@@ -367,7 +367,7 @@ callbacks["AskForGeneral"] = (sender, data) => {
   roomScene.dataModel.setPrompt("#AskForGeneral");
   roomScene.activate();
   roomScene.popupBox.sourceComponent =
-    Qt.createComponent("LunarLtk.Pages", "ChooseGeneralBox");
+    Qt.createComponent("LunarLtk.Pages.Popups", "ChooseGeneralBox");
   const box = roomScene.popupBox.item;
   box.accepted.connect(() => {
     replyToServer(box.choices);
@@ -394,7 +394,7 @@ callbacks["AskForSkillInvoke"] = (sender, data) => {
 callbacks["AskForArrangeCards"] = (sender, data) => {
   roomScene.activate();
   roomScene.popupBox.sourceComponent =
-    Qt.createComponent("LunarLtk.Pages", "ArrangeCardsBox");
+    Qt.createComponent("LunarLtk.Pages.Popups", "ArrangeCardsBox");
   const box = roomScene.popupBox.item;
   const cards = data.cards;
   box.cards = cards.reduce((newArray, elem) => {
@@ -425,7 +425,7 @@ callbacks["AskForGuanxing"] = (sender, data) => {
   const prompt = data.prompt;
   roomScene.activate();
   roomScene.popupBox.sourceComponent =
-    Qt.createComponent("LunarLtk.Pages", "GuanxingBox");
+    Qt.createComponent("LunarLtk.Pages.Popups", "GuanxingBox");
   const box = roomScene.popupBox.item;
   box.prompt = prompt;
   box.free_arrange = data.is_free;
@@ -461,7 +461,7 @@ callbacks["AskForExchange"] = (sender, data) => {
   const limits = [];
   roomScene.activate();
   roomScene.popupBox.sourceComponent =
-    Qt.createComponent("LunarLtk.Pages", "GuanxingBox");
+    Qt.createComponent("LunarLtk.Pages.Popups", "GuanxingBox");
   let for_i = 0;
   const box = roomScene.popupBox.item;
   box.org_cards = data.piles;
@@ -497,7 +497,7 @@ callbacks["AskForChoice"] = (sender, data) => {
   } else {
     qmlSrc = "DetailedChoiceBox";
   }
-  roomScene.popupBox.sourceComponent = Qt.createComponent("LunarLtk.Pages",qmlSrc);
+  roomScene.popupBox.sourceComponent = Qt.createComponent("LunarLtk.Pages.Popups", qmlSrc);
   const box = roomScene.popupBox.item;
   box.options = choices;
   box.skill_name = skill_name;
@@ -519,7 +519,7 @@ callbacks["AskForChoices"] = (sender, data) => {
   } else {
     qmlSrc = "DetailedCheckBox";
   }
-  roomScene.popupBox.sourceComponent = Qt.createComponent("LunarLtk.Pages",qmlSrc);
+  roomScene.popupBox.sourceComponent = Qt.createComponent("LunarLtk.Pages.Popups", qmlSrc);
   const box = roomScene.popupBox.item;
   box.options = choices;
   box.skill_name = skill_name;
@@ -544,7 +544,7 @@ callbacks["AskForCardChosen"] = (sender, data) => {
   roomScene.dataModel.setPrompt(prompt || `#AskForChooseCard:${data._id}::${reason}`);
   roomScene.activate();
   roomScene.popupBox.sourceComponent =
-    Qt.createComponent("LunarLtk.Pages", "PlayerCardBox");
+    Qt.createComponent("LunarLtk.Pages.Popups", "PlayerCardBox");
 
   const box = roomScene.popupBox.item;
   box.prompt = prompt;
@@ -579,7 +579,7 @@ callbacks["AskForCardsChosen"] = (sender, data) => {
   roomScene.dataModel.setPrompt(prompt || `#AskForChooseCards:${data._id}::${reason}:${min}:${max}`);
   roomScene.activate();
   roomScene.popupBox.sourceComponent =
-    Qt.createComponent("LunarLtk.Pages", "PlayerCardBox");
+    Qt.createComponent("LunarLtk.Pages.Popups", "PlayerCardBox");
   const box = roomScene.popupBox.item;
   box.multiChoose = true;
   box.min = min;
@@ -615,7 +615,7 @@ callbacks["AskForPoxi"] = (sender, dat) => {
 
   roomScene.activate();
   const pop = roomScene.popupBox;
-  pop.sourceComponent = Qt.createComponent("LunarLtk.Pages", "PoxiBox");
+  pop.sourceComponent = Qt.createComponent("LunarLtk.Pages.Popups", "PoxiBox");
   pop.item.dataModel = model;
   pop.moveToCenter();
 }
@@ -625,7 +625,7 @@ callbacks["AskForMoveCardInBoard"] = (sender, data) => {
 
   roomScene.activate();
   roomScene.popupBox.sourceComponent =
-    Qt.createComponent("LunarLtk.Pages", "MoveCardInBoardBox");
+    Qt.createComponent("LunarLtk.Pages.Popups", "MoveCardInBoardBox");
 
   const boxCards = [];
   cards.forEach(id => {
@@ -663,7 +663,7 @@ callbacks["AskForCardsAndChoice"] = (sender, data) => {
 
   roomScene.activate();
   roomScene.popupBox.sourceComponent =
-    Qt.createComponent("LunarLtk.Pages", "ChooseCardsAndChoiceBox");
+    Qt.createComponent("LunarLtk.Pages.Popups", "ChooseCardsAndChoiceBox");
 
   const boxCards = [];
   cards.forEach(id => boxCards.push(Ltk.getCardData(id)));
@@ -868,7 +868,7 @@ callbacks["LogEvent"] = (sender, data) => {
 callbacks["GameOver"] = (sender, jsonData) => {
   roomScene.state = "notactive";
   roomScene.popupBox.sourceComponent =
-    Qt.createComponent("LunarLtk.Pages", "GameOverBox");
+    Qt.createComponent("LunarLtk.Pages.Popups", "GameOverBox");
   const box = roomScene.popupBox.item;
   box.winner = jsonData;
   // roomScene.isStarted = false;

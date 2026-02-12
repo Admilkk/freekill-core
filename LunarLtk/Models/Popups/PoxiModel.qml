@@ -78,4 +78,30 @@ QtObject {
 
     accepted();
   }
+
+  // 反选再说吧 反正逻辑挪到model中
+  // MetroButton {
+  //   text: Lua.tr("Revert Selection")
+  //   onClicked: {
+  //     let old_selected = root.selected_ids.slice();
+  //     for (let i = 0; i < old_selected.length; i++) {
+  //       let cid = old_selected[i];
+  //       let item = findCardItem(cid);
+  //       item.selected = false;
+  //     }
+  //     for (let i = 0; i < cardModel.count; i++) {
+  //       let cards = cardModel.get(i).areaCards;
+  //       for (let j = 0; j < cards.count; j++) {
+  //         let card = cards.get(j);
+  //         if (old_selected.indexOf(card.cid) === -1 && Ltk.poxiFilter(root.poxi_type, card.cid, root.selected_ids,
+  //           root.card_data, root.extra_data)) {
+  //           let item = findCardItem(card.cid);
+  //           item.selected = true;
+  //         }
+  //       }
+  //     }
+  //     root.selected_idsChanged();
+  //     refreshPrompt();
+  //   }
+  // }
 }

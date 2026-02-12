@@ -18,7 +18,7 @@ GraphicsBox {
   // 所以这位初始条件会为null 后面比较急迫用到model的地方需要判空
   /* required */ property PoxiModel dataModel
 
-  title.text: dataModel?.promptText
+  title.text: dataModel?.promptText ?? ""
 
   // TODO: Adjust the UI design in case there are more than 7 cards
   width: 70 + 700
@@ -40,23 +40,9 @@ GraphicsBox {
       spacing: 15
       required property var modelData
 
-      Rectangle {
-        border.color: "#A6967A"
-        radius: 5
-        color: "transparent"
-        Layout.preferredWidth: 18
-        Layout.preferredHeight: 130
-        Layout.alignment: Qt.AlignTop
-
-        Text {
-          color: "#E4D5A0"
-          text: Lua.tr(cardRow.modelData[0])
-          anchors.fill: parent
-          wrapMode: Text.WrapAnywhere
-          verticalAlignment: Text.AlignVCenter
-          horizontalAlignment: Text.AlignHCenter
-          font.pixelSize: 15
-        }
+      PoxiLabel {
+        Layout.alignment: Qt.AlignVCenter
+        text: Lua.tr(cardRow.modelData[0])
       }
 
       GridLayout {
@@ -106,32 +92,5 @@ GraphicsBox {
       visible: root.dataModel?.cancelable ?? false
       onClicked: root.dataModel.rejected()
     }
-
-    // 反选再说吧 反正逻辑挪到model中
-    // MetroButton {
-    //   text: Lua.tr("Revert Selection")
-    //   onClicked: {
-    //     let old_selected = root.selected_ids.slice();
-    //     for (let i = 0; i < old_selected.length; i++) {
-    //       let cid = old_selected[i];
-    //       let item = findCardItem(cid);
-    //       item.selected = false;
-    //     }
-    //     for (let i = 0; i < cardModel.count; i++) {
-    //       let cards = cardModel.get(i).areaCards;
-    //       for (let j = 0; j < cards.count; j++) {
-    //         let card = cards.get(j);
-    //         if (old_selected.indexOf(card.cid) === -1 && Ltk.poxiFilter(root.poxi_type, card.cid, root.selected_ids,
-    //           root.card_data, root.extra_data)) {
-    //           let item = findCardItem(card.cid);
-    //           item.selected = true;
-    //         }
-    //       }
-    //     }
-    //     root.selected_idsChanged();
-    //     refreshPrompt();
-    //   }
-    // }
-
   }
 }

@@ -44,26 +44,8 @@ GraphicsBox {
         property string areaName: index < areaNames.length
                                   ? qsTr(areaNames[index]) : ""
 
-        Rectangle {
-          anchors.verticalCenter: parent.verticalCenter
-          color: "#6B5D42"
-          width: 20
-          height: 100
-          radius: 5
-
-          Text {
-            anchors.fill: parent
-            width: 20
-            height: 100
-            text: areaName
-            color: "white"
-            font.family: Config.libianName
-            font.pixelSize: 18
-            style: Text.Outline
-            wrapMode: Text.WordWrap
-            verticalAlignment: Text.AlignVCenter
-            horizontalAlignment: Text.AlignHCenter
-          }
+        PoxiLabel {
+          text: areaName
         }
 
         Repeater {

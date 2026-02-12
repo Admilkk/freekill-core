@@ -866,12 +866,15 @@ callbacks["LogEvent"] = (sender, data) => {
 }
 
 callbacks["GameOver"] = (sender, jsonData) => {
+  const modelComponent = Qt.createComponent("LunarLtk.Models.Popups", "GameOverModel");
+  const model = modelComponent.createObject();
+  model.winner = jsonData;
+
   roomScene.state = "notactive";
   roomScene.popupBox.sourceComponent =
     Qt.createComponent("LunarLtk.Pages.Popups", "GameOverBox");
   const box = roomScene.popupBox.item;
-  box.winner = jsonData;
-  // roomScene.isStarted = false;
+  box.dataModel = model;
 }
 
 callbacks["FillAG"] = (sender, data) => {

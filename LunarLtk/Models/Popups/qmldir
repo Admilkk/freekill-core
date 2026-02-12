@@ -1,3 +1,4 @@
 module LunarLtk.Models.Popups
 
 PoxiModel 1.0 PoxiModel.qml
+GameOverModel 1.0 GameOverModel.qml

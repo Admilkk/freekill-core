@@ -18,13 +18,6 @@ GraphicsBox {
   property string result : ""
 
   function processMatrixRowLengthCompact(matrix) {
-    /*
-      内容由 AI 生成，请仔细甄别：
-      输入一个二维数组，取每行元素数组成一个一维数组1，
-      对其中的元素{若小于5则取原值，大于4且小于9则取3，否则取其算数平方根（向下取整）}构成一个一维数组2并取其中的最大值，
-      对一维数组1中每个元素{除以该值（向上取整）并乘以该值}求和，对该和取算数平方根（向下取整），
-      若得到的值大于5，则返回6，小于4，则取其与一维数组2中所有数的最大值。
-    */
     const arr1 = matrix.map(row => row?.length || 0);
     if (!arr1.length) return 0;
     
@@ -45,11 +38,10 @@ GraphicsBox {
   height: lines * 45 + 20 + 40
 
   Flickable {
-    id : flickableContainer
+    id: flickableContainer
 
-    // 内容宽度大于可视区域宽度以启用水平滚动
     contentWidth: cardArea.implicitWidth
-    contentHeight: cardArea.implicitHeight  // 内容高度与可视区域高度相同，禁用垂直滚动
+    contentHeight: cardArea.implicitHeight
 
     anchors.topMargin: Math.max(40, (parent.height - contentHeight) / 2)
     anchors.leftMargin: Math.max(10, (parent.width - contentWidth) / 2)
@@ -57,11 +49,8 @@ GraphicsBox {
     anchors.bottomMargin: 20
     anchors.fill: parent
 
-    // 只允许水平滚动
     flickableDirection: Flickable.HorizontalFlick
-    // 根据内容宽度决定是否可交互
     interactive: contentWidth > parent.width - 20
-    // 启用裁剪
     clip: true
     
     Row {
@@ -153,19 +142,11 @@ GraphicsBox {
                   result = modelData;
                   root.close();
                 }
-
-
               }
-
             }
           }
-
         }
-
       }
     }
-
-    
   }
-
 }

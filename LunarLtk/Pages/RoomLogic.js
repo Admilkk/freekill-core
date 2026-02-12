@@ -392,26 +392,30 @@ callbacks["AskForSkillInvoke"] = (sender, data) => {
 }
 
 callbacks["AskForArrangeCards"] = (sender, data) => {
+  const { cards, prompt, size, capacities, limits, is_free, names, pattern, poxi_type, cancelable } = data;
+
+  const modelComponent = Qt.createComponent("LunarLtk.Models.Popups", "ArrangeCardsModel");
+  const model = modelComponent.createObject(null, {
+    origCards: cards,
+    prompt,
+    size,
+    areaCapacities: capacities,
+    areaLimits: limits,
+    // freeArrange: is_free,
+    areaNames: names,
+    pattern: pattern,
+    poxiType: poxi_type,
+    cancelable: cancelable,
+  });
+  model.initializeCards();
+  model.accepted.connect(() => replyToServer(model.result));
+  model.rejected.connect(() => replyToServer([]));
+
   roomScene.activate();
   roomScene.popupBox.sourceComponent =
     Qt.createComponent("LunarLtk.Pages.Popups", "ArrangeCardsBox");
-  const box = roomScene.popupBox.item;
-  const cards = data.cards;
-  box.cards = cards.reduce((newArray, elem) => {
-    return newArray.concat(elem.map(cid => Ltk.getCardData(cid)));
-  }, []);
-  box.org_cards = cards;
-  box.prompt = data.prompt;
-  box.size = data.size;
-  box.areaCapacities = data.capacities;
-  box.areaLimits = data.limits;
-  box.free_arrange = data.is_free;
-  box.areaNames = data.names;
-  box.pattern = data.pattern;
-  box.poxi_type = data.poxi_type;
-  box.cancelable = data.cancelable;
-
-  box.initializeCards();
+  roomScene.popupBox.item.dataModel = model;
+  roomScene.popupBox.item.arrangeCards();
 }
 
 callbacks["AskForGuanxing"] = (sender, data) => {

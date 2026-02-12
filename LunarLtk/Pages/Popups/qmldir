@@ -10,7 +10,6 @@ DetailedCheckBox 1.0 DetailedCheckBox.qml
 DetailedChoiceBox 1.0 DetailedChoiceBox.qml
 GameOverBox 1.0 GameOverBox.qml
 GraphicsBox 1.0 GraphicsBox.qml
-GuanxingBox 1.0 GuanxingBox.qml
 MoveCardInBoardBox 1.0 MoveCardInBoardBox.qml
 PlayerCardBox 1.0 PlayerCardBox.qml
 PoxiBox 1.0 PoxiBox.qml

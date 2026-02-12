@@ -418,46 +418,6 @@ callbacks["AskForArrangeCards"] = (sender, data) => {
   roomScene.popupBox.item.arrangeCards();
 }
 
-callbacks["AskForGuanxing"] = (sender, data) => {
-  const cards = data.cards;
-  const min_top_cards = data.min_top_cards;
-  const max_top_cards = data.max_top_cards;
-  const min_bottom_cards = data.min_bottom_cards;
-  const max_bottom_cards = data.max_bottom_cards;
-  const top_area_name = data.top_area_name;
-  const bottom_area_name = data.bottom_area_name;
-  const prompt = data.prompt;
-  roomScene.activate();
-  roomScene.popupBox.sourceComponent =
-    Qt.createComponent("LunarLtk.Pages.Popups", "GuanxingBox");
-  const box = roomScene.popupBox.item;
-  box.prompt = prompt;
-  box.free_arrange = data.is_free;
-  if (max_top_cards === 0) {
-    box.areaCapacities = [max_bottom_cards];
-    box.areaLimits = [min_bottom_cards];
-    box.areaNames = [Lua.tr(bottom_area_name)];
-  } else {
-    if (max_bottom_cards === 0) {
-      box.areaCapacities = [max_top_cards];
-      box.areaLimits = [min_top_cards];
-      box.areaNames = [Lua.tr(top_area_name)];
-    } else {
-      box.areaCapacities = [max_top_cards, max_bottom_cards];
-      box.areaLimits = [min_top_cards, min_bottom_cards];
-      box.areaNames = [Lua.tr(top_area_name), Lua.tr(bottom_area_name)];
-    }
-  }
-  box.org_cards = cards;
-  box.cards = cards.reduce((newArray, elem) => {
-    return newArray.concat(elem.map(cid => Ltk.getCardData(cid)));
-  }, []);
-  box.initializeCards();
-  box.accepted.connect(() => {
-    replyToServer(box.getResult());
-  });
-}
-
 callbacks["AskForExchange"] = (sender, data) => {
   const cards = [];
   const cards_name = [];

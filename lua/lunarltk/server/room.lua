@@ -1768,7 +1768,7 @@ end
 ---@return table<"top"|"bottom", integer[]> @ 观星后的牌堆结果
 function Room:askToGuanxing(player, params)
   -- 这一大堆都是来提前报错的
-  local cards, top_limit, bottom_limit, customNotify, noPut = params.cards, params.top_limit, params.bottom_limit, params.skill_name, params.skip
+  local cards, top_limit, bottom_limit, skillName, noPut = params.cards, params.top_limit, params.bottom_limit, params.skill_name, params.skip
   local leng = #cards
   top_limit = top_limit or { 0, leng }
   bottom_limit = bottom_limit or { 0, leng }
@@ -1789,7 +1789,6 @@ function Room:askToGuanxing(player, params)
     params.area_names =  { "Top", "Bottom" }
   end
   params.prompt = params.prompt or ""
-  local command = "AskForGuanxing"
   local max_top = top_limit[2]
   local card_map = {}
   if max_top > 0 then
@@ -1798,36 +1797,25 @@ function Room:askToGuanxing(player, params)
   if max_top < leng then
     table.insert(card_map, table.slice(cards, max_top + 1))
   end
-  local data = {
+  local default_pos = math.min(top_limit[2], leng - bottom_limit[1])
+  local result = self:askToArrangeCards(player, {
+    skill_name = skillName,
+    card_map = card_map,
+    box_size = math.min(#cards, 7),
     prompt = params.prompt,
-    is_free = true,
-    cards = card_map,
-    min_top_cards = top_limit[1],
-    max_top_cards = top_limit[2],
-    min_bottom_cards = bottom_limit[1],
-    max_bottom_cards = bottom_limit[2],
-    top_area_name = params.area_names[1],
-    bottom_area_name = params.area_names[2],
-  }
-
-  local req = Request:new(player, command)
-  req.focus_text = customNotify
-  req:setData(player, data)
-  local result = req:getResult(player)
+    max_limit = { top_limit[2] or leng, bottom_limit[2] or leng },
+    min_limit = { top_limit[1] or 0, bottom_limit[1] or 0 },
+    names = params.area_names,
+    free_arrange = true,
+    default_choice = {table.slice(cards, 1, default_pos + 1), table.slice(cards, default_pos + 1)},
+  })
   local top, bottom
-  if result ~= "" then
-    local d = result
-    if top_limit[2] == 0 then
-      top = Util.DummyTable
-      bottom = d[1]
-    else
-      top = d[1]
-      bottom = d[2] or Util.DummyTable
-    end
+  if top_limit[2] == 0 then
+    top = Util.DummyTable
+    bottom = result[1]
   else
-    local pos = math.min(top_limit[2], leng - bottom_limit[1])
-    top = table.slice(cards, 1, pos + 1)
-    bottom = table.slice(cards, pos + 1)
+    top = result[1]
+    bottom = result[2] or Util.DummyTable
   end
 
   if not noPut then

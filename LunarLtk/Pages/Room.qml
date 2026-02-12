@@ -86,8 +86,8 @@ W.PageBase {
           dataModel.dashboard.disableAllSkills();
 
           for (const model of photoModel) {
-            model.state = "normal";
             model.selected = false;
+            model.state = "normal";
           }
 
           if (popupBox.item != null) {

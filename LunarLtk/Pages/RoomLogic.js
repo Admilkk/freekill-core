@@ -603,27 +603,21 @@ callbacks["AskForCardsChosen"] = (sender, data) => {
 callbacks["AskForPoxi"] = (sender, dat) => {
   const { type, data, extra_data, cancelable } = dat;
 
-  roomScene.activate();
-  roomScene.popupBox.sourceComponent =
-    Qt.createComponent("LunarLtk.Pages", "PoxiBox");
-  const box = roomScene.popupBox.item;
-  box.extra_data = extra_data;
-  box.poxi_type = type;
-  box.card_data = data;
-  box.cancelable = cancelable;
-  for (let d of data) {
-    const arr = [];
-    const ids = d[1];
-
-    ids.forEach(id => arr.push(Ltk.getCardData(id)));
-    box.addCustomCards(d[0], arr);
-  }
-  box.refreshPrompt();
-
-  roomScene.popupBox.moveToCenter();
-  box.cardsSelected.connect((ids) => {
-    replyToServer(ids);
+  const modelComponent = Qt.createComponent("LunarLtk.Models.Popups", "PoxiModel");
+  const model = modelComponent.createObject(null, {
+    poxiType: type,
+    cardData: data,
+    cancelable,
+    extraData: extra_data,
   });
+  model.accepted.connect(() => replyToServer(model.selectedIds));
+  model.rejected.connect(() => replyToServer([]));
+
+  roomScene.activate();
+  const pop = roomScene.popupBox;
+  pop.sourceComponent = Qt.createComponent("LunarLtk.Pages", "PoxiBox");
+  pop.item.dataModel = model;
+  pop.moveToCenter();
 }
 
 callbacks["AskForMoveCardInBoard"] = (sender, data) => {

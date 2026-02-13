@@ -525,22 +525,13 @@ callbacks["AskForPoxi"] = (sender, dat) => {
 }
 
 callbacks["AskForMoveCardInBoard"] = (sender, data) => {
-  const { cards, cardsPosition, generalNames, playerIds } = data;
+  const { cards, cardsPosition, playerIds } = data;
 
   const modelComponent = Qt.createComponent("LunarLtk.Models.Popups", "MoveCardInBoardModel");
   const model = modelComponent.createObject(null, {
     cardIds: cards,
     cardsPosition,
     playerIds,
-
-    // TODO: 废除这个东西 这有啥意义 有playerId了还要他干啥
-    generalNames: generalNames.map(name => {
-      const namesSplit = name.split('/');
-      if (namesSplit.length > 1) {
-        return namesSplit.map(nameSplit => Lua.tr(nameSplit)).join('/');
-      }
-      return Lua.tr(name);
-    }),
   });
   model.accepted.connect(() => replyToServer({
     cardId: model.result,

@@ -6,6 +6,7 @@ import QtQuick.Layouts
 import Fk
 import Fk.Components.Common
 
+import LunarLtk
 import LunarLtk.Components
 import LunarLtk.Models.Popups
 
@@ -29,7 +30,7 @@ GraphicsBox {
 
     Repeater {
       id: areaRepeater
-      model: root.dataModel?.generalNames ?? []
+      model: root.dataModel?.playerIds ?? []
 
       Row {
         spacing: 5
@@ -37,7 +38,7 @@ GraphicsBox {
 
         PoxiLabel {
           Layout.alignment: Qt.AlignVCenter
-          text: Lua.tr(parent.modelData)
+          text: Lua.tr(Ltk.getPlayerStr(parent.modelData))
         }
 
         Repeater {

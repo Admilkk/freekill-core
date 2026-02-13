@@ -2915,13 +2915,9 @@ function Room:askToMoveCardInBoard(player, params)
     return
   end
 
-  local firstGeneralName = targetOne.general + (targetOne.deputyGeneral ~= "" and ("/" .. targetOne.deputyGeneral) or "")
-  local secGeneralName = targetTwo.general + (targetTwo.deputyGeneral ~= "" and ("/" .. targetTwo.deputyGeneral) or "")
-
   local data = {
     cards = cards,
     cardsPosition = cardsPosition,
-    generalNames = { firstGeneralName, secGeneralName },
     playerIds = { targetOne.id, targetTwo.id }
   }
   local command = "AskForMoveCardInBoard"

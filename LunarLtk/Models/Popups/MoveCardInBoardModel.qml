@@ -8,7 +8,6 @@ QtObject {
 
   property list<int> cardIds // int[] 卡牌id数组
   property list<int> cardsPosition // 0/1的数组 0表示cardIds[i]属于玩家A 1反之
-  property list<string> generalNames // [玩家A武将,玩家B武将]
   property list<int> playerIds // [玩家Aid，玩家Bid]
   property string prompt: ""
 

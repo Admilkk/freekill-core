@@ -732,11 +732,17 @@ W.PageBase {
         case "combo":
           skillInteraction.sourceComponent =
             Qt.createComponent("LunarLtk.Components.SkillInteraction", "SkillCombo");
-          skillInteraction.item.skill = skill_name;
           skillInteraction.item.default_choice = data["default"];
-          skillInteraction.item.choices = data.choices;
-          skillInteraction.item.detailed = data.detailed;
-          skillInteraction.item.all_choices = data.all_choices;
+          const modelComponent = Qt.createComponent("LunarLtk.Models.Popups", "ChoicesModel");
+          const model = modelComponent.createObject(null, {
+            choices: data.choices,
+            allChoices: data.all_choices,
+            cancelable: data.cancelable ?? false,
+            skillName: skill_name,
+            detailed: data.detailed,
+            // allowOneLine: data.allow_one_line,
+          });
+          skillInteraction.item.model = model;
           skillInteraction.item.clicked();
           break;
         case "spin":

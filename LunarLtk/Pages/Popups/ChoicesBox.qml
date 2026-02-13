@@ -9,6 +9,8 @@ import Fk.Components.Common
 import LunarLtk
 import LunarLtk.Models.Popups
 
+pragma ComponentBehavior: Bound
+
 GraphicsBox {
   property var options: []
   property var all_options: []

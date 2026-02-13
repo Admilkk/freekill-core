@@ -73,7 +73,6 @@ export const PlayerRunned = "PlayerRunned";
 export const AskForGeneral = "AskForGeneral";
 export const AskForSkillInvoke = "AskForSkillInvoke";
 export const AskForArrangeCards = "AskForArrangeCards";
-export const AskForGuanxing = "AskForGuanxing";
 export const AskForExchange = "AskForExchange";
 export const AskForChoice = "AskForChoice";
 export const AskForChoices = "AskForChoices";

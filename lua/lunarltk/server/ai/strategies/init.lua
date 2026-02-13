@@ -19,7 +19,6 @@ local joint_choice = require 'lunarltk.server.ai.strategies.joint_choice'
 local joint_cards = require 'lunarltk.server.ai.strategies.joint_cards'
 local invoke = require 'lunarltk.server.ai.strategies.invoke'
 local arrange_cards = require 'lunarltk.server.ai.strategies.arrange_cards'
-local guanxing = require 'lunarltk.server.ai.strategies.guanxing'
 local exchange = require 'lunarltk.server.ai.strategies.exchange'
 local number = require 'lunarltk.server.ai.strategies.number'
 local ag = require 'lunarltk.server.ai.strategies.ag'
@@ -119,9 +118,6 @@ return {
 
   ArrangeCardsStrategy = arrange_cards[1],
   newArrangeCardsStrategy = arrange_cards[2],
-
-  GuanxingStrategy = guanxing[1],
-  newGuanxingStrategy = guanxing[2],
 
   ExchangeStrategy = exchange[1],
   newExchangeStrategy = exchange[2],

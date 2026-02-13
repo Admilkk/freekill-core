@@ -820,7 +820,6 @@ W.PageBase {
     addCallback(Command.AskForExchange, Logic.callbacks["AskForExchange"]);
     addCallback(Command.AskForChoices, Logic.callbacks["AskForChoices"]);
     addCallback(Command.AskForCardChosen, Logic.callbacks["AskForCardChosen"]);
-    addCallback(Command.AskForCardsChosen, Logic.callbacks["AskForCardsChosen"]);
     addCallback(Command.AskForPoxi, Logic.callbacks["AskForPoxi"]);
     addCallback(Command.AskForMoveCardInBoard, Logic.callbacks["AskForMoveCardInBoard"]);
     addCallback(Command.AskForCardsAndChoice, Logic.callbacks["AskForCardsAndChoice"]);

@@ -486,65 +486,22 @@ callbacks["AskForChoices"] = (sender, data) => {
 callbacks["AskForCardChosen"] = (sender, data) => {
   // jsonData: [ int[] handcards, int[] equips, int[] delayedtricks,
   //  string reason ]
-  const reason = data._reason;
-  const prompt = data._prompt;
-  roomScene.dataModel.setPrompt(prompt || `#AskForChooseCard:${data._id}::${reason}`);
-  roomScene.activate();
-  roomScene.popupBox.sourceComponent =
-    Qt.createComponent("LunarLtk.Pages.Popups", "PlayerCardBox");
+  const { card_data, prompt, visible_data } = data;
 
-  const box = roomScene.popupBox.item;
-  box.prompt = prompt;
-  box.visible_data = data.visible_data ?? {};
-  for (let d of data.card_data) {
-    const arr = [];
-    const ids = d[1];
-
-    ids.forEach(id => {
-      let v = Ltk.getCardData(id);
-      const vcard = Ltk.getVirtualEquipData(data._id, id);
-      if (vcard) {
-        v.virt_name = vcard.name;
-      }
-      arr.push(v);
-    });
-    box.addCustomCards(d[0], arr);
-  }
-
-  roomScene.popupBox.moveToCenter();
-  box.cardSelected.connect(cid => replyToServer(cid));
-}
-
-callbacks["AskForCardsChosen"] = (sender, data) => {
-  // jsonData: [ int[] handcards, int[] equips, int[] delayedtricks,
-  //  int min, int max, string reason ]
-  const min = data._min;
-  const max = data._max;
-  const reason = data._reason;
-  const prompt = data._prompt;
-
-  roomScene.dataModel.setPrompt(prompt || `#AskForChooseCards:${data._id}::${reason}:${min}:${max}`);
-  roomScene.activate();
-  roomScene.popupBox.sourceComponent =
-    Qt.createComponent("LunarLtk.Pages.Popups", "PlayerCardBox");
-  const box = roomScene.popupBox.item;
-  box.multiChoose = true;
-  box.min = min;
-  box.max = max;
-  box.prompt = prompt;
-  box.visible_data = data.visible_data ?? {};
-  for (let d of data.card_data) {
-    const arr = [];
-    const ids = d[1];
-
-    ids.forEach(id => arr.push(Ltk.getCardData(id)));
-    box.addCustomCards(d[0], arr);
-  }
-
-  roomScene.popupBox.moveToCenter();
-  box.cardsSelected.connect((ids) => {
-    replyToServer(ids);
+  const modelComponent = Qt.createComponent("LunarLtk.Models.Popups", "PlayerCardModel");
+  const model = modelComponent.createObject(null, {
+    prompt: prompt,
+    cardData: card_data,
+    cardVisibility: visible_data,
   });
+  model.accepted.connect(() => replyToServer(model.selectedId));
+  model.rejected.connect(() => replyToServer(""));
+
+  roomScene.activate();
+  const pop = roomScene.popupBox;
+  pop.sourceComponent = Qt.createComponent("LunarLtk.Pages.Popups", "PlayerCardBox");
+  pop.item.dataModel = model;
+  pop.moveToCenter();
 }
 
 callbacks["AskForPoxi"] = (sender, dat) => {

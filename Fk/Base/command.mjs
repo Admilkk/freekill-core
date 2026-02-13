@@ -76,7 +76,6 @@ export const AskForArrangeCards = "AskForArrangeCards";
 export const AskForExchange = "AskForExchange";
 export const AskForChoices = "AskForChoices";
 export const AskForCardChosen = "AskForCardChosen";
-export const AskForCardsChosen = "AskForCardsChosen";
 export const AskForPoxi = "AskForPoxi";
 export const AskForMoveCardInBoard = "AskForMoveCardInBoard";
 export const AskForCardsAndChoice = "AskForCardsAndChoice";

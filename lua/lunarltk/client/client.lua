@@ -265,11 +265,8 @@ function Client:playCard(data)
 end
 
 function Client:askForCardChosen(data)
-  -- jsonData: [ int target_id, string flag, int reason ]
-  local id, flag, reason, prompt = data[1], data[2], data[3], data[4]
-  local target = self:getPlayerById(id)
-  local hand = table.simpleClone(target.player_cards[Player.Hand])
-  table.shuffle(hand)
+  local target, flag, prompt = data[1], data[2], data[3]
+  local hand = target.player_cards[Player.Hand]
   local equip = target.player_cards[Player.Equip]
   local judge = target.player_cards[Player.Judge]
 
@@ -292,19 +289,15 @@ function Client:askForCardChosen(data)
     end
     if next(visible_data) == nil then visible_data = nil end
     ui_data = {
-      _id = id,
-      _reason = reason,
       card_data = {},
-      _prompt = prompt,
+      prompt = prompt,
       visible_data = visible_data,
     }
     if #hand ~= 0 then table.insert(ui_data.card_data, { "$Hand", hand }) end
     if #equip ~= 0 then table.insert(ui_data.card_data, { "$Equip", equip }) end
     if #judge ~= 0 then table.insert(ui_data.card_data, { "$Judge", judge }) end
   else
-    ui_data._id = id
-    ui_data._reason = reason
-    ui_data._prompt = prompt
+    ui_data.prompt = prompt
   end
   self:notifyUI("AskForCardChosen", ui_data)
 end

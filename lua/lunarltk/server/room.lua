@@ -1237,18 +1237,25 @@ end
 
 ---@class AskToChooseCardParams: AskToSkillInvokeParams
 ---@field target ServerPlayer @ 被选牌的人
----@field flag string | {card_data: [string, integer[]][]} @ 用"hej"三个字母的组合表示能选择哪些区域, h 手牌区, e - 装备区, j - 判定区
+---@field flag string @ 用"hej"三个字母的组合表示能选择哪些区域, h 手牌区, e - 装备区, j - 判定区
+---@field skill_name string @ 原因，一般是技能名
+
+---@class AskToChooseCardDataParams: AskToSkillInvokeParams
+---@field flag {card_data: [string, integer[]][], visible_data: table<boolean>} @ 具体的牌堆数据，<br/>card_data的格式为{牌堆名, 牌id列表}，<br/>visible_data为每张牌（的id字符串）是否可见的映射
 ---@field skill_name string @ 原因，一般是技能名
 
 --- 询问player，选择target的一张牌。
 ---@param player ServerPlayer @ 要被询问的人
----@param params AskToChooseCardParams @ 各种变量
+---@param params AskToChooseCardParams|AskToChooseCardDataParams @ 各种变量
 ---@return integer @ 选择的卡牌id
 function Room:askToChooseCard(player, params)
   local command = "AskForCardChosen"
-  params.prompt = params.prompt or ""
-  local target, flag, reason, prompt = params.target, params.flag, params.skill_name, params.prompt
-  local data = {target.id, flag, reason, prompt}
+  local target, flag, skill_name, prompt =
+    params.target, params.flag, params.skill_name, params.prompt
+  if not prompt and type(flag) == "string" and target then
+    prompt = "#AskForChooseCard:" .. target.id .. "::" .. skill_name
+  end
+  local data = {target, flag, prompt}
   local req = Request:new(player, command)
   req:setData(player, data)
   local result = req:getResult(player)
@@ -1256,7 +1263,7 @@ function Room:askToChooseCard(player, params)
   if result == "" then
     local areas = {}
     local handcards
-    if type(flag) == "string" then
+    if type(flag) == "string" and target then
       if string.find(flag, "h") then table.insert(areas, Player.Hand) end
       if string.find(flag, "e") then table.insert(areas, Player.Equip) end
       if string.find(flag, "j") then table.insert(areas, Player.Judge) end
@@ -1267,13 +1274,13 @@ function Room:askToChooseCard(player, params)
         table.insertTable(handcards, t[2])
       end
     end
-    if #handcards == 0 then return end
+    if #handcards == 0 then return 0 end
     result = handcards[math.random(1, #handcards)]
   end
 
   if result == -1 then
     local handcards = target:getCardIds(Player.Hand)
-    if #handcards == 0 then return end
+    if #handcards == 0 then return 0 end
     result = table.random(handcards)
   end
 

@@ -6,16 +6,22 @@ import QtQuick.Layouts
 import Fk
 import Fk.Components.Common
 
-import LunarLtk
 import LunarLtk.Components
+import LunarLtk.Models
+import LunarLtk.Models.Popups
+
+pragma ComponentBehavior: Bound
 
 GraphicsBox {
   id: root
-  property var cards: []
-  property var cardsPosition: []
-  property var generalNames: []
-  property var playerIds: []
-  property var result
+  // property var cards: []
+  // property var cardsPosition: []
+  // property var generalNames: []
+  property MoveCardInBoardModel dataModel
+  property alias cardsPosition: root.dataModel.cardsPosition
+  property alias generalNames: root.dataModel.generalNames
+  property var result: {}
+
   property int padding: 25
 
   title.text: Lua.tr("Please click to move card")
@@ -24,44 +30,31 @@ GraphicsBox {
 
   ColumnLayout {
     id: body
-    x: padding
-    y: parent.height - padding - height
+    x: root.padding
+    y: parent.height - root.padding - height
     spacing: 20
 
     Repeater {
       id: areaRepeater
-      model: generalNames
+      model: root.generalNames
 
       Row {
+        id: cardRow
         spacing: 5
+        required property var modelData
 
-        Rectangle {
-          anchors.verticalCenter: parent.verticalCenter
-          color: "#6B5D42"
-          width: 20
-          height: 100
-          radius: 5
-
-          Text {
-            anchors.fill: parent
-            width: 20
-            height: 100
-            text: modelData
-            color: "white"
-            font.family: Config.libianName
-            font.pixelSize: 18
-            style: Text.Outline
-            wrapMode: Text.WordWrap
-            verticalAlignment: Text.AlignVCenter
-            horizontalAlignment: Text.AlignHCenter
-          }
+        PoxiLabel {
+          Layout.alignment: Qt.AlignVCenter
+          text: Lua.tr(cardRow.modelData)
         }
 
         Repeater {
           id: cardRepeater
-          model: cards
+          model: root.dataModel.cardModels
 
           Rectangle {
+            required property CardModel modelData
+            id: cardBox
             color: "#4A4139"
             width: 93
             height: 130
@@ -70,7 +63,7 @@ GraphicsBox {
             Text {
               horizontalAlignment: Text.AlignHCenter
               anchors.centerIn: parent
-              text: Lua.tr(modelData.subtype)
+              text: Lua.tr(cardBox.modelData.subtype)
               color: "#90765F"
               font.family: Config.libianName
               font.pixelSize: 16
@@ -87,44 +80,41 @@ GraphicsBox {
       Layout.alignment: Qt.AlignHCenter
       id: buttonConfirm
       text: Lua.tr("OK")
-      width: 120
-      height: 35
+      implicitWidth: 120
+      implicitHeight: 35
       enabled: false
 
-      onClicked: close();
+      onClicked: root.dataModel.accepted();
     }
   }
 
   Repeater {
     id: cardItem
-    model: cards
+    model: root.dataModel.cardModels
 
     CardItem {
+      required property int index
+      required property CardModel modelData
       x: index
       y: -1
-      cid: modelData.cid
-      name: modelData.name
-      suit: modelData.suit
-      number: modelData.number
-      virt_name: modelData.virt_name || ''
-      known: Lua.selfPlayer.cardVisible(modelData.cid)
+      dataModel: modelData
 
-      selectable: !result || result.item === this
+      selectable: !root.result || root.result.item === this
       onClicked: {
         if (!selectable) return;
-        if ((result || {}).item === this) {
-          result = undefined;
+        if ((root.result || {}).item === this) {
+          root.result = undefined;
         } else {
-          result = { item: this };
+          root.result = { item: this };
         }
 
-        updatePosition(this);
+        root.updatePosition(this);
       }
     }
   }
 
   function arrangeCards() {
-    for (let i = 0; i < cards.length; i++) {
+    for (let i = 0; i < root.dataModel.cardModels.length; i++) {
       const curCard = cardItem.itemAt(i);
       curCard.origX = i * 98 + 50;
       curCard.origY = cardsPosition[i] * 150 + body.y;
@@ -134,7 +124,7 @@ GraphicsBox {
 
   function updatePosition(item) {
     for (let i = 0; i < 2; i++) {
-      const index = cards.findIndex(data => item.cid === data.cid);
+      const index = root.dataModel.cardModels.findIndex(data => item.cid === data.cid);
       result && (result.pos = cardsPosition[index]);
 
       const cardPos = cardsPosition[index] === 0 ? (result ? 1 : 0)

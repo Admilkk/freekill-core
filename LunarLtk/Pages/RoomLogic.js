@@ -570,37 +570,31 @@ callbacks["AskForPoxi"] = (sender, dat) => {
 callbacks["AskForMoveCardInBoard"] = (sender, data) => {
   const { cards, cardsPosition, generalNames, playerIds } = data;
 
+  const modelComponent = Qt.createComponent("LunarLtk.Models.Popups", "MoveCardInBoardModel");
+  const model = modelComponent.createObject(null, {
+    cardIds: cards,
+    cardsPosition,
+    playerIds,
+
+    // TODO: 废除这个东西 这有啥意义 有playerId了还要他干啥
+    generalNames: generalNames.map(name => {
+      const namesSplit = name.split('/');
+      if (namesSplit.length > 1) {
+        return namesSplit.map(nameSplit => Lua.tr(nameSplit)).join('/');
+      }
+      return Lua.tr(name);
+    }),
+  });
+  model.accepted.connect(() => replyToServer({
+    cardId: model.result,
+    pos: cardsPosition[cards.indexOf(model.result)],
+  }));
+
   roomScene.activate();
   roomScene.popupBox.sourceComponent =
     Qt.createComponent("LunarLtk.Pages.Popups", "MoveCardInBoardBox");
-
-  const boxCards = [];
-  cards.forEach(id => {
-    const cardPos = cardsPosition[cards.findIndex(cid => cid === id)];
-    let d = Ltk.getCardData(id);
-    const vcard = Ltk.getVirtualEquipData(playerIds[cardPos], id);
-    if (vcard) {
-      d.virt_name = vcard.name;
-    }
-    boxCards.push(d);
-  });
-
-  const box = roomScene.popupBox.item;
-  box.cards = boxCards;
-  box.cardsPosition = cardsPosition;
-  box.playerIds = playerIds;
-  box.generalNames = generalNames.map(name => {
-    const namesSplit = name.split('/');
-    if (namesSplit.length > 1) {
-      return namesSplit.map(nameSplit => Lua.tr(nameSplit)).join('/');
-    }
-    return Lua.tr(name);
-  });
-
-  box.arrangeCards();
-  box.accepted.connect(() => {
-    replyToServer(box.getResult());
-  });
+  roomScene.popupBox.item.dataModel = model;
+  roomScene.popupBox.item.arrangeCards();
 }
 
 callbacks["AskForCardsAndChoice"] = (sender, data) => {

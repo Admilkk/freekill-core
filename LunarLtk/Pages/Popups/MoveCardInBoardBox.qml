@@ -7,20 +7,13 @@ import Fk
 import Fk.Components.Common
 
 import LunarLtk.Components
-import LunarLtk.Models
 import LunarLtk.Models.Popups
 
 pragma ComponentBehavior: Bound
 
 GraphicsBox {
   id: root
-  // property var cards: []
-  // property var cardsPosition: []
-  // property var generalNames: []
   property MoveCardInBoardModel dataModel
-  property alias cardsPosition: root.dataModel.cardsPosition
-  property alias generalNames: root.dataModel.generalNames
-  property var result: {}
 
   property int padding: 25
 
@@ -36,25 +29,22 @@ GraphicsBox {
 
     Repeater {
       id: areaRepeater
-      model: root.generalNames
+      model: root.dataModel?.generalNames ?? []
 
       Row {
-        id: cardRow
         spacing: 5
-        required property var modelData
+        required property string modelData
 
         PoxiLabel {
           Layout.alignment: Qt.AlignVCenter
-          text: Lua.tr(cardRow.modelData)
+          text: Lua.tr(parent.modelData)
         }
 
         Repeater {
-          id: cardRepeater
-          model: root.dataModel.cardModels
+          model: root.dataModel.cardIds
 
           Rectangle {
-            required property CardModel modelData
-            id: cardBox
+            required property int modelData
             color: "#4A4139"
             width: 93
             height: 130
@@ -63,7 +53,7 @@ GraphicsBox {
             Text {
               horizontalAlignment: Text.AlignHCenter
               anchors.centerIn: parent
-              text: Lua.tr(cardBox.modelData.subtype)
+              text: Lua.tr(root.dataModel.cardModels[parent.modelData].subtype)
               color: "#90765F"
               font.family: Config.libianName
               font.pixelSize: 16
@@ -72,7 +62,6 @@ GraphicsBox {
             }
           }
         }
-        property alias cardRepeater: cardRepeater
       }
     }
 
@@ -82,66 +71,48 @@ GraphicsBox {
       text: Lua.tr("OK")
       implicitWidth: 120
       implicitHeight: 35
-      enabled: false
-
-      onClicked: root.dataModel.accepted();
+      enabled: root.dataModel?.feasible ?? false
+      onClicked: root.dataModel.accepted()
     }
   }
 
   Repeater {
-    id: cardItem
-    model: root.dataModel.cardModels
+    id: cardItems
+    model: root.dataModel?.cardIds ?? []
 
     CardItem {
-      required property int index
-      required property CardModel modelData
-      x: index
-      y: -1
-      dataModel: modelData
+      required property int modelData
+      dataModel: root.dataModel.cardModels[modelData]
 
-      selectable: !root.result || root.result.item === this
+      selectable: {
+        const result = root.dataModel.result;
+        return result === -1 || result === modelData;
+      }
       onClicked: {
         if (!selectable) return;
-        if ((root.result || {}).item === this) {
-          root.result = undefined;
+        if (root.dataModel.result === modelData) {
+          root.dataModel.result = -1;
         } else {
-          root.result = { item: this };
+          root.dataModel.result = modelData;
         }
 
-        root.updatePosition(this);
+        root.arrangeCards();
       }
     }
   }
 
   function arrangeCards() {
-    for (let i = 0; i < root.dataModel.cardModels.length; i++) {
-      const curCard = cardItem.itemAt(i);
-      curCard.origX = i * 98 + 50;
-      curCard.origY = cardsPosition[i] * 150 + body.y;
-      curCard.goBack();
+    for (let i = 0; i < cardItems.count; i++) {
+      const cd = cardItems.itemAt(i) as CardItem;
+      cd.origX = i * 98 + 50;
+      cd.origY = body.y;
+
+      const pos = root.dataModel.cardsPosition[i];
+      const selected = root.dataModel.result === cd.dataModel.cardId;
+      if (pos ^ selected) {
+        cd.origY += 150;
+      }
+      cd.goBack(true);
     }
-  }
-
-  function updatePosition(item) {
-    for (let i = 0; i < 2; i++) {
-      const index = root.dataModel.cardModels.findIndex(data => item.cid === data.cid);
-      result && (result.pos = cardsPosition[index]);
-
-      const cardPos = cardsPosition[index] === 0 ? (result ? 1 : 0)
-                                                 : (result ? 0 : 1);
-      const curArea = areaRepeater.itemAt(cardPos);
-      const curBox = curArea.cardRepeater.itemAt(index);
-      const curPos = mapFromItem(curArea, curBox.x, curBox.y);
-
-      item.origX = curPos.x;
-      item.origY = curPos.y;
-      item.goBack(true);
-
-      buttonConfirm.enabled = !!result;
-    }
-  }
-
-  function getResult() {
-    return result ? { cardId: result.item.cid, pos: result.pos } : '';
   }
 }

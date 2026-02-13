@@ -6,28 +6,28 @@ import LunarLtk
 QtObject {
   id: root
 
-  property list<int> cardIds
-  property list<int> cardsPosition
-  property list<string> generalNames
-  property list<int> playerIds
+  property list<int> cardIds // int[] 卡牌id数组
+  property list<int> cardsPosition // 0/1的数组 0表示cardIds[i]属于玩家A 1反之
+  property list<string> generalNames // [玩家A武将,玩家B武将]
+  property list<int> playerIds // [玩家Aid，玩家Bid]
   property string prompt: ""
+
+  property int result: -1
 
   readonly property var cardModels: {
     const dict = {};
-    cardIds.forEach(id => {
-      const cardPos = cardsPosition[cards.findIndex(cid => cid === id)];
-      let d = Ltk.getCardData(id);
+    for (let i = 0; i < cardIds.length; i++) {
+      const id = cardIds[i];
+      const cardPos = cardsPosition[i];
       const vcard = Ltk.getVirtualEquipData(playerIds[cardPos], id);
-      if (vcard) {
-        d.virt_name = vcard.name;
-      }
       dict[id] = Ltk.createCardModel(id, {
-        virt_name: vcard?.name,
+        virtName: vcard?.name ?? "",
       });
-      dict.push(d);
-    });
+    }
     return dict;
   }
+
+  readonly property bool feasible: result !== -1
 
   readonly property string promptText: {
     return Ltk.processPrompt(prompt)

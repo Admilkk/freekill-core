@@ -1210,7 +1210,7 @@ function Room:askToChooseKingdom(players)
   end)
 
   if #specialKingdomPlayers > 0 then
-    local req = Request:new(specialKingdomPlayers, "AskForChoice")
+    local req = Request:new(specialKingdomPlayers, "AskForChoices")
     req.focus_text = "AskForKingdom"
     req.receive_decode = false
     req.focus_players = self.alive_players
@@ -1223,7 +1223,7 @@ function Room:askToChooseKingdom(players)
         allKingdoms = Fk:getKingdomMap(p.kingdom)
       end
       if #allKingdoms > 0 then
-        req:setData(p, { allKingdoms, allKingdoms, "AskForKingdom", "#ChooseInitialKingdom" })
+        req:setData(p, { allKingdoms, allKingdoms, { 1, 1 }, false, "AskForKingdom", "#ChooseInitialKingdom" })
         req:setDefaultReply(p, allKingdoms[1])
       end
     end
@@ -1421,34 +1421,13 @@ function Room:askToChoice(player, params)
     end
   end
   if #params.choices == 1 and not params.all_choices then return params.choices[1] end
-  assert(not params.all_choices or table.every(params.choices, function(c) return table.contains(params.all_choices, c) end))
-  local command = "AskForChoice"
-  params.prompt = params.prompt or ""
-  params.all_choices = params.all_choices or params.choices
 
-  local hide = false -- 是否隐藏读条，用于国战同时机技能选择
-  if params.skill_name == "trigger" then
-    for _, s in ipairs(params.choices) do
-      local skill_name = s
-      if skill_name:startsWith("#skill_muti_trigger") then
-        local strSplited = skill_name:split(":")
-        skill_name = strSplited[#strSplited - 1]
-      end
-      if player:isFakeSkill(skill_name) then
-        hide = true
-        break
-      end
-    end
-  end
-  local req = Request:new(player, command)
-  req.focus_text = hide and "" or params.skill_name
-  req.focus_players = hide and self.alive_players or nil
-  req.receive_decode = false -- 这个不用decode
-  req:setData(player, {
-    params.choices, params.all_choices, params.skill_name, params.prompt, params.detailed
-  })
-  local result = req:getResult(player)
+  local dupParams = table.simpleClone(params) --[[@as AskToChoicesParams]]
+  dupParams.min_num = 1
+  dupParams.max_num = 1
+  local result = self:askToChoices(player, dupParams)[1]
 
+  if result == nil then result = "" end
   if result == "" then
     if table.contains(params.choices, "Cancel") then
       result = "Cancel"
@@ -1481,7 +1460,24 @@ function Room:askToChoices(player, params)
   params.detailed = params.detailed or false
 
   local req = Request:new(player, command)
-  req.focus_text = params.skill_name
+
+  local hide = false -- 是否隐藏读条，用于国战同时机技能选择
+  if params.skill_name == "trigger" then
+    for _, s in ipairs(params.choices) do
+      local skill_name = s
+      if skill_name:startsWith("#skill_muti_trigger") then
+        local strSplited = skill_name:split(":")
+        skill_name = strSplited[#strSplited - 1]
+      end
+      if player:isFakeSkill(skill_name) then
+        hide = true
+        break
+      end
+    end
+  end
+  req.focus_text = hide and "" or params.skill_name
+  req.focus_players = hide and self.alive_players or nil
+
   req:setData(player, {
     params.choices, params.all_choices, {minNum, maxNum}, params.cancelable, params.skill_name, params.prompt, params.detailed
   })
@@ -1513,12 +1509,14 @@ function Room:askToJointChoice(player, params)
   local players, choices = params.players, params.choices
   local sendLog = params.send_log or false
 
-  local req = Request:new(players, "AskForChoice")
+  local req = Request:new(players, "AskForChoices")
   req.focus_text = skillName
   req.receive_decode = false
   local data = {
     choices,
     choices,  --如果all_choices和choices不一样应该自行构造request
+    { 1, 1 },
+    false,
     skillName,
     prompt,
   }

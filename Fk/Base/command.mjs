@@ -74,7 +74,6 @@ export const AskForGeneral = "AskForGeneral";
 export const AskForSkillInvoke = "AskForSkillInvoke";
 export const AskForArrangeCards = "AskForArrangeCards";
 export const AskForExchange = "AskForExchange";
-export const AskForChoice = "AskForChoice";
 export const AskForChoices = "AskForChoices";
 export const AskForCardChosen = "AskForCardChosen";
 export const AskForCardsChosen = "AskForCardsChosen";

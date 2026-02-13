@@ -448,56 +448,39 @@ callbacks["AskForExchange"] = (sender, data) => {
   });
 }
 
-callbacks["AskForChoice"] = (sender, data) => {
-  // jsonData: [ string[] choices, string skill ]
-  // TODO: multiple choices, e.g. benxi_ol
-  const [ choices, all_choices, skill_name, prompt, detailed ] = data;
-
-  roomScene.dataModel.setPrompt(prompt || `#AskForChoice:::${skill_name}`);
-  roomScene.activate();
-  let qmlSrc;
-  if (!detailed) {
-    qmlSrc = "ChoiceBox";
-  } else {
-    qmlSrc = "DetailedChoiceBox";
-  }
-  roomScene.popupBox.sourceComponent = Qt.createComponent("LunarLtk.Pages.Popups", qmlSrc);
-  const box = roomScene.popupBox.item;
-  box.options = choices;
-  box.skill_name = skill_name;
-  box.all_options = all_choices;
-  box.accepted.connect(() => {
-    replyToServer(all_choices[box.result]);
-  });
-}
-
 callbacks["AskForChoices"] = (sender, data) => {
   // jsonData: [ string[] choices, string skill ]
   // TODO: multiple choices, e.g. benxi_ol
   const [ choices, all_choices, [ min_num, max_num], cancelable, skill_name, prompt, detailed ] = data;
   roomScene.dataModel.setPrompt(prompt || `#AskForChoice:::${skill_name}`);
   roomScene.activate();
-  let qmlSrc;
-  if (!detailed) {
-    qmlSrc = "CheckBox";
-  } else {
-    qmlSrc = "DetailedCheckBox";
-  }
-  roomScene.popupBox.sourceComponent = Qt.createComponent("LunarLtk.Pages.Popups", qmlSrc);
-  const box = roomScene.popupBox.item;
-  box.options = choices;
-  box.skill_name = skill_name;
-  box.all_options = all_choices;
-  box.min_num = min_num;
-  box.max_num = max_num;
-  box.cancelable = cancelable;
-  box.accepted.connect(() => {
-    const ret = [];
-    box.result.forEach(id => {
-      ret.push(all_choices[id]);
-    });
-    replyToServer(ret);
+
+  const modelComponent = Qt.createComponent("LunarLtk.Models.Popups", "ChoicesModel");
+  const model = modelComponent.createObject(null, {
+    choices,
+    allChoices: all_choices,
+    minNum: min_num,
+    maxNum: max_num,
+    cancelable,
+    skillName: skill_name,
+    prompt,
+    detailed,
+    allowOneLine: min_num === 1 && max_num === 1,
   });
+  model.accepted.connect(() => replyToServer(model.result));
+  model.rejected.connect(() => replyToServer([]));
+
+  roomScene.popupBox.sourceComponent = Qt.createComponent("LunarLtk.Pages.Popups", "ChoicesBox");
+  const box = roomScene.popupBox.item;
+  box.dataModel = model;
+
+  // 因为box中取不到roomScene的内容就写在这里……
+  if (box.isOneLine) {
+    box.title.visible = false;
+    box.background.visible = false;
+    box.x = (roomScene.width - box.width) / 2;
+    box.y = dashboard.y - 20;
+  }
 }
 
 callbacks["AskForCardChosen"] = (sender, data) => {

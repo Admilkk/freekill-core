@@ -4,6 +4,7 @@ import QtQuick
 
 Item {
   property alias title: titleItem
+  property alias background: background
   signal accepted() //Read result
   signal finished() //Close the box
 
@@ -30,6 +31,7 @@ Item {
   }
 
   DragHandler {
+    enabled: background.visible
     grabPermissions: PointHandler.TakeOverForbidden
     xAxis.enabled: true
     yAxis.enabled: true

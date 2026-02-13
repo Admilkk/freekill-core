@@ -14,6 +14,7 @@ Item {
   property alias iconSource: icon.source
   property int padding: 5
   property bool hovered: false
+  property bool checked: false
 
   signal clicked
   signal rightClicked
@@ -35,6 +36,11 @@ Item {
     State {
       name: "hovered"; when: hover.hovered
       PropertyChanges { target: bg; color: "white" }
+      PropertyChanges { target: title; color: "black" }
+    },
+    State {
+      name: "checked"; when: button.checked
+      PropertyChanges { target: bg; color: "#DEC0CF" }
       PropertyChanges { target: title; color: "black" }
     },
     State {

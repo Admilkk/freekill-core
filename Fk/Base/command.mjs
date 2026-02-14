@@ -64,7 +64,6 @@ export const ReadyChanged = "ReadyChanged";
 export const NetStateChanged = "NetStateChanged";
 export const PropertyUpdate = "PropertyUpdate";
 export const UpdateCard = "UpdateCard";
-export const UpdateSkill = "UpdateSkill";
 export const StartGame = "StartGame";
 export const ArrangeSeats = "ArrangeSeats";
 export const MoveFocus = "MoveFocus";

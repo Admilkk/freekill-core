@@ -46,6 +46,27 @@ W.PageBase {
     onSeatChanged: Logic.arrangePhotos();
     onPlayerAdded: model => roomScene.photoModel.push(model);
     onCardsMoved: (move, data) => Logic.moveCards(move, data);
+
+    onActivated: {
+      progressAnim.from = (dataModel.requestDuration / dataModel.requestTotal) * 100.0;
+      progressAnim.duration = dataModel.requestDuration;
+      progress.visible = true;
+    }
+
+    onDeActivated: {
+      skillInteraction.sourceComponent = undefined;
+      progress.visible = false;
+      extra_data = {};
+
+      dashboard.disableAllCards();
+
+      if (popupBox.item != null) {
+        popupBox.item.finished();
+      }
+
+      Ltk.finishRequestUI();
+      applyChange({});
+    }
   }
 
   MediaPlayer {
@@ -61,65 +82,6 @@ W.PageBase {
       volume: Config.bgmVolume / 100
     }
   }
-
-  states: [
-    State { name: "notactive" },
-    State { name: "active" }
-  ]
-
-  state: "notactive"
-  transitions: [
-    Transition {
-      from: "*"; to: "notactive"
-      ScriptAction {
-        script: {
-          skillInteraction.sourceComponent = undefined;
-          okCancel.visible = false;
-          okButton.enabled = false;
-          cancelButton.enabled = false;
-          endPhaseButton.visible = false;
-          dataModel.promptText = "";
-          progress.visible = false;
-          extra_data = {};
-
-          dashboard.disableAllCards();
-          dataModel.dashboard.disableAllSkills();
-
-          for (const model of photoModel) {
-            model.selected = false;
-            model.state = "normal";
-          }
-
-          if (popupBox.item != null) {
-            popupBox.item.finished();
-          }
-
-          Ltk.finishRequestUI();
-          applyChange({});
-        }
-      }
-    },
-
-    Transition {
-      from: "notactive"; to: "active"
-      ScriptAction {
-        script: {
-          const dat = Backend.getRequestData();
-          const total = dat["timeout"] * 1000;
-          const now = Date.now(); // ms
-          const elapsed = now - (dat["timestamp"] ?? now);
-
-          if (total <= elapsed) {
-            roomScene.state = "notactive";
-          }
-
-          progressAnim.from = (1 - elapsed / total) * 100.0;
-          progressAnim.duration = total - elapsed;
-          progress.visible = true;
-        }
-      }
-    }
-  ]
 
   /* Layout:
    * +---------------------+
@@ -437,7 +399,7 @@ W.PageBase {
       anchors.bottom: parent.bottom
       anchors.horizontalCenter: progress.horizontalCenter
       spacing: 20
-      visible: false
+      visible: dataModel.okCancelVisible
 
       Button {
         id: skipNullificationButton
@@ -452,14 +414,14 @@ W.PageBase {
 
       Button {
         id: okButton
-        enabled: false
+        enabled: dataModel.okEnabled
         text: Lua.tr("OK")
         onClicked: Ltk.updateRequestUI("Button", "OK");
       }
 
       Button {
         id: cancelButton
-        enabled: false
+        enabled: dataModel.cancelEnabled
         text: Lua.tr("Cancel")
         onClicked: Ltk.updateRequestUI("Button", "Cancel");
       }
@@ -472,7 +434,7 @@ W.PageBase {
       anchors.bottomMargin: 40
       anchors.right: parent.right
       anchors.rightMargin: 30
-      visible: false;
+      visible: dataModel.endButtonVisible
       onClicked: Ltk.updateRequestUI("Button", "End");
     }
   }
@@ -608,14 +570,14 @@ W.PageBase {
 
   Shortcut {
     sequence: "Return"
-    enabled: okButton.enabled
+    enabled: dataModel.okEnabled
     onActivated: Ltk.updateRequestUI("Button", "OK");
   }
 
   Shortcut {
     sequence: "Space"
-    enabled: cancelButton.enabled || endPhaseButton.visible;
-    onActivated: if (cancelButton.enabled) {
+    enabled: dataModel.cancelEnabled || endPhaseButton.visible;
+    onActivated: if (dataModel.cancelEnabled) {
       Ltk.updateRequestUI("Button", "Cancel");
     } else {
       Logic.replyToServer("");
@@ -674,47 +636,14 @@ W.PageBase {
     return getPhoto(id);
   }
 
-  function activate() {
-    if (state === "active") state = "notactive";
-    state = "active";
-  }
-
   function applyChange(uiUpdate) {
     const sskilldata = uiUpdate["SpecialSkills"]?.[0]
     if (sskilldata) {
       specialCardSkills.model = sskilldata?.skills ?? [];
     }
 
+    dataModel.applyChange(uiUpdate);
     dashboard.applyChange(uiUpdate);
-    const pdatas = uiUpdate["Photo"];
-    pdatas?.forEach(pdata => {
-      const model = dataModel.getPhoto(pdata.id);
-      model.state = pdata.state;
-      model.selectable = pdata.enabled;
-      model.selected = pdata.selected;
-    });
-    for (const model of photoModel) {
-      model.updateTargetTip();
-    }
-
-    const buttons = uiUpdate["Button"];
-    if (buttons) {
-      okCancel.visible = true;
-    }
-    buttons?.forEach(bdata => {
-      switch (bdata.id) {
-        case "OK":
-          okButton.enabled = bdata.enabled;
-          break;
-        case "Cancel":
-          cancelButton.enabled = bdata.enabled;
-          break;
-        case "End":
-          endPhaseButton.enabled = bdata.enabled;
-          endPhaseButton.visible = bdata.enabled;
-          break;
-      }
-    })
 
     // Interaction最后上桌 太给脸了居然插结
     uiUpdate["_delete"]?.forEach(data => {
@@ -777,18 +706,6 @@ W.PageBase {
     });
   }
 
-  function netStateChanged(sender, data) {
-    const id = data[0];
-    let state = data[1];
-
-    const model = dataModel.getPhoto(id);
-    if (!model) return;
-    if (state === "run" && model.dead) {
-      state = "leave";
-    }
-    model.netstate = state;
-  }
-
   function getAreaItem(area) {
     if (area === Ltk.Card.DrawPile) {
       return drawPile;
@@ -801,15 +718,11 @@ W.PageBase {
   function setupCallbacks() {
     dataModel.setupCallbacks();
 
-    addCallback(Command.NetStateChanged, netStateChanged);
     // TODO 摆烂了 反正这些后面也是得重构 懒得搬砖了
     addCallback(Command.ShowVirtualCard, Logic.callbacks["ShowVirtualCard"]);
     addCallback(Command.UpdateCard, Logic.callbacks["UpdateCard"]);
-    addCallback(Command.UpdateSkill, Logic.callbacks["UpdateSkill"]);
     addCallback(Command.MoveFocus, Logic.callbacks["MoveFocus"]);
-    addCallback(Command.PlayerRunned, Logic.callbacks["PlayerRunned"]);
     addCallback(Command.AskForGeneral, Logic.callbacks["AskForGeneral"]);
-    addCallback(Command.AskForSkillInvoke, Logic.callbacks["AskForSkillInvoke"]);
     addCallback(Command.AskForArrangeCards, Logic.callbacks["AskForArrangeCards"]);
     addCallback(Command.AskForExchange, Logic.callbacks["AskForExchange"]);
     addCallback(Command.AskForChoices, Logic.callbacks["AskForChoices"]);
@@ -817,11 +730,7 @@ W.PageBase {
     addCallback(Command.AskForPoxi, Logic.callbacks["AskForPoxi"]);
     addCallback(Command.AskForMoveCardInBoard, Logic.callbacks["AskForMoveCardInBoard"]);
     addCallback(Command.AskForCardsAndChoice, Logic.callbacks["AskForCardsAndChoice"]);
-    addCallback(Command.PlayCard, Logic.callbacks["PlayCard"]);
-    addCallback(Command.AskForUseActiveSkill, Logic.callbacks["AskForUseActiveSkill"]);
-    addCallback(Command.CancelRequest, Logic.callbacks["CancelRequest"]);
     addCallback(Command.AskForUseCard, Logic.callbacks["AskForUseCard"]);
-    addCallback(Command.AskForResponseCard, Logic.callbacks["AskForResponseCard"]);
     addCallback(Command.Animate, Logic.callbacks["Animate"]);
     addCallback(Command.LogEvent, Logic.callbacks["LogEvent"]);
     addCallback(Command.GameOver, Logic.callbacks["GameOver"]);
@@ -832,7 +741,6 @@ W.PageBase {
     addCallback(Command.CustomDialog, Logic.callbacks["CustomDialog"]);
     addCallback(Command.MiniGame, Logic.callbacks["MiniGame"]);
     addCallback(Command.UpdateMiniGame, Logic.callbacks["UpdateMiniGame"]);
-    addCallback(Command.EmptyRequest, Logic.callbacks["EmptyRequest"]);
     addCallback(Command.UpdateRequestUI, Logic.callbacks["UpdateRequestUI"]);
     addCallback(Command.GetPlayerHandcards, Logic.callbacks["GetPlayerHandcards"]);
     addCallback(Command.ReplyToServer, Logic.callbacks["ReplyToServer"]);

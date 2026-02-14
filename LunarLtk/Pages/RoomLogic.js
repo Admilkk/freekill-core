@@ -128,9 +128,10 @@ function arrangePhotos() {
   }
 }
 
+// TODO 弹窗迁移到model或者别的什么控制的时候，再迁移
 function replyToServer(jsonData) {
   ClientInstance.replyToServer("", jsonData);
-  roomScene.state = "notactive";
+  roomScene.dataModel.deActivate();
 }
 
 function getPhoto(id) {
@@ -307,10 +308,6 @@ callbacks["UpdateCard"] = (sender, j) => {
   card.setData(Ltk.getCardData(id, filterCard));
 }
 
-callbacks["UpdateSkill"] = (sender, j) => {
-  // TODO 删了
-}
-
 function cancelAllFocus() {
   let item;
   const playerNum = roomScene.dataModel.playerNum;
@@ -331,6 +328,7 @@ callbacks["MoveFocus"] = (sender, data) => {
   for (const pid of focuses) {
     const model = dataModel.getPhoto(pid);
     if (!model) continue;
+    // 这样其实不好。应该用signal从model传递到item，或者item建立绑定
     const item = model.photoItem;
     item.progressBar.duration = timeout;
     item.progressBar.visible = true;
@@ -339,22 +337,12 @@ callbacks["MoveFocus"] = (sender, data) => {
   }
 }
 
-callbacks["PlayerRunned"] = (sender, data) => {
-  // jsonData: int runner, int robot
-  const [ runner, robot ] = data;
-
-  const model = dataModel.getPhoto(runner);
-  if (typeof(model) !== "undefined") {
-    model.playerid = robot;
-  }
-}
-
 callbacks["AskForGeneral"] = (sender, data) => {
   // jsonData: string[] generals, integer n, boolean no_convert, boolean heg, string rule, table extra_data
   const [ generals, n, no_convert, heg, rule, extra_data ] = data;
 
-  roomScene.dataModel.setPrompt("#AskForGeneral");
-  roomScene.activate();
+  roomScene.dataModel.prompt = "#AskForGeneral";
+  roomScene.dataModel.activate();
   roomScene.popupBox.sourceComponent =
     Qt.createComponent("LunarLtk.Pages.Popups", "ChooseGeneralBox");
   const box = roomScene.popupBox.item;
@@ -371,13 +359,6 @@ callbacks["AskForGeneral"] = (sender, data) => {
     box.generalList.append({ "name": generals[i] });
   box.updatePosition();
   box.refreshPrompt();
-}
-
-callbacks["AskForSkillInvoke"] = (sender, data) => {
-  // jsonData: [ string name, string prompt ]
-  const [ skill, prompt ] = data;
-  roomScene.dataModel.setPrompt(prompt || `#AskForSkillInvoke:::${skill}`);
-  roomScene.activate();
 }
 
 callbacks["AskForArrangeCards"] = (sender, data) => {
@@ -400,7 +381,7 @@ callbacks["AskForArrangeCards"] = (sender, data) => {
   model.accepted.connect(() => replyToServer(model.result));
   model.rejected.connect(() => replyToServer([]));
 
-  roomScene.activate();
+  roomScene.dataModel.activate();
   roomScene.popupBox.sourceComponent =
     Qt.createComponent("LunarLtk.Pages.Popups", "ArrangeCardsBox");
   roomScene.popupBox.item.dataModel = model;
@@ -412,7 +393,7 @@ callbacks["AskForExchange"] = (sender, data) => {
   const cards_name = [];
   const capacities = [];
   const limits = [];
-  roomScene.activate();
+  roomScene.dataModel.activate();
   roomScene.popupBox.sourceComponent =
     Qt.createComponent("LunarLtk.Pages.Popups", "GuanxingBox");
   let for_i = 0;
@@ -441,8 +422,8 @@ callbacks["AskForChoices"] = (sender, data) => {
   // jsonData: [ string[] choices, string skill ]
   // TODO: multiple choices, e.g. benxi_ol
   const [ choices, all_choices, [ min_num, max_num], cancelable, skill_name, prompt, detailed ] = data;
-  roomScene.dataModel.setPrompt(prompt || `#AskForChoice:::${skill_name}`);
-  roomScene.activate();
+  roomScene.dataModel.prompt = prompt || `#AskForChoice:::${skill_name}`;
+  roomScene.dataModel.activate();
 
   const modelComponent = Qt.createComponent("LunarLtk.Models.Popups", "ChoicesModel");
   const model = modelComponent.createObject(null, {
@@ -485,7 +466,7 @@ callbacks["AskForCardChosen"] = (sender, data) => {
   model.accepted.connect(() => replyToServer(model.selectedId));
   model.rejected.connect(() => replyToServer(""));
 
-  roomScene.activate();
+  roomScene.dataModel.activate();
   const pop = roomScene.popupBox;
   pop.sourceComponent = Qt.createComponent("LunarLtk.Pages.Popups", "PlayerCardBox");
   pop.item.dataModel = model;
@@ -505,7 +486,7 @@ callbacks["AskForPoxi"] = (sender, dat) => {
   model.accepted.connect(() => replyToServer(model.selectedIds));
   model.rejected.connect(() => replyToServer([]));
 
-  roomScene.activate();
+  roomScene.dataModel.activate();
   const pop = roomScene.popupBox;
   pop.sourceComponent = Qt.createComponent("LunarLtk.Pages.Popups", "PoxiBox");
   pop.item.dataModel = model;
@@ -526,7 +507,7 @@ callbacks["AskForMoveCardInBoard"] = (sender, data) => {
     pos: cardsPosition[cards.indexOf(model.result)],
   }));
 
-  roomScene.activate();
+  roomScene.dataModel.activate();
   roomScene.popupBox.sourceComponent =
     Qt.createComponent("LunarLtk.Pages.Popups", "MoveCardInBoardBox");
   roomScene.popupBox.item.dataModel = model;
@@ -538,7 +519,7 @@ callbacks["AskForCardsAndChoice"] = (sender, data) => {
   //  int min, int max, string reason ]
   const { cards, choices, prompt, cancel_choices, min, max, filter_skel, disabled, extra_data } = data;
 
-  roomScene.activate();
+  roomScene.dataModel.activate();
   roomScene.popupBox.sourceComponent =
     Qt.createComponent("LunarLtk.Pages.Popups", "ChooseCardsAndChoiceBox");
 
@@ -559,33 +540,13 @@ callbacks["AskForCardsAndChoice"] = (sender, data) => {
   roomScene.popupBox.moveToCenter();
 }
 
-// 切换状态 -> 向Lua询问UI情况
-// 所以Lua一开始就要设置好各种亮灭的值 而这个自然是通过update
-callbacks["PlayCard"] = () => {
-  roomScene.activate();
-  roomScene.okCancel.visible = true;
-}
-
-callbacks["AskForUseActiveSkill"] = (sender, data) => {
-  // jsonData: string skill_name, string prompt
-  const [ skill_name, prompt, cancelable ] = data;
-  const extra_data = data[3] ?? {};
-  roomScene.dataModel.setPrompt(prompt || `#AskForUseActiveSkill:::${skill_name}`);
-  roomScene.activate();
-  roomScene.okCancel.visible = true;
-}
-
-callbacks["CancelRequest"] = () => {
-  roomScene.state = "notactive";
-}
-
 callbacks["AskForUseCard"] = (sender, data) => {
   // jsonData: card, pattern, prompt, cancelable, {}
   const [ cardname, pattern, prompt, cancelable, extra_data, disabledSkillNames ] = data;
 
-  roomScene.dataModel.setPrompt(prompt || `#AskForUseCard:::${cardname}`);
-  roomScene.activate();
-  roomScene.okCancel.visible = true;
+  roomScene.dataModel.prompt = prompt || `#AskForUseCard:::${cardname}`;
+  roomScene.dataModel.activate();
+  roomScene.dataModel.okCancelVisible = true;
   if (extra_data != null) {
     if ((extra_data.effectTo !== Cpp.self.id && // 忽略本轮无懈可击，但目标是自己时不忽略
         roomScene.skippedUseEventId.find(id => id === extra_data.useEventId)) ||
@@ -597,15 +558,6 @@ callbacks["AskForUseCard"] = (sender, data) => {
       roomScene.extra_data = extra_data;
     }
   }
-}
-
-callbacks["AskForResponseCard"] = (sender, data) => {
-  // jsonData: card_name, pattern, prompt, cancelable, {}
-  const [ cardname, pattern, prompt, cancelable, extra_data, disabledSkillNames ] = data;
-
-  roomScene.dataModel.setPrompt(prompt || `#AskForResponseCard:::${cardname}`);
-  roomScene.activate();
-  roomScene.okCancel.visible = true;
 }
 
 callbacks["Animate"] = (sender, data) => {
@@ -747,7 +699,7 @@ callbacks["GameOver"] = (sender, jsonData) => {
   const model = modelComponent.createObject();
   model.winner = jsonData;
 
-  roomScene.state = "notactive";
+  roomScene.dataModel.deActivate();
   roomScene.popupBox.sourceComponent =
     Qt.createComponent("LunarLtk.Pages.Popups", "GameOverBox");
   const box = roomScene.popupBox.item;
@@ -762,7 +714,7 @@ callbacks["FillAG"] = (sender, data) => {
 }
 
 callbacks["AskForAG"] = (sender, j) => {
-  roomScene.activate();
+  roomScene.dataModel.activate();
   roomScene.manualBox.item.interactive = true;
 }
 
@@ -782,7 +734,7 @@ callbacks["CloseAG"] = () => roomScene.manualBox.item.close();
 callbacks["CustomDialog"] = (sender, data) => {
   const path = data.path;
   const dat = data.data;
-  roomScene.activate();
+  roomScene.dataModel.activate();
   roomScene.popupBox.source = AppPath + "/" + path;
   if (dat) {
     roomScene.popupBox.item.loadData(dat);
@@ -793,7 +745,7 @@ callbacks["MiniGame"] = (sender, data) => {
   const game = data.type;
   const dat = data.data;
   const gdata = Ltk.getMiniGame(game, Cpp.self.id, JSON.stringify(dat));
-  roomScene.activate();
+  roomScene.dataModel.activate();
   roomScene.popupBox.source = AppPath + "/" + gdata.qml_path + ".qml";
   if (dat) {
     roomScene.popupBox.item.loadData(dat);
@@ -804,10 +756,6 @@ callbacks["UpdateMiniGame"] = (sender, data) => {
   if (roomScene.popupBox.item) {
     roomScene.popupBox.item.updateData(data);
   }
-}
-
-callbacks["EmptyRequest"] = (sender, data) => {
-  roomScene.activate();
 }
 
 callbacks["ChangeSkin"] = (sender, data) => {
@@ -831,7 +779,7 @@ callbacks["ChangeSkin"] = (sender, data) => {
 
 callbacks["UpdateRequestUI"] = (sender, uiUpdate) => {
   if (uiUpdate["_prompt"])
-    roomScene.dataModel.setPrompt(uiUpdate["_prompt"]);
+    roomScene.dataModel.prompt = uiUpdate["_prompt"];
 
   if (uiUpdate._type == "Room") {
     roomScene.applyChange(uiUpdate);

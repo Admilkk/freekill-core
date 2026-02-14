@@ -19,8 +19,6 @@ QtObject {
 
   property var roomPage
 
-  property string promptText    // 要显示的prompt文本（已翻译）
-
   property int playerNum        // 房间当前游玩人数
   property int dashboardId      // 初次开局时主视角id 用于保存主视角本来的玩家防止被切视角乱掉
 
@@ -39,9 +37,31 @@ QtObject {
   // 处理区中的ui常驻卡牌
   property list<CardModel> processing: [];
 
+  // ====== 活跃状态下的额外UI信息 ======
+
+  // 几个大按钮
+  property bool okCancelVisible: false // 确定取消可见？
+  property bool okEnabled: false // 可以点确定按钮？
+  property bool cancelEnabled: false // 可以点取消按钮？
+  property bool endButtonVisible: false // 结束回合可见？
+
+  // 读条信息
+  property real requestTotal // 总共的读条时长
+  property real requestDuration // 剩余读条时长
+
+  property string prompt
+
+  property var skipNullificationData
+
+  readonly property string promptText: Ltk.processPrompt(prompt)
+
   signal seatChanged(); // 座位排序后的信号
   signal playerAdded(PhotoModel model); // 新玩家加入的信号（addNpc）
-  signal cardsMoved(var move, var models);
+  signal cardsMoved(var move, var models); // 操作完移牌数据后通知ui
+  signal popupReady(var model); // 准备好弹窗所需model后通知ui
+
+  signal activated();
+  signal deActivated();
 
   function getTimeString(time) {
     let s = time % 60;
@@ -59,8 +79,36 @@ QtObject {
     }
   }
 
-  function setPrompt(text) {
-    promptText = Ltk.processPrompt(text);
+  function activate() {
+    const dat = Backend.getRequestData();
+    const total = dat["timeout"] * 1000;
+    const now = Date.now(); // ms
+    const elapsed = now - (dat["timestamp"] ?? now);
+
+    if (total <= elapsed) {
+      return;
+    }
+
+    requestTotal = total;
+    requestDuration = total - elapsed;
+    activated();
+  }
+
+  function deActivate() {
+    okCancelVisible = false;
+    okEnabled = false;
+    cancelEnabled = false;
+    endButtonVisible = false;
+    prompt = "";
+
+    dashboard.disableAllSkills();
+
+    for (const model of players) {
+      model.selected = false;
+      model.state = "normal";
+    }
+
+    deActivated();
   }
 
   // 一秒5刷智慧
@@ -72,6 +120,17 @@ QtObject {
     }
 
     dashboard.refreshData();
+  }
+
+  function netStateChanged(sender, data) {
+    let [id, state] = data;
+
+    const model = getPhoto(id);
+    if (!model) return;
+    if (state === "run" && model.dead) {
+      state = "leave";
+    }
+    model.netstate = state;
   }
 
   function arrangeSeats(_, order) {
@@ -219,8 +278,44 @@ QtObject {
     dashboard.prelightSkill(skill_name, prelight);
   }
 
+  function playerRunned(sender, data) {
+    const [ runner, robot ] = data;
+
+    const model = getPhoto(runner);
+    if (model) {
+      model.playerid = robot;
+    }
+  }
+
+  function playCard() {
+    activate();
+    okCancelVisible = true;
+  }
+
+  function askForSkillInvoke(sender, data) {
+    const [ skill, prompt ] = data;
+    root.prompt = prompt || `#AskForSkillInvoke:::${skill}`;
+    activate();
+  }
+
+  function askForUseActiveSkill(sender, data) {
+    const [ skill_name, prompt, cancelable ] = data;
+    root.prompt = prompt || `#AskForUseActiveSkill:::${skill_name}`;
+    activate();
+    okCancelVisible = true;
+  }
+
+  function askForResponseCard(sender, data) {
+    const [ cardname, pattern, prompt, cancelable, extra_data, disabledSkillNames ] = data;
+
+    root.prompt = prompt || `#AskForResponseCard:::${cardname}`;
+    activate();
+    okCancelVisible = true;
+  }
+
   // 确定只会修改model属性的逻辑都搬家到这里
   function setupCallbacks() {
+    roomPage.addCallback(Command.NetStateChanged, netStateChanged);
     roomPage.addCallback(Command.ArrangeSeats, arrangeSeats);
     roomPage.addCallback(Command.PropertyUpdate, propertyUpdate);
     roomPage.addCallback(Command.StartGame, startGame);
@@ -237,6 +332,47 @@ QtObject {
     roomPage.addCallback(Command.AddSkill, addSkill);
     roomPage.addCallback(Command.PrelightSkill, prelightSkill);
     roomPage.addCallback("AddNpc", addNpc);
+
+    roomPage.addCallback(Command.EmptyRequest, activate);
+    roomPage.addCallback(Command.CancelRequest, deActivate);
+    roomPage.addCallback(Command.PlayerRunned, playerRunned);
+
+    // 以下为交互类
+    roomPage.addCallback(Command.PlayCard, playCard);
+    roomPage.addCallback(Command.AskForSkillInvoke, askForSkillInvoke);
+    roomPage.addCallback(Command.AskForUseActiveSkill, askForUseActiveSkill);
+    roomPage.addCallback(Command.AskForResponseCard, askForResponseCard);
+  }
+
+  function applyChange(uiUpdate) {
+    const pdatas = uiUpdate["Photo"];
+    pdatas?.forEach(pdata => {
+      const model = getPhoto(pdata.id);
+      model.state = pdata.state;
+      model.selectable = pdata.enabled;
+      model.selected = pdata.selected;
+    });
+    for (const model of players) {
+      model.updateTargetTip();
+    }
+
+    const buttons = uiUpdate["Button"];
+    if (buttons) {
+      okCancelVisible = true;
+    }
+    buttons?.forEach(bdata => {
+      switch (bdata.id) {
+        case "OK":
+          okEnabled = bdata.enabled;
+          break;
+        case "Cancel":
+          cancelEnabled = bdata.enabled;
+          break;
+        case "End":
+          endButtonVisible = bdata.enabled;
+          break;
+      }
+    });
   }
 
   function initialize() {

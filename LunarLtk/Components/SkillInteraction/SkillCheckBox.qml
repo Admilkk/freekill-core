@@ -4,19 +4,14 @@ import QtQuick
 import Fk
 import Fk.Components.Common
 import LunarLtk
+import LunarLtk.Models.Popups
 
 MetroButton {
   id: root
-  property string skill
-  property var choices: []
-  property var all_choices: []
-  property int min_num: 0
-  property int max_num: 0
+  property ChoicesModel dataModel
   property var answer: []
-  property bool detailed: false
-  property bool cancelable: false
 
-  text: Lua.tr("AskForChoices")
+  text: answer.length === 0 ? Lua.tr("AskForChoices") : answer.map(v => Ltk.processPrompt(v)).join("+")
 
   onAnswerChanged: {
     if (!answer) return;
@@ -25,22 +20,15 @@ MetroButton {
 
   onClicked: {
     Ltk.updateRequestUI("Interaction", "1", "update", []);
-    if (detailed) {
-      roomScene.popupBox.sourceComponent =
-        Qt.createComponent("../../../Pages/LunarLTK/DetailedCheckBox.qml");
-    } else {
-      roomScene.popupBox.sourceComponent =
-        Qt.createComponent("../../../Pages/LunarLTK/CheckBox.qml");
-    }
+    roomScene.popupBox.sourceComponent = Qt.createComponent("LunarLtk.Pages.Popups", "ChoicesBox");
     const box = roomScene.popupBox.item;
-    box.options = choices;
-    box.all_options = all_choices;
-    box.skill_name = skill;
-    box.min_num = min_num;
-    box.max_num = max_num;
-    box.accepted.connect(() => {
-      answer = box.result.map(result => all_choices[result]);
+    dataModel.accepted.connect(() => {
+      answer = dataModel.result;
+      box?.finished();
     });
+    dataModel.rejected.connect(() => {
+      box?.finished();
+    });
+    box.dataModel = dataModel;
   }
-
 }

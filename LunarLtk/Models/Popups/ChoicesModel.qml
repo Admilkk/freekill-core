@@ -19,8 +19,6 @@ QtObject {
   signal accepted()
   signal rejected()
 
-  readonly property bool allowOneLine: minNum === 1 && maxNum === 1
-
   readonly property string promptText: {
     const raw = Ltk.processPrompt(prompt || `#AskForChoice:::${skillName}`);
     return Lua.tr(raw);

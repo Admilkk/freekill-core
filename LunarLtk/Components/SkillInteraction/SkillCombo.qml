@@ -12,8 +12,7 @@ MetroButton {
 
   property ChoicesModel dataModel
 
-  property string defaultChoice
-  property string answer: defaultChoice
+  property string answer: dataModel?.result[0] ?? ""
 
   text: Ltk.processPrompt(answer)
 

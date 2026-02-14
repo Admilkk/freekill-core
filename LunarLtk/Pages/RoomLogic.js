@@ -473,8 +473,8 @@ callbacks["AskForChoices"] = (sender, data) => {
   const box = roomScene.popupBox.item;
   box.dataModel = model;
 
-  // 因为box中取不到roomScene的内容就写在这里……
-  if (box.isOneLine) {
+  // 因为box中取不到roomScene的内容就写在这里
+  if (box.isOneLine && min_num === 1 && max_num === 1) {
     box.title.visible = false;
     box.background.visible = false;
     box.x = (roomScene.width - box.width) / 2;

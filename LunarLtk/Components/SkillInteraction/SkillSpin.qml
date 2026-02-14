@@ -6,8 +6,9 @@ import QtQuick.Controls
 import LunarLtk
 
 SpinBox {
+  id: root
   background: Rectangle { color: "#88EEEEEE" }
-  property int answer: value
+  property alias answer: root.value
   property string skill
   // from, to
 

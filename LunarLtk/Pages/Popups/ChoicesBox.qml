@@ -39,13 +39,15 @@ GraphicsBox {
 
     MetroButton {
       text: Lua.tr("OK")
+      Layout.preferredWidth: 64
       enabled: root.dataModel?.feasible ?? false
       onClicked: root.dataModel.accepted();
     }
 
     MetroButton {
       text: Lua.tr("Cancel")
-      enabled: root.dataModel?.cancelable ?? false
+      Layout.preferredWidth: 64
+      visible: root.dataModel?.cancelable ?? false
       onClicked: root.dataModel.rejected();
     }
   }
@@ -89,7 +91,7 @@ GraphicsBox {
         MetroButton {
           required property string modelData
           Layout.fillWidth: true
-          Layout.minimumWidth: 100
+          Layout.minimumWidth: 72
           text: Ltk.processPrompt(modelData)
           enabled: root.dataModel.choices.indexOf(modelData) !== -1
           checked: root.dataModel.result.includes(modelData)
@@ -155,17 +157,15 @@ GraphicsBox {
       return;
     }
 
-    if (dataModel.allowOneLine) {
-      const maxWidth = 1000;
-      const merged = dataModel.allChoices.map(v => Ltk.processPrompt(v))
-        .join("gksm")
-        .replace(/<[^>]*>/g, "");
+    const maxWidth = 1000;
+    const merged = dataModel.allChoices.map(v => Ltk.processPrompt(v))
+      .join("gksm")
+      .replace(/<[^>]*>/g, "");
 
-      const estimatedWidth = merged.length * 16;
-      if (estimatedWidth < maxWidth) {
-        contentLoader.sourceComponent = onelineComponent;
-        return;
-      }
+    const estimatedWidth = merged.length * 16;
+    if (estimatedWidth < maxWidth) {
+      contentLoader.sourceComponent = onelineComponent;
+      return;
     }
 
     contentLoader.sourceComponent = gridComponent;

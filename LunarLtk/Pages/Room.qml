@@ -730,9 +730,11 @@ W.PageBase {
         const skill_name = dat.data.skill_name;
         switch (data.type) {
         case "combo":
-          skillInteraction.sourceComponent =
-            Qt.createComponent("LunarLtk.Components.SkillInteraction", "SkillCombo");
-          skillInteraction.item.defaultChoice = data["default"];
+        case "checkbox":
+          skillInteraction.sourceComponent = Qt.createComponent(
+            "LunarLtk.Components.SkillInteraction",
+            data.type === "combo" ? "SkillCombo" : "SkillCheckBox"
+          );
           const modelComponent = Qt.createComponent("LunarLtk.Models.Popups", "ChoicesModel");
           const model = modelComponent.createObject(null, {
             choices: data.choices,
@@ -740,6 +742,9 @@ W.PageBase {
             cancelable: data.cancelable ?? false,
             skillName: skill_name,
             detailed: data.detailed,
+            result: data.default ? [data.default] : [],
+            minNum: data.min_num ?? 1,
+            maxNum: data.max_num ?? 1,
           });
           skillInteraction.item.dataModel = model;
           skillInteraction.item.clicked();
@@ -766,18 +771,6 @@ W.PageBase {
           skillInteraction.item.skill = skill_name;
           skillInteraction.item.extra_data = data;
           skillInteraction.item?.clicked();
-          break;
-        case "checkbox":
-          skillInteraction.sourceComponent =
-            Qt.createComponent("LunarLtk.Components.SkillInteraction", "SkillCheckBox");
-          skillInteraction.item.skill = skill_name;
-          skillInteraction.item.choices = data.choices;
-          skillInteraction.item.detailed = data.detailed;
-          skillInteraction.item.all_choices = data.all_choices;
-          skillInteraction.item.min_num = data.min_num;
-          skillInteraction.item.max_num = data.max_num;
-          skillInteraction.item.cancelable = data.cancelable;
-          skillInteraction.item.clicked();
           break;
         default:
           skillInteraction.sourceComponent = undefined;

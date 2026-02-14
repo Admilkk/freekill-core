@@ -10,10 +10,10 @@ pragma ComponentBehavior: Bound
 MetroButton {
   id: root
 
-  property ChoicesModel model
+  property ChoicesModel dataModel
 
-  property string default_choice
-  property string answer: default_choice
+  property string defaultChoice
+  property string answer: defaultChoice
 
   text: Ltk.processPrompt(answer)
 
@@ -23,16 +23,16 @@ MetroButton {
   }
 
   onClicked: {
-    if (!model.cancelable && model.allChoices.length < 2) return;
+    if (!dataModel.cancelable && dataModel.allChoices.length < 2) return;
     roomScene.popupBox.sourceComponent = Qt.createComponent("LunarLtk.Pages.Popups", "ChoicesBox");
     const box = roomScene.popupBox.item;
-    model.accepted.connect(() => {
-      answer = model.result[0];
+    dataModel.accepted.connect(() => {
+      answer = dataModel.result[0];
       box.finished();
     });
-    model.rejected.connect(() => {
+    dataModel.rejected.connect(() => {
       box.finished();
     });
-    box.dataModel = model;
+    box.dataModel = dataModel;
   }
 }

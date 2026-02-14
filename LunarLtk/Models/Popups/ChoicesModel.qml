@@ -14,12 +14,12 @@ QtObject {
   property string prompt
   property bool detailed
 
-  property bool allowOneLine: false
-
   property list<var> result: []
 
   signal accepted()
   signal rejected()
+
+  readonly property bool allowOneLine: minNum === 1 && maxNum === 1
 
   readonly property string promptText: {
     const raw = Ltk.processPrompt(prompt || `#AskForChoice:::${skillName}`);

@@ -12,18 +12,14 @@ import LunarLtk.Models.Popups
 pragma ComponentBehavior: Bound
 
 GraphicsBox {
-  property var options: []
-  property var all_options: []
-  property string skill_name: ""
-  property int result
-
-  readonly property bool isOneLine: contentLoader.sourceComponent === onelineComponent
-
   id: root
+
   property ChoicesModel dataModel
   title.text: dataModel?.promptText ?? ""
   width: contentLoader.width + 16
   height: contentLoader.height + title.height + (okCancel.visible ? okCancel.height : 0) + 24
+
+  readonly property bool isOneLine: contentLoader.sourceComponent === onelineComponent
 
   Loader {
     id: contentLoader

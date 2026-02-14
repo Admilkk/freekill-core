@@ -465,7 +465,6 @@ callbacks["AskForChoices"] = (sender, data) => {
     skillName: skill_name,
     prompt,
     detailed,
-    allowOneLine: min_num === 1 && max_num === 1,
   });
   model.accepted.connect(() => replyToServer(model.result));
   model.rejected.connect(() => replyToServer([]));

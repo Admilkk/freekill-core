@@ -6,7 +6,7 @@ QtObject {
 
   property string prompt
   property list<var> cardData // var为如此list: [ name, ids ]
-  property var cardVisibility // 牌id到是否可见的映射，为什么没有map啊……
+  property var cardVisibility // 一个object 牌id到是否可见的映射
 
   property int selectedId: 0
 
@@ -33,12 +33,9 @@ QtObject {
 
   function shuffleIds() {
     const output = [];
-    console.log("cardData", cardData);
     cardData.forEach((cardArrs) => {
-      console.log("cardArrs", cardArrs);
       let piles = [];
       const origCards = cardArrs[1];
-      console.log("origCards", origCards);
       if (cardVisibility) {
         const invisible = [];
         for (const cid of origCards) {

@@ -12,7 +12,7 @@ pragma ComponentBehavior: Bound
 
 GraphicsBox {
   id: root
-  
+
   property PlayerCardModel dataModel
 
   title.text: dataModel?.promptText ?? Lua.tr("$ChooseCard")

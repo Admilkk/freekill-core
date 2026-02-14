@@ -804,7 +804,6 @@ W.PageBase {
     addCallback(Command.NetStateChanged, netStateChanged);
     // TODO 摆烂了 反正这些后面也是得重构 懒得搬砖了
     addCallback(Command.ShowVirtualCard, Logic.callbacks["ShowVirtualCard"]);
-    addCallback(Command.UpdateHandcard, Logic.callbacks["UpdateHandcard"]);
     addCallback(Command.UpdateCard, Logic.callbacks["UpdateCard"]);
     addCallback(Command.UpdateSkill, Logic.callbacks["UpdateSkill"]);
     addCallback(Command.MoveFocus, Logic.callbacks["MoveFocus"]);

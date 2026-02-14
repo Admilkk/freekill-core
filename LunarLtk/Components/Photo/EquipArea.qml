@@ -21,7 +21,7 @@ Item {
   required property PhotoModel dataModel
 
   property int itemHeight: {
-    if (treasureItem.name === "" && !treasureItem.sealed)
+    if (treasureItem.equips.length === 0 && !treasureItem.sealed)
       return height / 3;
     return height / 4;
   }
@@ -46,7 +46,7 @@ Item {
       id: treasureItem
       subtype: "treasure"
       width: parent.width
-      height: (name === "" && !sealed) ? 0 : itemHeight
+      height: (equips.length === 0 && !sealed) ? 0 : itemHeight
       opacity: 0
       sealed: root.dataModel.sealedSlots.includes('TreasureSlot')
     }
@@ -81,7 +81,7 @@ Item {
           id: defensiveHorseItem
           width: parent.width
           height: itemHeight
-          icon: "horse"
+          subtype: "defensive_ride"
           opacity: 0
           sealed: root.dataModel.sealedSlots.includes('DefensiveRideSlot')
         }
@@ -95,7 +95,7 @@ Item {
           id: offensiveHorseItem
           width: parent.width
           height: itemHeight
-          icon: "horse"
+          subtype: "offensive_ride"
           opacity: 0
           sealed: root.dataModel.sealedSlots.includes('OffensiveRideSlot')
         }
@@ -103,50 +103,35 @@ Item {
     }
   }
 
-  function add(inputs)
-  {
+  function add(inputs) {
     area.add(inputs);
 
-    let card, item;
-    if (inputs instanceof Array) {
-      for (let i = 0; i < inputs.length; i++) {
-        card = inputs[i];
-        const vcard = Ltk.getVirtualEquipData(dataModel.playerid, card.cid);
-        card = vcard || card;
-        item = items[subtypes.indexOf(card.subtype)];
-        if (item) {
-          item.addCard(card);
-          item.show();
-        }
+    for (const card of inputs instanceof Array ? inputs : [inputs]) {
+      const vcardData = Ltk.getVirtualEquipData(dataModel.playerid, card.dataModel.cardId);
+      if (vcardData) {
+        delete vcardData.cid;
+        Object.assign(card.dataModel, vcardData);
       }
-    } else {
-      card = inputs;
-      const vcard = Ltk.getVirtualEquipData(dataModel.playerid, card.cid);
-      card = vcard || card;
-      item = items[subtypes.indexOf(card.subtype)];
+      const item = items[subtypes.indexOf(card.dataModel.subtype)];
       if (item) {
-        item.addCard(card);
+        item.addCard(card.dataModel);
         item.show();
       }
     }
   }
 
-  function remove(outputs)
-  {
+  function remove(outputs) {
     const result = area.remove(outputs);
-    for (let i = 0; i < result.length; i++) {
-      const card = result[i];
-      for (let j = 0; j < items.length; j++) {
-        const item = items[j];
-        item.removeCard(card.cid);
+    for (const card of result) {
+      for (const item of items) {
+        item.removeCard(card.dataModel.cardId);
       }
     }
 
     return result;
   }
 
-  function updateCardPosition(animated)
-  {
+  function updateCardPosition(animated) {
     area.updateCardPosition(animated);
   }
 

@@ -279,17 +279,6 @@ function doIndicate(from, tos) {
   line.running = true;
 }
 
-callbacks["UpdateHandcard"] = (sender) => {
-  // roomScene.dashboard.handcardArea.cards.forEach((v) => {
-  //   const id = v.cid;
-  //   if (Lua.evaluate(`ClientInstance:getCardArea(${id}) == Card.PlayerHand and ClientInstance:getCardOwner(${id}) == Self`)) {
-  //     v.setData(Ltk.getCardData(id, true));
-  //     v.known = Lua.selfPlayer.cardVisible(id);
-  //     v.draggable = true;
-  //   }
-  // });
-}
-
 callbacks["UpdateCard"] = (sender, j) => {
   const id = parseInt(j);
   let card;
@@ -768,7 +757,7 @@ callbacks["GameOver"] = (sender, jsonData) => {
 callbacks["FillAG"] = (sender, data) => {
   const ids = data[0];
   roomScene.manualBox.sourceComponent =
-    Qt.createComponent("LunarLtk.Pages", "AG");
+    Qt.createComponent("LunarLtk.Pages.Popups", "AG");
   roomScene.manualBox.item.addIds(ids);
 }
 

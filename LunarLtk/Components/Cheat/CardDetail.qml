@@ -5,6 +5,7 @@ import QtQuick.Controls
 import QtQuick.Layouts
 
 import Fk
+import LunarLtk
 import LunarLtk.Components
 
 Flickable {
@@ -27,7 +28,7 @@ Flickable {
       id: cardPic
       Layout.alignment: Qt.AlignTop
       Layout.topMargin: 10
-      cid: 0
+      dataModel: CardModel {}
     }
 
     ColumnLayout {
@@ -69,9 +70,12 @@ Flickable {
   onExtra_dataChanged: {
     const card = extra_data.card;
     if (!card) return;
-    cardPic.setData(card.toData());
-    const name = card.virt_name ? card.virt_name : card.name;
-    screenName.text = Lua.tr(name);
-    skillDesc.text = Lua.tr(":" + name);
+    const model = Ltk.createCardModel(card.dataModel.cardId);
+    const data = Ltk.getCardData(card.dataModel.cardId, true);
+    model.virtName = data.virt_name ?? "";
+    model.selectable = true;
+    cardPic.dataModel = model;
+    screenName.text = Lua.tr(model.name);
+    skillDesc.text = Lua.tr(":" + model.name);
   }
 }

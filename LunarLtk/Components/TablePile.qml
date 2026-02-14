@@ -59,7 +59,7 @@ Item {
       } else {
         for (i = 0; i < discardedCards.length; i++) {
           if (!inTable((discardedCards[i])))
-            discardedCards[i].selectable = false;
+            discardedCards[i].dataModel.selectable = false;
         }
         toVanish = true;
       }
@@ -71,7 +71,7 @@ Item {
     for (const c of inputs) {
       c.footnoteVisible = true;
       c.markVisible = false;
-      c.selectable = true;
+      c.dataModel.selectable = true;
       c.cardScale = 0.8;
       if (Config.rotateTableCard) {
         c.rotation = (Math.random() - 0.5) * 5;
@@ -92,7 +92,7 @@ Item {
         discardedCards.splice(idx, 1);
       }
       c.footnoteVisible = false;
-      c.selectable = false;
+      c.dataModel.selectable = false;
       c.cardScale = 1;
       c.rotation = 0;
     });

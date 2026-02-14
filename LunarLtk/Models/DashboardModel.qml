@@ -118,6 +118,10 @@ QtObject {
       model.nullified = !skill.isEffectable(p);
       model.times = skill.getTimes(p);
     }
+
+    for (const model of handcards) {
+      model.refreshData();
+    }
   }
 
   function applyChange(uiUpdate) {

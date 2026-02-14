@@ -1144,9 +1144,6 @@ function RefreshStatusSkills()
       end
     end
   end
-
-  -- 刷自己的手牌
-  self:notifyUI("UpdateHandcard")
 end
 
 function GetPlayersAndObservers()

@@ -4,29 +4,31 @@ import QtQuick
 import Fk
 import Fk.Components.Common
 import LunarLtk
+import LunarLtk.Models
 
 Item {
-  ListModel {
-    id: equips
-  }
-
-  property int cid: 0
-  property string name: ""
-  property string suit: ""
-  property int number: 0
-  property bool sealed: false
-  property string subtype
-
-  property string icon: ""
-  property alias text: textItem.text
-
   id: root
+
+  property list<CardModel> equips
+  property string subtype
+  property bool sealed: false
+
+  readonly property string icon: {
+    const model = equips[root.equips.length - 1];
+    if (!model) return "";
+
+    if (subtype === "defensive_ride" || subtype === "offensive_ride") {
+      return "horse";
+    } else {
+      return model.name;
+    }
+  }
 
   Rectangle {
     anchors.fill: parent
     radius: 2
-    visible: sealed
-    color: "#CCC"
+    visible: root.sealed && root.equips.length === 0
+    color: "#CCCCCC"
     opacity: 0.8
   }
 
@@ -36,9 +38,11 @@ Item {
     x: 3
 
     source: {
-      if (sealed)
+      if (root.sealed && root.equips.length === 0)
         return SkinBank.equipIconDir + "sealed";
-      return icon ? SkinBank.getEquipIcon(cid, icon) : "";
+
+      const model = root.equips[root.equips.length - 1];
+      return root.icon ? SkinBank.getEquipIcon(model?.cardId ?? -1, root.icon) : "";
     }
 
     scale: 0.75
@@ -47,15 +51,23 @@ Item {
   Image {
     id: suitItem
     anchors.right: parent.right
-    source: (suit && !sealed) ? SkinBank.cardSuitDir + suit : ""
+    source: {
+      const model = root.equips[root.equips.length - 1];
+      if (!model) return "";
+      return SkinBank.cardSuitDir + model.suit;
+    }
     width: implicitWidth / implicitHeight * height
     height: 12
   }
 
   GlowText {
     id: numberItem
-    visible: !sealed && number > 0 && number < 14
-    text: Ltk.convertNumber(number)
+    visible: root.equips.length > 0
+    text: {
+      const model = root.equips[root.equips.length - 1];
+      if (!model) return "";
+      return Ltk.convertNumber(model.number);
+    }
     color: "white"
     font.family: Config.libianName
     font.pixelSize: 12
@@ -70,11 +82,30 @@ Item {
   Text {
     id: textItem
     font.family: Config.libianName
-    color: sealed ? "black" : "white"
+    color: (root.sealed && root.equips.length === 0) ? "black" : "white"
     font.pixelSize: 12
     anchors.left: iconItem.right
     anchors.leftMargin: -8
     verticalAlignment: Text.AlignVCenter
+
+    text: {
+      const model = root.equips[root.equips.length - 1];
+      const subtype = root.subtype;
+      if (!model) {
+        if (root.sealed) {
+          return '  ' + Lua.tr(subtype + "_sealed");
+        }
+        return "";
+      }
+
+      if (subtype === "defensive_ride") {
+        return "+1";
+      } else if (subtype === "offensive_ride") {
+        return "-1";
+      } else {
+        return Lua.tr(model.name);
+      }
+    }
   }
 
   ParallelAnimation {
@@ -121,72 +152,16 @@ Item {
     }
   }
 
-  function reset()
-  {
-    cid = 0;
-    name = "";
-    suit = "";
-    number = 0;
-    text = "";
-    icon = "";
-    if (sealed) {
-      text = '  ' + Lua.tr(subtype + "_sealed");
-    }
-  }
-
-  function setCard(card)
-  {
-    cid = card.cid;
-    name = card.name;
-    suit = card.suit;
-    number = card.number;
-    text = card.text;
-    icon = card.icon;
-  }
-
   function addCard(card) {
-    let iconName = "";
-    let displayText = "";
-    if (card.subtype === "defensive_ride") {
-      displayText = "+1";
-      iconName = "horse";
-    } else if (card.subtype === "offensive_ride") {
-      displayText = "-1"
-      iconName = "horse";
-    } else {
-      displayText = Lua.tr(card.name);
-      iconName = card.name;
-    }
-    let newModel = {
-      name: card.name,
-      cid: card.cid,
-      suit: card.suit,
-      number: card.number,
-      text: displayText,
-      icon: iconName,
-    }
-    setCard(newModel);
-    equips.append(newModel);
+    equips.push(card);
   }
 
   function removeCard(cid) {
-    let find = false;
-    for (let i = 0; i < equips.count; i++) {
-      if (equips.get(i).cid === cid) {
-        equips.remove(i);
-        find = true;
-        break;
-      }
-    }
-    if (!find) {
-      return;
-    }
-    if (equips.count === 0) {
-      reset();
+    const idx = equips.findIndex(model => model.cardId === cid);
+    if (idx === -1) return;
+    equips.splice(idx, 1);
+    if (equips.length === 0) {
       hide();
-    } else {
-      const card = equips.get(0);
-      setCard(card);
     }
   }
 
@@ -208,6 +183,5 @@ Item {
     x = 0;
 
     opacity = sealed ? 1 : 0;
-    text = '  ' + Lua.tr(subtype + "_sealed")
   }
 }

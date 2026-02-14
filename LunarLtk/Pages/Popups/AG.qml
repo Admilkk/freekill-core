@@ -13,12 +13,10 @@ GraphicsBox {
 
   id: root
   title.text: Lua.tr("Please choose cards")
-  width: cards.count * 100 + spacing * (cards.count - 1) + 25
+  width: cards.length * 100 + spacing * (cards.length - 1) + 25
   height: 180
 
-  ListModel {
-    id: cards
-  }
+  property list<var> cards // CardModel[]
 
   Row {
     x: 20
@@ -29,19 +27,15 @@ GraphicsBox {
       model: cards
 
       CardItem {
-        cid: model.cid
-        name: model.name
-        suit: model.suit
-        number: model.number
+        required property var modelData
+        dataModel: modelData
         autoBack: false
-        selectable: model.selectable
-        footnote: model.footnote
         footnoteVisible: true
         onClicked: {
           if (root.interactive && selectable) {
             root.interactive = false;
             roomScene.state = "notactive";
-            ClientInstance.replyToServer("", cid);
+            ClientInstance.replyToServer("", dataModel.cardId);
           }
         }
       }
@@ -50,19 +44,18 @@ GraphicsBox {
 
   function addIds(ids) {
     ids.forEach((id) => {
-      let data = Ltk.getCardData(id);
+      let data = Ltk.createCardModel(id);
       data.selectable = true;
       data.footnote = "";
-      cards.append(data);
+      cards.push(data);
     });
   }
 
   function takeAG(g, cid) {
-    for (let i = 0; i < cards.count; i++) {
-      const item = cards.get(i);
-      if (item.cid !== cid) continue;
-      item.footnote = g;
-      item.selectable = false;
+    for (const model of cards) {
+      if (model.cardId !== cid) continue;
+      model.footnote = g;
+      model.selectable = false;
       break;
     }
   }

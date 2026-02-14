@@ -1,6 +1,6 @@
 import QtQuick
 import Fk
-import LunarLtk.Components
+import LunarLtk
 
 // 此为某个游戏牌的UI数据
 //
@@ -37,5 +37,16 @@ QtObject {
   // 与UI交互相关
   property bool selectable: false
   property bool selected: false // 这个反过来被绑定
+
+  // 重新getCardById并刷新数据
+  function refreshData() {
+    const data = Ltk.getCardData(cardId, true);
+    const { name, extension, number, suit, color, type, subtype } = data;
+    Object.assign(root, {
+      name, extension, number, suit, color, type, subtype,
+      virtName: data.virt_name ?? "",
+    })
+    known = Lua.selfPlayer.cardVisible(cardId);
+  }
 }
 

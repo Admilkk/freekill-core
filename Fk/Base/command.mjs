@@ -63,7 +63,6 @@ export const RoomOwner = "RoomOwner";
 export const ReadyChanged = "ReadyChanged";
 export const NetStateChanged = "NetStateChanged";
 export const PropertyUpdate = "PropertyUpdate";
-export const UpdateHandcard = "UpdateHandcard";
 export const UpdateCard = "UpdateCard";
 export const UpdateSkill = "UpdateSkill";
 export const StartGame = "StartGame";

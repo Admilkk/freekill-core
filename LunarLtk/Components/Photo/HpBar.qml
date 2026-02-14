@@ -49,7 +49,7 @@ Column {
     Magatama {
       state: {
         const maxHp = root.dataModel.maxHp;
-        const hp = root.dataModel.maxHp;
+        const hp = root.dataModel.hp;
         return (hp >= 3 || hp >= maxHp) ? 3 : (hp <= 0 ? 0 : hp)
       }
     }

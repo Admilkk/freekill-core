@@ -48,9 +48,8 @@ UI.CardNameBox = function(spec)
   else
     spec.all_choices = {spec.choices}
   end
-  spec.default_choice = spec.default_choice and spec.default_choice or spec.choices[1]
+  spec.default = spec.default and spec.default or spec.choices[1]
   spec.type = "cardname"
-  spec.qml_path = "packages/freekill-core/Fk/Components/LunarLTK/SkillInteraction/SkillCardName"
   return spec
 end
 

@@ -3,15 +3,14 @@
 import QtQuick
 import Fk.Components.Common
 import LunarLtk
+import LunarLtk.Models.Popups
 
 MetroButton {
   id: root
-  property string skill
-  property var extra_data
-  property var choices : (extra_data !== undefined) ? extra_data.choices : []
-  property var all_choices : (extra_data !== undefined) ? extra_data.all_choices : []
-  property string default_choice : (extra_data !== undefined) ? extra_data.default_choice : ""
-  property string answer: default_choice
+
+  property ChoicesModel dataModel
+
+  property string answer: dataModel?.result[0] ?? ""
 
   text: Ltk.processPrompt(answer)
 
@@ -21,17 +20,12 @@ MetroButton {
   }
 
   onClicked: {
-    if (choices.length < 2 && choices.includes(answer)) return;
-    roomScene.popupBox.sourceComponent =
-      Qt.createComponent("../../../Pages/LunarLTK/CardNamesBox.qml");
-
+    if (!dataModel.cancelable && dataModel.choices.length < 2) return;
+    roomScene.popupBox.sourceComponent = Qt.createComponent("LunarLtk.Pages.Popups", "CardNamesBox");
     const box = roomScene.popupBox.item;
-    box.all_names = all_choices;
-    box.card_names = choices;
-    box.prompt = skill;
-    box.accepted.connect(() => {
-      answer = box.result;
+    dataModel.accepted.connect(() => {
+      answer = dataModel.result[0];
     });
+    box.dataModel = dataModel;
   }
-
 }

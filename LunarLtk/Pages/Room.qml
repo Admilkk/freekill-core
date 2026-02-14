@@ -731,17 +731,21 @@ W.PageBase {
         switch (data.type) {
         case "combo":
         case "checkbox":
+        case "cardname":
+          const pages = {
+            "combo": "SkillCombo",
+            "checkbox": "SkillCheckBox",
+            "cardname": "SkillCardName",
+          };
           skillInteraction.sourceComponent = Qt.createComponent(
-            "LunarLtk.Components.SkillInteraction",
-            data.type === "combo" ? "SkillCombo" : "SkillCheckBox"
-          );
+            "LunarLtk.Components.SkillInteraction", pages[data.type]);
           const modelComponent = Qt.createComponent("LunarLtk.Models.Popups", "ChoicesModel");
           const model = modelComponent.createObject(null, {
             choices: data.choices,
             allChoices: data.all_choices,
             cancelable: data.cancelable ?? false,
             skillName: skill_name,
-            detailed: data.detailed,
+            detailed: data.detailed ?? false,
             result: data.default ? [data.default] : [],
             minNum: data.min_num ?? 1,
             maxNum: data.max_num ?? 1,
@@ -761,13 +765,6 @@ W.PageBase {
         case "custom":
           skillInteraction.sourceComponent =
             Qt.createComponent(Cpp.path + "/" + data.qml_path + ".qml");
-          skillInteraction.item.skill = skill_name;
-          skillInteraction.item.extra_data = data;
-          skillInteraction.item?.clicked();
-          break;
-        case "cardname":
-          skillInteraction.sourceComponent =
-            Qt.createComponent("LunarLtk.Components.SkillInteraction", "SkillCardName");
           skillInteraction.item.skill = skill_name;
           skillInteraction.item.extra_data = data;
           skillInteraction.item?.clicked();

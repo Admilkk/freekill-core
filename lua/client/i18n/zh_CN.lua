@@ -406,6 +406,7 @@ FreeKill使用的是libgit2的C API，与此同时使用Git完成拓展包的下
   ["#RevealGeneral"] = "%from 亮出 %arg %arg2",
   ["mainGeneral"] = "主将",
   ["deputyGeneral"] = "副将",
+  ["removeDeputyGeneral"] = "移除副将",
   ["role"] = "身份",
   ["seat#1"] = "一号位",
   ["seat#2"] = "二号位",
@@ -770,6 +771,7 @@ Fk:loadTranslationTable {
 
   -- change hero
   ["#ChangeHero"] = "%from 的 %arg3 %arg 变更为 %arg2",
+  ["#RemoveDeputy"] = "%from 的副将 %arg 被移除了",
 
   -- misc
   ["#GuanxingResult"] = "%from 的观星结果为 %arg 上 %arg2 下",

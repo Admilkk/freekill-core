@@ -651,6 +651,7 @@ fk.TargetConfirmed = AimEvent:subclass("fk.TargetConfirmed")
 
 --- CardEffectData 卡牌效果的数据
 ---@class CardEffectDataSpec: RespondCardDataSpec
+---@field public skill CardSkill @ 卡牌技能
 ---@field public to ServerPlayer @ 角色目标
 ---@field public subTargets? ServerPlayer[] @ 子目标（借刀！）
 ---@field public tos ServerPlayer[] 目标列表
@@ -672,6 +673,8 @@ fk.TargetConfirmed = AimEvent:subclass("fk.TargetConfirmed")
 ---@field public disresponsiveList? ServerPlayer[] @ 这些角色不可响应此牌（晚于use.disresponsiveList）
 ---@field public unoffsetableList? ServerPlayer[] @ 这些角色不可抵消此牌（晚于use.unoffsetableList）
 ---@field public currentExtraData? UseExtraData | table @ 额外数据（仅当前目标，继承给对应生效事件）
+---@field public currentResponsePattern? string @ 用于响应卡牌效果的pattern，如"jink"之于杀、"nullification"之于锦囊
+---@field public offsetFunc? function @ 用于抵消卡牌效果的方式，如"使用一张闪"
 
 --- 卡牌效果的数据
 ---@class CardEffectData: CardEffectDataSpec, TriggerData

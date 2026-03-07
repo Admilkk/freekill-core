@@ -13,19 +13,26 @@ change_hero:addEffect("active", {
   card_filter = Util.FalseFunc,
   card_num = 0,
   target_filter = function(self, player, to_select, selected)
+    if self.interaction and self.interaction.data == "removeDeputyGeneral" then
+      if to_select.deputyGeneral == "" then
+        return false
+      end
+    end
     return #selected < 1
   end,
   target_num = 1,
   interaction = function(self)
     return UI.ComboBox {
-      choices = { "mainGeneral",  "deputyGeneral", "Gender", "Kingdom" },
+      choices = { "mainGeneral",  "deputyGeneral", "removeDeputyGeneral", "Gender", "Kingdom" },
     }
   end,
   on_use = function(self, room, effect)
     local from = effect.from
     local target = effect.tos[1]
-    local choice = self.interaction.data
-    if choice:endsWith("General") then
+    local choice = effect.interaction_data
+    if choice == "removeDeputyGeneral" then
+      room:removeDeputy(target, {})
+    elseif choice:endsWith("General") then
       local generals = room:getNGenerals(8)
       local general = room:askToChooseGeneral(from, {generals = generals, n = 1})
       local origin = choice == "deputyGeneral" and target.deputyGeneral or target.general

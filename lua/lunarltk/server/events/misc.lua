@@ -80,6 +80,14 @@ function ChangeProperty:main()
 
     data.results["deputyChange"] = {player.deputyGeneral, data.deputyGeneral}
     room:setPlayerProperty(player, "deputyGeneral", data.deputyGeneral)
+
+    if data.deputyGeneral == "" and data.sendLog then
+      room:sendLog{
+        type = "#RemoveDeputy",
+        from = player.id,
+        arg = originalDeputy.name,
+      }
+    end
   end
 
   if data.gender and data.gender ~= player.gender then
@@ -123,6 +131,34 @@ function ChangeProperty:main()
   logic:trigger(fk.AfterPropertyChange, player, data)
 end
 
+--- 重置角色的体力值
+---@param player ServerPlayer @ 要重置体力的角色
+---@param full? boolean @ 是否回复至体力上限，默认否
+---@param maxHpChange? boolean @ 是否改变体力上限，默认改变
+local function resetPlayerHp(player, full, maxHpChange)
+  local room = player.room
+  local oldHp, oldMaxHp = player.hp, player.maxHp
+  if (maxHpChange == nil) or maxHpChange then
+    local maxHp = player:getGeneralMaxHp()
+    local changer = Fk.game_modes[room:getSettings('gameMode')]:getAdjustedProperty(player)
+    if changer and changer.maxHp then
+      maxHp = maxHp + (changer.maxHp - player.maxHp)
+    end
+    room:setPlayerProperty(player, "maxHp", maxHp)
+  end
+  if full or player.hp > player.maxHp then
+    room:setPlayerProperty(player, "hp", player.maxHp)
+  end
+  if oldHp ~= player.hp or oldMaxHp ~= player.maxHp then
+    room:sendLog{
+      type = "#ShowHPAndMaxHP",
+      from = player.id,
+      arg = player.hp,
+      arg2 = player.maxHp,
+    }
+  end
+end
+
 --- 改变角色的武将
 ---@param player ServerPlayer @ 要换将的玩家
 ---@param new_general string @ 要变更的武将，若不存在则变身为孙策，孙策不存在变身为士兵
@@ -155,31 +191,12 @@ function MiscEventWrappers:changeHero(player, new_general, full, isDeputy, sendL
     gender = isDeputy and player.gender or new.gender,
     kingdom = kingdom,
     sendLog = sendLog,
-    results = {},
   }):exec()
 
-  local oldHp, oldMaxHp = player.hp, player.maxHp
-  if (maxHpChange == nil) or maxHpChange then
-    local maxHp = player:getGeneralMaxHp()
-    local changer = Fk.game_modes[self:getSettings('gameMode')]:getAdjustedProperty(player)
-    if changer and changer.maxHp then
-      maxHp = maxHp + (changer.maxHp - player.maxHp)
-    end
-    self:setPlayerProperty(player, "maxHp", maxHp)
-  end
-  if full or player.hp > player.maxHp then
-    self:setPlayerProperty(player, "hp", player.maxHp)
-  end
-  if oldHp ~= player.hp or oldMaxHp ~= player.maxHp then
-    self:sendLog{
-      type = "#ShowHPAndMaxHP",
-      from = player.id,
-      arg = player.hp,
-      arg2 = player.maxHp,
-    }
-  end
+  resetPlayerHp(player, full, maxHpChange)
 end
 
+--- 变更角色的势力
 ---@param player ServerPlayer @ 要变更势力的玩家
 ---@param kingdom string @ 要变更的势力
 ---@param sendLog? boolean @ 是否发Log
@@ -191,8 +208,29 @@ function MiscEventWrappers:changeKingdom(player, kingdom, sendLog)
     from = player,
     kingdom = kingdom,
     sendLog = sendLog,
-    results = {},
   }):exec()
+end
+
+---@class RemoveDeputyParams
+---@field change_max_hp? boolean @ 是否改变体力上限，默认改变
+---@field recover? boolean @ 是否回复至体力上限，默认否
+---@field send_log? boolean @ 是否发Log
+
+--- 移除角色的副将
+---@param player ServerPlayer @ 要移除副将的玩家
+---@param params RemoveDeputyParams
+function MiscEventWrappers:removeDeputy(player, params)
+  if player.deputyGeneral == "" then return end
+  ---@cast self Room
+  params.send_log = params.send_log or true
+
+  ChangeProperty:create(PropertyChangeData:new{
+    from = player,
+    deputyGeneral = "",
+    sendLog = params.send_log,
+  }):exec()
+
+  resetPlayerHp(player, params.recover, params.change_max_hp)
 end
 
 return { ChangeProperty, MiscEventWrappers }

@@ -302,6 +302,51 @@ Util.CanUseFixedTarget = function(self, player, card, extra_data)
   end) ~= nil
 end
 
+--使用闪以抵消杀
+---@param room Room
+---@param cardEffectData CardEffectData
+Util.SlashOffsetFunc = function(room, cardEffectData)
+  local params = { ---@type AskToUseCardParams
+    skill_name = "jink",
+    pattern = Fk.currentResponsePattern or "jink",
+    prompt = cardEffectData.extra_data.prompt,
+    cancelable = true,
+    event_data = cardEffectData
+  }
+  local use = room:askToUseCard(cardEffectData.to, params)
+  if use then
+    room:useCard(use)
+    if cardEffectData.isCancellOut then
+      return true
+    end
+  end
+  return false
+end
+
+--使用无懈以抵消锦囊
+---@param room Room
+---@param cardEffectData CardEffectData
+Util.TrickOffsetFunc = function(room, cardEffectData)
+  local params = { ---@type AskToUseCardParams
+    skill_name = "nullification",
+    pattern = Fk.currentResponsePattern or "nullification",
+    prompt = cardEffectData.extra_data.prompt,
+    cancelable = true,
+    extra_data = cardEffectData.extra_data,
+    event_data = cardEffectData
+  }
+  local use = room:askToNullification(cardEffectData.extra_data.players, params)
+  if use then
+    use.toCard = cardEffectData.card
+    use.responseToEvent = cardEffectData
+    room:useCard(use)
+    if cardEffectData.isCancellOut then
+      return true
+    end
+  end
+  return false
+end
+
 -- Table
 
 ---@generic T

@@ -38,6 +38,7 @@ Item {
           card = discardedCards[i];
           if (card.busy || inTable(card)) {
             discardedCards.splice(i, 1);
+            i--;
             continue;
           }
           card.origOpacity = 0;

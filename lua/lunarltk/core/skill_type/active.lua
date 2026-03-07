@@ -75,6 +75,9 @@ end
 ---@param extra_data? UseExtraData @ 额外数据
 ---@return Player[]? @ 返回固定目标角色列表。若此牌可以选择目标，返回空表
 function ActiveSkill:fixTargets(player, selected_cards, card, extra_data)
+  if self:getMaxTargetNum(player) == 0 then
+    return {}
+  end
   return nil
 end
 

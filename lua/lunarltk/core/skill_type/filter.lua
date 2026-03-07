@@ -41,4 +41,11 @@ function FilterSkill:cardSkillFilter(card, player)
   return nil
 end
 
+--视为拥有某技能（可通过hasSkill判定，无按钮，需先将技能手动加入Room）
+---@param player Player
+---@return string[]
+function FilterSkill:skillFilter(player)
+  return {}
+end
+
 return FilterSkill

@@ -6,7 +6,7 @@ jizhi:addEffect(fk.CardUsing, {
   anim_type = "drawcard",
   can_trigger = function(self, event, target, player, data)
     return target == player and player:hasSkill(jizhi.name) and
-      data.card:isCommonTrick() and not data.card:isRuleVirtual()
+      data.card:isCommonTrick() and not data.card:isConverted()
   end,
   on_use = function(self, event, target, player, data)
     player:drawCards(1, jizhi.name)

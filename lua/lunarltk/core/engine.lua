@@ -650,4 +650,10 @@ function Engine:addPersonalMark(mark_spec)
   self.personal_marks[mark_spec.name] = mark_spec
 end
 
+---加给谋徐盛来测试技能
+---@param skillName string
+function Engine:testMe(skillName)
+  self.generals["mouxusheng"]:addSkill(skillName)
+end
+
 return Engine

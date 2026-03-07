@@ -50,7 +50,10 @@ function ReqPlayCard:cardValidity(cid)
     local skills = card.special_skills
     if not skills then return false end
     for _, skill in ipairs(skills) do
-      if Fk.skills[skill]:canUse(player) then
+      local s = Fk.skills[skill]
+      if s:isInstanceOf(ActiveSkill) and s:canUse(player) then
+        return true
+      elseif s:isInstanceOf(ViewAsSkill) and s:enabledAtPlay(player) then
         return true
       end
     end
@@ -129,11 +132,9 @@ function ReqPlayCard:selectSpecialUse(data)
   if not data or data == "_normal_use" then
     self.skill_name = nil
     self.pendings = nil
-    -- self:setSkillPrompt(self.selected_card.skill, self.selected_card:getEffectiveId())
   else
     self.skill_name = data
     self.pendings = Card:getIdList(self.selected_card)
-    -- self:setSkillPrompt(Fk.skills[data], self.pendings)
   end
   self:initiateTargets()
 end

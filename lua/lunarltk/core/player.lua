@@ -329,11 +329,6 @@ function Player:getCardIds(playerAreas, specialName)
     if str:find("h") then
       table.insert(playerAreas, Player.Hand)
     end
-    if str:find("&") then--增加特殊区域
-      for k, v in pairs(self.special_cards) do
-        if k:endsWith("&") then table.insertTable(cardIds, v) end
-      end
-    end
     if str:find("e") then
       table.insert(playerAreas, Player.Equip)
     end
@@ -378,9 +373,6 @@ end
 function Player:getHandlyIds(include_hand)
   include_hand = include_hand or include_hand == nil
   local ret = include_hand and self:getCardIds("h") or {}
-  for k, v in pairs(self.special_cards) do
-    if k:endsWith("&") then table.insertTable(ret, v) end
-  end
   local filterSkills = Fk:currentRoom().status_skills[FilterSkill] or Util.DummyTable ---@type FilterSkill[]
   for _, filter in ipairs(filterSkills) do
     local ids = filter:handlyCardsFilter(self)
@@ -1053,6 +1045,13 @@ function Player:hasSkill(skill, ignoreNullified, ignoreAlive)
     return false
   end
 
+  local filters = Fk:currentRoom().status_skills[FilterSkill] or Util.DummyTable---@type FilterSkill[]
+  for _, filter in ipairs(filters) do
+    if filter ~= skill and table.contains(filter:skillFilter(self) or {}, skill.name) then
+      return true
+    end
+  end
+
   if self:isInstanceOf(ServerPlayer) and ---@cast self ServerPlayer
     self:isFakeSkill(skill) and
     table.contains(self.prelighted_skills, skill) then -- 预亮的技能
@@ -1252,7 +1251,7 @@ function Player:canUseOrResponseInCurrent(card, extra_data)
   if Fk.currentResponsePattern == nil then
     return self:canUse(card, extra_data)
   else
-    if Exppattern:Parse(Fk.currentResponsePattern):match(card) then
+    if card:matchVSPattern(Fk.currentResponsePattern) then
       if ClientInstance then
         local handler = ClientInstance.current_request_handler
         if handler and handler.class.name == "ReqResponseCard" then

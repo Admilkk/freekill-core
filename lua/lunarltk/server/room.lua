@@ -3,7 +3,7 @@
 --- Room是fk游戏逻辑运行的主要场所，同时也提供了许多API函数供编写技能使用。
 ---
 --- 一个房间中只有一个Room实例，保存在RoomInstance全局变量中。
----@class Room : AbstractRoom, ServerRoomBase, GameEventWrappers, CompatAskFor
+---@class Room : AbstractRoom, ServerRoomBase, GameEventWrappers
 ---@field public extra_turn_list table @ 待执行的额外回合表
 ---@field public general_pile string[] @ 武将牌堆，这是可用武将名的数组
 ---@field public skill_costs table<string, any> @ 存放skill.cost_data用
@@ -27,12 +27,7 @@ local ServerRoomBase = Fk.Base.ServerRoomBase
 Room:include(ServerRoomBase)
 
 local GameEventWrappers = require "lunarltk.server.events"
-local CompatAskFor = require "compat.askfor"
 Room:include(GameEventWrappers)
-Room:include(CompatAskFor)
-
--- 唉，兼容个锤子牢函数
--- GameLogic:include(dofile "lua/compat/gamelogic.lua")
 
 --[[--------------------------------------------------------------------
   Room 保存着服务器端游戏房间的所有信息，比如说玩家、卡牌，以及其他信息。
@@ -871,8 +866,12 @@ function Room:askToCards(player, params)
   canChosenCards = table.filter(canChosenCards, function(cid)
     return Exppattern:Parse(params.pattern):match(Fk:getCardById(cid))
   end)
-  if not params.cancelable and #canChosenCards < minNum then
-    minNum = #canChosenCards -- 防止牌不够的情况无法按确定和取消
+  if not params.cancelable then
+    if #canChosenCards == 0 then
+      return {}
+    elseif #canChosenCards < minNum then
+      minNum = #canChosenCards -- 防止牌不够的情况无法按确定和取消
+    end
   end
 
   local chosenCards = {}
@@ -1059,11 +1058,12 @@ function Room:askToChooseCardsAndPlayers(player, params)
 end
 
 ---@class AskToYijiParams: AskToChoosePlayersParams
----@field targets? ServerPlayer[] @ 可分配的目标角色，默认为所有存活角色
----@field cards? integer[] @ 要分配的卡牌。默认拥有的所有牌
+---@field targets? ServerPlayer[] @ 可分配的目标角色。**默认为所有存活角色**
+---@field cards? integer[] @ 要分配的卡牌。**默认拥有的所有牌**
 ---@field expand_pile? string|integer[] @ 可选私人牌堆名称，或额外可选牌
 ---@field single_max? integer|table @ 限制每人能获得的最大牌数。输入整数或(以角色id为键以整数为值)的表
----@field skip? boolean @ 是否跳过移动。默认不跳过
+---@field cancelable? boolean @ 是否可取消。**默认不可**
+---@field skip? boolean @ 是否跳过移动。**默认不跳过**
 ---@field moveMark? table|string @ 移动后自动赋予标记，格式：{标记名(支持-inarea后缀，移出值代表区域后清除), 值}
 
 --- 询问将卡牌分配给任意角色。
@@ -1110,13 +1110,13 @@ function Room:askToYiji(player, params)
     skillName = skillName,
   }
 
-  while maxNum > 0 and #_cards > 0 do
+  while params.cancelable or (maxNum > 0 and #_cards > 0) do
     data.max_num = maxNum
     local prompt = params.prompt or ("#AskForDistribution:::"..minNum..":"..maxNum)
     local activeParams = { ---@type AskToUseActiveSkillParams
       skill_name = "distribution_select_skill",
       prompt = prompt,
-      cancelable = minNum == 0,
+      cancelable = params.cancelable or minNum == 0,
       extra_data = data,
       no_indicate = true
     }
@@ -1137,19 +1137,22 @@ function Room:askToYiji(player, params)
     else
       break
     end
+    params.cancelable = false
   end
 
   for _, id in ipairs(cards) do
     self:setCardMark(Fk:getCardById(id), "@DistributionTo", 0)
   end
-  for _, pid in ipairs(targets) do
-    if minNum == 0 or #_cards == 0 then break end
-    local num = math.min(residueMap[toStr(pid)] or 0, minNum, #_cards)
-    if num > 0 then
-      for i = num, 1, -1 do
-        local c = table.remove(_cards, i)
-        table.insert(list[pid], c)
-        minNum = minNum - 1
+  if not params.cancelable then
+    for _, pid in ipairs(targets) do
+      if minNum == 0 or #_cards == 0 then break end
+      local num = math.min(residueMap[toStr(pid)] or 0, minNum, #_cards)
+      if num > 0 then
+        for i = num, 1, -1 do
+          local c = table.remove(_cards, i)
+          table.insert(list[pid], c)
+          minNum = minNum - 1
+        end
       end
     end
   end
@@ -1287,10 +1290,13 @@ function Room:askToChooseCard(player, params)
   return result
 end
 
+---@class PoxiExtraData
+---@field visible_data? table<string, boolean> @ 牌id是否可见的映射表
+
 ---@class AskToPoxiParams
 ---@field poxi_type string @ poxi关键词
 ---@field data any @ 牌堆信息
----@field extra_data any @ 额外信息
+---@field extra_data? table|PoxiExtraData @ 额外信息
 ---@field cancelable? boolean @ 是否可取消
 
 --- 谋askForCardsChosen，需使用```Fk:addPoxiMethod```定义好方法
@@ -1914,7 +1920,7 @@ end
 
 --- 把武将牌塞回去（……）
 ---@param g string[] @ 武将名数组
----@param position? string @位置，top/bottom/random，默认random
+---@param position? "top"|"bottom"|"random" @置入牌堆顶/牌堆底/随机位置，默认置于随机位置
 ---@return boolean @ 是否成功
 function Room:returnToGeneralPile(g, position)
   position = position or "random"
@@ -2048,16 +2054,52 @@ function Room:handleUseCardReply(player, data, params)
   else
     if data.special_skill then
       local skill = Fk.skills[data.special_skill]
-      assert(skill:isInstanceOf(ActiveSkill))
-      ---@cast skill ActiveSkill
-      local use_spec = {
-        from = player,
-        cards = { card },
-        tos = table.map(targets, Util.Id2PlayerMapper),
-      }
-      local use_data = skill:handleCostData(player, use_spec, extra_data)
-      skill:onUse(self, use_data)
-      return nil
+      if skill:isInstanceOf(ActiveSkill) then
+        ---@cast skill ActiveSkill
+        local use_spec = {
+          from = player,
+          cards = { card },
+          tos = table.map(targets, Util.Id2PlayerMapper),
+        }
+        local use_data = skill:handleCostData(player, use_spec, extra_data)
+        skill:onUse(self, use_data)
+        return nil
+      elseif skill:isInstanceOf(ViewAsSkill) then
+        ---@cast skill ViewAsSkill
+        local useResult
+        local c = skill:viewAs(player, { card })
+
+        local tos = {}
+        if #targets > 0 then
+          tos = table.map(targets, Util.Id2PlayerMapper)
+        else
+          --使用预设目标，并自动排序
+          tos = skill:fixTargets(player, { card }, nil, extra_data) or {}
+          self:sortByAction(tos)
+        end
+
+        local use_spec = {
+          from = player,
+          cards = { card },
+          tos = tos,
+          interaction_data = data.interaction_data,
+        }
+        local use_data = skill:handleCostData(player, use_spec, extra_data)
+
+        self:useSkill(player, skill, function()
+          useResult = skill:onUse(self, use_data, c, params) or ""
+          if type(useResult) == "table" then
+            if params == nil then
+              player.room:useCard(useResult)
+              skill:afterUse(player, useResult)
+              useResult = nil
+            else
+              useResult.attachedSkillAndUser = { skillName = skill.name, user = player.id, muteCard = skill.mute_card }
+            end
+          end
+        end, use_data)
+        return useResult
+      end
     end
     local use = {}
     use.from = player

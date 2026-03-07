@@ -1,5 +1,6 @@
 local RoomScene = require 'ui_emu.roomscene'
 local ReqActiveSkill = require 'lunarltk.core.request_type.active_skill'
+local SpecialSkills = require 'ui_emu.specialskills'
 
 --[[
   负责处理AskForResponseCard的Handler。
@@ -27,6 +28,7 @@ function ReqResponseCard:initialize(player, data)
     self.extra_data = data[5]
     self.disabledSkillNames = data[6]
   end
+  self.scene:addItem(SpecialSkills:new(self.scene, "1"))
 end
 
 function ReqResponseCard:setup()
@@ -40,15 +42,9 @@ function ReqResponseCard:setup()
   self:updatePrompt()
 end
 
--- FIXME: 关于&牌堆的可使用打出瞎jb写了点 来个懂哥优化一下
 function ReqResponseCard:expandPiles()
   if self.skill_name then return ReqActiveSkill.expandPiles(self) end
   local player = self.player
-  for pile in pairs(player.special_cards) do
-    if pile:endsWith('&') then
-      self:expandPile(pile)
-    end
-  end
   local cardsExpanded = {}
   local filterSkills = Fk:currentRoom().status_skills[FilterSkill] or Util.DummyTable ---@type FilterSkill[]
   for _, filter in ipairs(filterSkills) do
@@ -94,7 +90,18 @@ end
 function ReqResponseCard:cardFeasible(card)
   local exp = Exppattern:Parse(self.pattern)
   local player = self.player
-  return not player:prohibitResponse(card) and exp:match(card)
+  if not player:prohibitResponse(card) and exp:match(card) then
+    return true
+  else
+    local skills = card.special_skills
+    if not skills then return false end
+    for _, skill in ipairs(skills) do
+      local s = Fk.skills[skill]  ---@type ViewAsSkill
+      if s:isInstanceOf(ViewAsSkill) and s:enabledAtResponse(player) then
+        return true
+      end
+    end
+  end
 end
 
 function ReqResponseCard:feasible()
@@ -113,6 +120,20 @@ end
 function ReqResponseCard:isCancelable()
   if self.skill_name then return true end
   return not not self.cancelable
+end
+
+--- 选择一个卡牌特殊技能（如重铸）
+---@param data string? @ 特殊技能名，不填为正常使用
+function ReqResponseCard:selectSpecialUse(data)
+  -- 相当于使用一个以已选牌为pendings的主动技
+  if not data or data == "_normal_use" then
+    self.skill_name = nil
+    self.pendings = nil
+  else
+    self.skill_name = data
+    self.pendings = Card:getIdList(self.selected_card)
+  end
+  self:initiateTargets()
 end
 
 function ReqResponseCard:updateSkillButtons()
@@ -179,8 +200,17 @@ function ReqResponseCard:selectCard(cid, data)
     self.skill_name = nil
     self.selected_card = Fk:getCardById(cid)
     scene:unselectOtherCards(cid)
+    local sp_skills = {}
+    if self.selected_card.special_skills and table.contains(self.player:getHandlyIds(), cid) then
+      sp_skills = table.filter(self.selected_card.special_skills or {}, function (s)
+        return Fk.skills[s]:isInstanceOf(ViewAsSkill) and Fk.skills[s]:enabledAtResponse(self.player)
+      end)
+      self:selectSpecialUse(sp_skills[1])
+    end
+    self.scene:update("SpecialSkills", "1", { skills = sp_skills })
   else
     self.selected_card = nil
+    self.scene:update("SpecialSkills", "1", { skills = {} })
   end
 end
 

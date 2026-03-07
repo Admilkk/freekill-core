@@ -40,6 +40,8 @@ local SinglePindianEvent = TriggerEvent:subclass("SinglePindianEvent")
 
 ---@class fk.StartPindian: PindianEvent
 fk.StartPindian = PindianEvent:subclass("fk.StartPindian")
+---@class fk.PindianCardsDisplaying: PindianEvent
+fk.PindianCardsDisplaying = PindianEvent:subclass("fk.PindianCardsDisplaying")
 ---@class fk.PindianCardsDisplayed: PindianEvent
 fk.PindianCardsDisplayed = PindianEvent:subclass("fk.PindianCardsDisplayed")
 ---@class fk.PindianResultConfirmed: SinglePindianEvent

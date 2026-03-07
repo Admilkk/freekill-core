@@ -150,6 +150,8 @@ function Pindian:main()
     end
   end
 
+  logic:trigger(fk.PindianCardsDisplaying, nil, pindianData)
+
   if #moveInfos > 0 then
     room:moveCards(table.unpack(moveInfos))
   end

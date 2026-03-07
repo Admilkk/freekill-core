@@ -897,7 +897,7 @@ end
 ---@param cards1 integer[] @ 将要放到牌堆的牌
 ---@param cards2 integer[] @ 将要收为手牌的牌
 ---@param skillName string @ 技能名
----@param pile_name string @ 交换的私有牌堆名，特别的，为"Top"则为牌堆顶，"Bottom"则为牌堆底，"discardPile"则为弃牌堆
+---@param pile_name string|"Top"|"Bottom"|"discardPile" @ 交换的私有牌堆名，特别的，为"Top"则为牌堆顶，"Bottom"则为牌堆底，"discardPile"则为弃牌堆
 ---@param visible? boolean @ 是否明牌移动
 ---@param proposer? ServerPlayer @ 移动的操作者（默认同player）
 function MoveEventWrappers:swapCardsWithPile(player, cards1, cards2, skillName, pile_name, visible, proposer)

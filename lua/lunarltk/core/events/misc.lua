@@ -13,6 +13,12 @@
 ---@class PropertyChangeData: PropertyChangeDataSpec, TriggerData
 PropertyChangeData = TriggerData:subclass("PropertyChangeData")
 
+--- 构造函数
+function PropertyChangeData:initialize(spec)
+  TriggerData.initialize(self, spec)
+  self.results = self.results or {}
+end
+
 ---@class PropertyChangeEvent: TriggerEvent
 ---@field data PropertyChangeData
 local PropertyChangeEvent = TriggerEvent:subclass("PropertyChangeEvent")

@@ -28,8 +28,14 @@ function CardSkill:canUse(player, card, extra_data)
 end
 
 -- 判断一张牌是否可被此技能选中
----@return boolean
-function CardSkill:cardFilter()
+---@param player Player @ 使用者
+---@param to_select Player @ 待选目标
+---@param selected Player[] @ 已选目标
+---@param selected_cards integer[] @ 已选牌
+---@param card? Card @ 牌
+---@param extra_data? UseExtraData @ 额外数据
+---@return boolean?
+function CardSkill:cardFilter(player, to_select, selected, selected_cards, card, extra_data)
   return false
 end
 
@@ -269,19 +275,17 @@ function CardSkill:onEffect(room, cardEffectEvent) end
 ---@param cardEffectEvent CardEffectData
 function CardSkill:onNullified(room, cardEffectEvent) end
 
--- 卡牌生效前，询问抵消（默认杀询问闪，锦囊询问无懈）
+-- 卡牌生效前，询问抵消
 ---@param room Room
 ---@param cardEffectData CardEffectData
 function CardSkill:preEffect(room, cardEffectData)
-  if
-    cardEffectData.card.trueName == "slash" and
+  if cardEffectData.card.trueName == "slash" and
     not cardEffectData:isUnoffsetable(cardEffectData.to)
   then
     local loopTimes = cardEffectData:getResponseTimes()
-    Fk.currentResponsePattern = "jink"
+    Fk.currentResponsePattern = cardEffectData.currentResponsePattern or "jink"
 
     for i = 1, loopTimes do
-      local to = cardEffectData.to
       local prompt = ""
       if cardEffectData.from then
         if loopTimes == 1 then
@@ -291,18 +295,25 @@ function CardSkill:preEffect(room, cardEffectData)
         end
       end
 
-      local params = { ---@type AskToUseCardParams
-        pattern = "jink",
-        skill_name = "jink",
-        prompt = prompt,
-        cancelable = true,
-        event_data = cardEffectData
-      }
-      local use = room:askToUseCard(to, params)
-      if use then
-        --use.toCard = cardEffectData.card
-        --use.responseToEvent = cardEffectData
-        room:useCard(use)
+      local extra_data = cardEffectData.extra_data or {}
+      extra_data.effectCardId = cardEffectData.card.id
+      extra_data.prompt = prompt
+      extra_data.players = { cardEffectData.to }
+      extra_data.effectFrom = cardEffectData.from and cardEffectData.from.id or nil
+
+      if #cardEffectData.tos > 1 then
+        local parentUseEvent = room.logic:getCurrentEvent():findParent(GameEvent.UseCard)
+        if parentUseEvent then
+          extra_data.useEventId = parentUseEvent.id
+          extra_data.effectTo = cardEffectData.to.id
+        end
+      end
+      cardEffectData.extra_data = extra_data
+
+      if cardEffectData.offsetFunc then
+        cardEffectData.isCancellOut = cardEffectData.offsetFunc(room, cardEffectData)
+      else
+        cardEffectData.isCancellOut = Util.SlashOffsetFunc(room, cardEffectData)
       end
 
       if not cardEffectData.isCancellOut then
@@ -317,7 +328,7 @@ function CardSkill:preEffect(room, cardEffectData)
     not table.contains(cardEffectData.prohibitedCardNames or Util.DummyTable, "nullification")
   then
     local players = {}
-    Fk.currentResponsePattern = "nullification"
+    Fk.currentResponsePattern = cardEffectData.currentResponsePattern or "nullification"
     local cardCloned = Fk:cloneCard("nullification")
     cardCloned:setVSPattern(nil, nil, ".")
     for _, p in ipairs(room.alive_players) do
@@ -334,7 +345,6 @@ function CardSkill:preEffect(room, cardEffectData)
           end
         end
         if not table.contains(players, p) then
-          -- Self = p -- for enabledAtResponse
           for _, s in ipairs(table.connect(p:getAllSkills(), rawget(p, "_fake_skills"))) do
             ---@cast s ViewAsSkill
             if
@@ -357,7 +367,12 @@ function CardSkill:preEffect(room, cardEffectData)
       prompt = "#AskForNullificationWithoutTo:" .. cardEffectData.from.id .. "::" .. cardEffectData.card.name
     end
 
-    local extra_data = { effectCardId = cardEffectData.card.id }
+    local extra_data = cardEffectData.extra_data or {}
+    extra_data.effectCardId = cardEffectData.card.id
+    extra_data.prompt = prompt
+    extra_data.players = players
+    extra_data.effectFrom = cardEffectData.from and cardEffectData.from.id or nil
+
     if #cardEffectData.tos > 1 then
       local parentUseEvent = room.logic:getCurrentEvent():findParent(GameEvent.UseCard)
       if parentUseEvent then
@@ -365,23 +380,16 @@ function CardSkill:preEffect(room, cardEffectData)
         extra_data.effectTo = cardEffectData.to.id
       end
     end
-    extra_data.effectFrom = cardEffectData.from and cardEffectData.from.id or nil
+    cardEffectData.extra_data = extra_data
+
     if #players > 0 and cardEffectData.card.trueName == "nullification" then
       room:animDelay(2)
     end
-    local params = { ---@type AskToUseCardParams
-      skill_name = "nullification",
-      pattern = "nullification",
-      prompt = prompt,
-      cancelable = true,
-      extra_data = extra_data,
-      event_data = cardEffectData
-    }
-    local use = room:askToNullification(players, params)
-    if use then
-      use.toCard = cardEffectData.card
-      use.responseToEvent = cardEffectData
-      room:useCard(use)
+
+    if cardEffectData.offsetFunc then
+      cardEffectData.isCancellOut = cardEffectData.offsetFunc(room, cardEffectData)
+    else
+      cardEffectData.isCancellOut = Util.TrickOffsetFunc(room, cardEffectData)
     end
   end
   Fk.currentResponsePattern = nil

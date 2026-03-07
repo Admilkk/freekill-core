@@ -465,6 +465,7 @@ function SkillSkeleton:createFilterSkill(_skill, idx, key, attr, spec)
   skill.equipSkillFilter = spec.equip_skill_filter
   skill.handlyCardsFilter = spec.handly_cards
   skill.cardSkillFilter = spec.card_skill_filter
+  skill.skillFilter = spec.skill_filter
 
   return skill
 end

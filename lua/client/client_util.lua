@@ -175,7 +175,7 @@ function SearchGenerals(pack_name, word)
   local ret = {}
   if word == "" then return GetGenerals(pack_name) end
   for _, g in ipairs(Fk.packages[pack_name].generals) do
-    if not g.total_hidden and string.find(Fk:translate(g.name), word) then
+    if not g.total_hidden and string.find(g.name, word) or string.find(Fk:translate(g.name), word) then
       table.insert(ret, g.name)
     end
   end

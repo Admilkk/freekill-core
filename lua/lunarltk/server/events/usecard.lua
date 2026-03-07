@@ -60,9 +60,9 @@ local sendCardEmotionAndLog = function(room, useCardData, muteEmotion)
   local from = useCardData.from
   local card = useCardData.card
 
-  if not card:isVirtual() then
-    card = room:filterCard(card.id, from)
-  end
+  --if not card:isVirtual() then
+  --  card = room:filterCard(card.id, from)
+  --end
 
   if not muteEmotion then room:playCardEmotionAndSound(from, card)end
 
@@ -444,12 +444,12 @@ function CardEffect:main()
 
     effectCancellOutCheck(cardEffectData)
 
-    local skill = cardEffectData.card.skill --[[@as CardSkill]]
+    local skill = cardEffectData.skill or cardEffectData.card.skill --[[@as CardSkill]]
 
     if event == fk.PreCardEffect then
       skill:preEffect(room, cardEffectData)
     elseif event == fk.CardEffecting then
-      if cardEffectData.card.skill then
+      if skill then
         local data = { ---@type SkillEffectDataSpec
           who = cardEffectData.from,
           skill = skill,
@@ -481,15 +481,8 @@ end
 ---@param useCardData UseCardDataSpec @ 使用数据
 ---@return boolean
 function UseCardEventWrappers:useCard(useCardData)
-  -- local new_data
-  -- if type(useCardData.from) == "number" or (useCardData.tos and useCardData.tos[1]
-  --   and type(useCardData.tos[1][1]) == "number") then
-  --   new_data = UseCardData:new({})
-  --   new_data:loadLegacy(useCardData)
-  -- else
   local new_data = UseCardData:new(useCardData)
   new_data.tos = new_data.tos or {}
-  -- end
   return exec(UseCard, new_data)
 end
 
@@ -702,7 +695,7 @@ function UseCardEventWrappers:doCardUseEffect(useCardData)
     return
   end
 
-  -- 如果是闪无懈这种直接count掉一张牌的（即有toCard时），那么简单生效一次就结束结算
+  -- 如果是闪无懈这种直接counter掉一张牌的（即有toCard时），那么简单生效一次就结束结算
   if useCardData.toCard ~= nil then
     local cardEffectData = CardEffectData:new{
       from = useCardData.from,

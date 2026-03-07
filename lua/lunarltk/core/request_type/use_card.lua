@@ -78,6 +78,19 @@ function ReqUseCard:cardFeasible(card)
   end
   if not player:prohibitUse(card) and exp:match(card) then
     return (card.is_passive and not (self.extra_data or Util.DummyTable).not_passive) or player:canUse(card, self.extra_data)
+  else
+    local skills = card.special_skills
+    if not skills then return false end
+    for _, skill in ipairs(skills) do
+      local s = Fk.skills[skill]  ---@type ViewAsSkill
+      if s:isInstanceOf(ViewAsSkill) then
+        local new_card = s:viewAs(player, { card.id })
+        if new_card and
+          ((new_card.is_passive and not (self.extra_data or Util.DummyTable).not_passive) or player:canUse(new_card, self.extra_data)) then
+          return true
+        end
+      end
+    end
   end
   return false
 end

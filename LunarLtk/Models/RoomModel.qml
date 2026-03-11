@@ -79,6 +79,11 @@ QtObject {
     }
   }
 
+  function replyToServer(jsonData) {
+    ClientInstance.replyToServer("", jsonData);
+    deActivate();
+  }
+
   function activate() {
     const dat = Backend.getRequestData();
     const total = dat["timeout"] * 1000;
@@ -337,11 +342,14 @@ QtObject {
     roomPage.addCallback(Command.CancelRequest, deActivate);
     roomPage.addCallback(Command.PlayerRunned, playerRunned);
 
+
     // 以下为交互类
     roomPage.addCallback(Command.PlayCard, playCard);
     roomPage.addCallback(Command.AskForSkillInvoke, askForSkillInvoke);
     roomPage.addCallback(Command.AskForUseActiveSkill, askForUseActiveSkill);
     roomPage.addCallback(Command.AskForResponseCard, askForResponseCard);
+
+    roomPage.addCallback(Command.ReplyToServer, (_, data) => replyToServer(data));
   }
 
   function applyChange(uiUpdate) {

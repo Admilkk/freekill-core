@@ -128,12 +128,6 @@ function arrangePhotos() {
   }
 }
 
-// TODO 弹窗迁移到model或者别的什么控制的时候，再迁移
-function replyToServer(jsonData) {
-  ClientInstance.replyToServer("", jsonData);
-  roomScene.dataModel.deActivate();
-}
-
 function getPhoto(id) {
   return dataModel.getPhoto(id)?.photoItem;
 }
@@ -347,7 +341,7 @@ callbacks["AskForGeneral"] = (sender, data) => {
     Qt.createComponent("LunarLtk.Pages.Popups", "ChooseGeneralBox");
   const box = roomScene.popupBox.item;
   box.accepted.connect(() => {
-    replyToServer(box.choices);
+    roomScene.dataModel.replyToServer(box.choices);
   });
   box.generals = generals;
   box.choiceNum = n ?? 1;
@@ -378,8 +372,8 @@ callbacks["AskForArrangeCards"] = (sender, data) => {
     cancelable: cancelable,
   });
   model.initializeCards();
-  model.accepted.connect(() => replyToServer(model.result));
-  model.rejected.connect(() => replyToServer([]));
+  model.accepted.connect(() => roomScene.dataModel.replyToServer(model.result));
+  model.rejected.connect(() => roomScene.dataModel.replyToServer([]));
 
   roomScene.dataModel.activate();
   roomScene.popupBox.sourceComponent =
@@ -414,7 +408,7 @@ callbacks["AskForExchange"] = (sender, data) => {
   box.areaNames = cards_name
   box.initializeCards();
   box.accepted.connect(() => {
-    replyToServer(box.getResult());
+    roomScene.dataModel.replyToServer(box.getResult());
   });
 }
 
@@ -436,8 +430,8 @@ callbacks["AskForChoices"] = (sender, data) => {
     prompt,
     detailed,
   });
-  model.accepted.connect(() => replyToServer(model.result));
-  model.rejected.connect(() => replyToServer([]));
+  model.accepted.connect(() => roomScene.dataModel.replyToServer(model.result));
+  model.rejected.connect(() => roomScene.dataModel.replyToServer([]));
 
   roomScene.popupBox.sourceComponent = Qt.createComponent("LunarLtk.Pages.Popups", "ChoicesBox");
   const box = roomScene.popupBox.item;
@@ -463,8 +457,8 @@ callbacks["AskForCardChosen"] = (sender, data) => {
     cardData: card_data,
     cardVisibility: visible_data,
   });
-  model.accepted.connect(() => replyToServer(model.selectedId));
-  model.rejected.connect(() => replyToServer(""));
+  model.accepted.connect(() => roomScene.dataModel.replyToServer(model.selectedId));
+  model.rejected.connect(() => roomScene.dataModel.replyToServer(""));
 
   roomScene.dataModel.activate();
   const pop = roomScene.popupBox;
@@ -483,8 +477,8 @@ callbacks["AskForPoxi"] = (sender, dat) => {
     cancelable,
     extraData: extra_data,
   });
-  model.accepted.connect(() => replyToServer(model.selectedIds));
-  model.rejected.connect(() => replyToServer([]));
+  model.accepted.connect(() => roomScene.dataModel.replyToServer(model.selectedIds));
+  model.rejected.connect(() => roomScene.dataModel.replyToServer([]));
 
   roomScene.dataModel.activate();
   const pop = roomScene.popupBox;
@@ -502,7 +496,7 @@ callbacks["AskForMoveCardInBoard"] = (sender, data) => {
     cardsPosition,
     playerIds,
   });
-  model.accepted.connect(() => replyToServer({
+  model.accepted.connect(() => roomScene.dataModel.replyToServer({
     cardId: model.result,
     pos: cardsPosition[cards.indexOf(model.result)],
   }));
@@ -791,10 +785,6 @@ callbacks["GetPlayerHandcards"] = (sender, data) => {
   const hand = dashboard.handcardArea.cards.map(c => {
     return c.cid;
   })
-  replyToServer(hand);
-}
-
-callbacks["ReplyToServer"] = (sender, data) => {
-  replyToServer(data);
+  roomScene.dataModel.replyToServer(hand);
 }
 

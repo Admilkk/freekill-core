@@ -743,7 +743,6 @@ W.PageBase {
     addCallback(Command.UpdateMiniGame, Logic.callbacks["UpdateMiniGame"]);
     addCallback(Command.UpdateRequestUI, Logic.callbacks["UpdateRequestUI"]);
     addCallback(Command.GetPlayerHandcards, Logic.callbacks["GetPlayerHandcards"]);
-    addCallback(Command.ReplyToServer, Logic.callbacks["ReplyToServer"]);
     addCallback(Command.ChangeSkin, Logic.callbacks["ChangeSkin"]);
   }
 

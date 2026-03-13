@@ -43,6 +43,9 @@ function GameLogic:run()
   -- default logic
   local room = self.room
   table.shuffle(room.players)
+
+  self:prepareGlobalSkills()
+
   self:assignRoles()
   self:adjustSeats()
   self:chooseGenerals()
@@ -79,6 +82,15 @@ function GameLogic:assignRoles()
     room:broadcastProperty(p, "role")
   end
 end
+
+--- 制备全局技能
+function GameLogic:prepareGlobalSkills()
+  self:addTriggerSkill(Fk.skills["game_rule"] --[[@as TriggerSkill]])
+  for _, trig in ipairs(Fk.global_trigger) do
+    self:addTriggerSkill(trig)
+  end
+end
+
 
 --- 进行选将
 function GameLogic:chooseGenerals()
@@ -191,10 +203,12 @@ function GameLogic:prepareDrawPile()
   room:doBroadcastNotify("PrepareDrawPile", room.draw_pile)
 end
 
----@param player ServerPlayer
----@param skillName string
-function GameLogic:attachSkillToPlayer(player, skillName)
+---@param player ServerPlayer @ 要附加技能的角色
+---@param skillName string @ 要附加的技能
+---@param exclusived? string[] @ 排除的技能列表，若技能在该列表中则不附加
+function GameLogic:attachSkillToPlayer(player, skillName, exclusived)
   local room = self.room
+  if table.contains(exclusived, skillName) then return end
   local skill = Fk.skills[skillName]
   if not skill then
     fk.qCritical("Skill: "..skillName.." doesn't exist!")
@@ -213,17 +227,30 @@ function GameLogic:attachSkillToPlayer(player, skillName)
 end
 
 --- 将p选择的武将的技能交给他
+---@param p ServerPlayer
 function GameLogic:attachGeneralSkillsToPlayer(p)
+  local to_exclude = {}
+  local extra = p:getTableMark("ExtraAttachedSkills")
+  for _, s in ipairs(extra) do
+    if string.startsWith(s, "-") then
+      table.insert(to_exclude, string.sub(s, 2))
+    end
+  end
+
+  for _, s in ipairs(extra) do
+    self:attachSkillToPlayer(p, s, to_exclude)
+  end
+
   local skills = Fk.generals[p.general]:getSkillNameList(true)
   for _, s in ipairs(skills) do
-    self:attachSkillToPlayer(p, s)
+    self:attachSkillToPlayer(p, s, to_exclude)
   end
 
   local deputy = Fk.generals[p.deputyGeneral]
   if deputy then
     skills = deputy:getSkillNameList(true)
     for _, s in ipairs(skills) do
-      self:attachSkillToPlayer(p, s)
+      self:attachSkillToPlayer(p, s, to_exclude)
     end
   end
 end
@@ -242,12 +269,13 @@ function GameLogic:recordInitialGeneral(p)
   local record = room:getBanner("InitialGeneral") or {}
   local id, general, deputyGeneral = p.id, p.general, p.deputyGeneral
 
-  -- 隐匿 烂完了隐匿
-  if p:getMark("__hidden_general") ~= 0 then
-    general = p:getMark("__hidden_general")
+  -- 记录的初始武将应该是他初登场（包括被隐匿黑掉的那种）的那个，否则会有徐氏出没
+  local player_initialGeneral = p:getTableMark("InitialGeneral")
+  if player_initialGeneral[1] then
+    general = player_initialGeneral[1]
   end
-  if p:getMark("__hidden_deputy") ~= 0 then
-    deputyGeneral = p:getMark("__hidden_deputy")
+  if player_initialGeneral[2] then
+    deputyGeneral = player_initialGeneral[2]
   end
 
   -- 国战 TODO 现在国战模式完全可以自己重写该方法
@@ -272,9 +300,6 @@ function GameLogic:prepareForStart()
   end
 
   self:addTriggerSkill(Fk.skills["game_rule"] --[[@as TriggerSkill]])
-  for _, trig in ipairs(Fk.global_trigger) do
-    self:addTriggerSkill(trig)
-  end
 
   room:sendLog{ type = "$GameStart", arg = room:getSettings('gameMode') }
 end

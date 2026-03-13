@@ -1,4 +1,39 @@
 
+--- PrepareGeneralData 选择武将牌以展示的数据
+---@class PrepareGeneralDataSpec
+---@field public general? string @ 要设置的主武将
+---@field public deputyGeneral? string @ 要设置的副武将
+---@field public results? { general: string, deputy?: string, skills: string[] } @ 实际展示的主将和副将，以及变更后额外获得("技能名")或禁止获得("-技能名")的技能。
+---@field public public? boolean @ 是否公开
+
+--- 选择武将牌以展示的数据
+---@class PrepareGeneralData: PrepareGeneralDataSpec, TriggerData
+PrepareGeneralData = TriggerData:subclass("PrepareGeneralData")
+
+--- 构造函数
+function PrepareGeneralData:initialize(spec)
+  TriggerData.initialize(self, spec)
+  self.results = {
+    general = self.general,
+    deputy = self.deputyGeneral,
+    skills = {},
+  }
+end
+
+---一键追加技能的函数，请勿用该函数以外的方式修改results.skills
+---@param skillName string @ 要额外获得("技能名")或禁止获得("-技能名")的技能
+function PrepareGeneralData:attachSkill(skillName)
+  table.insert(self.results.skills, skillName)
+end
+
+---@class PrepareGeneralEvent: TriggerEvent
+---@field data PrepareGeneralData
+local PrepareGeneralEvent = TriggerEvent:subclass("PrepareGeneralEvent")
+
+--- 亮出武将牌时
+---@class fk.PreparingGeneral: PrepareGeneralEvent
+fk.PreparingGeneral = PrepareGeneralEvent:subclass("fk.PreparingGeneral")
+
 --- PropertyChangeData 武将牌属性变化的数据
 ---@class PropertyChangeDataSpec
 ---@field public from ServerPlayer @ 要变动的角色
@@ -152,6 +187,8 @@ fk.AfterAskForCardResponse = AskForCardEvent:subclass("fk.AfterAskForCardRespons
 ---@class fk.AfterAskForNullification : AskForCardEvent
 fk.AfterAskForNullification = AskForCardEvent:subclass("fk.AfterAskForNullification")
 
+---@alias PrepareGeneralFunc fun(self: TriggerSkill, event: PrepareGeneralEvent,
+---  target: ServerPlayer, player: ServerPlayer, data: PrepareGeneralData): any
 ---@alias PropertyChangeFunc fun(self: TriggerSkill, event: PropertyChangeEvent,
 ---  target: ServerPlayer, player: ServerPlayer, data: PropertyChangeData): any
 ---@alias SimpleChangeFunc fun(self: TriggerSkill, event: SimpleChangeEvent,
@@ -172,6 +209,8 @@ fk.AfterAskForNullification = AskForCardEvent:subclass("fk.AfterAskForNullificat
 ---  target: ServerPlayer, player: ServerPlayer, data: AskForCardData): any
 
 ---@class SkillSkeleton
+---@field public addEffect fun(self: SkillSkeleton, key: PrepareGeneralEvent,
+---  data: TrigSkelSpec<PrepareGeneralFunc>, attr: TrigSkelAttribute?): SkillSkeleton
 ---@field public addEffect fun(self: SkillSkeleton, key: PropertyChangeEvent,
 ---  data: TrigSkelSpec<PropertyChangeFunc>, attr: TrigSkelAttribute?): SkillSkeleton
 ---@field public addEffect fun(self: SkillSkeleton, key: SimpleChangeEvent,

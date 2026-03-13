@@ -391,8 +391,13 @@ function MoveEventWrappers:notifyMoveCards(players, moveDatas, event_id)
       v.from = v.from and v.from.id
       v.to = v.to and v.to.id
       v.proposer = v.proposer and v.proposer.id
-      if v.visiblePlayers then
-        v.visiblePlayers = table.map(v.visiblePlayers, Util.IdMapper)
+      if type(v.visiblePlayers) == "table" then
+        if type(v.visiblePlayers[1]) == "table" then
+          v.visiblePlayers = table.map(v.visiblePlayers, Util.IdMapper)
+        else
+          ---@diagnostic disable-next-line: undefined-field
+          v.visiblePlayers = v.visiblePlayers.id
+        end
       end
       table.insert(arg, v)
     end

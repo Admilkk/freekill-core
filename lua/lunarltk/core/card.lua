@@ -399,6 +399,16 @@ function Card:matchPattern(pattern)
   return Exppattern:Parse(pattern):match(self)
 end
 
+--- 获取卡牌牌名字数
+--- @param ol_rule? boolean @ OL服和谐【借刀杀人】
+--- @return integer
+function Card:getNameLength(ol_rule)
+  if ol_rule and self.trueName == "collateral" then
+    return 2
+  end
+  return Fk:translate(self.trueName, "zh_CN"):len()
+end
+
 --- 获取卡牌花色并返回花色文字描述（如``spade``黑桃、``heart``红桃、``club``梅花、``diamond``方块）或者符号（如♠♥♣♦，带颜色）。
 ---@param symbol? boolean @ 是否以符号形式显示
 ---@return string @ 描述花色的字符串

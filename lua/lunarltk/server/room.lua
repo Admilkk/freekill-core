@@ -405,26 +405,30 @@ function Room:setDeputyGeneral(player, general)
   self:notifyProperty(player, player, "deputyGeneral")
 end
 
---- 为角色设置武将，并从武将池中抽出，若有隐匿技变为隐匿将。注意此时不会进行选择势力，请随后自行处理
+--- 为角色设置武将，并从武将池中抽出。注意此时不会进行选择势力，请随后自行处理
 ---@param player ServerPlayer
 ---@param general string @ 主将名
 ---@param deputy? string @ 副将名
 ---@param broadcast? boolean @ 是否公示，默认否
 function Room:prepareGeneral(player, general, deputy, broadcast)
+  local data = PrepareGeneralData:new{
+    general = general,
+    deputyGeneral = deputy,
+    public = broadcast,
+  }
+
+  self.logic:trigger(fk.PreparingGeneral, player, data)
+
+  self:setPlayerMark(player, "InitialGeneral", { data.general, data.deputyGeneral })
+
+  general = data.results.general
+  deputy = data.results.deputy
+
   self:findGeneral(general)
   self:findGeneral(deputy)
-  local skills = Fk.generals[general]:getSkillNameList()
-  if Fk.generals[deputy] then
-    table.insertTable(skills, Fk.generals[deputy]:getSkillNameList())
-  end
-  if table.find(skills, function (s) return Fk.skills[s]:hasTag(Skill.Hidden) end) then
-    self:setPlayerMark(player, "__hidden_general", general)
-    if Fk.generals[deputy] then
-      self:setPlayerMark(player, "__hidden_deputy", deputy)
-      deputy = ""
-    end
-    general = "hiddenone"
-  end
+
+  self:setPlayerMark(player, "ExtraAttachedSkills", data.results.skills)
+
   player.general = general
   player.gender = Fk.generals[general].gender
   self:broadcastProperty(player, "gender")
@@ -433,7 +437,7 @@ function Room:prepareGeneral(player, general, deputy, broadcast)
   end
   player.kingdom = Fk.generals[general].kingdom
   for _, property in ipairs({"general","deputyGeneral","kingdom"}) do
-    if broadcast then
+    if data.public then
       self:broadcastProperty(player, property)
     else
       self:notifyProperty(player, player, property)

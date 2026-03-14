@@ -111,10 +111,15 @@ function Skill:__toqml()
     uri = "LunarLtk.Components",
     name = "SkillButton",
 
-    prop = {
-      type = "notactive",
-      orig = self.name,
-      skill = Fk:translate(self.name),
+    model = {
+      uri = "LunarLtk.Models",
+      name = "SkillModel",
+
+      prop = {
+        isActive = false,
+        origName = self.name,
+        name = Fk:translate(self.name),
+      },
     },
   }
 end

@@ -212,11 +212,15 @@ function Card:__touistring()
 end
 
 function Card:__toqml()
-  local mark = {}
+  local marks = {}
+  -- Qml Model那边要求的mark格式如此
   for k, v in pairs(self.mark) do
     if k and k:startsWith("@") and v and v ~= 0 then
-      table.insert(mark, {
-        k = k, v = v,
+      table.insert(marks, {
+        name = Fk:translate(k),
+        value = tostring(v), -- 偷懒
+        origName = k,
+        origValue = v,
       })
     end
   end
@@ -225,19 +229,24 @@ function Card:__toqml()
     uri = "LunarLtk.Components",
     name = "CardItem",
 
-    prop = {
-      cid = self.id,
-      virt_id = self.virt_id,
-      name = self.name,
-      extension = self.package.extensionName,
-      number = self.number,
-      suit = self:getSuitString(),
-      color = self:getColorString(),
-      mark = mark,
-      type = self.type,
-      subtype = self:getSubtypeString(),
-      multiple_targets = self.multiple_targets,
-    },
+    model = {
+      uri = "LunarLtk.Models",
+      name = "CardModel",
+
+      prop = {
+        cardId = self.id,
+        virtId = self.virt_id,
+        name = self.name,
+        extension = self.package.extensionName,
+        number = self.number,
+        suit = self:getSuitString(),
+        color = self:getColorString(),
+        marks = marks,
+        type = self.type,
+        subtype = self:getSubtypeString(),
+        -- multiple_targets = self.multiple_targets,
+      },
+    }
   }
 end
 

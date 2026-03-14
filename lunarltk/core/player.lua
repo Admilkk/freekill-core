@@ -141,25 +141,34 @@ function Player:__touistring()
   return self:toLogString()
 end
 function Player:__toqml()
+  local cplayer = self.player --[[@as fk.Player]]
+
   return {
     uri = "LunarLtk.Components",
     name = "PhotoBase",
 
-    -- 屋檐了，烂QML
     prop = {
-      playerid = self.id,
-      avatar = self.player:getAvatar(),
-      screenName = self.player:getScreenName(),
-
       scale = 0.55,
-      general = self.general,
-      deputyGeneral = self.deputyGeneral,
-      role = self.role,
-      state = "candidate",
-      kingdom = self.kingdom,
-      seatNumber = self.seat == 0 and 1 or self.seat,
-      selectable = true,
     },
+
+    model = {
+      uri = "LunarLtk.Models",
+      name = "PhotoModel",
+
+      prop = {
+        playerid = self.id,
+        avatar = cplayer:getAvatar(),
+        screenName = cplayer:getScreenName(),
+
+        general = self.general,
+        deputyGeneral = self.deputyGeneral,
+        role = self.role,
+        state = "candidate",
+        kingdom = self.kingdom,
+        seatNumber = self.seat == 0 and 1 or self.seat,
+        selectable = true,
+      },
+    }
   }
 end
 

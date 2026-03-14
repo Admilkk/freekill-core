@@ -146,14 +146,13 @@ QtObject {
   // 从Lua的QmlComponent类型中构造Qml对象
   function createQmlObject(spec, parent) {
     parent = parent ?? null;
-    
     const component = createComponent(spec);
-    const obj = component.createObject(null, spec.prop ?? {});
+    const prop = spec.prop ?? {};
 
     if (spec.model) {
-      obj.dataModel = createQmlObject(spec.model);
+      prop.dataModel = createQmlObject(spec.model);
     }
 
-    return obj;
+    return component.createObject(parent, prop);
   }
 }

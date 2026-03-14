@@ -507,13 +507,11 @@ QtObject {
     dashboardId = Cpp.self.id;
     const luaPlayers = Lua.client.players;
     playerNum = luaPlayers.length;
-    const photoModelComponent = Qt.createComponent("LunarLtk.Models", "PhotoModel");
     for (const player of luaPlayers) {
-      const prop = player.__toqml().prop;
-      delete prop.scale;
-      delete prop.selectable;
-      delete prop.state;
-      const model = photoModelComponent.createObject(null, prop);
+      const dat = player.__toqml().model;
+      delete dat.prop.selectable;
+      delete dat.prop.state;
+      const model = Lua.createQmlObject(dat);
       model.index = players.length;
       players.push(model);
     }

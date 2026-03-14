@@ -225,15 +225,11 @@ callbacks["ShowVirtualCard"] = (sender, data) => {
   const items = [];
   for (let i = 0; i < card_data.length; i++) {
     const dat = Lua.call("ToQml", card_data[i]);
-    let component = Qt.createComponent(dat.uri, dat.name);
-    let state = dat.prop;
+    const card = Lua.createQmlObject(dat, roomScene.dynamicCardArea);
     const parentPos = roomScene.mapFromItem(from, 0, 0);
-    state.x = parentPos.x;
-    state.y = parentPos.y;
-    const card = component.createObject(roomScene.dynamicCardArea, state);
-    card.x -= card.width / 2;
-    card.y -= card.height / 2;
-    card.holding_event_id = event_id;
+    card.x = parentPos.x - card.width / 2;
+    card.y = parentPos.y - card.height / 2;
+    // card.holding_event_id = event_id;
     card.known = true;
     if (footnote) {
       card.footnote = footnote;

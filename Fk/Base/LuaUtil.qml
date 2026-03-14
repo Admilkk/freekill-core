@@ -131,4 +131,29 @@ QtObject {
       return ev(exp).map(createProxyFromCbor);
     }
   }
+
+  // 从Lua的QmlComponent类型中构造Qml component
+  function createComponent(spec) {
+    if (spec.uri && spec.name) {
+      return Qt.createComponent(spec.uri, spec.name);
+    } else if (spec.url) {
+      return Qt.createComponent(Cpp.path + "/" + spec.url);
+    } else {
+      throw new Error("QmlComponent requires uri+name or url");
+    }
+  }
+
+  // 从Lua的QmlComponent类型中构造Qml对象
+  function createQmlObject(spec, parent) {
+    parent = parent ?? null;
+    
+    const component = createComponent(spec);
+    const obj = component.createObject(null, spec.prop ?? {});
+
+    if (spec.model) {
+      obj.dataModel = createQmlObject(spec.model);
+    }
+
+    return obj;
+  }
 }

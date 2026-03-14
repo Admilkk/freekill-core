@@ -644,6 +644,11 @@ W.PageBase {
     }
   }
 
+  // 当创建新的ui时，可以重写该函数以显示自定义组件（如卡牌等）。
+  function createComponent(spec, parent) {
+    return Lua.createComponent(spec, parent);
+  }
+
   function showDistance(show) {
     for (const model of photoModel) {
       if (show) {

@@ -21,7 +21,7 @@ end
 
 ---@type Player
 Self = nil -- `Self' is client-only, but we need it in AI
-dofile "lua/lunarltk/server/ai/init.lua"
+dofile "lunarltk/server/ai/init.lua"
 
 local Task = require "server.task"
 

@@ -85,5 +85,5 @@ end
 dofile "lua/fk_ex.lua"
 
 Fk = Engine:new()
-dofile "lua/lunarltk/init.lua"
+dofile "lunarltk/init.lua"
 Fk:load()

@@ -8,8 +8,8 @@
 
 TriggerEvent = require "core.trigger_event"
 require "lunarltk.core.events"
-dofile "lua/lunarltk/server/system_enum.lua"
-dofile "lua/lunarltk/server/mark_enum.lua"
+dofile "lunarltk/server/system_enum.lua"
+dofile "lunarltk/server/mark_enum.lua"
 TriggerSkill = require "lunarltk.core.skill_type.trigger"
 -- LegacyTriggerSkill = require "compat.trigger_legacy"
 ActiveSkill = require "lunarltk.core.skill_type.active"

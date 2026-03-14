@@ -503,15 +503,19 @@ function Room:sendCardVirtName(ids, name, virtual)
   self:doBroadcastNotify("SetCardVirtName", { ids, name, not not virtual })
 end
 
---- 在player脸上展示名为name的emotion动效。
+--- 在player脸上展示名为name的emotion动效， 也就是“杀”、“闪”之类的帧动画。
 ---
---- 这就是“杀”、“闪”之类的那个动画。
+--- 对于玩家，支持使用单张图片作为emotion，此时还支持某个图片常驻在脸上。
+---
+--- 想要取消脸上的常驻emotion图片，请使用player:hideEmotion()
 ---@param player ServerPlayer @ 被播放动画的那个角色
----@param name string @ emotion名字，可以是一个路径
-function Room:setEmotion(player, name)
+---@param name string @ emotion名字，可以是一个路径，可以是一张png图片（调用时不要带后缀）
+---@param permanent boolean? @ 如果emotion是单独一张图片，是否常驻？
+function Room:setEmotion(player, name, permanent)
   self:doAnimate("Emotion", {
     player = player.id,
-    emotion = name
+    emotion = name,
+    permanent = permanent,
   })
 end
 

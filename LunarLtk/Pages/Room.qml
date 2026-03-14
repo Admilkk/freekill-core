@@ -818,17 +818,25 @@ W.PageBase {
     line.running = true;
   }
 
-  function setEmotion(id, emotion, isCardId) {
+  function setPicEmotion(id, path, permanent) {
+    const photo = getPhoto(id);
+    if (!photo) return;
+    photo.setEmotion(path, permanent);
+  }
+
+  function setEmotion(id, emotion, isCardId, permanent) {
     let path = Fs.convertUrlToPath(SkinBank.pixAnimDir + emotion);
-    if (!Fs.exists(path)) {
+    if (!Fs.exists(path) && !Fs.exists(path + ".png")) {
       path = Fs.convertUrlToPath(`${Cpp.path}/${emotion}`);
     }
     if (!Fs.exists(path)) {
+      if (Fs.exists(path + ".png") && !isCardId) {
+        setPicEmotion(id, path + ".png", permanent);
+      }
       return;
     }
 
     if (!Fs.isDir(path)) {
-      // TODO: set picture emotion
       return;
     }
 
@@ -860,6 +868,15 @@ W.PageBase {
       animation.finished.connect(animation.destroy);
     }
     animation.start();
+  }
+
+  function hideEmotion(playerId) {
+    const photo = getPhoto(playerId);
+    if (!photo) {
+      return;
+    }
+
+    photo.hideEmotion();
   }
 
   function doSuperLightBox(path, data) {
@@ -909,7 +926,10 @@ W.PageBase {
         })
         break;
       case "Emotion":
-        setEmotion(data.player, data.emotion, data.is_card);
+        setEmotion(data.player, data.emotion, data.is_card, data.permanent);
+        break;
+      case "HideEmotion":
+        hideEmotion(data.player);
         break;
       case "SuperLightBox": {
         doSuperLightBox(data.path, data.data);

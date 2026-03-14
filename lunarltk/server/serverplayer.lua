@@ -850,4 +850,10 @@ function ServerPlayer:currentSwitchState()
   end
 end
 
+--- 隐藏脸上显示的Emotion图片
+---@see Room.setEmotion
+function ServerPlayer:hideEmotion()
+  self.room:doAnimate("HideEmotion", { player = self.id })
+end
+
 return ServerPlayer

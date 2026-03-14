@@ -98,7 +98,7 @@ QtObject {
   function changeSelf() {
     const self = Lua.selfPlayer;
     const ids = self.getCardIds("h");
-    handcards = ids.map(id => Ltk.createCardModel(id, { known: self.cardVisible(cid) }));
+    handcards = ids.map(id => Ltk.createCardModel(id, { known: self.cardVisible(id) }));
     expandedCards = [];
 
     skills = [];

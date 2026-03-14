@@ -251,6 +251,14 @@ PhotoBase {
     transformOrigin: Item.TopLeft
   }
 
+  // 还原之前一直缺的单图流emotion 神杀智慧！
+  Image {
+    id: emotionItem
+    anchors.centerIn: parent
+    scale: 0.8
+    opacity: 0
+  }
+
   GlowText {
     id: seatNum
     visible: !progressBar.visible
@@ -292,8 +300,46 @@ PhotoBase {
     }
   }
 
-  function tremble() {
-    trembleAnimation.start()
+  PropertyAnimation {
+    id: permanentEmotionShowAnim
+    target: emotionItem
+    property: "opacity"
+    from: 0.0
+    to: 1.0
+    duration: 500
+  }
+
+  PropertyAnimation {
+    id: permanentEmotionHideAnim
+    target: emotionItem
+    property: "opacity"
+    from: 1.0
+    to: 0.0
+    duration: 500
+  }
+
+  SequentialAnimation {
+    id: shortEmotionAnim
+
+    PropertyAnimation {
+      target: emotionItem
+      property: "opacity"
+      from: 0.0
+      to: 1.0
+      duration: 500
+    }
+
+    PauseAnimation {
+      duration: 1000
+    }
+
+    PropertyAnimation {
+      target: emotionItem
+      property: "opacity"
+      from: 1.0
+      to: 0.0
+      duration: 500
+    }
   }
 
   ProgressBar {
@@ -406,5 +452,22 @@ PhotoBase {
     }
 
     return null;
+  }
+
+  function tremble() {
+    trembleAnimation.start()
+  }
+
+  function setEmotion(path, permanent) {
+    emotionItem.source = path;
+    if (permanent) {
+      permanentEmotionShowAnim.start();
+    } else {
+      shortEmotionAnim.start();
+    }
+  }
+
+  function hideEmotion() {
+    permanentEmotionHideAnim.start();
   }
 }

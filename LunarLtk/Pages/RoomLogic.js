@@ -128,10 +128,6 @@ function arrangePhotos() {
   }
 }
 
-function getPhoto(id) {
-  return dataModel.getPhoto(id)?.photoItem;
-}
-
 function getAreaItem(area, id) {
   const publicArea = roomScene.getAreaItem(area);
   if (publicArea) return publicArea;
@@ -161,59 +157,6 @@ function moveCards(move, data) {
   to.updateCardPosition(true);
 }
 
-function setEmotion(id, emotion, isCardId) {
-  let path;
-  if (OS === "Win") {
-    // Windows: file:///C:/xxx/xxxx
-    path = (SkinBank.pixAnimDir + emotion).replace("file:///", "");
-  } else {
-    path = (SkinBank.pixAnimDir + emotion).replace("file://", "");
-  }
-
-  if (!Backend.exists(path)) {
-    // Try absolute path again
-    if (OS === "Win") {
-      // Windows: file:///C:/xxx/xxxx
-      path = (AppPath + "/" + emotion).replace("file:///", "");
-    } else {
-      path = (AppPath + "/" + emotion).replace("file://", "");
-    }
-    if (!Backend.exists(path))
-      return;
-  }
-  if (!Backend.isDir(path)) {
-    // TODO: set picture emotion
-    return;
-  }
-  const component = Qt.createComponent("LunarLtk.Components", "PixmapAnimation");
-  if (component.status !== Component.Ready)
-    return;
-
-  let photo;
-  if (isCardId === true) {
-    photo = roomScene.tableCards.find(v => v.dataModel.cardId === id);
-  } else {
-    photo = getPhoto(id);
-  }
-  if (!photo) return;
-
-  const animation = component.createObject(photo, {
-    source: (OS === "Win" ? "file:///" : "") + path,
-    scale: 0.75,
-  });
-  animation.anchors.centerIn = photo;
-  if (isCardId) {
-    animation.started.connect(() => photo.busy = true);
-    animation.finished.connect(() => {
-      photo.busy = false;
-      animation.destroy()
-    });
-  } else {
-    animation.finished.connect(() => animation.destroy());
-  }
-  animation.start();
-}
-
 callbacks["ShowVirtualCard"] = (sender, data) => {
   const [card_data, playerid, footnote, event_id] = data;
   let from = drawPile;
@@ -240,63 +183,6 @@ callbacks["ShowVirtualCard"] = (sender, data) => {
 
   tablePile.add(items);
   tablePile.updateCardPosition(true);
-}
-
-function doIndicate(from, tos) {
-  const component = Qt.createComponent("LunarLtk.Components", "IndicatorLine");
-  if (component.status !== Component.Ready)
-    return;
-
-  const fromItem = getPhotoOrDashboard(from);
-  const fromPos = mapFromItem(fromItem, fromItem.width / 2,
-                              fromItem.height / 2);
-
-  const end = [];
-  for (let i = 0; i < tos.length; i++) {
-    if (from === tos[i])
-      continue;
-    const toItem = getPhotoOrDashboard(tos[i]);
-    const toPos = mapFromItem(toItem, toItem.width / 2, toItem.height / 2);
-    end.push(toPos);
-  }
-
-  const color = "#96943D";
-  const line = component.createObject(roomScene, {
-                                        start: fromPos,
-                                        end: end,
-                                        color: color
-                                      });
-  line.finished.connect(() => line.destroy());
-  line.running = true;
-}
-
-function cancelAllFocus() {
-  let item;
-  const playerNum = roomScene.dataModel.playerNum;
-  for (let i = 0; i < playerNum; i++) {
-    item = photos.itemAt(i);
-    item.progressBar.visible = false;
-    item.progressTip = "";
-  }
-}
-
-callbacks["MoveFocus"] = (sender, data) => {
-  // jsonData: int[] focuses, string command
-  cancelAllFocus();
-  const [ focuses, command ] = data;
-  const timeout = data[2] ?? (Config.roomTimeout * 1000);
-
-  let item, model;
-  for (const pid of focuses) {
-    const model = dataModel.getPhoto(pid);
-    if (!model) continue;
-    // 这样其实不好。应该用signal从model传递到item，或者item建立绑定
-    const item = model.photoItem;
-    item.progressBar.duration = timeout;
-    item.progressBar.visible = true;
-    item.progressTip = Lua.tr(command)
-      + Lua.tr(" thinking...");
-  }
 }
 
 callbacks["AskForGeneral"] = (sender, data) => {
@@ -396,140 +282,6 @@ callbacks["AskForUseCard"] = (sender, data) => {
     } else {
       roomScene.extra_data = extra_data;
     }
-  }
-}
-
-callbacks["Animate"] = (sender, data) => {
-  // jsonData: [Object object]
-  switch (data.type) {
-    case "Indicate":
-      data.to.forEach(item => {
-        doIndicate(data.from, [item[0]]);
-        if (item[1]) {
-          doIndicate(item[0], item.slice(1));
-        }
-      })
-      break;
-    case "Emotion":
-      setEmotion(data.player, data.emotion, data.is_card);
-      break;
-    case "LightBox":
-      break;
-    case "SuperLightBox": {
-      const path = data.path;
-      const jsonData = data.data;
-      roomScene.bigAnim.source = AppPath + "/" + path;
-      if (jsonData && jsonData !== "") {
-        roomScene.bigAnim.item.loadData(jsonData);
-      }
-      break;
-    }
-    case "InvokeSkill": {
-      const id = data.player;
-      const component =
-            Qt.createComponent("LunarLtk.Components", "SkillInvokeAnimation");
-      if (component.status !== Component.Ready)
-        return;
-
-      const photo = getPhoto(id);
-      if (!photo) {
-        return null;
-      }
-
-      const animation = component.createObject(photo, {
-        skill_name: Lua.tr(data.name),
-        skill_type: (data.skill_type ? data.skill_type : "special"),
-      });
-      animation.anchors.centerIn = photo;
-      animation.finished.connect(() => animation.destroy());
-      break;
-    }
-    case "InvokeUltSkill": {
-      const id = data.player;
-      const photo = getPhoto(id);
-      if (!photo) {
-        return null;
-      }
-
-      roomScene.bigAnim.sourceComponent = Qt.createComponent("LunarLtk.Components", "UltSkillAnimation");
-      roomScene.bigAnim.item.loadData({
-        skill_name: data.name,
-        general: data.deputy ? photo.deputyGeneral : photo.general,
-      });
-      break;
-    }
-    default:
-      break;
-  }
-}
-
-callbacks["LogEvent"] = (sender, data) => {
-  // jsonData: [Object object]
-  switch (data.type) {
-    case "Damage": {
-      const item = getPhoto(data.to);
-      setEmotion(data.to, "damage");
-      item.tremble();
-      data.damageType = data.damageType || "normal_damage";
-      Backend.playSound("./audio/system/" + data.damageType +
-                        (data.damageNum > 1 ? "2" : ""));
-      break;
-    }
-    case "LoseHP": {
-      Backend.playSound("./audio/system/losehp");
-      break;
-    }
-    case "ChangeMaxHp": {
-      if (data.num < 0) {
-        Backend.playSound("./audio/system/losemaxhp");
-      }
-      break;
-    }
-    case "PlaySkillSound": {
-      const skill = data.name;
-      // let extension = data.extension;
-      let extension;
-      let path;
-      let dat;
-      const tryPlaySound = (general) => {
-        if (general) {
-          const dat = Ltk.getGeneralData(general);
-          const extension = dat.extension;
-          const path = SkinBank.getAudio(skill + "_" + general, extension, "skill");
-          if (path !== undefined) {
-            Backend.playSound(path, data.i);
-            return true;
-          }
-        }
-        return false;
-      };
-
-      // Try main general first, then deputy general
-      if (tryPlaySound(data.general) || tryPlaySound(data.deputy)) {
-        break;
-      }
-
-      // finally normal skill
-      dat = Ltk.getSkillData(skill);
-      extension = dat.extension;
-      path = SkinBank.getAudio(skill, extension, "skill");
-      Backend.playSound(path, data.i);
-      break;
-    }
-    case "PlaySound": {
-      const path = SkinBank.getAudioByPath(data.name);
-      Backend.playSound(path);
-      break;
-    }
-    case "Death": {
-      const item = getPhoto(data.to);
-      const extension = Ltk.getGeneralData(item.general).extension;
-      const path = SkinBank.getAudio(item.general, extension, "death");
-      Backend.playSound(path);
-      break;
-    }
-    default:
-      break;
   }
 }
 

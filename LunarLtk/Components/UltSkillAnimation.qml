@@ -209,7 +209,7 @@ Item {
 
   function loadData(data) {
     generalName = data.general;
-    skillName = data.skill_name;
+    skillName = data.skillName;
     anim.running = true;
   }
 }

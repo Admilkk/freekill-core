@@ -5,15 +5,15 @@ import Fk
 
 Item {
   id: root
-  property string skill_type
-  property string skill_name
+  property string skillType
+  property string skillName
   signal finished()
 
   PixmapAnimation {
     id: typeAnim
     anchors.centerIn: parent
     scale: 0.75
-    source: SkinBank.pixAnimDir + "skillInvoke/" + skill_type
+    source: SkinBank.pixAnimDir + "skillInvoke/" + root.skillType
     keepAtStop: true
   }
 
@@ -21,7 +21,7 @@ Item {
     id: bigSkillName
     anchors.centerIn: parent
     anchors.horizontalCenterOffset: 100
-    text: skill_name
+    text: root.skillName
     font.pixelSize: Math.max(24, 48 - (text.length - 2) * 6)
     font.family: Config.li2Name
     scale: 0.75

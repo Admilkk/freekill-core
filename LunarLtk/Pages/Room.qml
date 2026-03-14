@@ -565,7 +565,7 @@ W.PageBase {
 
   GlowText {
     anchors.centerIn: dashboard
-    visible: Logic.getPhoto(Cpp.self.id).rest > 0 && !Config.observing
+    visible: getPhoto(Cpp.self.id).rest > 0 && !Config.observing
     text: Lua.tr("Resting, don't leave!")
     color: "#DBCC69"
     font.family: Config.libianName
@@ -680,7 +680,7 @@ W.PageBase {
   }
 
   function getPhoto(id) {
-    return Logic.getPhoto(id);
+    return dataModel.getPhoto(id)?.photoItem;
   }
 
   function getPhotoOrDashboard(id) {
@@ -767,18 +767,281 @@ W.PageBase {
     }
   }
 
+  function cancelAllFocus() {
+    for (const model of dataModel.players) {
+      const item = model.photoItem;
+      item.progressBar.visible = false;
+      item.progressTip = "";
+    }
+  }
+
+  function moveFocus(sender, data) {
+    const [ focuses, command ] = data;
+    const timeout = data[2] ?? (Config.roomTimeout * 1000);
+
+    cancelAllFocus();
+
+    let item, model;
+    for (const pid of focuses) {
+      const model = dataModel.getPhoto(pid);
+      if (!model) continue;
+      // 这样其实不好。应该用signal从model传递到item，或者item建立绑定
+      const item = model.photoItem;
+      item.progressBar.duration = timeout;
+      item.progressBar.visible = true;
+      item.progressTip = Lua.tr(command)
+        + Lua.tr(" thinking...");
+    }
+  }
+
+  function doIndicate(from, tos) {
+    const component = Qt.createComponent("LunarLtk.Components", "IndicatorLine");
+    if (component.status !== Component.Ready)
+      return;
+
+    const fromItem = getPhotoOrDashboard(from);
+    const fromPos = mapFromItem(fromItem, fromItem.width / 2,
+                                fromItem.height / 2);
+
+    const end = [];
+    for (let i = 0; i < tos.length; i++) {
+      if (from === tos[i])
+        continue;
+      const toItem = getPhotoOrDashboard(tos[i]);
+      const toPos = mapFromItem(toItem, toItem.width / 2, toItem.height / 2);
+      end.push(toPos);
+    }
+
+    const color = "#96943D";
+    const line = component.createObject(roomScene, { start: fromPos, end: end, color: color });
+    line.finished.connect(line.destroy);
+    line.running = true;
+  }
+
+  function setEmotion(id, emotion, isCardId) {
+    let path;
+    if (OS === "Win") {
+      // Windows: file:///C:/xxx/xxxx
+      path = (SkinBank.pixAnimDir + emotion).replace("file:///", "");
+    } else {
+      path = (SkinBank.pixAnimDir + emotion).replace("file://", "");
+    }
+
+    if (!Backend.exists(path)) {
+      // Try absolute path again
+      if (OS === "Win") {
+        // Windows: file:///C:/xxx/xxxx
+        path = (Cpp.path + "/" + emotion).replace("file:///", "");
+      } else {
+        path = (Cpp.path + "/" + emotion).replace("file://", "");
+      }
+      if (!Fs.exists(path))
+      return;
+    }
+    if (!Backend.isDir(path)) {
+      // TODO: set picture emotion
+      return;
+    }
+    const component = Qt.createComponent("LunarLtk.Components", "PixmapAnimation");
+    if (component.status !== Component.Ready)
+    return;
+
+    let photo;
+    if (isCardId === true) {
+      photo = roomScene.tableCards.find(v => v.dataModel.cardId === id);
+    } else {
+      photo = getPhoto(id);
+    }
+    if (!photo) return;
+
+    const animation = component.createObject(photo, {
+      source: (OS === "Win" ? "file:///" : "") + path,
+      scale: 0.75,
+    });
+    animation.anchors.centerIn = photo;
+    if (isCardId) {
+      animation.started.connect(() => photo.busy = true);
+      animation.finished.connect(() => {
+        photo.busy = false;
+        animation.destroy()
+      });
+    } else {
+      animation.finished.connect(() => animation.destroy());
+    }
+    animation.start();
+  }
+
+  function doSuperLightBox(path, data) {
+    bigAnim.source = Cpp.path + "/" + path;
+    if (data) {
+      bigAnim.item.loadData(data);
+    }
+  }
+
+  function notifySkillInvoked(playerId, skillName, skillType) {
+    const photo = getPhoto(playerId);
+    if (!photo) {
+      return;
+    }
+
+    const component = Qt.createComponent("LunarLtk.Components", "SkillInvokeAnimation");
+    if (component.status !== Component.Ready) {
+      return;
+    }
+
+    const animation = component.createObject(photo, { skillName, skillType });
+    animation.anchors.centerIn = photo;
+    animation.finished.connect(animation.destroy);
+  }
+
+  function notifyUltSkillInvoked(playerId, skillName, isDeputy) {
+    const photo = getPhoto(playerId);
+    if (!photo) {
+      return;
+    }
+
+    bigAnim.sourceComponent = Qt.createComponent("LunarLtk.Components", "UltSkillAnimation");
+    bigAnim.item.loadData({
+      skillName,
+      general: data.deputy ? photo.deputyGeneral : photo.general,
+    });
+  }
+
+  function doAnimate(sender, data) {
+    switch (data.type) {
+      case "Indicate":
+        data.to.forEach(item => {
+          doIndicate(data.from, [item[0]]);
+          if (item[1]) {
+            doIndicate(item[0], item.slice(1));
+          }
+        })
+        break;
+      case "Emotion":
+        setEmotion(data.player, data.emotion, data.is_card);
+        break;
+      case "SuperLightBox": {
+        doSuperLightBox(data.path, data.data);
+        break;
+      }
+      case "InvokeSkill": {
+        notifySkillInvoked(data.player, Lua.tr(data.name), data.skill_type || "special");
+        break;
+      }
+      case "InvokeUltSkill": {
+        notifyUltSkillInvoked(data.player, data.name, data.deputy);
+        break;
+      }
+      default:
+        break;
+    }
+  }
+
+  function playDamageEffect(playerId, damageType, damageNum) {
+    const photo = getPhoto(playerId);
+    if (!photo) {
+      return;
+    }
+
+    setEmotion(playerId, "damage");
+    photo.tremble();
+    Backend.playSound("./audio/system/" + damageType + (damageNum > 1 ? "2" : ""));
+  }
+
+  function playLoseHpEffect() {
+    Backend.playSound("./audio/system/losehp");
+  }
+
+  function playChangeMaxEffect() {
+    if (data.num < 0) {
+      Backend.playSound("./audio/system/losemaxhp");
+    }
+  }
+
+  function playGeneralSkillSound(skill, idx, general) {
+    if (!general) {
+      return false;
+    }
+
+    const dat = Ltk.getGeneralData(general);
+    const extension = dat.extension;
+    const path = SkinBank.getAudio(skill + "_" + general, extension, "skill");
+    if (path) {
+      Backend.playSound(path, idx);
+      return true;
+    }
+  }
+
+  function playSkillSound(skill, idx) {
+    if (playGeneralSkillSound(data.general)) {
+      return;
+    }
+
+    if (playGeneralSkillSound(data.deputy)) {
+      return;
+    }
+
+    const dat = Ltk.getSkillData(skill);
+    const path = SkinBank.getAudio(skill, dat.extension, "skill");
+    Backend.playSound(path, idx);
+  }
+
+  function playSound(path) {
+    const _path = SkinBank.getAudioByPath(path);
+    Backend.playSound(_path);
+  }
+
+  function playDeathSound(playerId) {
+    const photo = getPhoto(playerId);
+    if (!photo) {
+      return;
+    }
+    const general = photo.general;
+    const extension = Ltk.getGeneralData(general).extension;
+    const path = SkinBank.getAudio(general, extension, "death");
+    Backend.playSound(path);
+  }
+
+  function logEvent(sender, data) {
+    switch (data.type) {
+      case "Damage": {
+        playDamageEffect(data.to, data.damageType || "normal_damage", data.damageNum);
+        break;
+      }
+      case "LoseHP": {
+        playLoseHpEffect();
+        break;
+      }
+      case "ChangeMaxHp": {
+        playChangeMaxEffect();
+        break;
+      }
+      case "PlaySkillSound": {
+        playSkillSound(data.name, data.i, data.extension);
+        break;
+      }
+      case "PlaySound": {
+        playSound(data.name);
+        break;
+      }
+      case "Death": {
+        playDeathSound(data.to);
+        break;
+      }
+      default:
+        break;
+    }
+  }
+
   function setupCallbacks() {
     dataModel.setupCallbacks();
 
     // TODO 摆烂了 反正这些后面也是得重构 懒得搬砖了
     addCallback(Command.ShowVirtualCard, Logic.callbacks["ShowVirtualCard"]);
-    addCallback(Command.MoveFocus, Logic.callbacks["MoveFocus"]);
     addCallback(Command.AskForGeneral, Logic.callbacks["AskForGeneral"]);
     addCallback(Command.AskForExchange, Logic.callbacks["AskForExchange"]);
     addCallback(Command.AskForCardsAndChoice, Logic.callbacks["AskForCardsAndChoice"]);
     addCallback(Command.AskForUseCard, Logic.callbacks["AskForUseCard"]);
-    addCallback(Command.Animate, Logic.callbacks["Animate"]);
-    addCallback(Command.LogEvent, Logic.callbacks["LogEvent"]);
     addCallback(Command.FillAG, Logic.callbacks["FillAG"]);
     addCallback(Command.AskForAG, Logic.callbacks["AskForAG"]);
     addCallback(Command.TakeAG, Logic.callbacks["TakeAG"]);
@@ -788,6 +1051,10 @@ W.PageBase {
     addCallback(Command.UpdateMiniGame, Logic.callbacks["UpdateMiniGame"]);
     addCallback(Command.UpdateRequestUI, Logic.callbacks["UpdateRequestUI"]);
     addCallback(Command.ChangeSkin, Logic.callbacks["ChangeSkin"]);
+
+    addCallback(Command.MoveFocus, moveFocus);
+    addCallback(Command.Animate, doAnimate);
+    addCallback(Command.LogEvent, logEvent);
   }
 
   Component.onCompleted: {

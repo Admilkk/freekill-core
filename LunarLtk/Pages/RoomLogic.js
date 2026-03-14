@@ -265,26 +265,6 @@ callbacks["AskForCardsAndChoice"] = (sender, data) => {
   roomScene.popupBox.moveToCenter();
 }
 
-callbacks["AskForUseCard"] = (sender, data) => {
-  // jsonData: card, pattern, prompt, cancelable, {}
-  const [ cardname, pattern, prompt, cancelable, extra_data, disabledSkillNames ] = data;
-
-  roomScene.dataModel.prompt = prompt || `#AskForUseCard:::${cardname}`;
-  roomScene.dataModel.activate();
-  roomScene.dataModel.okCancelVisible = true;
-  if (extra_data != null) {
-    if ((extra_data.effectTo !== Cpp.self.id && // 忽略本轮无懈可击，但目标是自己时不忽略
-        roomScene.skippedUseEventId.find(id => id === extra_data.useEventId)) ||
-        (Config.noSelfNullification && extra_data.effectFrom === Cpp.self.id &&
-        !Ltk.getCardData(extra_data.effectCardId).multiple_targets)) { // 不对自己使用的单目标锦囊牌无懈
-      Ltk.updateRequestUI("Button", "Cancel");
-      return;
-    } else {
-      roomScene.extra_data = extra_data;
-    }
-  }
-}
-
 callbacks["FillAG"] = (sender, data) => {
   const ids = data[0];
   roomScene.manualBox.sourceComponent =

@@ -33,10 +33,6 @@ W.PageBase {
   // 权宜之计 后面全改
   property alias cheatDrawer: cheatLoader
 
-  // 本轮跳过无懈专用
-  property var extra_data: ({}) // 史
-  property var skippedUseEventId: []
-
   property alias dataModel: dataModel
 
   RoomModel {
@@ -56,7 +52,6 @@ W.PageBase {
     onDeActivated: {
       skillInteraction.sourceComponent = undefined;
       progress.visible = false;
-      extra_data = {};
 
       dashboard.disableAllCards();
 
@@ -451,11 +446,9 @@ W.PageBase {
       Button {
         id: skipNullificationButton
         text: Lua.tr("SkipNullification")
-        visible: !!extra_data.useEventId
-                 && !skippedUseEventId.find(id => id === extra_data.useEventId)
+        visible: dataModel.canSkipNullification
         onClicked: {
-          skippedUseEventId.push(extra_data.useEventId);
-          Ltk.updateRequestUI("Button", "Cancel");
+          dataModel.skipNullification();
         }
       }
 
@@ -1052,7 +1045,6 @@ W.PageBase {
     addCallback(Command.AskForGeneral, Logic.callbacks["AskForGeneral"]);
     addCallback(Command.AskForExchange, Logic.callbacks["AskForExchange"]);
     addCallback(Command.AskForCardsAndChoice, Logic.callbacks["AskForCardsAndChoice"]);
-    addCallback(Command.AskForUseCard, Logic.callbacks["AskForUseCard"]);
     addCallback(Command.FillAG, Logic.callbacks["FillAG"]);
     addCallback(Command.AskForAG, Logic.callbacks["AskForAG"]);
     addCallback(Command.TakeAG, Logic.callbacks["TakeAG"]);

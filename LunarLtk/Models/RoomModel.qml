@@ -51,7 +51,13 @@ QtObject {
 
   property string prompt
 
-  property var skipNullificationData
+  // 俩跳过无懈用的
+  property var skipNullificationData: null
+  property var skippedUseEventIds: []
+  readonly property bool canSkipNullification: {
+    return !!skipNullificationData &&
+      !skippedUseEventIds.find(id => id === skipNullificationData.useEventId)
+  }
 
   readonly property string promptText: Ltk.processPrompt(prompt)
 
@@ -105,6 +111,7 @@ QtObject {
     cancelEnabled = false;
     endButtonVisible = false;
     prompt = "";
+    skipNullificationData = null;
 
     dashboard.disableAllSkills();
 
@@ -304,6 +311,7 @@ QtObject {
   }
 
   function playCard() {
+    skippedUseEventIds = [];
     activate();
     okCancelVisible = true;
   }
@@ -325,6 +333,35 @@ QtObject {
     const [ cardname, pattern, prompt, cancelable, extra_data, disabledSkillNames ] = data;
 
     root.prompt = prompt || `#AskForResponseCard:::${cardname}`;
+    activate();
+    okCancelVisible = true;
+  }
+
+  function askForUseCard(sender, data) {
+    const [ cardname, pattern, prompt, cancelable, nullfiData, disabledSkillNames ] = data;
+
+    root.prompt = prompt || `#AskForUseCard:::${cardname}`;
+
+    if (nullfiData) {
+      // 询问使用【无懈可击】相关
+
+      // 不对自己使用的单目标锦囊牌无懈
+      if (Config.noSelfNullification && nullfiData.effectFrom === Cpp.self.id &&
+        !Ltk.getCardData(nullfiData.effectCardId).multiple_targets) { 
+        Ltk.updateRequestUI("Button", "Cancel");
+        return;
+      }
+
+      // 如果已忽略本轮无懈可击，那么忽略，除非即将对自己生效
+      if (nullfiData.effectTo !== Cpp.self.id && 
+        skippedUseEventIds.find(id => id === nullfiData.useEventId)) {
+        Ltk.updateRequestUI("Button", "Cancel");
+        return;
+      }
+
+      skipNullificationData = nullfiData;
+    }
+
     activate();
     okCancelVisible = true;
   }
@@ -429,6 +466,11 @@ QtObject {
     replyToServer(hand);
   }
 
+  function skipNullification() {
+    skippedUseEventIds.push(skipNullificationData.useEventId);
+    Ltk.updateRequestUI("Button", "Cancel");
+  }
+
   // 确定只会修改model属性的逻辑都搬家到这里
   function setupCallbacks() {
     roomPage.addCallback(Command.NetStateChanged, netStateChanged);
@@ -461,6 +503,7 @@ QtObject {
     roomPage.addCallback(Command.AskForSkillInvoke, askForSkillInvoke);
     roomPage.addCallback(Command.AskForUseActiveSkill, askForUseActiveSkill);
     roomPage.addCallback(Command.AskForResponseCard, askForResponseCard);
+    roomPage.addCallback(Command.AskForUseCard, askForUseCard);
 
     roomPage.addCallback(Command.AskForChoices, askForChoices);
     roomPage.addCallback(Command.AskForPoxi, askForPoxi);

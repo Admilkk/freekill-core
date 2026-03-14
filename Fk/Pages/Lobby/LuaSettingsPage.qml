@@ -31,13 +31,7 @@ Item {
   }
 
   function buildComponent(data, parent) {
-    const qml = data._qml;
-    let component;
-    if (qml.uri) {
-      component = Qt.createComponent(qml.uri, qml.name);
-    } else {
-      component = Qt.createComponent(Cpp.path + '/' + qml.url);
-    }
+    const component = Lua.createComponent(data._qml);
 
     if (component.status != Component.Ready) {
       return;

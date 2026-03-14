@@ -90,7 +90,7 @@ W.PageBase {
           Layout.fillWidth: true
           text: qsTr("PackageManage")
           onClicked: {
-            App.enterNewPage("Fk.Pages.Common", "PackageManage")
+            App.enterNewPage(Qt.createComponent("Fk.Pages.Common", "PackageManage"));
           }
         }
 
@@ -98,7 +98,7 @@ W.PageBase {
           Layout.fillWidth: true
           text: qsTr("管理资源包")
           onClicked: {
-            App.enterNewPage("Fk.Pages.Common", "ResourcePackManage")
+            App.enterNewPage(Qt.createComponent("Fk.Pages.Common", "ResourcePackManage"));
           }
         }
 
@@ -223,7 +223,7 @@ W.PageBase {
 
   function enterLobby(sender, data) {
     Config.lastLoginServer = Config.serverAddr;
-    App.enterNewPage("Fk.Pages.Lobby", "Lobby")
+    App.enterNewPage(Qt.createComponent("Fk.Pages.Lobby", "Lobby"));
     App.setBusy(false);
     Cpp.notifyServer("RefreshRoomList", "");
     Config.saveConf();

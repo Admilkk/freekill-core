@@ -107,7 +107,11 @@ Game.PokerCard {
         font.pixelSize: Math.floor(16 * root.cardScale)
         font.family: Config.libianName
         font.letterSpacing: -0.6
-        text: parent.modelData.value
+        text: {
+          const data = parent.modelData;
+          if (!data) return "";
+          return `${data.name} ${data.value}`.trim();
+        }
         color: "white"
         style: Text.Outline
         styleColor: "purple"

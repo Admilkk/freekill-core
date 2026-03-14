@@ -177,6 +177,17 @@ QtObject {
     Ltk.setMark(mark.startsWith("@!") ? player.picMarks : player.marks, mark, v, id);
   }
 
+  function setCardMark(_, data) {
+    const [ id, mark, v ] = data;
+    for (const cd of [...processing, ...dashboard.handcards]) {
+      if (cd.cardId === id) {
+        Ltk.setMark(cd.marks, mark, v);
+        cd.refreshData();
+        return;
+      }
+    }
+  }
+
   function setBanner(_, data) {
     const [ mark, v ] = data;
     Ltk.setMark(banners, mark, v);
@@ -412,6 +423,12 @@ QtObject {
     popupReady(Command.GameOver, jsonData, model);
   }
 
+  // 蒋琬专属；啥时候删了这玩意啊？
+  function jiangwanHandler(sender, data) {
+    const hand = dashboard.handcards.map(c => c.cardId);
+    replyToServer(hand);
+  }
+
   // 确定只会修改model属性的逻辑都搬家到这里
   function setupCallbacks() {
     roomPage.addCallback(Command.NetStateChanged, netStateChanged);
@@ -436,6 +453,8 @@ QtObject {
     roomPage.addCallback(Command.CancelRequest, deActivate);
     roomPage.addCallback(Command.PlayerRunned, playerRunned);
 
+    roomPage.addCallback(Command.SetCardMark, setCardMark);
+    roomPage.addCallback(Command.GetPlayerHandcards, jiangwanHandler);
 
     // 以下为交互类
     roomPage.addCallback(Command.PlayCard, playCard);

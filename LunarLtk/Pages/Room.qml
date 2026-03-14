@@ -767,7 +767,6 @@ W.PageBase {
 
     // TODO 摆烂了 反正这些后面也是得重构 懒得搬砖了
     addCallback(Command.ShowVirtualCard, Logic.callbacks["ShowVirtualCard"]);
-    addCallback(Command.UpdateCard, Logic.callbacks["UpdateCard"]);
     addCallback(Command.MoveFocus, Logic.callbacks["MoveFocus"]);
     addCallback(Command.AskForGeneral, Logic.callbacks["AskForGeneral"]);
     addCallback(Command.AskForExchange, Logic.callbacks["AskForExchange"]);
@@ -783,7 +782,6 @@ W.PageBase {
     addCallback(Command.MiniGame, Logic.callbacks["MiniGame"]);
     addCallback(Command.UpdateMiniGame, Logic.callbacks["UpdateMiniGame"]);
     addCallback(Command.UpdateRequestUI, Logic.callbacks["UpdateRequestUI"]);
-    addCallback(Command.GetPlayerHandcards, Logic.callbacks["GetPlayerHandcards"]);
     addCallback(Command.ChangeSkin, Logic.callbacks["ChangeSkin"]);
   }
 

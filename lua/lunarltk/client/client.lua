@@ -829,7 +829,7 @@ function Client:setCardMark(data)
   local card, mark, value = data[1], data[2], data[3]
   Fk:getCardById(card):setMark(mark, value)
 
-  self:notifyUI("UpdateCard", card)
+  self:notifyUI("SetCardMark", data)
 end
 
 function Client:logEvent(data)

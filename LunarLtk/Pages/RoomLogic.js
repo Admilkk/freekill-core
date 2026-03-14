@@ -274,34 +274,6 @@ function doIndicate(from, tos) {
   line.running = true;
 }
 
-callbacks["UpdateCard"] = (sender, j) => {
-  const id = parseInt(j);
-  let card;
-  let filterCard = false;
-  roomScene.tableCards.forEach((v) => {
-    if (v.cid === id) {
-      card = v;
-      return;
-    }
-  });
-
-  if (!card) {
-    roomScene.dashboard.handcardArea.cards.forEach((v) => {
-      if (v.cid === id) {
-        card = v;
-        filterCard = true;
-        return;
-      }
-    });
-  }
-
-  if (!card) {
-    return;
-  }
-
-  card.setData(Ltk.getCardData(id, filterCard));
-}
-
 function cancelAllFocus() {
   let item;
   const playerNum = roomScene.dataModel.playerNum;
@@ -643,13 +615,5 @@ callbacks["UpdateRequestUI"] = (sender, uiUpdate) => {
   if (uiUpdate._type == "Room") {
     roomScene.applyChange(uiUpdate);
   }
-}
-
-// 蒋琬
-callbacks["GetPlayerHandcards"] = (sender, data) => {
-  const hand = dashboard.handcardArea.cards.map(c => {
-    return c.cid;
-  })
-  roomScene.dataModel.replyToServer(hand);
 }
 

@@ -56,6 +56,7 @@ export const Chat = "Chat";
 // LunarLTK.Room
 export const SetCardFootnote = "SetCardFootnote";
 export const SetCardVirtName = "SetCardVirtName";
+export const SetCardMark = "SetCardMark";
 export const ShowVirtualCard = "ShowVirtualCard";
 export const AddPlayer = "AddPlayer";
 export const RemovePlayer = "RemovePlayer";
@@ -63,7 +64,6 @@ export const RoomOwner = "RoomOwner";
 export const ReadyChanged = "ReadyChanged";
 export const NetStateChanged = "NetStateChanged";
 export const PropertyUpdate = "PropertyUpdate";
-export const UpdateCard = "UpdateCard";
 export const StartGame = "StartGame";
 export const ArrangeSeats = "ArrangeSeats";
 export const MoveFocus = "MoveFocus";

@@ -43,7 +43,7 @@ Item {
         text: {
           const data = markItem.modelData;
           if (!data) return "";
-          return `${data.name} ${data.value}`;
+          return `${data.name} ${data.value}`.trim();
         }
         font.family: Config.libianName
         font.pixelSize: 16

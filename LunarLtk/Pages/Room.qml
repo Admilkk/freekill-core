@@ -819,32 +819,23 @@ W.PageBase {
   }
 
   function setEmotion(id, emotion, isCardId) {
-    let path;
-    if (OS === "Win") {
-      // Windows: file:///C:/xxx/xxxx
-      path = (SkinBank.pixAnimDir + emotion).replace("file:///", "");
-    } else {
-      path = (SkinBank.pixAnimDir + emotion).replace("file://", "");
+    let path = Fs.convertUrlToPath(SkinBank.pixAnimDir + emotion);
+    if (!Fs.exists(path)) {
+      path = Fs.convertUrlToPath(`${Cpp.path}/${emotion}`);
     }
-
-    if (!Backend.exists(path)) {
-      // Try absolute path again
-      if (OS === "Win") {
-        // Windows: file:///C:/xxx/xxxx
-        path = (Cpp.path + "/" + emotion).replace("file:///", "");
-      } else {
-        path = (Cpp.path + "/" + emotion).replace("file://", "");
-      }
-      if (!Fs.exists(path))
+    if (!Fs.exists(path)) {
       return;
     }
-    if (!Backend.isDir(path)) {
+
+    if (!Fs.isDir(path)) {
       // TODO: set picture emotion
       return;
     }
+
     const component = Qt.createComponent("LunarLtk.Components", "PixmapAnimation");
-    if (component.status !== Component.Ready)
-    return;
+    if (component.status !== Component.Ready) {
+      return;
+    }
 
     let photo;
     if (isCardId === true) {
@@ -866,7 +857,7 @@ W.PageBase {
         animation.destroy()
       });
     } else {
-      animation.finished.connect(() => animation.destroy());
+      animation.finished.connect(animation.destroy);
     }
     animation.start();
   }

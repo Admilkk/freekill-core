@@ -16,16 +16,12 @@ W.PageBase {
   ListModel { id: availablePackModel }
   ListModel { id: enabledPackModel }
 
-
   Component.onCompleted: {
     availablePackModel.clear();
     enabledPackModel.clear();
-    let allPacks = Backend.ls(AppPath + "/resource_pak/").filter(dir => {
-      let full_dir = AppPath + "/resource_pak/" + dir
-      if (OS === "Win"){
-        full_dir = full_dir.replace("file:///", "file://");
-      }
-      return Backend.isDir(full_dir);
+    let allPacks = Backend.ls(Cpp.path + "/resource_pak/").filter(dir => {
+      let full_dir = Cpp.path + "/resource_pak/" + dir
+      return Fs.isDir(Fs.convertUrlToPath(full_dir));
     });
     currentEnabled = Config.enabledResourcePacks || [];
     let enabledSet = new Set(currentEnabled.filter(p => allPacks.indexOf(p) !== -1));

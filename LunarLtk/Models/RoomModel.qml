@@ -58,7 +58,7 @@ QtObject {
   signal seatChanged(); // 座位排序后的信号
   signal playerAdded(PhotoModel model); // 新玩家加入的信号（addNpc）
   signal cardsMoved(var move, var models); // 操作完移牌数据后通知ui
-  signal popupReady(var model); // 准备好弹窗所需model后通知ui
+  signal popupReady(string command,var data, var model); // 准备好弹窗所需model后通知ui
 
   signal activated();
   signal deActivated();
@@ -318,6 +318,100 @@ QtObject {
     okCancelVisible = true;
   }
 
+  function askForArrangeCards(sender, data) {
+    const { cards, prompt, size, capacities, limits, is_free, names, pattern, poxi_type, cancelable } = data;
+    const modelComponent = Qt.createComponent("LunarLtk.Models.Popups", "ArrangeCardsModel");
+    const model = modelComponent.createObject(null, {
+      origCards: cards,
+      prompt,
+      size,
+      areaCapacities: capacities,
+      areaLimits: limits,
+      areaNames: names,
+      pattern: pattern,
+      poxiType: poxi_type,
+      cancelable: cancelable,
+    });
+    model.initializeCards();
+    model.accepted.connect(() => replyToServer(model.result));
+    model.rejected.connect(() => replyToServer([]));
+    activate();
+    popupReady(Command.AskForArrangeCards, data, model);
+  }
+
+  function askForChoices(sender, data) {
+    const [ choices, all_choices, [ min_num, max_num], cancelable, skill_name, prompt, detailed ] = data;
+    root.prompt = prompt || `#AskForChoice:::${skill_name}`;
+    activate();
+    const modelComponent = Qt.createComponent("LunarLtk.Models.Popups", "ChoicesModel");
+    const model = modelComponent.createObject(null, {
+      choices,
+      allChoices: all_choices,
+      minNum: min_num,
+      maxNum: max_num,
+      cancelable,
+      skillName: skill_name,
+      prompt,
+      detailed,
+    });
+    model.accepted.connect(() => replyToServer(model.result));
+    model.rejected.connect(() => replyToServer([]));
+    popupReady(Command.AskForChoices, data, model);
+  }
+
+  function askForPoxi(sender, dat) {
+    const { type, data, extra_data, cancelable } = dat;
+    const modelComponent = Qt.createComponent("LunarLtk.Models.Popups", "PoxiModel");
+    const model = modelComponent.createObject(null, {
+      poxiType: type,
+      cardData: data,
+      cancelable,
+      extraData: extra_data,
+    });
+    model.accepted.connect(() => replyToServer(model.selectedIds));
+    model.rejected.connect(() => replyToServer([]));
+    activate();
+    popupReady(Command.AskForPoxi, dat, model);
+  }
+
+  function askForMoveCardInBoard(sender, data) {
+    const { cards, cardsPosition, playerIds } = data;
+    const modelComponent = Qt.createComponent("LunarLtk.Models.Popups", "MoveCardInBoardModel");
+    const model = modelComponent.createObject(null, {
+      cardIds: cards,
+      cardsPosition,
+      playerIds,
+    });
+    model.accepted.connect(() => replyToServer({
+      cardId: model.result,
+      pos: cardsPosition[cards.indexOf(model.result)],
+    }));
+    activate();
+    popupReady(Command.AskForMoveCardInBoard, data, model);
+  }
+
+  function askForCardChosen(sender, data) {
+    const { card_data, prompt, visible_data } = data;
+    const modelComponent = Qt.createComponent("LunarLtk.Models.Popups", "PlayerCardModel");
+    const model = modelComponent.createObject(null, {
+      prompt: prompt,
+      cardData: card_data,
+      cardVisibility: visible_data,
+    });
+    model.accepted.connect(() => replyToServer(model.selectedId));
+    model.rejected.connect(() => replyToServer(""));
+    activate();
+    popupReady(Command.AskForCardChosen, data, model);
+  }
+
+  function gameOver(sender, jsonData) {
+    const modelComponent = Qt.createComponent("LunarLtk.Models.Popups", "GameOverModel");
+    const model = modelComponent.createObject();
+    model.winner = jsonData;
+    deActivate();
+    popupReady(Command.GameOver, jsonData, model);
+  }
+
   // 确定只会修改model属性的逻辑都搬家到这里
   function setupCallbacks() {
     roomPage.addCallback(Command.NetStateChanged, netStateChanged);
@@ -349,6 +443,13 @@ QtObject {
     roomPage.addCallback(Command.AskForUseActiveSkill, askForUseActiveSkill);
     roomPage.addCallback(Command.AskForResponseCard, askForResponseCard);
 
+    roomPage.addCallback(Command.AskForChoices, askForChoices);
+    roomPage.addCallback(Command.AskForPoxi, askForPoxi);
+    roomPage.addCallback(Command.AskForArrangeCards, askForArrangeCards);
+    roomPage.addCallback(Command.AskForMoveCardInBoard, askForMoveCardInBoard);
+    roomPage.addCallback(Command.AskForCardChosen, askForCardChosen);
+    roomPage.addCallback(Command.GameOver, gameOver);
+    
     roomPage.addCallback(Command.ReplyToServer, (_, data) => replyToServer(data));
   }
 

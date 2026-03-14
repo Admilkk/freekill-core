@@ -67,6 +67,53 @@ W.PageBase {
       Ltk.finishRequestUI();
       applyChange({});
     }
+
+    onPopupReady: (command, data, model) => {
+      const pop = roomScene.popupBox;
+      switch (command) {
+        case Command.AskForArrangeCards:
+          pop.sourceComponent = Qt.createComponent("LunarLtk.Pages.Popups", "ArrangeCardsBox");
+          pop.item.dataModel = model;
+          pop.item.arrangeCards();
+          break;
+        case Command.AskForChoices:
+          model.accepted.connect(() => dataModel.replyToServer(model.result));
+          model.rejected.connect(() => dataModel.replyToServer([]));
+          pop.sourceComponent = Qt.createComponent("LunarLtk.Pages.Popups", "ChoicesBox");
+          const choicesBox = pop.item;
+          choicesBox.dataModel = model;
+          if (choicesBox.isOneLine && model.minNum === 1 && model.maxNum === 1) {
+            choicesBox.title.visible = false;
+            choicesBox.background.visible = false;
+            choicesBox.x = (roomScene.width - choicesBox.width) / 2;
+            choicesBox.y = dashboard.y - 20;
+          }
+          break;
+        case Command.AskForCardChosen:
+          pop.sourceComponent = Qt.createComponent("LunarLtk.Pages.Popups", "PlayerCardBox");
+          pop.item.dataModel = model;
+          pop.moveToCenter();
+          break;
+        case Command.AskForPoxi:
+          pop.sourceComponent = Qt.createComponent("LunarLtk.Pages.Popups", "PoxiBox");
+          pop.item.dataModel = model;
+          pop.moveToCenter();
+          break;
+        case Command.AskForMoveCardInBoard:
+          pop.sourceComponent = Qt.createComponent("LunarLtk.Pages.Popups", "MoveCardInBoardBox");
+          pop.item.dataModel = model;
+          pop.item.arrangeCards();
+          break;
+        case Command.GameOver:
+          pop.sourceComponent = Qt.createComponent("LunarLtk.Pages.Popups", "GameOverBox");
+          pop.item.dataModel = model;
+          break;
+        default:
+          break;
+      }
+    }
+
+    
   }
 
   MediaPlayer {
@@ -723,17 +770,11 @@ W.PageBase {
     addCallback(Command.UpdateCard, Logic.callbacks["UpdateCard"]);
     addCallback(Command.MoveFocus, Logic.callbacks["MoveFocus"]);
     addCallback(Command.AskForGeneral, Logic.callbacks["AskForGeneral"]);
-    addCallback(Command.AskForArrangeCards, Logic.callbacks["AskForArrangeCards"]);
     addCallback(Command.AskForExchange, Logic.callbacks["AskForExchange"]);
-    addCallback(Command.AskForChoices, Logic.callbacks["AskForChoices"]);
-    addCallback(Command.AskForCardChosen, Logic.callbacks["AskForCardChosen"]);
-    addCallback(Command.AskForPoxi, Logic.callbacks["AskForPoxi"]);
-    addCallback(Command.AskForMoveCardInBoard, Logic.callbacks["AskForMoveCardInBoard"]);
     addCallback(Command.AskForCardsAndChoice, Logic.callbacks["AskForCardsAndChoice"]);
     addCallback(Command.AskForUseCard, Logic.callbacks["AskForUseCard"]);
     addCallback(Command.Animate, Logic.callbacks["Animate"]);
     addCallback(Command.LogEvent, Logic.callbacks["LogEvent"]);
-    addCallback(Command.GameOver, Logic.callbacks["GameOver"]);
     addCallback(Command.FillAG, Logic.callbacks["FillAG"]);
     addCallback(Command.AskForAG, Logic.callbacks["AskForAG"]);
     addCallback(Command.TakeAG, Logic.callbacks["TakeAG"]);

@@ -355,33 +355,6 @@ callbacks["AskForGeneral"] = (sender, data) => {
   box.refreshPrompt();
 }
 
-callbacks["AskForArrangeCards"] = (sender, data) => {
-  const { cards, prompt, size, capacities, limits, is_free, names, pattern, poxi_type, cancelable } = data;
-
-  const modelComponent = Qt.createComponent("LunarLtk.Models.Popups", "ArrangeCardsModel");
-  const model = modelComponent.createObject(null, {
-    origCards: cards,
-    prompt,
-    size,
-    areaCapacities: capacities,
-    areaLimits: limits,
-    // freeArrange: is_free,
-    areaNames: names,
-    pattern: pattern,
-    poxiType: poxi_type,
-    cancelable: cancelable,
-  });
-  model.initializeCards();
-  model.accepted.connect(() => roomScene.dataModel.replyToServer(model.result));
-  model.rejected.connect(() => roomScene.dataModel.replyToServer([]));
-
-  roomScene.dataModel.activate();
-  roomScene.popupBox.sourceComponent =
-    Qt.createComponent("LunarLtk.Pages.Popups", "ArrangeCardsBox");
-  roomScene.popupBox.item.dataModel = model;
-  roomScene.popupBox.item.arrangeCards();
-}
-
 callbacks["AskForExchange"] = (sender, data) => {
   const cards = [];
   const cards_name = [];
@@ -410,102 +383,6 @@ callbacks["AskForExchange"] = (sender, data) => {
   box.accepted.connect(() => {
     roomScene.dataModel.replyToServer(box.getResult());
   });
-}
-
-callbacks["AskForChoices"] = (sender, data) => {
-  // jsonData: [ string[] choices, string skill ]
-  // TODO: multiple choices, e.g. benxi_ol
-  const [ choices, all_choices, [ min_num, max_num], cancelable, skill_name, prompt, detailed ] = data;
-  roomScene.dataModel.prompt = prompt || `#AskForChoice:::${skill_name}`;
-  roomScene.dataModel.activate();
-
-  const modelComponent = Qt.createComponent("LunarLtk.Models.Popups", "ChoicesModel");
-  const model = modelComponent.createObject(null, {
-    choices,
-    allChoices: all_choices,
-    minNum: min_num,
-    maxNum: max_num,
-    cancelable,
-    skillName: skill_name,
-    prompt,
-    detailed,
-  });
-  model.accepted.connect(() => roomScene.dataModel.replyToServer(model.result));
-  model.rejected.connect(() => roomScene.dataModel.replyToServer([]));
-
-  roomScene.popupBox.sourceComponent = Qt.createComponent("LunarLtk.Pages.Popups", "ChoicesBox");
-  const box = roomScene.popupBox.item;
-  box.dataModel = model;
-
-  // 因为box中取不到roomScene的内容就写在这里
-  if (box.isOneLine && min_num === 1 && max_num === 1) {
-    box.title.visible = false;
-    box.background.visible = false;
-    box.x = (roomScene.width - box.width) / 2;
-    box.y = dashboard.y - 20;
-  }
-}
-
-callbacks["AskForCardChosen"] = (sender, data) => {
-  // jsonData: [ int[] handcards, int[] equips, int[] delayedtricks,
-  //  string reason ]
-  const { card_data, prompt, visible_data } = data;
-
-  const modelComponent = Qt.createComponent("LunarLtk.Models.Popups", "PlayerCardModel");
-  const model = modelComponent.createObject(null, {
-    prompt: prompt,
-    cardData: card_data,
-    cardVisibility: visible_data,
-  });
-  model.accepted.connect(() => roomScene.dataModel.replyToServer(model.selectedId));
-  model.rejected.connect(() => roomScene.dataModel.replyToServer(""));
-
-  roomScene.dataModel.activate();
-  const pop = roomScene.popupBox;
-  pop.sourceComponent = Qt.createComponent("LunarLtk.Pages.Popups", "PlayerCardBox");
-  pop.item.dataModel = model;
-  pop.moveToCenter();
-}
-
-callbacks["AskForPoxi"] = (sender, dat) => {
-  const { type, data, extra_data, cancelable } = dat;
-
-  const modelComponent = Qt.createComponent("LunarLtk.Models.Popups", "PoxiModel");
-  const model = modelComponent.createObject(null, {
-    poxiType: type,
-    cardData: data,
-    cancelable,
-    extraData: extra_data,
-  });
-  model.accepted.connect(() => roomScene.dataModel.replyToServer(model.selectedIds));
-  model.rejected.connect(() => roomScene.dataModel.replyToServer([]));
-
-  roomScene.dataModel.activate();
-  const pop = roomScene.popupBox;
-  pop.sourceComponent = Qt.createComponent("LunarLtk.Pages.Popups", "PoxiBox");
-  pop.item.dataModel = model;
-  pop.moveToCenter();
-}
-
-callbacks["AskForMoveCardInBoard"] = (sender, data) => {
-  const { cards, cardsPosition, playerIds } = data;
-
-  const modelComponent = Qt.createComponent("LunarLtk.Models.Popups", "MoveCardInBoardModel");
-  const model = modelComponent.createObject(null, {
-    cardIds: cards,
-    cardsPosition,
-    playerIds,
-  });
-  model.accepted.connect(() => roomScene.dataModel.replyToServer({
-    cardId: model.result,
-    pos: cardsPosition[cards.indexOf(model.result)],
-  }));
-
-  roomScene.dataModel.activate();
-  roomScene.popupBox.sourceComponent =
-    Qt.createComponent("LunarLtk.Pages.Popups", "MoveCardInBoardBox");
-  roomScene.popupBox.item.dataModel = model;
-  roomScene.popupBox.item.arrangeCards();
 }
 
 callbacks["AskForCardsAndChoice"] = (sender, data) => {
@@ -686,18 +563,6 @@ callbacks["LogEvent"] = (sender, data) => {
     default:
       break;
   }
-}
-
-callbacks["GameOver"] = (sender, jsonData) => {
-  const modelComponent = Qt.createComponent("LunarLtk.Models.Popups", "GameOverModel");
-  const model = modelComponent.createObject();
-  model.winner = jsonData;
-
-  roomScene.dataModel.deActivate();
-  roomScene.popupBox.sourceComponent =
-    Qt.createComponent("LunarLtk.Pages.Popups", "GameOverBox");
-  const box = roomScene.popupBox.item;
-  box.dataModel = model;
 }
 
 callbacks["FillAG"] = (sender, data) => {

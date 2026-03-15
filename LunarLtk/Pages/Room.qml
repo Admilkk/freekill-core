@@ -41,7 +41,7 @@ W.PageBase {
 
     onSeatChanged: arrangePhotos();
     onPlayerAdded: model => roomScene.photoModel.push(model);
-    onCardsMoved: (move, data) => Logic.moveCards(move, data);
+    onCardsMoved: (move, data) => moveCards(move, data);
 
     onActivated: {
       progressAnim.from = (dataModel.requestDuration / dataModel.requestTotal) * 100.0;
@@ -620,7 +620,7 @@ W.PageBase {
     onActivated: if (dataModel.cancelEnabled) {
       Ltk.updateRequestUI("Button", "Cancel");
     } else {
-      Logic.replyToServer("");
+      dataModel.replyToServer("");
     }
   }
 
@@ -737,10 +737,14 @@ W.PageBase {
           skillInteraction.item?.clicked();
           break;
         case "custom":
-          skillInteraction.sourceComponent =
-            Qt.createComponent(Cpp.path + "/" + data.qml_path + ".qml");
-          skillInteraction.item.skill = skill_name;
-          skillInteraction.item.extra_data = data;
+          skillInteraction.sourceComponent = Lua.createComponent(data.qml);
+          if (data.qml.model) {
+            const model = Lua.createQmlObject(data.qml.model);
+            if ("skillName" in model) {
+              model.skillName = skill_name;
+            }
+            skillInteraction.item.model = model;
+          }
           skillInteraction.item?.clicked();
           break;
         default:

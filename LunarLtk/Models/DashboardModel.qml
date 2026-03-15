@@ -104,7 +104,9 @@ QtObject {
     skills = [];
     fakeSkills = [];
     for (const s of self.player_skills) {
-      addSkill(s.name);
+      if (s.visible) {
+        addSkill(s.name);
+      }
     }
   }
 

@@ -41,7 +41,7 @@ W.PageBase {
 
     onSeatChanged: arrangePhotos();
     onPlayerAdded: model => roomScene.photoModel.push(model);
-    onCardsMoved: (move, data) => moveCards(move, data);
+    onCardsMoved: (move, data) => roomScene.moveCards(move, data);
 
     onActivated: {
       progressAnim.from = (dataModel.requestDuration / dataModel.requestTotal) * 100.0;

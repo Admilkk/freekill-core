@@ -33,7 +33,7 @@ GraphicsBox {
     anchors.bottom: parent.bottom
     anchors.bottomMargin: 8
     anchors.horizontalCenter: parent.horizontalCenter
-    visible: root.dataModel && root.dataModel.minNum !== 1 && root.dataModel.maxNum !== 1
+    visible: root.dataModel && root.dataModel.maxNum !== 1
 
     spacing: 16
 

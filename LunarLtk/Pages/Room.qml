@@ -39,7 +39,7 @@ W.PageBase {
     id: dataModel
     roomPage: roomScene
 
-    onSeatChanged: Logic.arrangePhotos();
+    onSeatChanged: arrangePhotos();
     onPlayerAdded: model => roomScene.photoModel.push(model);
     onCardsMoved: (move, data) => Logic.moveCards(move, data);
 
@@ -163,8 +163,8 @@ W.PageBase {
       }
     }
 
-    onWidthChanged: Logic.arrangePhotos();
-    onHeightChanged: Logic.arrangePhotos();
+    onWidthChanged: arrangePhotos();
+    onHeightChanged: arrangePhotos();
 
     InvisibleCardArea {
       id: drawPile
@@ -751,15 +751,6 @@ W.PageBase {
     });
   }
 
-  function getAreaItem(area) {
-    if (area === Ltk.Card.DrawPile) {
-      return drawPile;
-    } else if (area === Ltk.Card.DiscardPile || area === Ltk.Card.Processing ||
-             area === Ltk.Card.Void) {
-      return tablePile;
-    }
-  }
-
   function cancelAllFocus() {
     for (const model of dataModel.players) {
       const item = model.photoItem;
@@ -1037,11 +1028,197 @@ W.PageBase {
     }
   }
 
+  function arrangeManyPhotos() {
+    /* Layout of photos:
+     * +----------------+
+     * |    -2 ... 2    |
+     * | -1           1 |
+     * |              0 |
+     * +----------------+
+     */
+
+    const playerNum = roomScene.dataModel.playerNum;
+    const photoBaseWidth = 175 * 0.75;
+    const photoMaxWidth = 175 * 0.75;
+    // const verticalSpacing = 32;
+    const verticalSpacing = roomArea.height * 0.08;
+    // Padding is negative, because photos are scaled.
+    const roomAreaPadding = 16;
+
+    let horizontalSpacing = 8;
+    let photoWidth = (roomArea.width - horizontalSpacing * playerNum)
+                   / (playerNum - 1);
+    let photoScale = 1;
+    if (photoWidth > photoMaxWidth) {
+      photoWidth = photoMaxWidth;
+      horizontalSpacing = (roomArea.width - photoWidth * (playerNum - 1))
+                        / playerNum;
+    } else {
+      photoScale = photoWidth / photoBaseWidth;
+    }
+
+    const horizontalPadding = (photoWidth - photoBaseWidth) / 2;
+    const startX = horizontalPadding + horizontalSpacing;
+    const padding = photoWidth + horizontalSpacing;
+    let regions = [
+      {
+        x: startX + padding * (playerNum - 2),
+        y: roomScene.height - 192,
+        scale: photoScale
+      },
+    ];
+    let i;
+    for (i = 0; i < playerNum - 1; i++) {
+      regions.push({
+        x: startX + padding * (playerNum - 2 - i),
+        y: roomAreaPadding,
+        scale: photoScale,
+      });
+    }
+    regions[1].y += verticalSpacing * 3;
+    regions[regions.length - 1].y += verticalSpacing * 3;
+    regions[2].y += verticalSpacing;
+    regions[regions.length - 2].y += verticalSpacing;
+
+    let item, region;
+
+    for (i = 0; i < playerNum; i++) {
+      item = photos.itemAt(i);
+      if (!item)
+        continue;
+
+      region = regions[photoModel[i].index];
+      item.x = region.x;
+      item.y = region.y;
+      item.scale = region.scale;
+    }
+  }
+
+  function arrangePhotos() {
+    const playerNum = roomScene.dataModel.playerNum;
+    if (playerNum > 8) {
+      return arrangeManyPhotos();
+    }
+
+    /* Layout of photos:
+     * +---------------+
+     * |   6 5 4 3 2   |
+     * | 7           1 |
+     * |             0 |
+     * +---------------+
+     */
+
+    const photoWidth = 175 * 0.75;
+    // Padding is negative, because photos are scaled.
+    const roomAreaPadding = 16;
+    const verticalPadding = 0;
+    const verticalSpacing = roomArea.height * 0.08;
+    const horizontalSpacing = (roomArea.width - photoWidth * 7) / 8;
+
+    // Position 1-7
+    const startX = verticalPadding + horizontalSpacing;
+    const padding = photoWidth + horizontalSpacing;
+    const regions = [
+      { x: startX + padding * 6, y: roomScene.height - 192 },
+      { x: startX + padding * 6, y: roomAreaPadding + verticalSpacing * 3 },
+      { x: startX + padding * 5, y: roomAreaPadding + verticalSpacing },
+      { x: startX + padding * 4, y: roomAreaPadding },
+      { x: startX + padding * 3, y: roomAreaPadding },
+      { x: startX + padding * 2, y: roomAreaPadding },
+      { x: startX + padding, y: roomAreaPadding + verticalSpacing },
+      { x: startX, y: roomAreaPadding + verticalSpacing * 3 },
+    ];
+
+    const regularSeatIndex = [
+      [0],
+      [0, 4],
+      [0, 3, 5],
+      [0, 1, 4, 7],
+      [0, 1, 3, 5, 7],
+      [0, 1, 3, 4, 5, 7],
+      [0, 1, 2, 3, 5, 6, 7],
+      [0, 1, 2, 3, 4, 5, 6, 7],
+    ];
+    const seatIndex = regularSeatIndex[playerNum - 1];
+
+    let item, region, i;
+
+    for (i = 0; i < playerNum; i++) {
+      item = photos.itemAt(i);
+      if (!item)
+        continue;
+
+      region = regions[seatIndex[photoModel[i].index]];
+      item.x = region.x;
+      item.y = region.y;
+    }
+  }
+
+  function getAreaItem(area, id) {
+    if (area === Ltk.Card.DrawPile) {
+      return drawPile;
+    } else if (area === Ltk.Card.DiscardPile || area === Ltk.Card.Processing ||
+             area === Ltk.Card.Void) {
+      return tablePile;
+    }
+
+    const photo = getPhoto(id);
+    if (!photo) {
+      return null;
+    }
+
+    if (area === Ltk.Card.PlayerHand && id === Cpp.self.id) {
+      return dashboard.handcardArea;
+    }
+
+    return photo.getAreaItem(area);
+  }
+
+  function moveCards(move, data) {
+    const from = getAreaItem(move.fromArea, move.from);
+    const to = getAreaItem(move.toArea, move.to);
+    if (!from || !to) return;
+    if (from === to && from !== tablePile) return;
+    if (from === tablePile && move.toArea === Ltk.Card.DiscardPile) return;
+
+    const items = from.remove(data, move.fromSpecialName);
+    if (items.length > 0)
+      to.add(items, move.specialName);
+    to.updateCardPosition(true);
+  }
+
+  function showVirtualCard(sender, data) {
+    const [card_data, playerid, footnote, event_id] = data;
+    let from = drawPile;
+    const photo = getPhoto(playerid);
+    if (photo) {
+      from = (playerid === Cpp.self.id ? dashboard.handcardArea : photo.handcardArea);
+    }
+
+    const items = [];
+    for (let i = 0; i < card_data.length; i++) {
+      const dat = Lua.call("ToQml", card_data[i]);
+      const card = Lua.createQmlObject(dat, roomScene.dynamicCardArea);
+      const parentPos = roomScene.mapFromItem(from, 0, 0);
+      card.x = parentPos.x - card.width / 2;
+      card.y = parentPos.y - card.height / 2;
+      // card.holding_event_id = event_id;
+      card.known = true;
+      if (footnote) {
+        card.footnote = footnote;
+        card.footnoteVisible = true;
+      }
+      items.push(card);
+    }
+
+    tablePile.add(items);
+    tablePile.updateCardPosition(true);
+  }
+
   function setupCallbacks() {
     dataModel.setupCallbacks();
 
     // TODO 摆烂了 反正这些后面也是得重构 懒得搬砖了
-    addCallback(Command.ShowVirtualCard, Logic.callbacks["ShowVirtualCard"]);
     addCallback(Command.AskForGeneral, Logic.callbacks["AskForGeneral"]);
     addCallback(Command.AskForExchange, Logic.callbacks["AskForExchange"]);
     addCallback(Command.AskForCardsAndChoice, Logic.callbacks["AskForCardsAndChoice"]);
@@ -1058,6 +1235,8 @@ W.PageBase {
     addCallback(Command.MoveFocus, moveFocus);
     addCallback(Command.Animate, doAnimate);
     addCallback(Command.LogEvent, logEvent);
+
+    addCallback(Command.ShowVirtualCard, showVirtualCard);
   }
 
   Component.onCompleted: {
@@ -1070,6 +1249,6 @@ W.PageBase {
       photoModel.push(dataModel.players[i]);
     }
 
-    Logic.arrangePhotos();
+    arrangePhotos();
   }
 }

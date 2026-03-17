@@ -75,7 +75,7 @@ function SkillEffect:main()
         end
       elseif not skill.click_count then
         if type(audio_index) == "table" then
-          audio_index = table.random(audio_index)
+          audio_index = room:tableRandomPick(audio_index)
         end
         if audio_index ~= 0 then
           player:broadcastSkillInvoke(skill:getSkeleton().name, audio_index)

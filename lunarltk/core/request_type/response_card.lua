@@ -160,7 +160,7 @@ end
 function ReqResponseCard:doCancelButton()
   if self.skill_name then
     self:selectSkill(self.skill_name, { selected = false })
-    self.scene:notifyUI()
+    --self.scene:notifyUI()
     return
   end
   return ReqActiveSkill:doCancelButton()

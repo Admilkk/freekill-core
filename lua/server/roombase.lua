@@ -38,6 +38,8 @@ function ServerRoomBase:initialize(_room)
   self.timeout = _room:getTimeout()
   self.settings = cbor.decode(self.room:settings())
 
+  self._rand_seed = math.random(os.time())
+  self._rng = fk.rand(self._rand_seed)
   self._resume_fn = Util.TrueFunc
 
   self.callbacks = {}
@@ -520,6 +522,59 @@ end
 function ServerRoomBase:setBanner(name, value)
   Fk.Base.RoomBase.setBanner(self, name, value)
   self:doBroadcastNotify("SetBanner", { name, value })
+end
+
+-- 生成随机数。该随机数只与当前游戏房间有关，
+-- 以便后续可以只根据随机数种子和玩家的决策来重现整个对局。
+function ServerRoomBase:random(m, n)
+  return self._rng:random(m, n)
+end
+
+-- 重置房间的随机数种子，仅用于复盘阶段
+function ServerRoomBase:randomseed(x, y)
+  return self._rng:randomseed(x, y)
+end
+
+--- 基于本房间的随机发生器来原地打乱某个表。
+---@generic T
+---@param t T[]
+function ServerRoomBase:shuffleTable(t)
+  if #t == 2 then
+    if self:random() < 0.5 then
+      t[1], t[2] = t[2], t[1]
+    end
+  else
+    for i = #t, 2, -1 do
+      local j = self:random(i)
+      t[i], t[j] = t[j], t[i]
+    end
+  end
+end
+
+---@generic T
+---@param t T[]
+---@return T
+---@diagnostic disable-next-line
+function ServerRoomBase:tableRandomPick(t) end
+
+--- 基于本房间的随机发生器来从表中随机选取
+---@generic T
+---@param t T[]
+---@param n integer
+---@return T[]
+---@diagnostic disable-next-line: duplicate-set-field
+function ServerRoomBase:tableRandomPick(t, n)
+  local n0 = n
+  n = n or 1
+  if #t == 0 then return n0 ~= nil and {} or nil end
+  local tmp = {table.unpack(t)}
+  local ret = {}
+  while n > 0 and #tmp > 0 do
+    local i = self:random(1, #tmp)
+    table.insert(ret, table.remove(tmp, i))
+    n = n - 1
+  end
+  return n0 == nil and ret[1] or ret
 end
 
 function ServerRoomBase:serialize(player)

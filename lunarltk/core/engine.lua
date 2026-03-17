@@ -516,6 +516,9 @@ function Engine:getGeneralsRandomly(num, generalPool, except, filter)
     return {}
   end
 
+  if RoomInstance then
+    return RoomInstance:tableRandomPick(availableGenerals, num)
+  end
   return table.random(availableGenerals, num)
 end
 

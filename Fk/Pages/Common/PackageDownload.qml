@@ -6,8 +6,6 @@ import Fk.Widgets as W
 W.PageBase {
   id: root
 
-
-  property bool needRestart: false
   property var hasHandlerModel: []
 
   function setPackages(summary) {
@@ -26,21 +24,6 @@ W.PageBase {
     const item = packageRepeater.itemAt(root.currentPackageIndex);
     if (!item.hasError) {
       item.subTitle = "<font color='lime'>✓</font> Download Complete.";
-    }
-
-    let coreItem, coreModel;
-    for (let i = 0; i < packageRepeater.count; i++) {
-      const it = packageRepeater.itemAt(i);
-      if (it.myName === "freekill-core") {
-        coreItem = it;
-        coreModel = packageModel.get(i);
-        break;
-      }
-    }
-    if (coreItem && coreModel) {
-      if (coreModel.oldHash !== coreModel.hash && coreItem.hasError === false) {
-        root.needRestart = true;
-      }
     }
 
     if (hasHandlerModel.length > 0) {
@@ -175,32 +158,27 @@ W.PageBase {
       font.pixelSize: 20
       wrapMode: Text.WrapAnywhere
 
-      text: "正在与服务器同步拓展包。<br>请耐心等待，<b>必须在所有拓展包完成下载后才可以关闭该页面</b>。<br><br>若下载途中有<font color='red'>错误</font>产生，<b>则将无法进入服务器</b>，请截图并寻求帮助。" + (root.needRestart ? "<br><br>游戏核心包freekill-core发生更新，必须重启游戏才能生效，请点击按钮关闭游戏后手动重新打开。" : "")
+      text: "正在与服务器同步拓展包。<br>请耐心等待，<b>必须在所有拓展包完成下载后才可以关闭该页面</b>。<br><br>若下载途中有<font color='red'>错误</font>产生，<b>则将无法进入服务器</b>，请截图并寻求帮助。"
     }
 
     W.ButtonContent {
       id: backButton
       visible: false
-      text: root.needRestart ? "已完成，点击关闭游戏" : "已完成，点击返回"
+      text: "已完成，点击返回"
       anchors.bottom: parent.bottom
       anchors.bottomMargin: 8
       width: parent.width - 16
       x: 8
 
       onClicked: {
-        if (root.needRestart) {
-          Config.saveConf();
-          Qt.quit();
-        } else {
-          App.quitPage();
-        }
+        App.quitPage();
       }
     }
 
     W.ButtonContent {
       id: repairButton
       visible: false
-      text: "修复全部内容并退出"
+      text: "修复全部内容并返回"
       anchors.bottom: backButton.top
       anchors.bottomMargin: 8
       width: parent.width - 16
@@ -247,7 +225,7 @@ W.PageBase {
     } else if (/Http/g.exec(errorMsg)) {
       return ["网络错误", null];
     }
-  
+
     return [null, null];
   }
 }

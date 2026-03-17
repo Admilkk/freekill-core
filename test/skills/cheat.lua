@@ -43,7 +43,7 @@ cheat:addEffect("active", {
     local cardName = room:askToChoice(from, {choices = allCardNames, skill_name = "cheat"})
     local toGain
     if #allCardMapper[cardName] > 0 then
-      toGain = table.random(allCardMapper[cardName])
+      toGain = room:tableRandomPick(allCardMapper[cardName])
     end
     room:obtainCard(effect.from, toGain, true, fk.ReasonPrey, effect.from, "cheat")
   end

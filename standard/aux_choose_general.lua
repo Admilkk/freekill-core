@@ -18,7 +18,7 @@ Fk:addChooseGeneralRule{
     end
   end,
   default_choice = function(data, extra_data)
-    return table.random(data, extra_data.n)
+    return RoomInstance:tableRandomPick(data, extra_data.n)
   end
 }
 

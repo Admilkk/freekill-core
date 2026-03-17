@@ -833,7 +833,6 @@ function Card:getAvailableTargets(player, extra_data)
   -- 选定目标的优先逻辑：额外的锁定目标(求桃锁定濒死角色)>牌本身的锁定目标(南蛮无中装备)>所有角色
   local avail = (self:getFixedTargets(player, extra_data) or room.alive_players)
   local tos = table.simpleClone(avail)
-  --[[
   -- 过滤额外的目标限制，不需要了，下面会判
   for _, limit in ipairs({"exclusive_targets", "must_targets", "include_targets"}) do
     if type(extra_data[limit]) == "table" and #extra_data[limit] > 0 then
@@ -859,6 +858,7 @@ function Card:getAvailableTargets(player, extra_data)
     else
       --最小目标过多则直接当作没有复杂规则，每个目标平权。eg.荆襄盛世
       if #tos >= n then
+        if RoomInstance then return RoomInstance:tableRandomPick(tos, n) end
         return table.random(tos, n)
       else
         return {}
@@ -893,6 +893,7 @@ function Card:getDefaultTarget(player, extra_data)
       end
     end
   else
+    if RoomInstance then return RoomInstance:tableRandomPick(tos, n) end
     return table.random(tos, n)
   end
   return {}

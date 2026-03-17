@@ -174,17 +174,12 @@ end
 -- misc
 
 --- 准备房间牌堆
+---@param new_draw_pile integer[]
 function CardManager:prepareDrawPile(new_draw_pile)
   local gamemode = Fk.game_modes[self:getSettings('gameMode')] or Fk.game_modes["aaa_role_mode"]
+  local _, void_pile = gamemode:buildDrawPile()
 
-  local draw_pile, void_pile = gamemode:buildDrawPile()
-
-  if new_draw_pile then
-    self.draw_pile = new_draw_pile
-  else
-    table.shuffle(draw_pile)
-    self.draw_pile = draw_pile
-  end
+  self.draw_pile = new_draw_pile
 
   for _, id in ipairs(self.draw_pile) do
     self:setCardArea(id, Card.DrawPile, nil)
@@ -196,17 +191,9 @@ function CardManager:prepareDrawPile(new_draw_pile)
   end
 end
 
+---@param new_draw_pile integer[]
 function CardManager:shuffleDrawPile(new_draw_pile)
-  if #self.draw_pile + #self.discard_pile == 0 then
-    return
-  end
-
-  if new_draw_pile then
-    self.draw_pile = new_draw_pile
-  else
-    table.shuffle(self.discard_pile)
-    table.insertTable(self.draw_pile, self.discard_pile)
-  end
+  self.draw_pile = new_draw_pile
   self.discard_pile = {}
   for _, id in ipairs(self.draw_pile) do
     self:setCardArea(id, Card.DrawPile, nil)
@@ -231,49 +218,6 @@ function CardManager:getSubcardsByRule(card, fromAreas)
   end
 
   return cardIds
-end
-
----从牌堆（或弃牌堆）内随机抽任意张牌
----@param pattern string @ 查找规则
----@param num? number @ 查找数量
----@param fromPile? "drawPile" | "discardPile" | "allPiles" @ 查找的来源区域，默认从牌堆内寻找
----@return integer[] @ id列表 可能空
-function CardManager:getCardsFromPileByRule(pattern, num, fromPile)
-  num = num or 1
-  local pileToSearch = self.draw_pile
-  if fromPile == "discardPile" then
-    pileToSearch = self.discard_pile
-  elseif fromPile == "allPiles" then
-    pileToSearch = table.simpleClone(self.draw_pile)
-    table.insertTable(pileToSearch, self.discard_pile)
-  end
-
-  if #pileToSearch == 0 then
-    return {}
-  end
-
-  local matchedIds = {}
-  for _, id in ipairs(pileToSearch) do
-    if Fk:getCardById(id):matchPattern(pattern) then
-      table.insert(matchedIds, id)
-    end
-  end
-
-  if #matchedIds == 0 then
-    return {}
-  end
-
-  local cardPack = {}
-
-  local loopTimes = math.min(num, #matchedIds)
-  local i
-  for _ = 1, loopTimes do
-    i = math.random(1, #matchedIds)
-    table.insert(cardPack, matchedIds[i])
-    table.remove(matchedIds, i)
-  end
-
-  return cardPack
 end
 
 function CardManager:serialize()
@@ -326,7 +270,7 @@ end
 --- 将一些牌洗入某个区域，不产生移动事件和动画（仅限弃牌堆、摸牌堆、虚空区
 ---@param cards integer|integer[]|Card|Card[] @ 牌
 ---@param area CardArea @ 目标区域
----@param areaCards? integer[] @ 若指定顺序，则输入新区域牌的id表
+---@param areaCards integer[] @ 输入新区域牌的id表
 ---@return integer[] @ 返回新区域的牌id表
 function CardManager:changeCardArea(cards, area, areaCards)
   local areaMap = {
@@ -345,13 +289,6 @@ function CardManager:changeCardArea(cards, area, areaCards)
       table.removeOne(self.discard_pile, id)
     elseif oldPlace == Card.Void then
       table.removeOne(self.void, id)
-    end
-  end
-  if areaCards == nil then
-    areaCards = areaMap[area]
-    assert(areaCards)
-    for _, id in ipairs(cards) do
-      table.insert(areaCards, math.random(#areaCards + 1), id)
     end
   end
   if area == Card.DrawPile then

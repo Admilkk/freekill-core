@@ -42,7 +42,7 @@ end
 function GameLogic:run()
   -- default logic
   local room = self.room
-  table.shuffle(room.players)
+  room:shuffleTable(room.players)
 
   self:prepareGlobalSkills()
 
@@ -71,7 +71,7 @@ function GameLogic:assignRoles()
   local room = self.room
   local n = #room.players
   local roles = self.role_table[n]
-  table.shuffle(roles)
+  room:shuffleTable(roles)
 
   for i = 1, n do
     local p = room.players[i]
@@ -122,14 +122,14 @@ function GameLogic:chooseGenerals()
   end
 
   local nonlord = room:getOtherPlayers(lord, true)
-  local generals = table.random(room.general_pile, #nonlord * generalNum)
+  local generals = room:tableRandomPick(room.general_pile, #nonlord * generalNum)
 
   local req = Request:new(nonlord, "AskForGeneral")
   req.timeout = self.room:getSettings('generalTimeout')
   for i, p in ipairs(nonlord) do
     local arg = table.slice(generals, (i - 1) * generalNum + 1, i * generalNum + 1)
     req:setData(p, { arg, n })
-    req:setDefaultReply(p, table.random(arg, n))
+    req:setDefaultReply(p, room:tableRandomPick(arg, n))
   end
 
   for _, p in ipairs(nonlord) do
@@ -199,7 +199,10 @@ end
 
 function GameLogic:prepareDrawPile()
   local room = self.room
-  room:prepareDrawPile()
+  local gamemode = Fk.game_modes[self.room:getSettings('gameMode')] or Fk.game_modes["aaa_role_mode"]
+  local draw_pile = gamemode:buildDrawPile()
+  self.room:shuffleTable(draw_pile)
+  room:prepareDrawPile(draw_pile)
   room:doBroadcastNotify("PrepareDrawPile", room.draw_pile)
 end
 

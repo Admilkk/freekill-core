@@ -32,7 +32,7 @@ Fk:addPoxiMethod{
       local cards = pile[2]
       local lim = extra_data.min - #ret
       if #cards > lim then
-        table.insertTable(ret, table.random(cards, lim))
+        table.insertTable(ret, RoomInstance:random(cards, lim))
         break
       end
       table.insertTable(ret, cards)

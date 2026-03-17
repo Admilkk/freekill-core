@@ -12,6 +12,9 @@ class = require "middleclass"
 -- 老json只能待命了
 json = require "json"
 
+-- 调用此函数可创建单独的随机数发生器 行为与math.random一致，但保存单独的状态。
+fk.rand = require "xoshiro256starstar"
+
 cbor = require "server.rpc.cbor"
 
 -- 初始化随机数种子

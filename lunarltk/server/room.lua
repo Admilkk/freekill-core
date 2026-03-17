@@ -114,7 +114,7 @@ function Room:makeGeneralPile()
       trueNames[general.trueName] = true
     end
   end
-  table.shuffle(ret)
+  self:shuffleTable(ret)
   self.general_pile = ret
   return true
 end
@@ -786,7 +786,7 @@ function Room:askToDiscard(player, params)
     toDiscard = ret.cards
   else
     if params.cancelable then return {} end
-    toDiscard = table.random(canDiscards, minNum) ---@type integer[]
+    toDiscard = self:tableRandomPick(canDiscards, minNum) ---@type integer[]
   end
 
   if not params.skip then
@@ -837,7 +837,7 @@ function Room:askToChoosePlayers(player, params)
     if params.cancelable then
       return {}
     else
-      return table.random(params.targets, minNum)
+      return self:tableRandomPick(params.targets, minNum)
     end
   end
 end
@@ -903,7 +903,7 @@ function Room:askToCards(player, params)
     chosenCards = ret.cards
   else
     if params.cancelable then return {} end
-    chosenCards = table.random(canChosenCards, minNum)
+    chosenCards = self:tableRandomPick(canChosenCards, minNum)
   end
 
   return chosenCards
@@ -993,7 +993,7 @@ function Room:askToChooseCardsAndChoice(player, params)
   if result ~= "" then
     return result.cards, result.choice
   end
-  return table.random(cards, min), default_choice
+  return self:tableRandomPick(cards, min), default_choice
 end
 
 ---@class AskToChooseCardsAndPlayersParams: AskToChoosePlayersParams
@@ -1060,7 +1060,8 @@ function Room:askToChooseCardsAndPlayers(player, params)
     if params.cancelable then
       return {}, {}, false
     else
-      return table.random(params.targets, minTargetNum), table.random(pcards, minCardNum), false
+      return self:tableRandomPick(params.targets, minTargetNum),
+        self:tableRandomPick(pcards, minCardNum), false
     end
   end
 end
@@ -1285,14 +1286,14 @@ function Room:askToChooseCard(player, params)
         table.insertTable(handcards, t[2])
       end
     end
-    if #handcards == 0 then return 0 end
-    result = handcards[math.random(1, #handcards)]
+    if #handcards == 0 then return end
+    result = handcards[self:random(1, #handcards)]
   end
 
   if result == -1 then
     local handcards = target:getCardIds(Player.Hand)
-    if #handcards == 0 then return 0 end
-    result = table.random(handcards)
+    if #handcards == 0 then return  end
+    result = self:tableRandomPick(handcards)
   end
 
   return result
@@ -1416,7 +1417,7 @@ function Room:askToChooseCards(player, params)
   local hidden_num = #ret - #new_ret
   if hidden_num > 0 then
     table.insertTable(new_ret,
-    table.random(target:getCardIds(Player.Hand), hidden_num))
+    self:tableRandomPick(target:getCardIds(Player.Hand), hidden_num))
   end
   return new_ret
 end
@@ -1507,7 +1508,7 @@ function Room:askToChoices(player, params)
     if params.cancelable then
       return {}
     else
-      return table.random(params.choices, math.min(minNum, #params.choices))
+      return self:tableRandomPick(params.choices, math.min(minNum, #params.choices))
     end
   end
   return result
@@ -1543,7 +1544,7 @@ function Room:askToJointChoice(player, params)
   }
   for _, p in ipairs(players) do
     req:setData(p, data)
-    req:setDefaultReply(p, table.random(choices))  --默认项为随机选项
+    req:setDefaultReply(p, self:tableRandomPick(choices))  --默认项为随机选项
   end
   req:ask()
   if sendLog then
@@ -1615,7 +1616,7 @@ function Room:askToJointCards(player, params)
       if #cards > minNum then
         table.insert(toAsk, p)
       end
-      ret[p] = table.random(cards, minNum)
+      ret[p] = self:tableRandomPick(cards, minNum)
     end
     if #toAsk == 0 then
       return ret
@@ -1941,7 +1942,7 @@ function Room:returnToGeneralPile(g, position)
     end
   elseif position == "random" then
     while #g > 0 do
-      table.insert(self.general_pile, math.random(math.max(#self.general_pile - 1, 1)),
+      table.insert(self.general_pile, self:random(math.max(#self.general_pile - 1, 1)),
                    table.remove(g))
     end
   end
@@ -2263,9 +2264,9 @@ function Room:askToUseVirtualCard(player, params)
           return nil
         end
         if params.card_filter.fake_subcards then
-          card:addFakeSubcards(table.random(cards, params.card_filter.n[1]))
+          card:addFakeSubcards(self:tableRandomPick(cards, params.card_filter.n[1]))
         else
-          card:addSubcards(table.random(cards, params.card_filter.n[1]))
+          card:addSubcards(self:tableRandomPick(cards, params.card_filter.n[1]))
         end
       end
       card.skillName = skillName
@@ -2316,9 +2317,9 @@ function Room:askToUseVirtualCard(player, params)
           return nil
         end
         if params.card_filter.fake_subcards then
-          card:addFakeSubcards(table.random(cards, params.card_filter.n[1]))
+          card:addFakeSubcards(self:tableRandomPick(cards, params.card_filter.n[1]))
         else
-          card:addSubcards(table.random(cards, params.card_filter.n[1]))
+          card:addSubcards(self:tableRandomPick(cards, params.card_filter.n[1]))
         end
       end
       card.skillName = skillName
@@ -2429,7 +2430,7 @@ function Room:askToNumber(player, params)
     if params.cancelable then
       return nil
     else
-      return math.random(params.min, params.max)
+      return self:random(params.min, params.max)
     end
   end
 end
@@ -2740,7 +2741,7 @@ function Room:askToAG(player, params)
   local ret = req:getResult(player)
 
   if ret == "" and not cancelable then
-    ret = table.random(id_list)
+    ret = self:tableRandomPick(id_list)
   end
   return ret
 end
@@ -2976,7 +2977,7 @@ function Room:askToMoveCardInBoard(player, params)
   local result = req:getResult(player)
 
   if result == "" then
-    local randomIndex = math.random(1, #cards)
+    local randomIndex = self:random(1, #cards)
     result = { cardId = cards[randomIndex], pos = cardsPosition[randomIndex] }
   end
 
@@ -3170,7 +3171,14 @@ end
 
 --- 洗牌。
 function Room:shuffleDrawPile()
-  AbstractRoom.shuffleDrawPile(self)
+  if #self.draw_pile + #self.discard_pile == 0 then
+    return
+  end
+
+  self:shuffleTable(self.discard_pile)
+  table.insertTable(self.draw_pile, self.discard_pile)
+
+  AbstractRoom.shuffleDrawPile(self, self.draw_pile)
 
   self:doBroadcastNotify("ShuffleDrawPile", self.draw_pile)
 
@@ -3737,6 +3745,18 @@ end
 ---@param area CardArea @ 目标区域
 ---@param areaCards? integer[] @ 若指定顺序，则输入新区域牌的id表
 function Room:changeCardArea (cards, area, areaCards)
+  local areaMap = {
+    [Card.DrawPile] = self.draw_pile,
+    [Card.DiscardPile] = self.discard_pile,
+    [Card.Void] = self.void,
+  }
+  if areaCards == nil then
+    areaCards = areaMap[area]
+    assert(areaCards)
+    for _, id in ipairs(Card:getIdList(cards)) do
+      table.insert(areaCards, self:random(#areaCards + 1), id)
+    end
+  end
   local ret = AbstractRoom.changeCardArea(self, cards, area, areaCards)
   self:doBroadcastNotify("ChangeCardArea", {cards, area, areaCards or ret})
 end
@@ -3904,5 +3924,49 @@ function Room:summonPlayer(operator, nextPlayer, params)
 
   return ret
 end
+
+---从牌堆（或弃牌堆）内随机抽任意张牌
+---@param pattern string @ 查找规则
+---@param num? number @ 查找数量
+---@param fromPile? "drawPile" | "discardPile" | "allPiles" @ 查找的来源区域，默认从牌堆内寻找
+---@return integer[] @ id列表 可能空
+function Room:getCardsFromPileByRule(pattern, num, fromPile)
+  num = num or 1
+  local pileToSearch = self.draw_pile
+  if fromPile == "discardPile" then
+    pileToSearch = self.discard_pile
+  elseif fromPile == "allPiles" then
+    pileToSearch = table.simpleClone(self.draw_pile)
+    table.insertTable(pileToSearch, self.discard_pile)
+  end
+
+  if #pileToSearch == 0 then
+    return {}
+  end
+
+  local matchedIds = {}
+  for _, id in ipairs(pileToSearch) do
+    if Fk:getCardById(id):matchPattern(pattern) then
+      table.insert(matchedIds, id)
+    end
+  end
+
+  if #matchedIds == 0 then
+    return {}
+  end
+
+  local cardPack = {}
+
+  local loopTimes = math.min(num, #matchedIds)
+  local i
+  for _ = 1, loopTimes do
+    i = self:random(1, #matchedIds)
+    table.insert(cardPack, matchedIds[i])
+    table.remove(matchedIds, i)
+  end
+
+  return cardPack
+end
+
 
 return Room

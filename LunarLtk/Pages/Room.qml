@@ -84,6 +84,14 @@ W.PageBase {
             choicesBox.y = dashboard.y - 20;
           }
           break;
+        case Command.AskForGeneral:
+          model.accepted.connect(() => dataModel.replyToServer(model.result));
+          model.rejected.connect(() => dataModel.replyToServer([]));
+          pop.sourceComponent = Qt.createComponent("LunarLtk.Pages.Popups", "ChooseGeneralBox");
+          pop.item.dataModel = model;
+          pop.item.arrangeCards();
+          pop.moveToCenter();
+          break;
         case Command.AskForCardChosen:
           pop.sourceComponent = Qt.createComponent("LunarLtk.Pages.Popups", "PlayerCardBox");
           pop.item.dataModel = model;
@@ -1223,7 +1231,6 @@ W.PageBase {
     dataModel.setupCallbacks();
 
     // TODO 摆烂了 反正这些后面也是得重构 懒得搬砖了
-    addCallback(Command.AskForGeneral, Logic.callbacks["AskForGeneral"]);
     addCallback(Command.AskForExchange, Logic.callbacks["AskForExchange"]);
     addCallback(Command.AskForCardsAndChoice, Logic.callbacks["AskForCardsAndChoice"]);
     addCallback(Command.FillAG, Logic.callbacks["FillAG"]);

@@ -407,6 +407,24 @@ QtObject {
     popupReady(Command.AskForChoices, data, model);
   }
 
+  function askForGeneral(sender, data) {
+    const [generals, n, no_convert, heg, rule, extra_data] = data;
+    const modelComponent = Qt.createComponent("LunarLtk.Models.Popups", "GeneralsModel");
+    const model = modelComponent.createObject(null, {
+      allGenerals: generals,
+      choiceNum: n ?? 1,
+      convertDisabled: !!no_convert,
+      hegemony: !!heg,
+      ruleType: rule ?? (heg? "heg_general_choose" : "askForGeneralsChosen"),
+      extraData: extra_data ?? { n : n },
+    });
+    model.initializeGenerals();
+    model.accepted.connect(() => replyToServer(model.result));
+    model.rejected.connect(() => replyToServer([]));
+    activate();
+    popupReady(Command.AskForGeneral, data, model);
+  }
+
   function askForPoxi(sender, dat) {
     const { type, data, extra_data, cancelable } = dat;
     const modelComponent = Qt.createComponent("LunarLtk.Models.Popups", "PoxiModel");
@@ -506,6 +524,7 @@ QtObject {
     roomPage.addCallback(Command.AskForUseCard, askForUseCard);
 
     roomPage.addCallback(Command.AskForChoices, askForChoices);
+    roomPage.addCallback(Command.AskForGeneral, askForGeneral);
     roomPage.addCallback(Command.AskForPoxi, askForPoxi);
     roomPage.addCallback(Command.AskForArrangeCards, askForArrangeCards);
     roomPage.addCallback(Command.AskForMoveCardInBoard, askForMoveCardInBoard);

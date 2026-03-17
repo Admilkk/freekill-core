@@ -436,6 +436,17 @@ QtObject {
     return component.createObject(null, prop);
   }
 
+  function createGeneralModel(name, additionalProp) {
+    const component = Qt.createComponent("LunarLtk.Models", "GeneralModel");
+    const data = Ltk.getGeneralData(name);
+    const prop = {
+      name: data.general,
+      origName: data.orig_general,
+    };
+    if (additionalProp instanceof Object) Object.assign(prop, additionalProp);
+    return component.createObject(null, prop);
+  }
+
   function createSkillModel(skillName, additionalProp) {
     const component = Qt.createComponent("LunarLtk.Models", "SkillModel");
     const data = Ltk.getSkillData(skillName);

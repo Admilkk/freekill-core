@@ -2,30 +2,6 @@
 
 let callbacks={}
 
-callbacks["AskForGeneral"] = (sender, data) => {
-  // jsonData: string[] generals, integer n, boolean no_convert, boolean heg, string rule, table extra_data
-  const [ generals, n, no_convert, heg, rule, extra_data ] = data;
-
-  roomScene.dataModel.prompt = "#AskForGeneral";
-  roomScene.dataModel.activate();
-  roomScene.popupBox.sourceComponent =
-    Qt.createComponent("LunarLtk.Pages.Popups", "ChooseGeneralBox");
-  const box = roomScene.popupBox.item;
-  box.accepted.connect(() => {
-    roomScene.dataModel.replyToServer(box.choices);
-  });
-  box.generals = generals;
-  box.choiceNum = n ?? 1;
-  box.convertDisabled = !!no_convert;
-  box.hegemony = !!heg;
-  box.rule_type = rule ?? (heg? "heg_general_choose" : "askForGeneralsChosen"); // 若heg为true，默认应用国战选将
-  box.extra_data = extra_data ?? { n : n };
-  for (let i = 0; i < generals.length; i++)
-    box.generalList.append({ "name": generals[i] });
-  box.updatePosition();
-  box.refreshPrompt();
-}
-
 callbacks["AskForExchange"] = (sender, data) => {
   const cards = [];
   const cards_name = [];

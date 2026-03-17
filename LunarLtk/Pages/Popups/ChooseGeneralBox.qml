@@ -5,33 +5,24 @@ import QtQuick
 import Fk
 import Fk.Components.Common
 
+import Fk
+import Fk.Components.Common
 import LunarLtk
 import LunarLtk.Components
+import LunarLtk.Models.Popups
+
+pragma ComponentBehavior: Bound
 
 GraphicsBox {
-  property string prompt: ""
-  property alias generalList: generalList
-  property var generals: []
-  property int choiceNum: 1
-  property bool convertDisabled: false
-  property string rule_type: ""
-  property var extra_data
-  property bool hegemony: false
-  property var choices: []
-  property var selectedItem: []
-  property bool loaded: false
-
-  ListModel {
-    id: generalList
-  }
-
   id: root
-  title.text: {
-    if (prompt !== "") return prompt;
-    const suffix = Lua.client.getSettings("enableFreeAssign") ? `(${Lua.tr("Enable free assign")})` : "";
-    const ret = Lua.tr("$ChooseGeneral").arg(choiceNum) + suffix;
-    return ret;
-  }
+
+  property GeneralsModel dataModel
+
+  property alias generalCardList: generalCardList
+
+  property var draggingCard: null
+
+  title.text: dataModel?.promptText ?? ""
   width: generalArea.width + body.anchors.leftMargin + body.anchors.rightMargin
   height: body.implicitHeight + body.anchors.topMargin +
           body.anchors.bottomMargin
@@ -44,21 +35,24 @@ GraphicsBox {
 
     Item {
       id: generalArea
-      width: (generalList.count > 8 ? Math.ceil(generalList.count / 2)
-                                    : Math.max(3, generalList.count)) * 97
-      height: generalList.count > 8 ? 290 : 150
+      width: {
+        const count = root.dataModel?.generals?.length ?? 0;
+        return (count > 8 ? Math.ceil(count / 2) : Math.max(3, count)) * 97;
+      }
+      height: (root.dataModel?.generals?.length ?? 0) > 8 ? 290 : 150
       z: 1
 
       Repeater {
         id: generalMagnetList
-        model: generalList.count
+        model: root.dataModel?.generals?.length ?? 0
 
         Item {
+          required property int index
           width: 93
           height: 130
           x: {
-            const count = generalList.count;
-            let columns = generalList.count;
+            const count = root.dataModel?.generals?.length ?? 0;
+            let columns = count;
             if (columns > 8) {
               columns = Math.ceil(columns / 2);
             }
@@ -69,9 +63,10 @@ GraphicsBox {
             return ret;
           }
           y: {
-            if (generalList.count <= 8)
+            const count = root.dataModel?.generals?.length ?? 0;
+            if (count <= 8)
               return 0;
-            return index < generalList.count / 2 ? 0 : 135;
+            return index < count / 2 ? 0 : 135;
           }
         }
       }
@@ -96,7 +91,7 @@ GraphicsBox {
 
         Repeater {
           id: resultList
-          model: choiceNum
+          model: root.dataModel?.choiceNum ?? 1
 
           Rectangle {
             color: "#1D1E19"
@@ -120,10 +115,11 @@ GraphicsBox {
 
         MetroButton {
           id: convertBtn
-          visible: !convertDisabled
+          visible: !root.dataModel?.convertDisabled
+          enabled: root.dataModel?.canConvert ?? false
           text: Lua.tr("Same General Convert")
           onClicked: {
-            roomScene.startCheat("SameConvert", { cards: generalList, choices: choices });
+            roomScene.startCheat("SameConvert", { cards: generalCardList.model, choices: root.dataModel?.result });
           }
         }
 
@@ -132,18 +128,18 @@ GraphicsBox {
           text: Lua.tr("OK")
           width: 120
           height: 35
-          enabled: false
+          enabled: root.dataModel?.feasible ?? false;
 
-          onClicked: close();
+          onClicked: root.dataModel?.accepted();
         }
 
         MetroButton {
           id: detailBtn
-          enabled: choices.length > 0
+          enabled: (root.dataModel?.result ?? []).length > 0
           text: Lua.tr("Show General Detail")
           onClicked: roomScene.startCheat(
             "GeneralDetail",
-            { generals: choices }
+            { generals: root.dataModel?.result }
           );
         }
       }
@@ -152,56 +148,85 @@ GraphicsBox {
 
   Repeater {
     id: generalCardList
-    model: generalList
+    model: {
+      const ret = Qt.createQmlObject("import QtQuick; ListModel {}", root);
+      for (const name of root.dataModel?.generals ?? []) {
+        ret.append({ "name": name });
+      }
+      return ret;
+    }
 
     GeneralCardItem {
+      required property var model
+      required property int index
       name: model.name
-      selectable: true
-      draggable: true
+      selectable: {
+        const result = root.dataModel?.result;
+        if (result) {
+          return result.includes(name) || root.dataModel.generalFilter(name) || false;
+        }
+        return false;
+      }
+      draggable: !root.draggingCard || root.draggingCard === this
 
       onClicked: {
         if (!selectable) return;
-        let toSelect = true;
-        for (let i = 0; i < selectedItem.length; i++) {
-          if (selectedItem[i] === this) {
-            toSelect = false;
-            selectedItem.splice(i, 1);
-            break;
-          }
-        }
-        if (toSelect && selectedItem.length < choiceNum)
-          selectedItem.push(this);
-        updatePosition();
+        root.dataModel?.toggleResult(name);
+        root.arrangeCards();
       }
 
       onRightClicked: {
-        if (selectedItem.indexOf(this) === -1 && Lua.client.getSettings("enableFreeAssign"))
+        if (root.dataModel?.result.findIndex(e => e === name) === -1 && Lua.client.getSettings("enableFreeAssign"))
           roomScene.startCheat("FreeAssign", { card: this });
       }
 
+      onNameChanged: {
+        root.dataModel?.changeGeneral(index, name);
+        root.arrangeCards();
+      }
+
+      opacity: dragging ? 0.5 : 1
+      onDraggingChanged: {
+        if (dragging) root.draggingCard = this;
+      }
+      onXChanged : {
+        if (!dragging) return;
+        root.arrangeCards();
+      }
+      onYChanged : {
+        if (!dragging) return;
+        root.arrangeCards();
+      }
       onReleased: {
-        arrangeCards();
+        root.updateCardDragging(this);
+        root.draggingCard = null;
+        root.arrangeCards();
       }
     }
   }
 
-  function arrangeCards()
-  {
-    let item, i;
-
-    selectedItem = [];
-    for (i = 0; i < generalList.count; i++) {
-      item = generalCardList.itemAt(i);
-      if (item.y > splitLine.y && item.selectable)
-        selectedItem.push(item);
+  function updateCardDragging(item) {
+    const name = item.name;
+    if (item.y > splitLine.y && item.selectable) {
+      let i, magnet, pos, itemdiff;
+      let diff = 17308, idx = -1;
+      for (i = 0; i < resultList.count; i++) {
+        magnet = resultList.itemAt(i);
+        pos = root.mapFromItem(resultArea, magnet.x, magnet.y);
+        itemdiff = Math.max(Math.abs(pos.x - item.x), Math.abs(pos.y - item.y));
+        if (itemdiff < diff) {
+          diff = itemdiff;
+          idx = i;
+        };
+      }
+      if (diff < 50) {
+        root.dataModel.moveGeneral(name, true, idx);
+      } else {
+        root.dataModel.moveGeneral(name, false);
+      }
+    } else {
+      root.dataModel.moveGeneral(name, false);
     }
-
-    selectedItem.sort((a, b) => a.x - b.x);
-
-    if (selectedItem.length > choiceNum)
-      selectedItem.splice(choiceNum, selectedItem.length - choiceNum);
-
-    updatePosition();
   }
 
   function updateCompanion(gcard1, gcard2, overwrite) {
@@ -212,96 +237,89 @@ GraphicsBox {
     }
   }
 
-  function updatePosition()
-  {
-    choices = [];
+  function arrangeCards() {
+    if (!root.dataModel) return;
     let item, magnet, pos, i;
-    for (i = 0; i < selectedItem.length && i < resultList.count; i++) {
-      item = selectedItem[i];
-      choices.push(item.name);
-      magnet = resultList.itemAt(i);
-      pos = root.mapFromItem(resultArea, magnet.x, magnet.y);
-      if (item.origX !== pos.x || item.origY !== item.y) {
-        item.origX = pos.x;
-        item.origY = pos.y;
-        item.goBack(true);
-      }
-    }
-    root.choicesChanged();
+    magnet = resultList.itemAt(i);
+    pos = root.mapFromItem(resultArea, magnet.x, magnet.y);
 
-    fightButton.enabled = Ltk.chooseGeneralFeasible(root.rule_type, root.choices,
-                                root.generals, root.extra_data);
-
-    for (i = 0; i < generalCardList.count; i++) {
+    for (i = 0; i < generalMagnetList.count; i++) {
       item = generalCardList.itemAt(i);
-      item.selectable = choices.includes(item.name) ||
-              Ltk.chooseGeneralFilter(root.rule_type, item.name, root.choices,
-                    root.generals, root.extra_data);
-      if (hegemony) { // 珠联璧合相关
-        item.inPosition = 0;
-        if (selectedItem[0]) {
-          if (selectedItem[1]) {
-            if (selectedItem[0] === item) {
-              updateCompanion(item, selectedItem[1], true);
-            } else if (selectedItem[1] === item) {
-              updateCompanion(item, selectedItem[0], true);
-            } else {
-              item.hasCompanions = false;
-            }
-          } else {
-            if (selectedItem[0] !== item) {
-              updateCompanion(item, selectedItem[0], true);
-            } else {
-              for (let j = 0; j < generalList.count; j++) {
-                updateCompanion(item, generalList.get(j), false);
-              }
-            }
-          }
-        } else {
-          for (let j = 0; j < generalList.count; j++) {
-            updateCompanion(item, generalList.get(j), false);
-          }
-        }
-      }
-      if (selectedItem.indexOf(item) != -1)
+      if (!item) break;
+      if (item.dragging) {
+        item.z = 999;
         continue;
-
-      magnet = generalMagnetList.itemAt(i);
-      pos = root.mapFromItem(generalMagnetList.parent, magnet.x, magnet.y);
-      if (item.origX !== pos.x || item.origY !== item.y) {
-        item.origX = pos.x;
-        item.origY = pos.y;
-        item.goBack(true);
       }
+      const resultIdx = root.dataModel.result.findIndex(e => e === item.name);
+      if (resultIdx !== -1) {
+        magnet = resultList.itemAt(resultIdx);
+        pos = root.mapFromItem(resultArea, magnet.x, magnet.y);
+      } else {
+        magnet = generalMagnetList.itemAt(i);
+        pos = root.mapFromItem(generalMagnetList.parent, magnet.x, magnet.y);
+      }
+      item.origX = pos.x;
+      item.origY = pos.y;
+      item.goBack(true);
     }
 
-    if (hegemony) { // 主副将调整阴阳鱼
-      if (selectedItem[0]) {
-        if (selectedItem[0].mainMaxHp < 0) {
-          selectedItem[0].inPosition = 1;
-        } else if (selectedItem[0].deputyMaxHp < 0) {
-          selectedItem[0].inPosition = -1;
-        }
-        if (selectedItem[1]) {
-          if (selectedItem[1].mainMaxHp < 0) {
-            selectedItem[1].inPosition = -1;
-          } else if (selectedItem[1].deputyMaxHp < 0) {
-            selectedItem[1].inPosition = 1;
-          }
-        }
-      }
-    }
-
-    for (let i = 0; i < generalList.count; i++) {
-      if (Ltk.getSameGenerals(generalList.get(i).name).length > 0) {
-        convertBtn.enabled = true;
-        return;
-      }
-    }
-    convertBtn.enabled = false;
+    setHegemonyData();
   }
 
-  function refreshPrompt() {
-    prompt = Ltk.processPrompt(Ltk.chooseGeneralPrompt(rule_type, generals, extra_data))
+  function setHegemonyData(){
+    if (!root.dataModel || !root.dataModel.hegemony) return;
+
+    let item, i;
+
+    // 国战小标记
+    const result = root.dataModel.result ?? [];
+    const selectedItem = [generalCardList.itemAt(root.dataModel.generals.indexOf(result[0])), generalCardList.itemAt(root.dataModel.generals.indexOf(result[1]))];
+
+    // 主副将认定
+    if (selectedItem[0]) {
+      if (selectedItem[0].mainMaxHp !== 0) {
+        selectedItem[0].inPosition = 1;
+      } else if (selectedItem[0].deputyMaxHp !== 0) {
+        selectedItem[0].inPosition = -1;
+      }
+      if (selectedItem[1]) {
+        if (selectedItem[1].mainMaxHp !== 0) {
+          selectedItem[1].inPosition = -1;
+        } else if (selectedItem[1].deputyMaxHp !== 0) {
+          selectedItem[1].inPosition = 1;
+        }
+      }
+    }
+
+    // 珠联璧合
+    for (i = 0; i < generalCardList.count; i++) {
+      item = generalCardList.itemAt(i);
+      if (!item) break;
+      item.inPosition = 0;
+
+      if (selectedItem[0]) {
+        if (selectedItem[1]) {
+          if (selectedItem[0] === item) {
+            updateCompanion(item, selectedItem[1], true);
+          } else if (selectedItem[1] === item) {
+            updateCompanion(item, selectedItem[0], true);
+          } else {
+            item.hasCompanions = false;
+          }
+        } else {
+          if (selectedItem[0] !== item) {
+            updateCompanion(item, selectedItem[0], true);
+          } else {
+            for (let j = 0; j < generalCardList.count; j++) {
+              updateCompanion(item, generalCardList.itemAt(j), false);
+            }
+          }
+        }
+      } else {
+        for (let j = 0; j < generalCardList.count; j++) {
+          updateCompanion(item, generalCardList.itemAt(j), false);
+        }
+      }
+    }
   }
 }

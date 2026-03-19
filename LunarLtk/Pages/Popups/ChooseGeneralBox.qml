@@ -135,7 +135,7 @@ GraphicsBox {
 
         MetroButton {
           id: detailBtn
-          enabled: (root.dataModel?.result ?? []).length > 0
+          enabled: !root.dataModel?.isAllEmpty() ?? false
           text: Lua.tr("Show General Detail")
           onClicked: roomScene.startCheat(
             "GeneralDetail",
@@ -148,22 +148,16 @@ GraphicsBox {
 
   Repeater {
     id: generalCardList
-    model: {
-      const ret = Qt.createQmlObject("import QtQuick; ListModel {}", root);
-      for (const name of root.dataModel?.generals ?? []) {
-        ret.append({ "name": name });
-      }
-      return ret;
-    }
+    model: root.dataModel?.generals ?? []
 
     GeneralCardItem {
-      required property var model
+      required property string modelData
       required property int index
-      name: model.name
+      dataModel: root.dataModel?.generalDict?.[modelData]
       selectable: {
         const result = root.dataModel?.result;
         if (result) {
-          return result.includes(name) || root.dataModel.generalFilter(name) || false;
+          return result.includes(modelData) || root.dataModel.generalFilter(modelData) || false;
         }
         return false;
       }
@@ -171,17 +165,17 @@ GraphicsBox {
 
       onClicked: {
         if (!selectable) return;
-        root.dataModel?.toggleResult(name);
+        root.dataModel?.toggleResult(modelData);
         root.arrangeCards();
       }
 
       onRightClicked: {
-        if (root.dataModel?.result.findIndex(e => e === name) === -1 && Lua.client.getSettings("enableFreeAssign"))
+        if (root.dataModel?.result.findIndex(e => e === modelData) === -1 && Lua.client.getSettings("enableFreeAssign"))
           roomScene.startCheat("FreeAssign", { card: this });
       }
 
-      onNameChanged: {
-        root.dataModel?.changeGeneral(index, name);
+      onDataModelChanged: {
+        root.dataModel.reloadGeneralModels();
         root.arrangeCards();
       }
 
@@ -206,7 +200,7 @@ GraphicsBox {
   }
 
   function updateCardDragging(item) {
-    const name = item.name;
+    const name = item.dataModel.name;
     if (item.y > splitLine.y && item.selectable) {
       let i, magnet, pos, itemdiff;
       let diff = 17308, idx = -1;
@@ -230,7 +224,7 @@ GraphicsBox {
   }
 
   function updateCompanion(gcard1, gcard2, overwrite) {
-    if (Ltk.isCompanionWith(gcard1.name, gcard2.name)) {
+    if (Ltk.isCompanionWith(gcard1.name, gcard1.name)) {
       gcard1.hasCompanions = true;
     } else if (overwrite) {
       gcard1.hasCompanions = false;
@@ -250,7 +244,7 @@ GraphicsBox {
         item.z = 999;
         continue;
       }
-      const resultIdx = root.dataModel.result.findIndex(e => e === item.name);
+      const resultIdx = root.dataModel.result.findIndex(e => e === item.dataModel.name);
       if (resultIdx !== -1) {
         magnet = resultList.itemAt(resultIdx);
         pos = root.mapFromItem(resultArea, magnet.x, magnet.y);
@@ -273,7 +267,7 @@ GraphicsBox {
 
     // 国战小标记
     const result = root.dataModel.result ?? [];
-    const selectedItem = [generalCardList.itemAt(root.dataModel.generals.indexOf(result[0])), generalCardList.itemAt(root.dataModel.generals.indexOf(result[1]))];
+    const selectedItem = result.slice(0, 2).map(name => root.dataModel.generalDict?.[name]?.dataModel);
 
     // 主副将认定
     if (selectedItem[0]) {
@@ -293,7 +287,7 @@ GraphicsBox {
 
     // 珠联璧合
     for (i = 0; i < generalCardList.count; i++) {
-      item = generalCardList.itemAt(i);
+      item = root.dataModel.generalDict[generalCardList.itemAt(i)]?.dataModel;
       if (!item) break;
       item.inPosition = 0;
 
@@ -311,13 +305,13 @@ GraphicsBox {
             updateCompanion(item, selectedItem[0], true);
           } else {
             for (let j = 0; j < generalCardList.count; j++) {
-              updateCompanion(item, generalCardList.itemAt(j), false);
+              updateCompanion(item, root.dataModel.generalDict[generalCardList.itemAt(j)]?.dataModel, false);
             }
           }
         }
       } else {
         for (let j = 0; j < generalCardList.count; j++) {
-          updateCompanion(item, generalCardList.itemAt(j), false);
+          updateCompanion(item, root.dataModel.generalDict[generalCardList.itemAt(j)]?.dataModel, false);
         }
       }
     }

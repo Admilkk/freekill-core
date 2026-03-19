@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
+pragma ComponentBehavior: Bound
 
 import QtQuick
 import QtQuick.Layouts
@@ -34,6 +35,7 @@ GraphicsBox {
       model: root.dataModel?.areaCapacities ?? 0
 
       Row {
+        id: areaRow
         spacing: 7
 
         required property int index
@@ -49,7 +51,7 @@ GraphicsBox {
           model: (root.dataModel.size === 0) ? parent.modelData : 1
 
           Rectangle {
-            color: root.draggingToArea === cardRepeater.parent.index ? "#5D5E59" : "#1D1E19"
+            color: root.draggingToArea === areaRow.index ? "#5D5E59" : "#1D1E19"
             width: (root.dataModel.size === 0) ? 93 : root.dataModel.size * 100 - 7
             height: 130
           }
@@ -213,7 +215,7 @@ GraphicsBox {
   }
 
   // 将card们都按result记载的那样排列，如果有拖动中的卡，就挤开两边的
-  // 不管正在拖动的卡
+  // 正在拖动的卡本身状态不应变化
   function arrangeCards() {
     const result = root.dataModel.result;
     const size = root.dataModel.size;

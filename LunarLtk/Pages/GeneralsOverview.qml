@@ -1,3 +1,4 @@
+pragma ComponentBehavior: Bound
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 import QtQuick
@@ -44,18 +45,20 @@ W.PageBase {
     highlightMoveDuration: 500
 
     delegate: Item {
+      required property string name
+      required property int index
       width: modList.width
       height: 40
 
       Text {
-        text: Lua.tr(name)
-        color: modList.currentIndex === index ? "black" : "white"
+        text: Lua.tr(parent.name)
+        color: modList.currentIndex === parent.index ? "black" : "white"
         anchors.centerIn: parent
       }
 
       W.TapHandler {
         onTapped: {
-          modList.currentIndex = index;
+          modList.currentIndex = parent.index;
         }
       }
     }
@@ -202,7 +205,7 @@ W.PageBase {
         font.pixelSize: 20
         onClicked: {
           generals.forEach((g) => {
-            doBanGeneral(g);
+            root.doBanGeneral(g);
           })
         }
       }
@@ -265,14 +268,16 @@ W.PageBase {
     anchors.leftMargin: 8 + (width % 100) / 2
     cellHeight: 140
     cellWidth: 100
-    model: generals
+    model: root.generals
 
     delegate: GeneralCardItem {
+      id: generalCard
+      required property string modelData
       autoBack: false
-      name: modelData
+      dataModel: Ltk.createGeneralModel(modelData)
       onClicked: {
         if (root.stat === 2) {
-          doBanGeneral(modelData);
+          root.doBanGeneral(modelData);
         } else {
           generalDetailLoader.item.general = modelData;
           generalDetailLoader.item.canSetAvatar = root.parent instanceof StackView;
@@ -285,12 +290,12 @@ W.PageBase {
         color: "black"
         opacity: {
           const s = Config.curScheme;
-          const gdata = Ltk.getGeneralData(modelData);
+          const gdata = Ltk.getGeneralData(generalCard.modelData);
           const pack = gdata.package;
           if (s.banPkg[pack]) {
-            if (!s.banPkg[pack].includes(modelData)) return 0.5;
+            if (!s.banPkg[pack].includes(generalCard.modelData)) return 0.5;
           } else {
-            if (!!s.normalPkg[pack]?.includes(modelData)) return 0.5;
+            if (!!s.normalPkg[pack]?.includes(generalCard.modelData)) return 0.5;
           }
           return 0;
         }
@@ -303,23 +308,23 @@ W.PageBase {
         id: banText
         visible: {
           const s = Config.curScheme;
-          const gdata = Ltk.getGeneralData(modelData);
+          const gdata = Ltk.getGeneralData(generalCard.modelData);
           const pack = gdata.package;
           if (s.banPkg[pack]) {
-            return s.banPkg[pack].includes(modelData);
+            return s.banPkg[pack].includes(generalCard.modelData);
           } else {
-            return !!s.normalPkg[pack]?.includes(modelData);
+            return !!s.normalPkg[pack]?.includes(generalCard.modelData);
           }
         }
         text: {
           if (!visible) return '';
           const s = Config.curScheme;
-          const gdata = Ltk.getGeneralData(modelData);
+          const gdata = Ltk.getGeneralData(generalCard.modelData);
           const pack = gdata.package;
           if (s.banPkg[pack]) {
-            if (s.banPkg[pack].includes(modelData)) return Lua.tr('Enable');
+            if (s.banPkg[pack].includes(generalCard.modelData)) return Lua.tr('Enable');
           } else {
-            if (!!s.normalPkg[pack]?.includes(modelData)) return Lua.tr('Prohibit');
+            if (!!s.normalPkg[pack]?.includes(generalCard.modelData)) return Lua.tr('Prohibit');
           }
         }
         anchors.centerIn: parent

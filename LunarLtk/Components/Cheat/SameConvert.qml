@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
+pragma ComponentBehavior: Bound
 
 import QtQuick
 import QtQuick.Controls
@@ -29,39 +30,34 @@ Item {
         }
 
         ColumnLayout {
+          id: generalColumn
+          required property string gname
           Text {
             color: "#E4D5A0"
-            text: Lua.tr(gname)
+            text: Lua.tr(generalColumn.gname)
           }
           GridLayout {
             columns: 6
 
             Repeater {
-              model: Ltk.getSameGenerals(gname)
+              model: Ltk.getSameGenerals(generalColumn.gname)
 
               GeneralCardItem {
-                name: modelData
+                required property string modelData
+                dataModel: Ltk.createGeneralModel(modelData)
                 selectable: true
 
                 onClicked: {
                   let idx = 0;
-                  for (; idx < extra_data.cards.count; idx++) {
-                    if (extra_data.cards.get(idx).name === gname)
+                  for (; idx < root.extra_data.cards.count; idx++) {
+                    if (root.extra_data.cards.get(idx).dataModel.name === generalColumn.gname)
                       break;
                   }
 
-                  if (idx < extra_data.cards.count) {
-                    extra_data.cards.set(idx, { name: modelData });
+                  if (idx < root.extra_data.cards.count) {
+                    dataModel.name = modelData;
+                    root.extra_data.cards.get(idx).dataModel.name = modelData;
                   }
-
-                  idx = 0;
-                  extra_data.choices.forEach( s => {
-                    if (s === gname) {
-                      extra_data.choices[idx] = modelData;
-                      return;
-                    }
-                    idx++;
-                  });
 
                   root.finish();
                 }
@@ -76,7 +72,7 @@ Item {
   onExtra_dataChanged: {
     if (!extra_data.cards) return;
     for (let i = 0; i < extra_data.cards.count; i++) {
-      glist.set(i, { gname: extra_data.cards.get(i).name });
+      glist.set(i, { gname: extra_data.cards.get(i).dataModel.name });
     }
   }
 }

@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
+pragma ComponentBehavior: Bound
 
 import QtQuick
 import Qt5Compat.GraphicalEffects
@@ -24,54 +25,49 @@ Game.BasicCard {
   width: 93
   height: 130
 
-  property string name
-  property string kingdom
-  property string subkingdom: "wei"
-  property int hp
-  property int maxHp
-  property int shieldNum
-  property int mainMaxHp
-  property int deputyMaxHp
-  property int inPosition: 0
-  property string pkgName: ""
-  property bool detailed: true
-  property bool showIsFavorite: true
-  property alias hasCompanions: companions.visible
+  property GeneralModel dataModel
 
-  footnote: ""
-  cardFrontSource: (Config.enabledSkins[name] && Config.enabledSkins[name] !== "-") ? (Cpp.path + "/" + Config.enabledSkins[name]) : SkinBank.getGeneralPicture(name)
-  cardBackSource: SkinBank.generalCardDir + 'card-back'
+  footnote: dataModel?.footnote ?? ""
+  cardFrontSource: dataModel?.frontSkin ?? ""
+  cardBackSource: dataModel?.backSkin ?? ""
   glow.color: "white" //Engine.kingdomColor[kingdom]
 
-  // FIXME: 藕！！
-  property bool heg: name.startsWith('hs__') || name.startsWith('ld__') ||
-                     name.includes('heg__')
+  known: dataModel?.known ?? true
 
   Image {
     anchors.fill: parent
     anchors.margins: -1
     fillMode: Image.PreserveAspectFit
-    source: parent.known ? (SkinBank.generalCardDir + "border") : ""
+    source: parent.dataModel?.known ? (SkinBank.generalCardDir + "border") : ""
   }
 
   Image {
-    scale: parent.subkingdom ? 0.6 : 1
+    scale: parent.dataModel?.subkingdom ? 0.6 : 1
     width: 34; fillMode: Image.PreserveAspectFit
     anchors.top: parent.top
-    anchors.topMargin: parent.subkingdom ? -7 : -2
+    anchors.topMargin: parent.dataModel?.subkingdom ? -7 : -2
     anchors.left: parent.left
-    anchors.leftMargin: parent.subkingdom ? -8 : -2
-    source: SkinBank.getGeneralCardDir(parent.kingdom) + parent.kingdom
-    visible: parent.detailed && parent.known
+    anchors.leftMargin: parent.dataModel?.subkingdom ? -8 : -2
+    source: {
+      if (parent.dataModel?.kingdom) {
+        return SkinBank.getGeneralCardDir(parent.dataModel.kingdom) + parent.dataModel.kingdom;
+      }
+      return "";
+    }
+    visible: parent.dataModel?.detailed && parent.dataModel?.known
   }
 
   Image {
     scale: 0.6; x: 8; y: 12
     transformOrigin: Item.TopLeft
     width: 34; fillMode: Image.PreserveAspectFit
-    source: parent.subkingdom ? SkinBank.getGeneralCardDir(parent.subkingdom) + parent.subkingdom
-                       : ""
-    visible: parent.detailed && parent.known
+    source: {
+      if (parent.dataModel?.subkingdom) {
+        return SkinBank.getGeneralCardDir(parent.dataModel.subkingdom) + parent.dataModel.subkingdom;
+      }
+      return "";
+    }
+    visible: parent.dataModel?.detailed && parent.dataModel?.known
   }
 
   Component {
@@ -81,10 +77,10 @@ Game.BasicCard {
       height: 10 / childrenRect.width * childrenRect.height
       Image {
         id: mainMagatama
-        source: SkinBank.getGeneralCardDir(root.kingdom) + root.kingdom + "-magatama"
+        source: SkinBank.getGeneralCardDir(root.dataModel?.kingdom) + root.dataModel?.kingdom + "-magatama"
         width: 10
         height: 10 / sourceSize.width * sourceSize.height
-        visible: !root.subkingdom
+        visible: !root.dataModel?.subkingdom
       }
       LinearGradient {
         id: mainMagatamaMask
@@ -99,7 +95,7 @@ Game.BasicCard {
         anchors.fill: mainMagatama
         source: mainMagatama
         maskSource: mainMagatamaMask
-        visible: !!root.subkingdom
+        visible: !!root.dataModel?.subkingdom
       }
 
       Image {
@@ -107,8 +103,13 @@ Game.BasicCard {
         visible: false
         width: 10
         height: 10 / sourceSize.width * sourceSize.height
-        source: root.subkingdom ? SkinBank.getGeneralCardDir(root.subkingdom) +
-                             root.subkingdom + "-magatama" : ""
+        source: {
+          if (root.dataModel?.subkingdom) {
+            return SkinBank.getGeneralCardDir(root.dataModel.subkingdom) +
+                                root.dataModel.subkingdom + "-magatama";
+          }
+          return "";
+        }
       }
       LinearGradient {
         id: subkingdomMask
@@ -123,7 +124,7 @@ Game.BasicCard {
         anchors.fill: subkingdomMagatama
         source: subkingdomMagatama
         maskSource: subkingdomMask
-        visible: root.subkingdom
+        visible: root.dataModel?.subkingdom
       }
     }
   }
@@ -135,7 +136,13 @@ Game.BasicCard {
       height: childrenRect.height
       Image {
         id: singleMagatamaImg
-        source: SkinBank.getGeneralCardDir(root.kingdom) + root.kingdom + "-magatama"
+        source: {
+          if (root.dataModel?.kingdom) {
+            return SkinBank.getGeneralCardDir(root.dataModel.kingdom) +
+                                root.dataModel.kingdom + "-magatama";
+          }
+          return "";
+        }
         width: 10
         height: 10 / sourceSize.width * sourceSize.height
       }
@@ -146,19 +153,19 @@ Game.BasicCard {
     id: magatamaRow
     x: 34; y: 4
     spacing: 1
-    visible: parent.detailed && parent.known && !parent.heg
+    visible: parent.dataModel?.detailed && parent.dataModel.known && !parent.dataModel.heg
     Repeater {
       id: hpRepeater
-      model: (!root.heg) ? ((root.hp > 5 || root.hp !== root.maxHp) ? 1 : root.hp) : 0
-      delegate: root.subkingdom ? duelkingdomMagatama : singlekingdomMagatama
+      model: (!root.dataModel.heg) ? ((root.dataModel.hp > 5 || root.dataModel.hp !== root.dataModel.maxHp) ? 1 : root.dataModel.hp) : 0
+      delegate: root.dataModel.subkingdom ? duelkingdomMagatama : singlekingdomMagatama
     }
   }
 
   Text {
     anchors.left: magatamaRow.right
     anchors.leftMargin: -1
-    visible: root.hp > 5 || root.hp !== root.maxHp
-    text: root.hp === root.maxHp ? (" x" + root.hp) : (" " + root.hp + "/" + root.maxHp)
+    visible: (parent.dataModel?.hp ?? 0) > 5 || parent.dataModel.hp !== parent.dataModel.maxHp
+    text: parent.dataModel.hp === parent.dataModel.maxHp ? (" x" + parent.dataModel.hp) : (" " + parent.dataModel.hp + "/" + parent.dataModel.maxHp)
     color: "white"
     font.family: Config.libianName
     font.pixelSize: 14
@@ -171,26 +178,26 @@ Game.BasicCard {
     x: 34
     y: 3
     spacing: 0
-    visible: detailed && known && heg
+    visible: parent.dataModel?.detailed && parent.dataModel.known && parent.dataModel.heg
     Repeater {
       id: hegHpRepeater
-      model: heg ? ((hp > 7 || hp !== maxHp) ? 1 : Math.ceil(hp / 2)) : 0
+      model: root.dataModel.heg ? ((root.dataModel.hp > 7 || root.dataModel.hp !== root.dataModel.maxHp) ? 1 : Math.ceil(root.dataModel.hp / 2)) : 0
       Item {
         width: childrenRect.width
         height: childrenRect.height
         Image {
-          opacity: ((mainMaxHp < 0 || deputyMaxHp < 0) && (index * 2 + 1 === hp) && inPosition !== -1)
-                    ? (inPosition === 0 ? 0.5 : 0) :1
+          opacity: ((root.dataModel.mainMaxHp < 0 || root.dataModel.deputyMaxHp < 0) && (index * 2 + 1 === root.dataModel.hp) && root.dataModel.inPosition !== -1)
+                    ? (root.dataModel.inPosition === 0 ? 0.5 : 0) :1
           height: 12; fillMode: Image.PreserveAspectFit
-          source: SkinBank.getGeneralCardDir(kingdom) + kingdom + "-magatama-l"
+          source: SkinBank.getGeneralCardDir(root.dataModel.kingdom) + root.dataModel.kingdom + "-magatama-l"
         }
         Image {
           x: 4.4
-          opacity: (index + 1) * 2 <= hp ? (((mainMaxHp < 0 || deputyMaxHp < 0) && inPosition !== -1 && ((index + 1) * 2 === hp))
-                    ? (inPosition === 0 ? 0.5 : 0) : 1) : 0
+          opacity: (index + 1) * 2 <= root.dataModel.hp ? (((root.dataModel.mainMaxHp < 0 || root.dataModel.deputyMaxHp < 0) && root.dataModel.inPosition !== -1 && ((index + 1) * 2 === root.dataModel.hp))
+                    ? (root.dataModel.inPosition === 0 ? 0.5 : 0) : 1) : 0
           height: 12; fillMode: Image.PreserveAspectFit
           source: {
-            const k = subkingdom ? subkingdom : kingdom;
+            const k = root.dataModel.subkingdom ? root.dataModel.subkingdom : root.dataModel.kingdom;
             SkinBank.getGeneralCardDir(k) + k + "-magatama-r"
           }
         }
@@ -198,8 +205,8 @@ Game.BasicCard {
     }
 
     Text {
-      visible: hp > 7 || hp !== maxHp
-      text: hp === maxHp ? ("x" + hp / 2) : (" " + hp / 2 + "/" + maxHp / 2)
+      visible: root.dataModel.hp > 7 || root.dataModel.hp !== root.dataModel.maxHp
+      text: root.dataModel.hp === root.dataModel.maxHp ? ("x" + root.dataModel.hp / 2) : (" " + root.dataModel.hp / 2 + "/" + root.dataModel.maxHp / 2)
       color: "white"
       font.pixelSize: 14
       style: Text.Outline
@@ -208,12 +215,12 @@ Game.BasicCard {
   }
 
   Shield {
-    visible: shieldNum > 0 && detailed && known
+    visible: parent.dataModel.shieldNum > 0 && parent.dataModel.detailed && parent.dataModel.known
     anchors.right: parent.right
     anchors.top: parent.top
     anchors.topMargin: hpRepeater.model > 4 ? 16 : 0
     scale: 0.8
-    value: shieldNum
+    value: parent.dataModel.shieldNum
   }
 
   Image {
@@ -222,7 +229,7 @@ Game.BasicCard {
     fillMode: Image.PreserveAspectFit
     visible: false
     source: {
-      const f = SkinBank.getGeneralCardDir(kingdom) + kingdom + "-companions";
+      const f = SkinBank.getGeneralCardDir(parent.dataModel.kingdom) + parent.dataModel.kingdom + "-companions";
       if (Backend.exists(f + ".png")) return f;
       return "";
     }
@@ -244,8 +251,8 @@ Game.BasicCard {
     height: 80
     x: 3
     y: lineCount > 4 ? 28 : 30
-    text: name !== "" ? Lua.tr(name) : "nil"
-    visible: detailed && known
+    text: parent.dataModel && parent.dataModel.name !== "" ? Lua.tr(parent.dataModel.name) : "nil"
+    visible: parent.dataModel?.detailed && parent.dataModel.known
     color: "white"
     font.family: "LiSu"
     font.pixelSize: 18
@@ -255,7 +262,7 @@ Game.BasicCard {
   }
 
   Rectangle {
-    visible: pkgName !== "" && detailed && known
+    visible: parent.dataModel?.detailed && parent.dataModel?.pkgName !== "" && parent.dataModel?.known
     height: 16
     width: pkgNameText.width + 15
     anchors.bottom: parent.bottom
@@ -280,7 +287,7 @@ Game.BasicCard {
     }
     Text {
       id: pkgNameText
-      text: Lua.tr(pkgName)
+      text: Lua.tr(root.dataModel?.pkgName)
       x: 13; y: 1
       font.family: Config.libianName
       font.pixelSize: 14
@@ -292,7 +299,7 @@ Game.BasicCard {
   }
 
   Item {
-    visible: Config.favoriteGenerals.includes(parent.name) && parent.showIsFavorite
+    visible: Config.favoriteGenerals.includes(parent.dataModel?.name) && parent.dataModel?.showIsFavorite
     width: 15; height: 15
     anchors.bottom: parent.bottom
     anchors.left: parent.left
@@ -331,24 +338,6 @@ Game.BasicCard {
       Component.onCompleted: requestPaint()
       onWidthChanged: requestPaint()
       onHeightChanged: requestPaint()
-    }
-  }
-
-  onNameChanged: {
-    const data = Ltk.getGeneralData(name);
-    kingdom = data.kingdom;
-    subkingdom = (data.subkingdom !== kingdom && data.subkingdom) || "";
-    hp = data.hp;
-    maxHp = data.maxHp;
-    shieldNum = data.shield;
-    mainMaxHp = data.mainMaxHpAdjustedValue;
-    deputyMaxHp = data.deputyMaxHpAdjustedValue;
-
-    const splited = name.split("__");
-    if (splited.length > 1) {
-      pkgName = splited[0];
-    } else {
-      pkgName = "";
     }
   }
 }

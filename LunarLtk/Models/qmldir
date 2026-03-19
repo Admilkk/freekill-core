@@ -2,6 +2,7 @@ module LunarLtk.Models
 
 RoomModel 1.0 RoomModel.qml
 CardModel 1.0 CardModel.qml
+GeneralModel 1.0 GeneralModel.qml
 SkillModel 1.0 SkillModel.qml
 PhotoModel 1.0 PhotoModel.qml
 DashboardModel 1.0 DashboardModel.qml

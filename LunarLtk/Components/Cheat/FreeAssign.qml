@@ -109,7 +109,7 @@ Item {
         }
 
         onClicked: {
-          generalModel = Ltk.getGenerals(model.name);
+          root.generalModel = Ltk.getGenerals(model.name);
           stack.push(generalList);
         }
       }
@@ -122,25 +122,25 @@ Item {
       clip: true
       width: stack.width
       height: stack.height
-      Item { height: 6 }
+      Item { implicitHeight: 6 }
       GridView {
         clip: true
         Layout.preferredWidth: stack.width - stack.width % 100 + 10
         Layout.fillHeight: true
         Layout.alignment: Qt.AlignHCenter
-        model: generalModel
+        model: root.generalModel
         ScrollBar.vertical: ScrollBar {}
 
         cellHeight: 140
         cellWidth: 100
 
         delegate: GeneralCardItem {
-          required property var modelData
+          required property string modelData
           autoBack: false
-          name: modelData
+          dataModel: Ltk.createGeneralModel(modelData)
           onClicked: {
             stack.pop();
-            extra_data.card.name = modelData;
+            root.extra_data.card.dataModel.name = modelData;
             root.finish();
           }
         }

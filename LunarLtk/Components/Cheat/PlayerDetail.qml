@@ -172,13 +172,13 @@ Flickable {
 
         GeneralCardItem {
           id: mainChara
-          name: "caocao"
-          visible: name !== ""
+          dataModel: Ltk.createGeneralModel("caocao", { detailed: false })
+          visible: true
         }
         GeneralCardItem {
           id: deputyChara
-          name: "caocao"
-          visible: name !== ""
+          dataModel: Ltk.createGeneralModel("caocao", { detailed: false })
+          visible: false
         }
       }
 
@@ -252,8 +252,14 @@ Flickable {
 
     avatar.general = hasPhoto? extra_data.photo.avatar : extra_data.avatar;
     screenName.text = hasPhoto? extra_data.photo.screenName : extra_data.screenName;
-    mainChara.name = hasPhoto? extra_data.photo.general : extra_data.general;
-    deputyChara.name = hasPhoto? extra_data.photo.deputyGeneral : extra_data.deputyGeneral; // 判空…
+    mainChara.dataModel = Ltk.createGeneralModel(hasPhoto? extra_data.photo.general : extra_data.general);
+    const deputyName = hasPhoto? extra_data.photo.deputyGeneral : extra_data.deputyGeneral;
+    if (deputyName === "") {
+      deputyChara.visible = false;
+    } else {
+      deputyChara.visible = true;
+      deputyChara.dataModel = Ltk.createGeneralModel(hasPhoto? extra_data.photo.deputyGeneral : extra_data.deputyGeneral);
+    }
 
     if (!Config.observing) {
       const gamedata = Ltk.getPlayerGameData(id);

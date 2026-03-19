@@ -6,6 +6,21 @@ function Translate(src)
   return Fk:translate(src)
 end
 
+function GetGeneralModel(name)
+  local general = Fk.generals[name]
+  if general == nil then general = Fk.generals["diaochan"] end
+  return {
+    pkgName = general.pkgName or "",
+    kingdom = general.kingdom,
+    subkingdom = general.subkingdom or "",
+    hp = general.hp,
+    maxHp = general.maxHp,
+    shieldNum = general.shield,
+    mainMaxHp = general.mainMaxHpAdjustedValue,
+    deputyMaxHp = general.deputyMaxHpAdjustedValue,
+  }
+end
+
 function GetGeneralData(name)
   local general = Fk.generals[name]
   if general == nil then general = Fk.generals["diaochan"] end

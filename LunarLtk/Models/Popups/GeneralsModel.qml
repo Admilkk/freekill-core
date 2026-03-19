@@ -10,14 +10,16 @@ QtObject {
   property bool convertDisabled: false
   property bool cancelable: false
   property string skillName
-  property string prompt
+  property string prompt: ""
   property bool detailed
   property string ruleType: ""
   property var extraData
   property bool hegemony: false
 
   property list<var> generals: [] // 当前场上所有的武将
-  property list<var> result: [] // 已选择的武将
+  property list<var> result: [] // 已选择的武将，为了保证空位替换，长度始终为choiceNum，未选择的位为undefined
+
+  property var generalDict: {} // 武将名到GeneralModel的映射
 
   signal accepted()
   signal rejected()
@@ -31,15 +33,6 @@ QtObject {
     return ret;
   }
 
-  readonly property var generalModels: {
-    const dict = {};
-
-    for (const name of generals) {
-      dict[name] = { name };
-    }
-    return dict;
-  }
-
   readonly property bool feasible: {
     return !hasEmptySlot();
   }
@@ -49,6 +42,11 @@ QtObject {
       if (Ltk.getSameGenerals(name).length > 0) return true;
     }
     return false;
+  }
+
+  function isAllEmpty() {
+    const length = result.length;
+    return result.findIndex(s => s !== undefined) === -1;
   }
 
   function hasEmptySlot() {
@@ -106,11 +104,28 @@ QtObject {
     resultChanged();
   }
 
+  onGeneralsChanged: {
+    initGeneralModels();
+  }
+
+  function reloadGeneralModels() { //FIXME: 刷新dataModel时需要调用以刷新作为实际判断的generals
+  }
+
+  function initGeneralModels() {
+    generalDict = {};
+
+    for (const name of generals) {
+      const model = Ltk.createGeneralModel(name)
+      generalDict[name] = model;
+    }
+  }
+
   function initializeGenerals() {
-    generals = [];
+    const tmpgeneral = [];
     result = new Array(choiceNum).fill(undefined);
     for (const name of allGenerals) {
-      generals.push(name);
+      tmpgeneral.push(name);
     }
+    generals = tmpgeneral;
   }
 }

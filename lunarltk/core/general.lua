@@ -8,10 +8,11 @@
 ---
 ---@class General : Object
 ---@field public package Package @ 武将所属包
+---@field public pkgName? string @ 武将所属子扩展包角标名（如“界”）
 ---@field public name string @ 武将名字
 ---@field public trueName string @ 武将真名，也许可以分辨标界？
 ---@field public kingdom string @ 武将所属势力
----@field public subkingdom string @ 武将副势力
+---@field public subkingdom? string @ 武将副势力
 ---@field public hp integer @ 武将初始体力
 ---@field public maxHp integer @ 武将初始最大体力
 ---@field public mainMaxHpAdjustedValue integer @ 主将体力上限调整
@@ -53,6 +54,7 @@ function General:initialize(package, name, kingdom, hp, maxHp, gender)
   self.package = package
   self.name = name
   local name_splited = name:split("__")
+  self.pkgName = #name_splited > 1 and name_splited[1] or nil
   self.trueName = name_splited[#name_splited]
 
   self.kingdom = kingdom
@@ -95,10 +97,21 @@ function General:__toqml()
     uri = "LunarLtk.Components",
     name = "GeneralCardItem",
 
-    -- TODO 虚拟卡
-    prop = {
-      name = self.name,
-    },
+    model = {
+      uri = "LunarLtk.Models",
+      name = "GeneralModel",
+
+      prop = {
+        pkgName = self.pkgName or "",
+        kingdom = self.kingdom,
+        subkingdom = self.subkingdom or "",
+        hp = self.hp,
+        maxHp = self.maxHp,
+        shieldNum = self.shield,
+        mainMaxHp = self.mainMaxHpAdjustedValue,
+        deputyMaxHp = self.deputyMaxHpAdjustedValue,
+      },
+    }
   }
 end
 cbor.tagged_decoders[CBOR_TAG_GENERAL] = function(v)

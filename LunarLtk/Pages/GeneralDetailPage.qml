@@ -1,3 +1,4 @@
+pragma ComponentBehavior: Bound
 import QtQuick
 import QtQuick.Layouts
 import QtQuick.Controls
@@ -77,7 +78,7 @@ Item {
   }
 
   function updateGeneral() {
-    detailGeneralCard.name = general;
+    detailGeneralCard.dataModel = Ltk.createGeneralModel(general);
     //detailFlickable.contentY = 0; // 重置滚动条
     const data = Ltk.getGeneralDetail(general);
     generalText.clear();
@@ -210,12 +211,17 @@ Item {
   Component {
     id: skillAudioBtn
     Win.Button {
+      id: skillAudioItem
+      required property string name
+      required property int idx
+      required property bool specific
+
       Layout.fillWidth: true
       contentItem: Column {
         Text {
           width: parent.width
           text: {
-            return Lua.tr(name) + (idx ? " (" + idx.toString() + ")"
+            return Lua.tr(skillAudioItem.name) + (skillAudioItem.idx ? " (" + skillAudioItem.idx.toString() + ")"
               : "");
           }
           font.bold: true
@@ -224,8 +230,8 @@ Item {
         Text {
           width: parent.width
           text: {
-            const orig = '$' + name + (specific ? '_' + detailGeneralCard.name : "")
-              + (idx ? idx.toString() : "");
+            const orig = '$' + skillAudioItem.name + (skillAudioItem.specific ? '_' + detailGeneralCard.dataModel.name : "")
+              + (skillAudioItem.idx ? skillAudioItem.idx.toString() : "");
             const orig_trans = Lua.tr(orig);
 
             if (orig_trans !== orig) {
@@ -239,8 +245,8 @@ Item {
       }
 
       onClicked: {
-        const skill = name;
-        const general = specific ? detailGeneralCard.name : null;
+        const skill = skillAudioItem.name;
+        const general = skillAudioItem.specific ? detailGeneralCard.dataModel.name : null;
         let extension;
         let path;
         let dat;
@@ -252,7 +258,7 @@ Item {
           path = SkinBank.getAudio(skill + "_" + general, extension, "skill");
           //path = "./packages/" + extension + "/audio/skill/" + skill + "_" + general;
           if (path !== undefined) {
-            Backend.playSound(path, idx);
+            Backend.playSound(path, skillAudioItem.idx);
             return;
           }
         }
@@ -261,12 +267,12 @@ Item {
         dat = Ltk.getSkillData(skill);
         extension = dat.extension;
         path = SkinBank.getAudio(skill, extension, "skill");
-        Backend.playSound(path, idx);
+        Backend.playSound(path, skillAudioItem.idx);
       }
 
       onPressAndHold: {
-        Backend.copyToClipboard('$' + name + ':' + (idx ? idx.toString() : "")
-          + (specific ? ':' + detailGeneralCard.name : ""));
+        Backend.copyToClipboard('$' + skillAudioItem.name + ':' + (skillAudioItem.idx ? skillAudioItem.idx.toString() : "")
+          + (skillAudioItem.specific ? ':' + detailGeneralCard.dataModel.name : ""));
         App.showToast(Lua.tr("Audio Code Copy Success"));
       }
 
@@ -289,16 +295,16 @@ Item {
           MenuItem {
             text: Lua.tr("Copy Audio Code")
             onTriggered: {
-              Backend.copyToClipboard('$' + name + ':' + (idx ? idx.toString() : "")
-                + (specific ? ':' + detailGeneralCard.name : ""));
+              Backend.copyToClipboard('$' + skillAudioItem.name + ':' + (skillAudioItem.idx ? skillAudioItem.idx.toString() : "")
+                + (skillAudioItem.specific ? ':' + detailGeneralCard.dataModel.name : ""));
               App.showToast(Lua.tr("Audio Code Copy Success"));
             }
           }
           MenuItem {
             text: Lua.tr("Copy Audio Text")
             onTriggered: {
-              Backend.copyToClipboard(Lua.tr('$' + name + (specific ? '_' + detailGeneralCard.name : "")
-              + (idx ? idx.toString() : "")));
+              Backend.copyToClipboard(Lua.tr('$' + skillAudioItem.name + (skillAudioItem.specific ? '_' + detailGeneralCard.dataModel.name : "")
+              + (skillAudioItem.idx ? skillAudioItem.idx.toString() : "")));
               App.showToast(Lua.tr("Audio Text Copy Success"));
             }
           }
@@ -314,7 +320,7 @@ Item {
     width: 150
     GeneralCardItem {
       id: detailGeneralCard
-      name: "caocao"
+      dataModel: Ltk.createGeneralModel("caocao")
       scale: 1.5; transformOrigin: Item.TopLeft
     }
 
@@ -360,14 +366,14 @@ Item {
       Layout.preferredWidth: 130
       text: Lua.tr("Set as Avatar")
       visible: root.canSetAvatar
-      enabled: detailGeneralCard.name !== "" && !opTimer.running
-      && Cpp.self.avatar !== detailGeneralCard.name
+      enabled: detailGeneralCard.dataModel.name !== "" && !opTimer.running
+      && Cpp.self.avatar !== detailGeneralCard.dataModel.name
       onClicked: {
         App.setBusy(true);
         opTimer.start();
         ClientInstance.notifyServer(
           "UpdateAvatar",
-          detailGeneralCard.name
+          detailGeneralCard.dataModel.name
         );
       }
     }
@@ -626,8 +632,9 @@ Item {
           Repeater {
             model: root.getSameNameGenerals(root.general)
             delegate: GeneralCardItem {
+              required property string modelData
               id: sameNameGeneralCard
-              name: modelData
+              dataModel: Ltk.createGeneralModel(modelData)
               scale: 1; transformOrigin: Item.TopLeft
 
               onClicked: {

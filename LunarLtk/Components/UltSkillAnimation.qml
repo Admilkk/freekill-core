@@ -80,12 +80,11 @@ Item {
 
   GeneralCardItem {
     id: herocard
-    name: generalName
+    dataModel: Ltk.createGeneralModel(generalName, { detailed: false })
     scale: 2.7
     x: root.width + 140
     anchors.verticalCenter: parent.verticalCenter
     opacity: 0
-    detailed: false
   }
 
   Text {

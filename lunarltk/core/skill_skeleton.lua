@@ -891,7 +891,7 @@ end
 ---@param player Player @ 使用者
 ---@param scope? integer @ 查询历史范围（默认为回合）
 ---@param to? Player @ 目标
----@return boolean?
+---@return boolean
 function SkillSkeleton:withinTimesLimit(player, scope, to)
   scope = scope or Player.HistoryTurn
   if not self:withinBranchTimesLimit(player, nil, scope) then return false end
@@ -907,7 +907,7 @@ end
 ---@param branch? string @ 查询分支范围（无则检查所有分支）
 ---@param scope? integer @ 查询历史范围（默认为回合）
 ---@param to? Player @ 目标
----@return boolean?
+---@return boolean
 function SkillSkeleton:withinBranchTimesLimit(player, branch, scope, to)
   scope = scope or Player.HistoryTurn
   local times_table

@@ -11,6 +11,7 @@
 ---@field public serverplayer_klass any
 ---@field public logic_klass any
 ---@field public logic Base.GameLogic @ 这个房间使用的游戏逻辑，可能根据游戏模式而变动
+---@field public current_request Request @ 当前正在处理中的request
 ---@field public last_request Request @ 上一次完成的request
 ---@field public _test_disable_delay boolean? 测试专用 会禁用delay和烧条
 ---@field public callbacks { [string|integer]: fun(self, sender: integer, data) }

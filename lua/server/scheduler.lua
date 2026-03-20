@@ -163,6 +163,22 @@ if FileIO.pwd():endsWith("packages/freekill-core") then
   FileIO.cd("../..")
 end
 
+-- server端的开屏动画
+print [[
+
+███████╗██████╗ ███████╗███████╗██╗  ██╗██╗██╗     ██╗     
+██╔════╝██╔══██╗██╔════╝██╔════╝██║ ██╔╝██║██║     ██║     
+█████╗  ██████╔╝█████╗  █████╗  █████╔╝ ██║██║     ██║     
+██╔══╝  ██╔══██╗██╔══╝  ██╔══╝  ██╔═██╗ ██║██║     ██║     
+██║     ██║  ██║███████╗███████╗██║  ██╗██║███████╗███████╗
+╚═╝     ╚═╝  ╚═╝╚══════╝╚══════╝╚═╝  ╚═╝╚═╝╚══════╝╚══════╝
+
+        Free          Open         Flexible
+
+   Git: <https://github.com/Qsgs-Fans/FreeKill>
+   Doc: <https://fkbook-all-in-one.readthedocs.io>
+]]
+
 -- 此为服务端入口lua的末尾，服务端VM等待调试器
 if fk._VscodeDbgEnabled == "server" then
   fk._VscodeDbgWait(5928)

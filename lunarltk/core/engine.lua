@@ -95,10 +95,7 @@ function Engine:initialize()
   }
 end
 
-function Engine:load()
-  self:loadPackages()
-
-  -- 唉，杀批的Engine又搞特殊了
+function Engine:postLoad()
   -- 把card放在后面加载吧
   for _, pkname in ipairs(self.package_names) do
     local pack = self.packages[pkname]
@@ -128,6 +125,18 @@ function Engine:load()
   self:setLords()
   self:loadCardNames()
   self:loadDisabled()
+
+  local generalCount = 0
+  for _ in pairs(self.generals) do
+    generalCount = generalCount + 1
+  end
+  fk.qInfo(string.format("[LunarLtk] Loaded %d generals.", generalCount))
+  local skillCount = 0
+  for _ in pairs(self.skill_skels) do
+    skillCount = skillCount + 1
+  end
+  fk.qInfo(string.format("[LunarLtk] Loaded %d skills.", skillCount))
+  fk.qInfo(string.format("[LunarLtk] Loaded %d card types.", #self.all_card_names))
 end
 
 local _foreign_keys = {

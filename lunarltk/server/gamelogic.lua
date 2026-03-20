@@ -211,7 +211,7 @@ end
 ---@param exclusived? string[] @ 排除的技能列表，若技能在该列表中则不附加
 function GameLogic:attachSkillToPlayer(player, skillName, exclusived)
   local room = self.room
-  if table.contains(exclusived, skillName) then return end
+  if exclusived and table.contains(exclusived, skillName) then return end
   local skill = Fk.skills[skillName]
   if not skill then
     fk.qCritical("Skill: "..skillName.." doesn't exist!")

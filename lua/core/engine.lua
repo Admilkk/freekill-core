@@ -154,5 +154,8 @@ function Engine:getUIPackage(name)
   return self.ui_packages[name]
 end
 
+-- 当包都加载完成后，engine可以做点什么
+function Engine:postLoad()
+end
 
 return Engine

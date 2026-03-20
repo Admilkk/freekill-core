@@ -90,3 +90,17 @@ dofile "lua/fk_ex.lua"
 Fk = Engine:new()
 dofile "lunarltk/init.lua"
 Fk:load()
+
+local boardgameCount = 0
+for _, game in pairs(Fk.boardgames) do
+  local engine = game.engine
+  engine:postLoad()
+  boardgameCount = boardgameCount + 1
+end
+fk.qInfo(string.format("[Core] Loaded %d boardgame(s).", boardgameCount))
+
+local gamemodeCount = 0
+for _ in pairs(Fk.game_modes) do
+  gamemodeCount = gamemodeCount + 1
+end
+fk.qInfo(string.format("[Core] Loaded %d game mode(s).", gamemodeCount))

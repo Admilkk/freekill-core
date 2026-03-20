@@ -180,7 +180,7 @@ GraphicsBox {
       }
 
       onRightClicked: {
-        if (root.dataModel?.result.findIndex(e => e === modelData) === -1 && Lua.client.getSettings("enableFreeAssign"))
+        if (Lua.client.getSettings("enableFreeAssign"))
           roomScene.startCheat("FreeAssign", { dataModel: root.dataModel, oldName: dataModel.name });
       }
 

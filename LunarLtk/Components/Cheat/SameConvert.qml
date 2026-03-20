@@ -22,22 +22,37 @@ Item {
   Component {
     id: generalColumnComponent
 
-    ColumnLayout {
+    RowLayout {
       id: generalColumn
       required property string modelData
       visible: toConvertRepeater.model.length > 0
-      Text {
-        color: "#E4D5A0"
-        text: Lua.tr(parent.modelData)
+      spacing: 12
+      CompactGeneralCardItem {
+        // color: "#E4D5A0"
+        dataModel: Ltk.createGeneralCardModel(parent.modelData, { detailed: false })
+        Layout.alignment: Qt.AlignTop
       }
+
+      Text {
+        text: "===>"
+        color: "#E4D5A0"
+        horizontalAlignment: Text.AlignHCenter
+        verticalAlignment: Text.AlignVCenter
+        Layout.preferredWidth: 40
+        Layout.preferredHeight: 64
+        Layout.alignment: Qt.AlignTop
+      }
+
       GridLayout {
-        columns: 6
+        columns: 8
+        rowSpacing: 4
+        columnSpacing: 4
 
         Repeater {
           id: toConvertRepeater
           model: Ltk.getSameGenerals(generalColumn.modelData)
 
-          GeneralCardItem {
+          CompactGeneralCardItem {
             required property string modelData
             dataModel: Ltk.createGeneralCardModel(modelData)
             selectable: true
@@ -54,8 +69,9 @@ Item {
   }
 
   Flickable {
-    height: parent.height
-    width: generalButtons.width
+    height: parent.height - 20
+    // width: generalButtons.width
+    width: parent.width - 20
     anchors.centerIn: parent
     contentHeight: generalButtons.height
     ScrollBar.vertical: ScrollBar {}

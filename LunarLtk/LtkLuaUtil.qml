@@ -442,7 +442,7 @@ QtObject {
     const { kingdom, subkingdom, hp, maxHp } = data;
     const prop = {
       name,
-      pkgName: data.package,
+      prefix: Lua.tr(data.prefix),
       kingdom,
       subkingdom: subkingdom || "",
       hp, maxHp,

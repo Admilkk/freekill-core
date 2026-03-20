@@ -12,6 +12,7 @@ function GetGeneralData(name)
   return {
     package = general.package.name,
     extension = general.package.extensionName,
+    prefix = general.prefix,
     kingdom = general.kingdom,
     subkingdom = general.subkingdom,
     hp = general.hp,

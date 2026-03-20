@@ -21,7 +21,7 @@ QtObject {
   property string skin: "" // 皮肤名，默认为空，表示使用默认皮肤
 
   // 武将牌额外信息（子扩展名等）
-  property string pkgName: "" // 武将子扩展包名
+  property string prefix: "" // 武将子扩展包名缩写，用于简略显示
 
   // 国战专用
   // property bool heg: false // 是否为国战武将
@@ -49,11 +49,6 @@ QtObject {
   property bool selected: false // 这个反过来被绑定
 
   // 次生参数
-  readonly property string prefix: {
-    const sp = name.split("__");
-    if (sp.length === 1) return "";
-    return Lua.tr(sp[0]);
-  }
   readonly property var frontSkin: {
     return (Config.enabledSkins[name] && Config.enabledSkins[name] !== "-") ? (Cpp.path + "/" + Config.enabledSkins[name]) : SkinBank.getGeneralPicture(name);
   }

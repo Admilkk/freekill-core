@@ -8,7 +8,7 @@
 ---
 ---@class General : Object
 ---@field public package Package @ 武将所属包
----@field public pkgName? string @ 武将所属子扩展包角标名（如“界”）
+---@field public prefix? string @ 武将子扩展包角标名（如“界”）
 ---@field public name string @ 武将名字
 ---@field public trueName string @ 武将真名，也许可以分辨标界？
 ---@field public kingdom string @ 武将所属势力
@@ -54,7 +54,7 @@ function General:initialize(package, name, kingdom, hp, maxHp, gender)
   self.package = package
   self.name = name
   local name_splited = name:split("__")
-  self.pkgName = #name_splited > 1 and name_splited[1] or nil
+  self.prefix = #name_splited > 1 and name_splited[1] or nil
   self.trueName = name_splited[#name_splited]
 
   self.kingdom = kingdom
@@ -102,7 +102,7 @@ function General:__toqml()
       name = "GeneralModel",
 
       prop = {
-        pkgName = self.pkgName or "",
+        prefix = Fk:translate(self.prefix or ""),
         kingdom = self.kingdom,
         subkingdom = self.subkingdom or "",
         hp = self.hp,

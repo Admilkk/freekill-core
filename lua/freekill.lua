@@ -89,7 +89,7 @@ dofile "lua/fk_ex.lua"
 
 Fk = Engine:new()
 dofile "lunarltk/init.lua"
-Fk:load()
+Fk:loadPackages()
 
 local boardgameCount = 0
 for _, game in pairs(Fk.boardgames) do

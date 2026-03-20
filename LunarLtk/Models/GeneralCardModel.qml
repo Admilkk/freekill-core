@@ -9,6 +9,8 @@ import LunarLtk
 QtObject {
   id: root
 
+  property var cardItem
+
   // 武将局内信息
   property string name: "diaochan" // 武将名
   property string kingdom: "qun" // 势力
@@ -22,7 +24,12 @@ QtObject {
   property string pkgName: "" // 武将子扩展包名
 
   // 国战专用
-  property bool heg: false // 是否为国战武将
+  // property bool heg: false // 是否为国战武将
+  // 老代码太耦了不好看所以直接填false是吧
+  // FIXME: 藕！！
+  property bool heg: name.startsWith('hs__') || name.startsWith('ld__') ||
+                     name.includes('heg__')
+
   property int mainMaxHp: 0 // 国战主将额外体力上限
   property int deputyMaxHp: 0 // 国战副将额外体力上限
   property int inPosition: 0 // 选将时的指示器，0=无，1=主将，-1=副将
@@ -42,26 +49,16 @@ QtObject {
   property bool selected: false // 这个反过来被绑定
 
   // 次生参数
+  readonly property string prefix: {
+    const sp = name.split("__");
+    if (sp.length === 1) return "";
+    return Lua.tr(sp[0]);
+  }
   readonly property var frontSkin: {
     return (Config.enabledSkins[name] && Config.enabledSkins[name] !== "-") ? (Cpp.path + "/" + Config.enabledSkins[name]) : SkinBank.getGeneralPicture(name);
   }
   readonly property var backSkin: {
     return SkinBank.generalCardDir + 'card-back';
-  }
-
-  onNameChanged: {
-    refreshData();
-  }
-
-  // 重新getGeneralModel并刷新数据
-  function refreshData() {
-    const data = Ltk.getGeneralModel(name);
-    const { pkgName, kingdom, subkingdom,
-      hp, maxHp, shieldNum, mainMaxHp, deputyMaxHp } = data;
-    Object.assign(root, {
-      pkgName, kingdom, subkingdom,
-      hp, maxHp, shieldNum, mainMaxHp, deputyMaxHp
-    })
   }
 }
 

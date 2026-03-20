@@ -409,16 +409,16 @@ QtObject {
 
   function askForGeneral(sender, data) {
     const [generals, n, no_convert, heg, rule, extra_data] = data;
-    const modelComponent = Qt.createComponent("LunarLtk.Models.Popups", "GeneralsModel");
+    const modelComponent = Qt.createComponent("LunarLtk.Models.Popups", "ChooseGeneralModel");
     const model = modelComponent.createObject(null, {
-      allGenerals: generals,
+      generals,
       choiceNum: n ?? 1,
       convertDisabled: !!no_convert,
       hegemony: !!heg,
       ruleType: rule ?? (heg? "heg_general_choose" : "askForGeneralsChosen"),
       extraData: extra_data ?? { n : n },
     });
-    model.initializeGenerals();
+    model.initGeneralModels();
     model.accepted.connect(() => replyToServer(model.result));
     model.rejected.connect(() => replyToServer([]));
     activate();

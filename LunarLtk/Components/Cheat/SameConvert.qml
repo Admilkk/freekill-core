@@ -7,6 +7,7 @@ import QtQuick.Layouts
 
 import Fk
 import LunarLtk
+import LunarLtk.Models.Popups
 import LunarLtk.Components
 
 Item {
@@ -16,52 +17,35 @@ Item {
 
   signal finish()
 
-  Flickable {
-    height: parent.height
-    width: generalButtons.width
-    anchors.centerIn: parent
-    contentHeight: generalButtons.height
-    ScrollBar.vertical: ScrollBar {}
+  property ChooseGeneralModel dataModel
+
+  Component {
+    id: generalColumnComponent
+
     ColumnLayout {
-      id: generalButtons
-      Repeater {
-        model: ListModel {
-          id: glist
-        }
+      id: generalColumn
+      required property string modelData
+      visible: toConvertRepeater.model.length > 0
+      Text {
+        color: "#E4D5A0"
+        text: Lua.tr(parent.modelData)
+      }
+      GridLayout {
+        columns: 6
 
-        ColumnLayout {
-          id: generalColumn
-          required property string gname
-          Text {
-            color: "#E4D5A0"
-            text: Lua.tr(generalColumn.gname)
-          }
-          GridLayout {
-            columns: 6
+        Repeater {
+          id: toConvertRepeater
+          model: Ltk.getSameGenerals(generalColumn.modelData)
 
-            Repeater {
-              model: Ltk.getSameGenerals(generalColumn.gname)
+          GeneralCardItem {
+            required property string modelData
+            dataModel: Ltk.createGeneralCardModel(modelData)
+            selectable: true
 
-              GeneralCardItem {
-                required property string modelData
-                dataModel: Ltk.createGeneralModel(modelData)
-                selectable: true
+            onClicked: {
+              root.dataModel.changeGeneral(generalColumn.modelData, dataModel);
 
-                onClicked: {
-                  let idx = 0;
-                  for (; idx < root.extra_data.cards.count; idx++) {
-                    if (root.extra_data.cards.get(idx).dataModel.name === generalColumn.gname)
-                      break;
-                  }
-
-                  if (idx < root.extra_data.cards.count) {
-                    dataModel.name = modelData;
-                    root.extra_data.cards.get(idx).dataModel.name = modelData;
-                  }
-
-                  root.finish();
-                }
-              }
+              root.finish();
             }
           }
         }
@@ -69,10 +53,24 @@ Item {
     }
   }
 
-  onExtra_dataChanged: {
-    if (!extra_data.cards) return;
-    for (let i = 0; i < extra_data.cards.count; i++) {
-      glist.set(i, { gname: extra_data.cards.get(i).dataModel.name });
+  Flickable {
+    height: parent.height
+    width: generalButtons.width
+    anchors.centerIn: parent
+    contentHeight: generalButtons.height
+    ScrollBar.vertical: ScrollBar {}
+
+    ColumnLayout {
+      id: generalButtons
+      Repeater {
+        model: root.dataModel?.generals ?? []
+        delegate: generalColumnComponent
+      }
     }
+  }
+
+  onExtra_dataChanged: {
+    if (!extra_data.dataModel) return;
+    root.dataModel = extra_data.dataModel;
   }
 }

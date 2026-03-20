@@ -80,7 +80,7 @@ Item {
 
   GeneralCardItem {
     id: herocard
-    dataModel: Ltk.createGeneralModel(generalName, { detailed: false })
+    dataModel: Ltk.createGeneralCardModel(generalName, { detailed: false })
     scale: 2.7
     x: root.width + 140
     anchors.verticalCenter: parent.verticalCenter

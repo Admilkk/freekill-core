@@ -72,10 +72,6 @@ QtObject {
   // 把client_util.lua公式化转了一遍。还没剔除
   ///////////////// 施工中 //////////////////////
 
-  function getGeneralModel(name) {
-    return Lua.call("GetGeneralModel", name);
-  }
-
   function getGeneralData(name) {
     return Lua.call("GetGeneralData", name);
   }
@@ -440,14 +436,19 @@ QtObject {
     return component.createObject(null, prop);
   }
 
-  function createGeneralModel(name, additionalProp) {
-    const component = Qt.createComponent("LunarLtk.Models", "GeneralModel");
-    const data = Ltk.getGeneralModel(name);
-    const { pkgName, kingdom, subkingdom,
-      hp, maxHp, shieldNum, mainMaxHp, deputyMaxHp } = data;
-    const prop =  {
-      name, pkgName, kingdom, subkingdom,
-      hp, maxHp, shieldNum, mainMaxHp, deputyMaxHp
+  function createGeneralCardModel(name, additionalProp) {
+    const component = Qt.createComponent("LunarLtk.Models", "GeneralCardModel");
+    const data = Ltk.getGeneralData(name);
+    const { kingdom, subkingdom, hp, maxHp } = data;
+    const prop = {
+      name,
+      pkgName: data.package,
+      kingdom,
+      subkingdom: subkingdom || "",
+      hp, maxHp,
+      shieldNum: data.shield,
+      mainMaxHp: data.mainMaxHpAdjustedValue,
+      deputyMaxHp: data.deputyMaxHpAdjustedValue,
     };
     if (additionalProp instanceof Object) Object.assign(prop, additionalProp);
     return component.createObject(null, prop);

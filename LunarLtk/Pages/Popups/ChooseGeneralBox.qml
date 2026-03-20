@@ -4,9 +4,6 @@ import QtQuick
 
 import Fk
 import Fk.Components.Common
-
-import Fk
-import Fk.Components.Common
 import LunarLtk
 import LunarLtk.Components
 import LunarLtk.Models.Popups
@@ -16,11 +13,23 @@ pragma ComponentBehavior: Bound
 GraphicsBox {
   id: root
 
-  property GeneralsModel dataModel
+  property ChooseGeneralModel dataModel
 
   property alias generalCardList: generalCardList
 
   property var draggingCard: null
+
+  Connections {
+    target: root.dataModel
+    function onGeneralChanged(oldName, newName) {
+      for (let i = 0; i < generalCardList.count; i++) {
+        const item = generalCardList.itemAt(i);
+        if (item.modelData === oldName) {
+          item.modelData = newName;
+        }
+      }
+    }
+  }
 
   title.text: dataModel?.promptText ?? ""
   width: generalArea.width + body.anchors.leftMargin + body.anchors.rightMargin
@@ -36,22 +45,22 @@ GraphicsBox {
     Item {
       id: generalArea
       width: {
-        const count = root.dataModel?.generals?.length ?? 0;
+        const count = root.dataModel?.generals.length ?? 0;
         return (count > 8 ? Math.ceil(count / 2) : Math.max(3, count)) * 97;
       }
-      height: (root.dataModel?.generals?.length ?? 0) > 8 ? 290 : 150
+      height: (root.dataModel?.generals.length ?? 0) > 8 ? 290 : 150
       z: 1
 
       Repeater {
         id: generalMagnetList
-        model: root.dataModel?.generals?.length ?? 0
+        model: root.dataModel?.generals.length ?? 0
 
         Item {
           required property int index
           width: 93
           height: 130
           x: {
-            const count = root.dataModel?.generals?.length ?? 0;
+            const count = root.dataModel?.generals.length ?? 0;
             let columns = count;
             if (columns > 8) {
               columns = Math.ceil(columns / 2);
@@ -63,7 +72,7 @@ GraphicsBox {
             return ret;
           }
           y: {
-            const count = root.dataModel?.generals?.length ?? 0;
+            const count = root.dataModel?.generals.length ?? 0;
             if (count <= 8)
               return 0;
             return index < count / 2 ? 0 : 135;
@@ -119,7 +128,8 @@ GraphicsBox {
           enabled: root.dataModel?.canConvert ?? false
           text: Lua.tr("Same General Convert")
           onClicked: {
-            roomScene.startCheat("SameConvert", { cards: generalCardList.model, choices: root.dataModel?.result });
+            const models = root.dataModel.generals.map(name => root.dataModel.generalDict[name]);
+            roomScene.startCheat("SameConvert", { dataModel: root.dataModel });
           }
         }
 
@@ -135,11 +145,11 @@ GraphicsBox {
 
         MetroButton {
           id: detailBtn
-          enabled: !root.dataModel?.isAllEmpty() ?? false
+          enabled: !!root.dataModel?.result.length
           text: Lua.tr("Show General Detail")
           onClicked: roomScene.startCheat(
             "GeneralDetail",
-            { generals: root.dataModel?.result }
+            { generals: root.dataModel.result }
           );
         }
       }
@@ -153,7 +163,7 @@ GraphicsBox {
     GeneralCardItem {
       required property string modelData
       required property int index
-      dataModel: root.dataModel?.generalDict?.[modelData]
+      dataModel: root.dataModel.generalDict[modelData]
       selectable: {
         const result = root.dataModel?.result;
         if (result) {
@@ -165,18 +175,13 @@ GraphicsBox {
 
       onClicked: {
         if (!selectable) return;
-        root.dataModel?.toggleResult(modelData);
+        root.dataModel?.selectGeneralCard(modelData);
         root.arrangeCards();
       }
 
       onRightClicked: {
         if (root.dataModel?.result.findIndex(e => e === modelData) === -1 && Lua.client.getSettings("enableFreeAssign"))
-          roomScene.startCheat("FreeAssign", { card: this });
-      }
-
-      onDataModelChanged: {
-        root.dataModel.reloadGeneralModels();
-        root.arrangeCards();
+          roomScene.startCheat("FreeAssign", { dataModel: root.dataModel, oldName: dataModel.name });
       }
 
       opacity: dragging ? 0.5 : 1
@@ -223,14 +228,6 @@ GraphicsBox {
     }
   }
 
-  function updateCompanion(gcard1, gcard2, overwrite) {
-    if (Ltk.isCompanionWith(gcard1.name, gcard1.name)) {
-      gcard1.hasCompanions = true;
-    } else if (overwrite) {
-      gcard1.hasCompanions = false;
-    }
-  }
-
   function arrangeCards() {
     if (!root.dataModel) return;
     let item, magnet, pos, i;
@@ -260,6 +257,14 @@ GraphicsBox {
     setHegemonyData();
   }
 
+  function updateCompanion(gcard1, gcard2, overwrite) {
+    if (Ltk.isCompanionWith(gcard1.name, gcard1.name)) {
+      gcard1.hasCompanions = true;
+    } else if (overwrite) {
+      gcard1.hasCompanions = false;
+    }
+  }
+
   function setHegemonyData(){
     if (!root.dataModel || !root.dataModel.hegemony) return;
 
@@ -267,7 +272,7 @@ GraphicsBox {
 
     // 国战小标记
     const result = root.dataModel.result ?? [];
-    const selectedItem = result.slice(0, 2).map(name => root.dataModel.generalDict?.[name]?.dataModel);
+    const selectedItem = result.slice(0, 2).map(name => root.dataModel.generalDict[name]?.dataModel);
 
     // 主副将认定
     if (selectedItem[0]) {

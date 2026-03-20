@@ -33,7 +33,7 @@ ColumnLayout {
       required property string modelData
       id: cardItem
       autoBack: false
-      dataModel: Ltk.createGeneralModel(modelData, { detailed: false })
+      dataModel: Ltk.createGeneralCardModel(modelData, { detailed: false })
       onClicked: { // FIXME: rightClicked不能覆写
         roomScene.startCheat("GeneralDetail", { generals: [modelData] });
       }

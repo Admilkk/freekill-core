@@ -137,10 +137,10 @@ Item {
         delegate: GeneralCardItem {
           required property string modelData
           autoBack: false
-          dataModel: Ltk.createGeneralModel(modelData)
+          dataModel: Ltk.createGeneralCardModel(modelData)
           onClicked: {
             stack.pop();
-            root.extra_data.card.dataModel.name = modelData;
+            root.extra_data.dataModel.changeGeneral(root.extra_data.oldName, dataModel);
             root.finish();
           }
         }

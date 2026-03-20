@@ -274,7 +274,7 @@ W.PageBase {
       id: generalCard
       required property string modelData
       autoBack: false
-      dataModel: Ltk.createGeneralModel(modelData)
+      dataModel: Ltk.createGeneralCardModel(modelData)
       onClicked: {
         if (root.stat === 2) {
           root.doBanGeneral(modelData);

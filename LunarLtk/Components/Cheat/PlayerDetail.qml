@@ -172,12 +172,12 @@ Flickable {
 
         GeneralCardItem {
           id: mainChara
-          dataModel: Ltk.createGeneralModel("caocao", { detailed: false })
+          dataModel: Ltk.createGeneralCardModel("caocao", { detailed: false })
           visible: true
         }
         GeneralCardItem {
           id: deputyChara
-          dataModel: Ltk.createGeneralModel("caocao", { detailed: false })
+          dataModel: Ltk.createGeneralCardModel("caocao", { detailed: false })
           visible: false
         }
       }
@@ -252,13 +252,13 @@ Flickable {
 
     avatar.general = hasPhoto? extra_data.photo.avatar : extra_data.avatar;
     screenName.text = hasPhoto? extra_data.photo.screenName : extra_data.screenName;
-    mainChara.dataModel = Ltk.createGeneralModel(hasPhoto? extra_data.photo.general : extra_data.general);
+    mainChara.dataModel = Ltk.createGeneralCardModel(hasPhoto? extra_data.photo.general : extra_data.general);
     const deputyName = hasPhoto? extra_data.photo.deputyGeneral : extra_data.deputyGeneral;
     if (deputyName === "") {
       deputyChara.visible = false;
     } else {
       deputyChara.visible = true;
-      deputyChara.dataModel = Ltk.createGeneralModel(hasPhoto? extra_data.photo.deputyGeneral : extra_data.deputyGeneral);
+      deputyChara.dataModel = Ltk.createGeneralCardModel(hasPhoto? extra_data.photo.deputyGeneral : extra_data.deputyGeneral);
     }
 
     if (!Config.observing) {

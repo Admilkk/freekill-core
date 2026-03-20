@@ -78,7 +78,7 @@ Item {
   }
 
   function updateGeneral() {
-    detailGeneralCard.dataModel = Ltk.createGeneralModel(general);
+    detailGeneralCard.dataModel = Ltk.createGeneralCardModel(general);
     //detailFlickable.contentY = 0; // 重置滚动条
     const data = Ltk.getGeneralDetail(general);
     generalText.clear();
@@ -320,7 +320,7 @@ Item {
     width: 150
     GeneralCardItem {
       id: detailGeneralCard
-      dataModel: Ltk.createGeneralModel("caocao")
+      dataModel: Ltk.createGeneralCardModel("caocao")
       scale: 1.5; transformOrigin: Item.TopLeft
     }
 
@@ -634,7 +634,7 @@ Item {
             delegate: GeneralCardItem {
               required property string modelData
               id: sameNameGeneralCard
-              dataModel: Ltk.createGeneralModel(modelData)
+              dataModel: Ltk.createGeneralCardModel(modelData)
               scale: 1; transformOrigin: Item.TopLeft
 
               onClicked: {

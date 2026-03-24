@@ -9,50 +9,40 @@ import Fk.Components.Common
 
 import LunarLtk
 import LunarLtk.Components
+import LunarLtk.Models.Popups
 
 GraphicsBox {
   id: root
+  property ChooseCardsAndChoiceModel dataModel
 
-  property var selected_ids: []
-  property var ok_options: []
-  property var cards: []
-  property var disable_cards: []
-  property string filter_skel: ""
-  property string prompt
-  property int min
-  property int max
-  property var cancel_options: []
-  property var extra_data
-
-  title.text: prompt !== "" ? Ltk.processPrompt(prompt) : Lua.tr("$ChooseCard")
+  title.text: dataModel?.promptText ?? Lua.tr("$ChooseCard")
   // TODO: Adjust the UI design in case there are more than 7 cards
-  width: 40 + Math.min(8.5, Math.max(4, cards.length)) * 100
+  width: 40 + Math.min(8.5, Math.max(4, dataModel.cards.length)) * 100
   height: 260
 
   Component {
     id: cardDelegate
     CardItem {
-      Component.onCompleted: {
-        setData(modelData);
-      }
+      required property var modelData
+      dataModel: Ltk.createCardModel(modelData)
       autoBack: false
       showDetail: true
-      selectable: !disable_cards.includes(cid)
+      selectable: !(root.dataModel?.disabledCards ?? []).includes(modelData)
       onSelectedChanged: {
-        // if (ok_options.length == 0) return;
-
+        const selectedCards = root.dataModel?.result?.cards;
+        if (!selectedCards) return;
+        const cardId = modelData.cardId;
         if (selected) {
           origY = origY - 20;
-          root.selected_ids.push(cid);
+          if (!selectedCards.includes(cardId)) selectedCards.push(cardId);
         } else {
           origY = origY + 20;
-          root.selected_ids.splice(root.selected_ids.indexOf(cid), 1);
+          const idx = selectedCards.indexOf(cardId);
+          if (idx >= 0) selectedCards.splice(idx, 1);
         }
         origX = x;
         goBack(true);
-        root.selected_idsChanged();
-
-        root.updateCardSelectable();
+        updateCardSelectable();
       }
     }
   }
@@ -93,7 +83,7 @@ GraphicsBox {
           spacing: 5
           Repeater {
             id: to_select
-            model: cards
+            model:root.dataModel?.cards ?? []
             delegate: cardDelegate
           }
         }
@@ -114,71 +104,45 @@ GraphicsBox {
       spacing: 8
 
       Repeater {
-        model: ok_options
+        model: root.dataModel?.choices ?? []
 
         MetroButton {
           Layout.fillWidth: true
           text: Ltk.processPrompt(modelData)
           enabled: {
-            const cards = root.selected_ids;
-            if (!(cards && cards.length >= root.min && cards.length <= root.max)) return false;
-            if (index === 0) return true;
-            if (filter_skel != "") {
-              const func = `Fk.skill_skels["${filter_skel}"].extra.choiceFilter({${cards}}, "${modelData}", json.decode('${JSON.stringify(extra_data)}'))`;
-              // console.log(func);
-              return Lua.evaluate(func);
-            }
-            return true;
+            const cards = root.dataModel?.result?.cards ?? [];
+            return root.dataModel?.choiceEnabled(cards, modelData, index) ?? false;
           }
 
-          onClicked: {
-            const reply = (
-              {
-                cards: root.selected_ids,
-                choice: modelData,
-              }
-            );
-            ClientInstance.replyToServer("", reply);
-            close();
-            roomScene.state = "notactive";
-          }
+          onClicked: root.dataModel.toggleChoose(modelData);
         }
       }
 
       Repeater {
-        model: cancel_options
-
+        model: root.dataModel?.cancelChoices ?? []
         MetroButton {
           Layout.fillWidth: true
           text: Ltk.processPrompt(modelData)
           enabled: true
-
-          onClicked: {
-            const reply = (
-              {
-                cards: [],
-                choice: modelData,
-              }
-            );
-            ClientInstance.replyToServer("", reply);
-            close();
-            roomScene.state = "notactive";
-          }
+          onClicked: root.dataModel.toggleChoose(modelData);
         }
       }
     }
   }
 
   function updateCardSelectable() {
-    if (selected_ids.length > max) {
-      let item;
-      for (let i = 0; i < to_select.count; i++) {
-        item = to_select.itemAt(i);
-        if (item.cid == selected_ids[0]) {
-          item.selected = false;
-          break;
-        }
+    const selectedCards = root.dataModel?.result?.cards ?? [];
+    const maxNum = root.dataModel?.maxNum ?? 0;
+    if (selectedCards.length <= maxNum) return;
+
+    for (let i = 0; i < to_select.count; i++) {
+      const item = to_select.itemAt(i);
+      if (item?.modelData?.cardId === selectedCards[0]) {
+        item.selected = false;
+        break;
       }
     }
   }
+
+
 }

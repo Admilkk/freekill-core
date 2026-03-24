@@ -2863,8 +2863,7 @@ end
 
 ---@class AskToCustomDialogParams
 ---@field skill_name string @ 烧条时显示的技能名
----@field qml_path string @ 小游戏框关键词
----@field extra_data any @ 额外信息，因技能而异了
+---@field component? QmlComponent model模块
 
 -- Show a qml dialog and return qml's ClientInstance.replyToServer
 -- Do anything you like through this function
@@ -2879,8 +2878,7 @@ function Room:askToCustomDialog(player, params)
   req.focus_text = params.skill_name
   req.receive_decode = false -- 没法知道要不要decode，所以我写false (json.decode该杀啊)
   req:setData(player, {
-    path = params.qml_path,
-    data = params.extra_data,
+    component = params.component,
   })
   return req:getResult(player)
 end

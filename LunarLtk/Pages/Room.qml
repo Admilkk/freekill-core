@@ -107,9 +107,20 @@ W.PageBase {
           pop.item.dataModel = model;
           pop.item.arrangeCards();
           break;
+        case Command.AskForCardsAndChoice:
+          pop.sourceComponent = Qt.createComponent("LunarLtk.Pages.Popups", "ChooseCardsAndChoiceBox");
+          pop.item.dataModel = model;
+          pop.moveToCenter();
+          break;
         case Command.GameOver:
           pop.sourceComponent = Qt.createComponent("LunarLtk.Pages.Popups", "GameOverBox");
           pop.item.dataModel = model;
+          break;
+        case Command.CustomDialog:
+          pop.sourceComponent = Lua.createComponent(data.component);
+          if (model) {
+            pop.item.dataModel = model;
+          }
           break;
         default:
           break;
@@ -1232,12 +1243,10 @@ W.PageBase {
 
     // TODO 摆烂了 反正这些后面也是得重构 懒得搬砖了
     addCallback(Command.AskForExchange, Logic.callbacks["AskForExchange"]);
-    addCallback(Command.AskForCardsAndChoice, Logic.callbacks["AskForCardsAndChoice"]);
     addCallback(Command.FillAG, Logic.callbacks["FillAG"]);
     addCallback(Command.AskForAG, Logic.callbacks["AskForAG"]);
     addCallback(Command.TakeAG, Logic.callbacks["TakeAG"]);
     addCallback(Command.CloseAG, Logic.callbacks["CloseAG"]);
-    addCallback(Command.CustomDialog, Logic.callbacks["CustomDialog"]);
     addCallback(Command.MiniGame, Logic.callbacks["MiniGame"]);
     addCallback(Command.UpdateMiniGame, Logic.callbacks["UpdateMiniGame"]);
     addCallback(Command.UpdateRequestUI, Logic.callbacks["UpdateRequestUI"]);

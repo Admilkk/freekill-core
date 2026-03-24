@@ -470,12 +470,45 @@ QtObject {
     popupReady(Command.AskForCardChosen, data, model);
   }
 
+  function askForCardsAndChoice(sender, data) {
+    const { cards, choices, prompt, cancel_choices, min, max, filter_skel, disabled, extra_data } = data;
+    const modelComponent = Qt.createComponent("LunarLtk.Models.Popups", "ChooseCardsAndChoiceModel");
+    const model = modelComponent.createObject(null, {
+      cards,
+      choices,
+      prompt,
+      cancelChoices: cancel_choices ?? [],
+      minNum: min ?? 1,
+      maxNum: max ?? 1,
+      filterSkel: filter_skel ?? "",
+      disabledCards: disabled ?? [],
+      extraData: extra_data,
+    });
+    model.accepted.connect(() => replyToServer(model.result));
+    model.rejected.connect(() => replyToServer(""));
+    activate();
+    popupReady(Command.AskForCardsAndChoice, data, model);
+  }
+
   function gameOver(sender, jsonData) {
     const modelComponent = Qt.createComponent("LunarLtk.Models.Popups", "GameOverModel");
     const model = modelComponent.createObject();
     model.winner = jsonData;
     deActivate();
     popupReady(Command.GameOver, jsonData, model);
+  }
+
+  function customDialog(sender, data) {
+    const { component } = data;
+    activate();
+    if (component.model) {
+      const mod =Lua.createQmlObject(component.model);
+      mod.accepted.connect(() => replyToServer(mod.result));
+      mod.rejected.connect(() => replyToServer(""));
+      popupReady(Command.CustomDialog, data, mod);
+    } else {
+      popupReady(Command.CustomDialog, data, null);
+    }
   }
 
   // 蒋琬专属；啥时候删了这玩意啊？
@@ -529,7 +562,9 @@ QtObject {
     roomPage.addCallback(Command.AskForArrangeCards, askForArrangeCards);
     roomPage.addCallback(Command.AskForMoveCardInBoard, askForMoveCardInBoard);
     roomPage.addCallback(Command.AskForCardChosen, askForCardChosen);
+    roomPage.addCallback(Command.AskForCardsAndChoice, askForCardsAndChoice);
     roomPage.addCallback(Command.GameOver, gameOver);
+    roomPage.addCallback(Command.CustomDialog, customDialog);
     
     roomPage.addCallback(Command.ReplyToServer, (_, data) => replyToServer(data));
   }

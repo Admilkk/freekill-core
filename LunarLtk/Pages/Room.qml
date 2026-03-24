@@ -175,7 +175,7 @@ W.PageBase {
         text: Lua.tr("Choose one handcard")
         textFont.pixelSize: 28
         visible: {
-          if (roomScene.state === "notactive") return false;
+          if (!progressAnim.running) return false;
           if (dashboard.handcardArea.length <= 15) {
             return false;
           }
@@ -196,7 +196,7 @@ W.PageBase {
         onClicked: {
           Cpp.notifyServer("Trust", "");
           trustBtn.enabled = false;
-          roomScene.state = "notactive";
+          roomScene.dataModel.deActivate();
         }
       }
       MetroButton {
@@ -365,7 +365,7 @@ W.PageBase {
         duration: Config.roomTimeout * 1000
 
         onFinished: {
-          roomScene.state = "notactive"
+          roomScene.dataModel.deActivate();
         }
       }
     }

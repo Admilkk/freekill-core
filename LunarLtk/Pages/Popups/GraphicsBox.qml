@@ -3,12 +3,14 @@
 import QtQuick
 
 Item {
+  id: root
+
   property alias title: titleItem
   property alias background: background
   signal accepted() //Read result
   signal finished() //Close the box
 
-  id: root
+  signal shown() // 对话框刚刚展示时触发的信号
 
   Rectangle {
     id: background

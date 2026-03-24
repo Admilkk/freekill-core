@@ -20,15 +20,13 @@ MetroButton {
 
   onClicked: {
     Ltk.updateRequestUI("Interaction", "1", "update", []);
-    roomScene.popupBox.sourceComponent = Qt.createComponent("LunarLtk.Pages.Popups", "ChoicesBox");
-    const box = roomScene.popupBox.item;
+    roomScene.showPopup(Qt.createComponent("LunarLtk.Pages.Popups", "ChoicesBox"), { dataModel });
     dataModel.accepted.connect(() => {
       answer = dataModel.result;
-      box?.finished();
+      roomScene.popupItem?.finished();
     });
     dataModel.rejected.connect(() => {
-      box?.finished();
+      roomScene.popupItem?.finished();
     });
-    box.dataModel = dataModel;
   }
 }

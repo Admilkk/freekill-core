@@ -21,6 +21,15 @@ GraphicsBox {
 
   readonly property bool isOneLine: contentLoader.sourceComponent === onelineComponent
 
+  onShown: {
+    if (isOneLine && dataModel.minNum === 1 && dataModel.maxNum === 1) {
+      title.visible = false;
+      background.visible = false;
+      x = (roomScene.width - root.width) / 2;
+      y = roomScene.dashboard.y - 20;
+    }
+  }
+
   Loader {
     id: contentLoader
     x: 8

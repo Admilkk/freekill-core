@@ -19,6 +19,8 @@ GraphicsBox {
 
   property var draggingCard: null
 
+  onShown: arrangeCards();
+
   Connections {
     target: root.dataModel
     function onGeneralChanged(oldName, newName) {

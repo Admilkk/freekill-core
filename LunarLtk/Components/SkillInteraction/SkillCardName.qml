@@ -21,11 +21,9 @@ MetroButton {
 
   onClicked: {
     if (!dataModel.cancelable && dataModel.choices.length < 2) return;
-    roomScene.popupBox.sourceComponent = Qt.createComponent("LunarLtk.Pages.Popups", "CardNamesBox");
-    const box = roomScene.popupBox.item;
+    roomScene.showPopup(Qt.createComponent("LunarLtk.Pages.Popups", "CardNamesBox"), { dataModel });
     dataModel.accepted.connect(() => {
       answer = dataModel.result[0];
     });
-    box.dataModel = dataModel;
   }
 }

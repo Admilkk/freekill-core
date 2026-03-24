@@ -65,66 +65,28 @@ W.PageBase {
 
     onPopupReady: (command, data, model) => {
       let component;
-      switch (command) {
-        case Command.AskForArrangeCards:
-          component = Qt.createComponent("LunarLtk.Pages.Popups", "ArrangeCardsBox");
-          showPopup(component, { dataModel: model });
-          popupItem.arrangeCards();
-          break;
-        case Command.AskForChoices:
-          model.accepted.connect(() => dataModel.replyToServer(model.result));
-          model.rejected.connect(() => dataModel.replyToServer([]));
+      let prop = { dataModel: model };
+      if (!model) delete prop.dataModel;
 
-          component = Qt.createComponent("LunarLtk.Pages.Popups", "ChoicesBox");
-          showPopup(component, { dataModel: model });
-          if (popupItem.isOneLine && model.minNum === 1 && model.maxNum === 1) {
-            popupItem.title.visible = false;
-            popupItem.background.visible = false;
-            popupItem.x = (roomScene.width - popupItem.width) / 2;
-            popupItem.y = dashboard.y - 20;
-          }
-          break;
-        case Command.AskForGeneral:
-          model.accepted.connect(() => dataModel.replyToServer(model.result));
-          model.rejected.connect(() => dataModel.replyToServer([]));
+      const componentTable = {
+        [Command.AskForArrangeCards]: "ArrangeCardsBox",
+        [Command.AskForChoices]: "ChoicesBox",
+        [Command.AskForGeneral]: "ChooseGeneralBox",
+        [Command.AskForCardChosen]: "PlayerCardBox",
+        [Command.AskForPoxi]: "PoxiBox",
+        [Command.AskForMoveCardInBoard]: "MoveCardInBoardBox",
+        [Command.AskForCardsAndChoice]: "ChooseCardsAndChoiceBox",
 
-          component = Qt.createComponent("LunarLtk.Pages.Popups", "ChooseGeneralBox");
-          showPopup(component, { dataModel: model });
-          popupItem.arrangeCards();
-          break;
-        case Command.AskForCardChosen:
-          component = Qt.createComponent("LunarLtk.Pages.Popups", "PlayerCardBox");
-          showPopup(component, { dataModel: model });
-          break;
-        case Command.AskForPoxi:
-          component = Qt.createComponent("LunarLtk.Pages.Popups", "PoxiBox");
-          showPopup(component, { dataModel: model });
-          break;
-        case Command.AskForMoveCardInBoard:
-          component = Qt.createComponent("LunarLtk.Pages.Popups", "MoveCardInBoardBox");
-          showPopup(component, { dataModel: model });
-          popupItem.arrangeCards();
-          break;
-        case Command.AskForCardsAndChoice:
-          component = Qt.createComponent("LunarLtk.Pages.Popups", "ChooseCardsAndChoiceBox");
-          showPopup(component, { dataModel: model });
-          break;
-        case Command.GameOver:
-          component = Qt.createComponent("LunarLtk.Pages.Popups", "GameOverBox");
-          showPopup(component, { dataModel: model });
-          break;
-        case Command.CustomDialog: {
-          component = Lua.createComponent(data.component);
-          const prop = {};
-          if (model) {
-            prop.dataModel = model;
-          }
-          showPopup(component, prop);
-          break;
-        }
-        default:
-          break;
+        [Command.GameOver]: "GameOver",
+      };
+
+      if (command == Command.CustomDialog) {
+        component = Lua.createComponent(data.component);
+      } else {
+        component = Qt.createComponent("LunarLtk.Pages.Popups", componentTable[command]);
       }
+
+      showPopup(component, prop);
     }
 
     onAgReady: roomScene.showAG();
@@ -643,6 +605,8 @@ W.PageBase {
     item.heightChanged.connect(() => moveToCenter());
 
     moveToCenter();
+
+    item?.shown();
   }
 
   function showAG() {

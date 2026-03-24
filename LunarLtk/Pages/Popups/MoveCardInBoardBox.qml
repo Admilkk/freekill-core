@@ -22,6 +22,8 @@ GraphicsBox {
   width: body.width + padding * 2
   height: title.height + body.height + padding * 2
 
+  onShown: arrangeCards();
+
   ColumnLayout {
     id: body
     x: root.padding

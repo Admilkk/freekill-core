@@ -2,6 +2,8 @@ import QtQuick
 import Fk
 import LunarLtk
 
+import LunarLtk.Models.Popups
+
 // 试做型RoomModel
 //
 // 目标是干掉大部分游戏对局内UI页面/组件的property定义
@@ -51,6 +53,8 @@ QtObject {
 
   property string prompt
 
+  property AGModel agModel
+
   // 俩跳过无懈用的
   property var skipNullificationData: null
   property var skippedUseEventIds: []
@@ -65,6 +69,8 @@ QtObject {
   signal playerAdded(PhotoModel model); // 新玩家加入的信号（addNpc）
   signal cardsMoved(var move, var models); // 操作完移牌数据后通知ui
   signal popupReady(string command,var data, var model); // 准备好弹窗所需model后通知ui
+
+  signal agReady(); // FIXME 烂完了五谷
 
   signal activated();
   signal deActivated();
@@ -511,6 +517,33 @@ QtObject {
     }
   }
 
+  function fillAG(sender, data) {
+    const ids = data[0];
+
+    const modelComponent = Qt.createComponent("LunarLtk.Models.Popups", "AGModel");
+    const model = modelComponent.createObject();
+    model.addIds(ids);
+    model.accepted.connect(() => dataModel.replyToServer(model.result));
+
+    agModel = model;
+    agReady();
+  }
+
+  function askForAG(sender, j) {
+    activate();
+    agModel.interactive = true;
+  }
+
+  function takeAG(sender, data) {
+    if (!agModel) return;
+    const pid = data[0];
+    const cid = data[1];
+    const item = getPhoto(pid);
+    const general = Lua.tr(item.general);
+
+    agModel.takeAG(general, cid);
+  }
+
   // 蒋琬专属；啥时候删了这玩意啊？
   function jiangwanHandler(sender, data) {
     const hand = dashboard.handcards.map(c => c.cardId);
@@ -565,6 +598,10 @@ QtObject {
     roomPage.addCallback(Command.AskForCardsAndChoice, askForCardsAndChoice);
     roomPage.addCallback(Command.GameOver, gameOver);
     roomPage.addCallback(Command.CustomDialog, customDialog);
+
+    roomPage.addCallback(Command.FillAG, fillAG);
+    roomPage.addCallback(Command.AskForAG, askForAG);
+    roomPage.addCallback(Command.TakeAG, takeAG);
     
     roomPage.addCallback(Command.ReplyToServer, (_, data) => replyToServer(data));
   }

@@ -59,31 +59,6 @@ callbacks["AskForCardsAndChoice"] = (sender, data) => {
   roomScene.popupBox.moveToCenter();
 }
 
-callbacks["FillAG"] = (sender, data) => {
-  const ids = data[0];
-  roomScene.manualBox.sourceComponent =
-    Qt.createComponent("LunarLtk.Pages.Popups", "AG");
-  roomScene.manualBox.item.addIds(ids);
-}
-
-callbacks["AskForAG"] = (sender, j) => {
-  roomScene.dataModel.activate();
-  roomScene.manualBox.item.interactive = true;
-}
-
-callbacks["TakeAG"] = (sender, data) => {
-  if (!roomScene.manualBox.item) return;
-  const pid = data[0];
-  const cid = data[1];
-  const item = getPhoto(pid);
-  const general = Lua.tr(item.general);
-
-  // the item should be AG box
-  roomScene.manualBox.item.takeAG(general, cid);
-}
-
-callbacks["CloseAG"] = () => roomScene.manualBox.item.close();
-
 callbacks["CustomDialog"] = (sender, data) => {
   const path = data.path;
   const dat = data.data;

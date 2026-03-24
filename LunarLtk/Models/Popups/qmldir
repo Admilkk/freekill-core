@@ -1,5 +1,6 @@
 module LunarLtk.Models.Popups
 
+AGModel 1.0 AGModel.qml
 PoxiModel 1.0 PoxiModel.qml
 PlayerCardModel 1.0 PlayerCardModel.qml
 MoveCardInBoardModel 1.0 MoveCardInBoardModel.qml

@@ -17,8 +17,8 @@ import "RoomLogic.js" as Logic
 W.PageBase {
   id: roomScene
 
-  property var popupItem
-  property alias manualBox: manualBox
+  property var agItem // 五谷框
+  property var popupItem // 弹窗
   property alias bigAnim: bigAnim
   property alias okCancel: okCancel
   property alias okButton: okButton
@@ -126,6 +126,8 @@ W.PageBase {
           break;
       }
     }
+
+    onAgReady: roomScene.showAG();
   }
 
   MediaPlayer {
@@ -496,26 +498,6 @@ W.PageBase {
     }
   }
 
-  // manualBox: same as popupBox, but must be closed manually
-  Loader {
-    id: manualBox
-    z: 999
-    onSourceChanged: {
-      if (item === null)
-        return;
-      item.finished.connect(() => sourceComponent = undefined);
-      item.widthChanged.connect(() => manualBox.moveToCenter());
-      item.heightChanged.connect(() => manualBox.moveToCenter());
-      moveToCenter();
-    }
-    onSourceComponentChanged: sourceChanged();
-
-    function moveToCenter() {
-      item.x = Math.round((roomArea.width - item.width) / 2);
-      item.y = Math.round(roomArea.height * 0.67 - item.height / 2);
-    }
-  }
-
   Loader {
     id: bigAnim
     anchors.fill: parent
@@ -656,6 +638,26 @@ W.PageBase {
     item.finished.connect(() => {
       item.destroy();
       roomScene.popupItem = null;
+    });
+    item.widthChanged.connect(() => moveToCenter());
+    item.heightChanged.connect(() => moveToCenter());
+
+    moveToCenter();
+  }
+
+  function showAG() {
+    const component = Qt.createComponent("LunarLtk.Pages.Popups", "AG");
+    const item = component.createObject(roomScene, { dataModel: dataModel.agModel });
+    agItem = item;
+
+    const moveToCenter = () => {
+      item.x = Math.round((roomArea.width - item.width) / 2);
+      item.y = Math.round(roomArea.height * 0.67 - item.height / 2);
+    }
+
+    item.finished.connect(() => {
+      item.destroy();
+      roomScene.agItem = null;
     });
     item.widthChanged.connect(() => moveToCenter());
     item.heightChanged.connect(() => moveToCenter());
@@ -1235,10 +1237,6 @@ W.PageBase {
 
     // TODO 摆烂了 反正这些后面也是得重构 懒得搬砖了
     addCallback(Command.AskForExchange, Logic.callbacks["AskForExchange"]);
-    addCallback(Command.FillAG, Logic.callbacks["FillAG"]);
-    addCallback(Command.AskForAG, Logic.callbacks["AskForAG"]);
-    addCallback(Command.TakeAG, Logic.callbacks["TakeAG"]);
-    addCallback(Command.CloseAG, Logic.callbacks["CloseAG"]);
     addCallback(Command.MiniGame, Logic.callbacks["MiniGame"]);
     addCallback(Command.UpdateMiniGame, Logic.callbacks["UpdateMiniGame"]);
     addCallback(Command.UpdateRequestUI, Logic.callbacks["UpdateRequestUI"]);
@@ -1247,6 +1245,8 @@ W.PageBase {
     addCallback(Command.MoveFocus, moveFocus);
     addCallback(Command.Animate, doAnimate);
     addCallback(Command.LogEvent, logEvent);
+
+    addCallback(Command.CloseAG, () => agItem.close());
 
     addCallback(Command.ShowVirtualCard, showVirtualCard);
   }

@@ -14,11 +14,9 @@ pragma ComponentBehavior: Bound
 GraphicsBox {
   id: root
 
-  // 因为弹窗在Loader中加载，不能用required. 其他同理
-  // 所以这位初始条件会为null 后面比较急迫用到model的地方需要判空
-  /* required */ property PoxiModel dataModel
+  required property PoxiModel dataModel
 
-  title.text: dataModel?.promptText ?? ""
+  title.text: dataModel.promptText
 
   // TODO: Adjust the UI design in case there are more than 7 cards
   width: 70 + 700
@@ -32,7 +30,7 @@ GraphicsBox {
     anchors.rightMargin: 20
     anchors.bottomMargin: 30
     spacing: 20
-    model: root.dataModel?.cardData ?? []
+    model: root.dataModel.cardData
     clip: true
 
     delegate: RowLayout {
@@ -81,7 +79,7 @@ GraphicsBox {
       width: 120
       height: 35
       text: Lua.tr("OK")
-      enabled: root.dataModel?.feasible ?? false
+      enabled: root.dataModel.feasible
       onClicked: root.dataModel.shuffleAndOk()
     }
 
@@ -89,7 +87,7 @@ GraphicsBox {
       width: 120
       height: 35
       text: Lua.tr("Cancel")
-      visible: root.dataModel?.cancelable ?? false
+      visible: root.dataModel.cancelable
       onClicked: root.dataModel.rejected()
     }
   }

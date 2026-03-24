@@ -13,11 +13,11 @@ import LunarLtk.Models.Popups
 GraphicsBox {
   id: root
 
-  property ChoicesModel dataModel
+  required property ChoicesModel dataModel
 
-  readonly property int lines: processMatrixRowLengthCompact(dataModel?.allChoices ?? [])
+  readonly property int lines: processMatrixRowLengthCompact(dataModel.allChoices)
 
-  title.text: dataModel?.promptText ?? ""
+  title.text: dataModel.promptText
   width: 700
   height: lines * 45 + 20 + 40
 
@@ -41,7 +41,7 @@ GraphicsBox {
       spacing: 20
 
       Repeater {
-        model: root.dataModel?.allChoices ?? []
+        model: root.dataModel.allChoices
 
         delegate: GridLayout {
           required property var modelData

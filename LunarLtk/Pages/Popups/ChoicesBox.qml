@@ -14,8 +14,8 @@ pragma ComponentBehavior: Bound
 GraphicsBox {
   id: root
 
-  property ChoicesModel dataModel
-  title.text: dataModel?.promptText ?? ""
+  required property ChoicesModel dataModel
+  title.text: dataModel.promptText
   width: contentLoader.width + 16
   height: contentLoader.height + title.height + (okCancel.visible ? okCancel.height : 0) + 24
 
@@ -40,14 +40,14 @@ GraphicsBox {
     MetroButton {
       text: Lua.tr("OK")
       Layout.preferredWidth: 64
-      enabled: root.dataModel?.feasible ?? false
+      enabled: root.dataModel.feasible
       onClicked: root.dataModel.accepted();
     }
 
     MetroButton {
       text: Lua.tr("Cancel")
       Layout.preferredWidth: 64
-      visible: root.dataModel?.cancelable ?? false
+      visible: root.dataModel.cancelable
       onClicked: root.dataModel.rejected();
     }
   }

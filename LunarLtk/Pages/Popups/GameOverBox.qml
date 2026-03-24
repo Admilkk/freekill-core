@@ -12,11 +12,11 @@ import LunarLtk.Models.Popups
 GraphicsBox {
   id: root
 
-  property GameOverModel dataModel
+  required property GameOverModel dataModel
 
   property bool summaryShown: true
 
-  title.text: dataModel?.titleText ?? ""
+  title.text: dataModel.titleText
   width: summaryShown ? 780 : 400
   height: queryResultList.height + 96
 
@@ -38,7 +38,7 @@ GraphicsBox {
       return implicitColumnWidth(col);
     }
 
-    model: root.dataModel?.tableModel
+    model: root.dataModel.tableModel
 
     delegate: Text {
       required property string display
@@ -72,33 +72,33 @@ GraphicsBox {
     Item { Layout.fillWidth: true }
     MetroButton {
       text: Lua.tr("Continue Game")
-      visible: root.dataModel?.canContinue ?? false
-      onClicked: root.dataModel?.continueGame(root)
+      visible: root.dataModel.canContinue
+      onClicked: root.dataModel.continueGame(root)
     }
 
     MetroButton {
       text: Lua.tr("Back To Room")
-      visible: root.dataModel?.canBackToRoom ?? false
-      onClicked: root.dataModel?.backToRoom(root)
+      visible: root.dataModel.canBackToRoom
+      onClicked: root.dataModel.backToRoom(root)
     }
 
     MetroButton {
       text: Lua.tr("Back To Lobby")
-      onClicked: root.dataModel?.backToLobby(root)
+      onClicked: root.dataModel.backToLobby(root)
     }
 
     MetroButton {
       id: repBtn
       text: Lua.tr("Save Replay")
-      visible: root.dataModel?.canSaveReplay ?? false
-      onClicked: root.dataModel?.saveReplay(root)
+      visible: root.dataModel.canSaveReplay ?? false
+      onClicked: root.dataModel.saveReplay(root)
     }
 
     MetroButton {
       id: bkmBtn
       text: Lua.tr("Bookmark Replay")
-      visible: root.dataModel?.canBookmarkReplay ?? false
-      onClicked: root.dataModel?.bookmarkReplay(root)
+      visible: root.dataModel.canBookmarkReplay ?? false
+      onClicked: root.dataModel.bookmarkReplay(root)
     }
   }
 }

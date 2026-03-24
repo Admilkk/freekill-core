@@ -13,14 +13,14 @@ import LunarLtk.Models.Popups
 GraphicsBox {
   id: root
 
-  property ArrangeCardsModel dataModel
+  required property ArrangeCardsModel dataModel
 
   property var draggingCard: null
   property int draggingToArea: -1
   property int draggingToIndex: -1
   property int padding: 25
 
-  title.text: dataModel?.promptText ?? ""
+  title.text: dataModel.promptText
   width: body.width + padding * 2
   height: title.height + body.height + padding * 2
 
@@ -32,7 +32,7 @@ GraphicsBox {
 
     Repeater {
       id: areaRepeater
-      model: root.dataModel?.areaCapacities ?? 0
+      model: root.dataModel.areaCapacities
 
       Row {
         id: areaRow
@@ -69,7 +69,7 @@ GraphicsBox {
         width: 120
         height: 35
         text: Lua.tr("OK")
-        enabled: root.dataModel?.feasible ?? false
+        enabled: root.dataModel.feasible
         onClicked: root.dataModel.accepted()
       }
 
@@ -77,7 +77,7 @@ GraphicsBox {
         width: 120
         height: 35
         text: Lua.tr("Cancel")
-        visible: root.dataModel?.cancelable ?? true
+        visible: root.dataModel.cancelable
         onClicked: root.dataModel.rejected()
       }
     }
@@ -87,7 +87,7 @@ GraphicsBox {
     id: cardItem
     model: {
       const ret = [];
-      for (const cardIds of root.dataModel?.origCards ?? []) {
+      for (const cardIds of root.dataModel.origCards) {
         ret.push(...cardIds);
       }
       return ret;

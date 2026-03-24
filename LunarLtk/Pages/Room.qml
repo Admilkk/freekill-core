@@ -17,7 +17,7 @@ import "RoomLogic.js" as Logic
 W.PageBase {
   id: roomScene
 
-  property alias popupBox: popupBox
+  property var popupItem
   property alias manualBox: manualBox
   property alias bigAnim: bigAnim
   property alias okCancel: okCancel
@@ -55,8 +55,8 @@ W.PageBase {
 
       dashboard.disableAllCards();
 
-      if (popupBox.item != null) {
-        popupBox.item.finished();
+      if (popupItem != null) {
+        popupItem.finished();
       }
 
       Ltk.finishRequestUI();
@@ -64,70 +64,68 @@ W.PageBase {
     }
 
     onPopupReady: (command, data, model) => {
-      const pop = roomScene.popupBox;
+      let component;
       switch (command) {
         case Command.AskForArrangeCards:
-          pop.sourceComponent = Qt.createComponent("LunarLtk.Pages.Popups", "ArrangeCardsBox");
-          pop.item.dataModel = model;
-          pop.item.arrangeCards();
+          component = Qt.createComponent("LunarLtk.Pages.Popups", "ArrangeCardsBox");
+          showPopup(component, { dataModel: model });
+          popupItem.arrangeCards();
           break;
         case Command.AskForChoices:
           model.accepted.connect(() => dataModel.replyToServer(model.result));
           model.rejected.connect(() => dataModel.replyToServer([]));
-          pop.sourceComponent = Qt.createComponent("LunarLtk.Pages.Popups", "ChoicesBox");
-          const choicesBox = pop.item;
-          choicesBox.dataModel = model;
-          if (choicesBox.isOneLine && model.minNum === 1 && model.maxNum === 1) {
-            choicesBox.title.visible = false;
-            choicesBox.background.visible = false;
-            choicesBox.x = (roomScene.width - choicesBox.width) / 2;
-            choicesBox.y = dashboard.y - 20;
+
+          component = Qt.createComponent("LunarLtk.Pages.Popups", "ChoicesBox");
+          showPopup(component, { dataModel: model });
+          if (popupItem.isOneLine && model.minNum === 1 && model.maxNum === 1) {
+            popupItem.title.visible = false;
+            popupItem.background.visible = false;
+            popupItem.x = (roomScene.width - popupItem.width) / 2;
+            popupItem.y = dashboard.y - 20;
           }
           break;
         case Command.AskForGeneral:
           model.accepted.connect(() => dataModel.replyToServer(model.result));
           model.rejected.connect(() => dataModel.replyToServer([]));
-          pop.sourceComponent = Qt.createComponent("LunarLtk.Pages.Popups", "ChooseGeneralBox");
-          pop.item.dataModel = model;
-          pop.item.arrangeCards();
-          pop.moveToCenter();
+
+          component = Qt.createComponent("LunarLtk.Pages.Popups", "ChooseGeneralBox");
+          showPopup(component, { dataModel: model });
+          popupItem.arrangeCards();
           break;
         case Command.AskForCardChosen:
-          pop.sourceComponent = Qt.createComponent("LunarLtk.Pages.Popups", "PlayerCardBox");
-          pop.item.dataModel = model;
-          pop.moveToCenter();
+          component = Qt.createComponent("LunarLtk.Pages.Popups", "PlayerCardBox");
+          showPopup(component, { dataModel: model });
           break;
         case Command.AskForPoxi:
-          pop.sourceComponent = Qt.createComponent("LunarLtk.Pages.Popups", "PoxiBox");
-          pop.item.dataModel = model;
-          pop.moveToCenter();
+          component = Qt.createComponent("LunarLtk.Pages.Popups", "PoxiBox");
+          showPopup(component, { dataModel: model });
           break;
         case Command.AskForMoveCardInBoard:
-          pop.sourceComponent = Qt.createComponent("LunarLtk.Pages.Popups", "MoveCardInBoardBox");
-          pop.item.dataModel = model;
-          pop.item.arrangeCards();
+          component = Qt.createComponent("LunarLtk.Pages.Popups", "MoveCardInBoardBox");
+          showPopup(component, { dataModel: model });
+          popupItem.arrangeCards();
           break;
         case Command.AskForCardsAndChoice:
-          pop.sourceComponent = Qt.createComponent("LunarLtk.Pages.Popups", "ChooseCardsAndChoiceBox");
-          pop.item.dataModel = model;
-          pop.moveToCenter();
+          component = Qt.createComponent("LunarLtk.Pages.Popups", "ChooseCardsAndChoiceBox");
+          showPopup(component, { dataModel: model });
           break;
         case Command.GameOver:
-          pop.sourceComponent = Qt.createComponent("LunarLtk.Pages.Popups", "GameOverBox");
-          pop.item.dataModel = model;
+          component = Qt.createComponent("LunarLtk.Pages.Popups", "GameOverBox");
+          showPopup(component, { dataModel: model });
           break;
-        case Command.CustomDialog:
-          pop.sourceComponent = Lua.createComponent(data.component);
+        case Command.CustomDialog: {
+          component = Lua.createComponent(data.component);
+          const prop = {};
           if (model) {
-            pop.item.dataModel = model;
+            prop.dataModel = model;
           }
+          showPopup(component, prop);
           break;
+        }
         default:
           break;
       }
     }
-
-    
   }
 
   MediaPlayer {
@@ -519,31 +517,6 @@ W.PageBase {
   }
 
   Loader {
-    id: popupBox
-    z: 999
-    onSourceChanged: {
-      if (item === null)
-        return;
-      item.finished.connect(() => {
-        sourceComponent = undefined;
-      });
-      item.widthChanged.connect(() => {
-        popupBox.moveToCenter();
-      });
-      item.heightChanged.connect(() => {
-        popupBox.moveToCenter();
-      });
-      moveToCenter();
-    }
-    onSourceComponentChanged: sourceChanged();
-
-    function moveToCenter() {
-      item.x = Math.round((roomArea.width - item.width) / 2);
-      item.y = Math.round(roomArea.height * 0.67 - item.height / 2);
-    }
-  }
-
-  Loader {
     id: bigAnim
     anchors.fill: parent
     z: 999
@@ -671,6 +644,25 @@ W.PageBase {
     }
   }
 
+  function showPopup(component, prop) {
+    const item = component.createObject(roomScene, prop);
+    popupItem = item;
+
+    const moveToCenter = () => {
+      item.x = Math.round((roomArea.width - item.width) / 2);
+      item.y = Math.round(roomArea.height * 0.67 - item.height / 2);
+    }
+
+    item.finished.connect(() => {
+      item.destroy();
+      roomScene.popupItem = null;
+    });
+    item.widthChanged.connect(() => moveToCenter());
+    item.heightChanged.connect(() => moveToCenter());
+
+    moveToCenter();
+  }
+
   function startCheat(type, data) {
     let component = Qt.createComponent(type);
     if (component.status !== Component.Ready) {
@@ -713,8 +705,8 @@ W.PageBase {
     uiUpdate["_delete"]?.forEach(data => {
       if (data.type == "Interaction") {
         skillInteraction.sourceComponent = undefined;
-        if (roomScene.popupBox.item)
-          roomScene.popupBox.item.finished();
+        if (roomScene.popupItem)
+          roomScene.popupItem.finished();
       }
     });
     uiUpdate["_new"]?.forEach(dat => {

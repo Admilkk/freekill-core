@@ -8,10 +8,11 @@ callbacks["AskForExchange"] = (sender, data) => {
   const capacities = [];
   const limits = [];
   roomScene.dataModel.activate();
-  roomScene.popupBox.sourceComponent =
+  const component =
     Qt.createComponent("LunarLtk.Pages.Popups", "GuanxingBox");
   let for_i = 0;
-  const box = roomScene.popupBox.item;
+  roomScene.showPopup(component);
+  const box = roomScene.popupItem;
   box.org_cards = data.piles;
   data.piles.forEach(ids => {
     if (ids.length > 0) {

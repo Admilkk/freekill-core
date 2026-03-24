@@ -13,9 +13,9 @@ import LunarLtk.Models.Popups
 
 GraphicsBox {
   id: root
-  property ChooseCardsAndChoiceModel dataModel
+  required property ChooseCardsAndChoiceModel dataModel
 
-  title.text: dataModel?.promptText ?? Lua.tr("$ChooseCard")
+  title.text: dataModel.promptText || Lua.tr("$ChooseCard")
   // TODO: Adjust the UI design in case there are more than 7 cards
   width: 40 + Math.min(8.5, Math.max(4, dataModel.cards.length)) * 100
   height: 260
@@ -27,9 +27,9 @@ GraphicsBox {
       dataModel: Ltk.createCardModel(modelData)
       autoBack: false
       showDetail: true
-      selectable: !(root.dataModel?.disabledCards ?? []).includes(modelData)
+      selectable: !root.dataModel.disabledCards.includes(modelData)
       onSelectedChanged: {
-        const selectedCards = root.dataModel?.result?.cards;
+        const selectedCards = root.dataModel.result.cards;
         if (!selectedCards) return;
         const cardId = modelData.cardId;
         if (selected) {
@@ -83,7 +83,7 @@ GraphicsBox {
           spacing: 5
           Repeater {
             id: to_select
-            model:root.dataModel?.cards ?? []
+            model:root.dataModel.cards
             delegate: cardDelegate
           }
         }
@@ -104,14 +104,14 @@ GraphicsBox {
       spacing: 8
 
       Repeater {
-        model: root.dataModel?.choices ?? []
+        model: root.dataModel.choices
 
         MetroButton {
           Layout.fillWidth: true
           text: Ltk.processPrompt(modelData)
           enabled: {
-            const cards = root.dataModel?.result?.cards ?? [];
-            return root.dataModel?.choiceEnabled(cards, modelData, index) ?? false;
+            const cards = root.dataModel.result.cards;
+            return root.dataModel.choiceEnabled(cards, modelData, index);
           }
 
           onClicked: root.dataModel.toggleChoose(modelData);
@@ -119,7 +119,7 @@ GraphicsBox {
       }
 
       Repeater {
-        model: root.dataModel?.cancelChoices ?? []
+        model: root.dataModel.cancelChoices
         MetroButton {
           Layout.fillWidth: true
           text: Ltk.processPrompt(modelData)
@@ -131,8 +131,8 @@ GraphicsBox {
   }
 
   function updateCardSelectable() {
-    const selectedCards = root.dataModel?.result?.cards ?? [];
-    const maxNum = root.dataModel?.maxNum ?? 0;
+    const selectedCards = root.dataModel.result.cards;
+    const maxNum = root.dataModel.maxNum;
     if (selectedCards.length <= maxNum) return;
 
     for (let i = 0; i < to_select.count; i++) {

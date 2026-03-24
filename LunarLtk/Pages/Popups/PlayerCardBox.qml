@@ -13,9 +13,9 @@ pragma ComponentBehavior: Bound
 GraphicsBox {
   id: root
 
-  property PlayerCardModel dataModel
+  required property PlayerCardModel dataModel
 
-  title.text: dataModel?.promptText ?? Lua.tr("$ChooseCard")
+  title.text: dataModel.promptText || Lua.tr("$ChooseCard")
 
   // TODO: Adjust the UI design in case there are more than 7 cards
   width: 70 + 700
@@ -29,7 +29,7 @@ GraphicsBox {
     anchors.rightMargin: 20
     anchors.bottomMargin: 20
     spacing: 20
-    model: root.dataModel?.shuffleIds() ?? []
+    model: root.dataModel.shuffleIds()
     clip: true
 
     delegate: RowLayout {

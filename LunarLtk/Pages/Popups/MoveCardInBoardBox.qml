@@ -14,7 +14,7 @@ pragma ComponentBehavior: Bound
 
 GraphicsBox {
   id: root
-  property MoveCardInBoardModel dataModel
+  required property MoveCardInBoardModel dataModel
 
   property int padding: 25
 
@@ -30,7 +30,7 @@ GraphicsBox {
 
     Repeater {
       id: areaRepeater
-      model: root.dataModel?.playerIds ?? []
+      model: root.dataModel.playerIds
 
       Row {
         spacing: 5
@@ -72,14 +72,14 @@ GraphicsBox {
       text: Lua.tr("OK")
       implicitWidth: 120
       implicitHeight: 35
-      enabled: root.dataModel?.feasible ?? false
+      enabled: root.dataModel.feasible
       onClicked: root.dataModel.accepted()
     }
   }
 
   Repeater {
     id: cardItems
-    model: root.dataModel?.cardIds ?? []
+    model: root.dataModel.cardIds
 
     CardItem {
       required property int modelData

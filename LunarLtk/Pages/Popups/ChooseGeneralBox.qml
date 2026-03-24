@@ -13,7 +13,7 @@ pragma ComponentBehavior: Bound
 GraphicsBox {
   id: root
 
-  property ChooseGeneralModel dataModel
+  required property ChooseGeneralModel dataModel
 
   property alias generalCardList: generalCardList
 
@@ -31,7 +31,7 @@ GraphicsBox {
     }
   }
 
-  title.text: dataModel?.promptText ?? ""
+  title.text: dataModel.promptText
   width: generalArea.width + body.anchors.leftMargin + body.anchors.rightMargin
   height: body.implicitHeight + body.anchors.topMargin +
           body.anchors.bottomMargin
@@ -45,22 +45,22 @@ GraphicsBox {
     Item {
       id: generalArea
       width: {
-        const count = root.dataModel?.generals.length ?? 0;
+        const count = root.dataModel.generals.length;
         return (count > 8 ? Math.ceil(count / 2) : Math.max(3, count)) * 97;
       }
-      height: (root.dataModel?.generals.length ?? 0) > 8 ? 290 : 150
+      height: root.dataModel.generals.length > 8 ? 290 : 150
       z: 1
 
       Repeater {
         id: generalMagnetList
-        model: root.dataModel?.generals.length ?? 0
+        model: root.dataModel.generals.length
 
         Item {
           required property int index
           width: 93
           height: 130
           x: {
-            const count = root.dataModel?.generals.length ?? 0;
+            const count = root.dataModel.generals.length;
             let columns = count;
             if (columns > 8) {
               columns = Math.ceil(columns / 2);
@@ -72,7 +72,7 @@ GraphicsBox {
             return ret;
           }
           y: {
-            const count = root.dataModel?.generals.length ?? 0;
+            const count = root.dataModel.generals.length;
             if (count <= 8)
               return 0;
             return index < count / 2 ? 0 : 135;
@@ -100,7 +100,7 @@ GraphicsBox {
 
         Repeater {
           id: resultList
-          model: root.dataModel?.choiceNum ?? 1
+          model: root.dataModel.choiceNum
 
           Rectangle {
             color: "#1D1E19"
@@ -124,8 +124,8 @@ GraphicsBox {
 
         MetroButton {
           id: convertBtn
-          visible: !root.dataModel?.convertDisabled
-          enabled: root.dataModel?.canConvert ?? false
+          visible: !root.dataModel.convertDisabled
+          enabled: root.dataModel.canConvert
           text: Lua.tr("Same General Convert")
           onClicked: {
             const models = root.dataModel.generals.map(name => root.dataModel.generalDict[name]);
@@ -138,14 +138,14 @@ GraphicsBox {
           text: Lua.tr("OK")
           width: 120
           height: 35
-          enabled: root.dataModel?.feasible ?? false;
+          enabled: root.dataModel.feasible;
 
-          onClicked: root.dataModel?.accepted();
+          onClicked: root.dataModel.accepted();
         }
 
         MetroButton {
           id: detailBtn
-          enabled: !!root.dataModel?.result.length
+          enabled: !!root.dataModel.result.length
           text: Lua.tr("Show General Detail")
           onClicked: roomScene.startCheat(
             "GeneralDetail",
@@ -158,14 +158,14 @@ GraphicsBox {
 
   Repeater {
     id: generalCardList
-    model: root.dataModel?.generals ?? []
+    model: root.dataModel.generals
 
     GeneralCardItem {
       required property string modelData
       required property int index
       dataModel: root.dataModel.generalDict[modelData]
       selectable: {
-        const result = root.dataModel?.result;
+        const result = root.dataModel.result;
         if (result) {
           return result.includes(modelData) || root.dataModel.generalFilter(modelData) || false;
         }
@@ -175,7 +175,7 @@ GraphicsBox {
 
       onClicked: {
         if (!selectable) return;
-        root.dataModel?.selectGeneralCard(modelData);
+        root.dataModel.selectGeneralCard(modelData);
         root.arrangeCards();
       }
 

@@ -33,42 +33,6 @@ callbacks["AskForExchange"] = (sender, data) => {
   });
 }
 
-callbacks["AskForCardsAndChoice"] = (sender, data) => {
-  // jsonData: [ int[] handcards, int[] equips, int[] delayedtricks,
-  //  int min, int max, string reason ]
-  const { cards, choices, prompt, cancel_choices, min, max, filter_skel, disabled, extra_data } = data;
-
-  roomScene.dataModel.activate();
-  roomScene.popupBox.sourceComponent =
-    Qt.createComponent("LunarLtk.Pages.Popups", "ChooseCardsAndChoiceBox");
-
-  const boxCards = [];
-  cards.forEach(id => boxCards.push(Ltk.getCardData(id)));
-
-  const box = roomScene.popupBox.item;
-  box.cards = boxCards;
-  box.ok_options = choices;
-  box.prompt = prompt ?? "";
-  box.cancel_options = cancel_choices ?? [];
-  box.min = min ?? 1;
-  box.max = max ?? 1;
-  box.disable_cards = disabled ?? [];
-  box.filter_skel = filter_skel ?? "";
-  box.extra_data = extra_data;
-
-  roomScene.popupBox.moveToCenter();
-}
-
-callbacks["CustomDialog"] = (sender, data) => {
-  const path = data.path;
-  const dat = data.data;
-  roomScene.dataModel.activate();
-  roomScene.popupBox.source = AppPath + "/" + path;
-  if (dat) {
-    roomScene.popupBox.item.loadData(dat);
-  }
-}
-
 callbacks["MiniGame"] = (sender, data) => {
   const game = data.type;
   const dat = data.data;

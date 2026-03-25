@@ -1187,20 +1187,65 @@ W.PageBase {
     tablePile.updateCardPosition(true);
   }
 
+  // TODO: 处理minigame，但现在懒得管
+  function handleMiniGame(sender, data) {
+    const game = data.type;
+    const dat = data.data;
+    const gdata = Ltk.getMiniGame(game, Cpp.self.id, JSON.stringify(dat));
+    const component = Qt.createComponent(Cpp.path + "/" + gdata.qml_path + ".qml")
+    dataModel.activate();
+    showPopup(component);
+    if (dat) {
+      roomScene.popupBox.item.loadData(dat);
+    }
+  }
+
+  function updateMiniGame(sender, data) {
+    popupItem?.updateData(data);
+  }
+
+  function changeSkin(sender, data) {
+    const photo = getPhoto(Number(data[0]));
+    const path = data[2];
+    const deputypath = data[3];
+    if (path) {
+      if (Number(data[0]) === Cpp.self.id) {
+        Config.enabledSkins[photo.general] = path === "-" ? "" : path;
+      }
+      photo.skinSource = path === "-" ? "" : (AppPath + "/" + path);
+    }
+    if (deputypath) {
+      if (Number(data[0]) === Cpp.self.id) {
+        Config.enabledSkins[photo.deputyGeneral] = deputypath === "-" ? "" : deputypath;
+      }
+      photo.deputySkinSource = deputypath === "-" ? "" : (AppPath + "/" + deputypath);
+    }
+    photo.changeSkinTimer.start()
+  }
+
+  function updateRequestUI(sender, uiUpdate) {
+    if (uiUpdate["_prompt"])
+      roomScene.dataModel.prompt = uiUpdate["_prompt"];
+
+    if (uiUpdate._type == "Room") {
+      roomScene.applyChange(uiUpdate);
+    }
+  }
+
   function setupCallbacks() {
     dataModel.setupCallbacks();
-
-    // TODO 摆烂了 反正这些后面也是得重构 懒得搬砖了
-    addCallback(Command.MiniGame, Logic.callbacks["MiniGame"]);
-    addCallback(Command.UpdateMiniGame, Logic.callbacks["UpdateMiniGame"]);
-    addCallback(Command.UpdateRequestUI, Logic.callbacks["UpdateRequestUI"]);
-    addCallback(Command.ChangeSkin, Logic.callbacks["ChangeSkin"]);
 
     addCallback(Command.MoveFocus, moveFocus);
     addCallback(Command.Animate, doAnimate);
     addCallback(Command.LogEvent, logEvent);
 
     addCallback(Command.CloseAG, () => agItem.close());
+
+    addCallback(Command.MiniGame, handleMiniGame);
+    addCallback(Command.UpdateMiniGame, updateMiniGame);
+
+    addCallback(Command.UpdateRequestUI, updateRequestUI);
+    addCallback(Command.ChangeSkin, changeSkin);
 
     addCallback(Command.ShowVirtualCard, showVirtualCard);
   }

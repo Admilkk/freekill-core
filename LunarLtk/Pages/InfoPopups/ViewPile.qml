@@ -31,7 +31,7 @@ ColumnLayout {
     Layout.alignment: Qt.AlignHCenter
     clip: true
 
-    model: root.ids || root.cardNames
+    model: root.ids.length > 0 ? root.ids : root.cardNames
 
     delegate: CardItem {
       id: cardItem

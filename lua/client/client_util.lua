@@ -1021,9 +1021,12 @@ function GetQmlMark(mtype, name, p)
     value = ClientInstance:getBanner(name)
   end
   if (not p) and (not value) or (value == 0) then return {} end
+  local qmlData = spec.qml
+  if type(qmlData) == "function" then
+    qmlData = qmlData(name, value, p)
+  end
   return {
-    qml_path = type(spec.qml_path) == "function" and spec.qml_path(name, value, p) or spec.qml_path,
-    qml_data = type(spec.qml_data) == "function" and spec.qml_data(name, value, p) or value,
+    qml = qmlData,
     text = spec.how_to_show(name, value, p)
   }
 end

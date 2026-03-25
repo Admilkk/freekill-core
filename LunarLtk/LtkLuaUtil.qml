@@ -351,7 +351,6 @@ QtObject {
     let qmlComponentSpec = {
       uri: "LunarLtk.Pages.InfoPopups",
     };
-    let qmlPath, cheatSource;
     let qmlData = { name: mark };
 
     if (!mark.startsWith("@")) {
@@ -373,7 +372,6 @@ QtObject {
         qmlData.cardNames = value;
       }
       qmlComponentSpec.prop = qmlData;
-    } else if (mark.startsWith("@$")) {
     } else if (mark.startsWith("@&")) {
       // 武将牌名列表
       textValue = value.length.toString();
@@ -381,15 +379,22 @@ QtObject {
       qmlData.cardNames = value;
       qmlComponentSpec.prop = qmlData;
     } else if (mark.startsWith("@[")) {
-      // TODO 大改QML mark!
       const close_br = mark.indexOf(']');
       if (close_br !== -1) {
         const mark_type = mark.slice(2, close_br);
         const data = Ltk.getQmlMark(mark_type, mark, playerid);
         if (data) {
-          qmlPath = data.qml_path;
-          qmlData.data = data.qml_data;
-          qmlData.owner = playerid;
+          qmlComponentSpec = typeof data.qml == "object" ? data.qml : {};
+          let propObj;
+          if (qmlComponentSpec.prop) {
+            propObj = qmlComponentSpec.prop;
+          } else if (qmlComponentSpec.model?.prop) {
+            propObj = qmlComponentSpec.model.prop;
+          }
+          if (propObj) {
+            propObj.name = mark;
+            // 由于对应组件必须提供prop包含的属性，所以先不写owner了
+          }
           textValue = data.text;
         }
       }
@@ -413,7 +418,6 @@ QtObject {
     if (elem) {
       elem.value = textValue;
       elem.origValue = value;
-      elem.qmlPath = qmlPath;
       elem.qml = qmlComponentSpec;
       elem.desc = desc;
     } else {
@@ -423,7 +427,6 @@ QtObject {
         origName: mark,
         origValue: value,
         qml: qmlComponentSpec,
-        qmlPath,
         desc,
       });
     }

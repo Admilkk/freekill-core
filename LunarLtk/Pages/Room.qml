@@ -474,7 +474,7 @@ W.PageBase {
     Ltk.updateRequestUI("SkillButton", skill_name, action, data);
   }
 
-  W.PopupLoader {
+  W.PopupItem {
     id: cheatLoader
     width: Config.winWidth * 0.60
     height: Config.winHeight * 0.8
@@ -634,14 +634,13 @@ W.PageBase {
     if (component.status !== Component.Ready) {
       component = Qt.createComponent("LunarLtk.Components.Cheat", type);
     }
-    cheatLoader.sourceComponent = component;
-    cheatLoader.item.extra_data = data;
+    cheatLoader.setSourceComponent(component, { extra_data: data });
     cheatLoader.open();
   }
 
   function startCheatByPath(path, data) {
-    cheatLoader.sourceComponent = Qt.createComponent(`${Cpp.path}/${path}.qml`);
-    cheatLoader.item.extra_data = data;
+    const component = Qt.createComponent(`${Cpp.path}/${path}.qml`);
+    cheatLoader.setSourceComponent(component, { extra_data: data });
     cheatLoader.open();
   }
 

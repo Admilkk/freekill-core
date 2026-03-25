@@ -1200,7 +1200,6 @@ W.PageBase {
     dataModel.setupCallbacks();
 
     // TODO 摆烂了 反正这些后面也是得重构 懒得搬砖了
-    addCallback(Command.AskForExchange, Logic.callbacks["AskForExchange"]);
     addCallback(Command.MiniGame, Logic.callbacks["MiniGame"]);
     addCallback(Command.UpdateMiniGame, Logic.callbacks["UpdateMiniGame"]);
     addCallback(Command.UpdateRequestUI, Logic.callbacks["UpdateRequestUI"]);

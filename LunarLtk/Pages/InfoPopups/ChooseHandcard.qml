@@ -11,7 +11,6 @@ import LunarLtk.Components
 ColumnLayout {
   id: root
   anchors.fill: parent
-  property var extra_data: ({}) // unused
   signal finish()
   property var cards: []
 

@@ -31,7 +31,7 @@ W.PageBase {
   property alias banner: banner
 
   // 权宜之计 后面全改
-  property alias cheatDrawer: cheatLoader
+  property alias cheatDrawer: infoPopup
 
   property alias dataModel: dataModel
 
@@ -133,7 +133,9 @@ W.PageBase {
 
         onRightClicked: {
           if (playerid === 0 || playerid === -1) return;
-          roomScene.startCheat("PlayerDetail", { photo: this });
+          roomScene.showInfoPopup(
+            Qt.createComponent("LunarLtk.Pages.InfoPopups", "PlayerDetail"),
+            { dataModel });
         }
 
         Component.onCompleted: {
@@ -185,7 +187,7 @@ W.PageBase {
           }
           return false;
         }
-        onClicked: roomScene.startCheat("ChooseHandcard");
+        onClicked: roomScene.showInfoPopup(Qt.createComponent("LunarLtk.Pages.InfoPopups", "ChooseHandcard"));
       }
       MetroButton {
         id: trustBtn
@@ -475,7 +477,7 @@ W.PageBase {
   }
 
   W.PopupItem {
-    id: cheatLoader
+    id: infoPopup
     width: Config.winWidth * 0.60
     height: Config.winHeight * 0.8
     anchors.centerIn: parent
@@ -629,23 +631,13 @@ W.PageBase {
     moveToCenter();
   }
 
-  function startCheat(type, data) {
-    let component = Qt.createComponent(type);
-    if (component.status !== Component.Ready) {
-      component = Qt.createComponent("LunarLtk.Components.Cheat", type);
-    }
-    cheatLoader.setSourceComponent(component, { extra_data: data });
-    cheatLoader.open();
+  function showInfoPopup(component, prop) {
+    infoPopup.setSourceComponent(component, prop);
+    infoPopup.open();
   }
 
-  function startCheatByPath(path, data) {
-    const component = Qt.createComponent(`${Cpp.path}/${path}.qml`);
-    cheatLoader.setSourceComponent(component, { extra_data: data });
-    cheatLoader.open();
-  }
-
-  function closeCheat() {
-    cheatLoader.close();
+  function closeInfoPopup() {
+    infoPopup.close();
   }
 
   function getPhoto(id) {

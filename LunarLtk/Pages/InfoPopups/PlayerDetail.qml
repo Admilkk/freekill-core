@@ -7,16 +7,16 @@ import QtQuick.Layouts
 import Fk
 import Fk.Components.Common
 import LunarLtk
+import LunarLtk.Models
 import LunarLtk.Components
 
 Flickable {
   id: root
   anchors.fill: parent
-  property var extra_data: ({})
-  property int pid
-  property bool isObserving: false // 指该角色是否为旁观者
 
   signal finish()
+
+  required property PhotoModel dataModel
 
   contentHeight: details.height
   ScrollBar.vertical: ScrollBar {}
@@ -32,7 +32,7 @@ Flickable {
         id: avatar
         Layout.preferredWidth: 56
         Layout.preferredHeight: 56
-        general: "diaochan"
+        general: root.dataModel.avatar
       }
 
       ColumnLayout {
@@ -40,6 +40,24 @@ Flickable {
           id: screenName
           font.pixelSize: 18
           color: "#E4D5A0"
+          text: {
+            const id = dataModel.playerid;
+            if (id === 0 || id === undefined) return "";
+
+            let ret = root.dataModel.screenName;
+
+            const gamedata = Ltk.getPlayerGameData(id);
+            const totalTime = gamedata[3];
+            const h = (totalTime / 3600).toFixed(2);
+            const m = Math.floor(totalTime / 60);
+            if (m < 100) {
+              ret += " (" + Lua.tr("TotalGameTime: %1 min").arg(m) + ")";
+            } else {
+              ret += " (" + Lua.tr("TotalGameTime: %1 h").arg(h) + ")";
+            }
+
+            return ret;
+          }
         }
 
         Text {
@@ -47,6 +65,21 @@ Flickable {
           Layout.fillWidth: true
           font.pixelSize: 18
           color: "#E4D5A0"
+          text: {
+            const id = dataModel.playerid;
+            if (id === 0 || id === undefined) return "";
+
+            const gamedata = Ltk.getPlayerGameData(id);
+            const total = gamedata[0];
+            const win = gamedata[1];
+            const run = gamedata[2];
+            const winRate = (win / total) * 100;
+            const runRate = (run / total) * 100;
+
+            return total === 0 ? Lua.tr("Newbie") :
+              Lua.tr("Win=%1 Run=%2 Total=%3").arg(winRate.toFixed(2))
+                .arg(runRate.toFixed(2)).arg(total);
+          }
         }
       }
     }
@@ -54,7 +87,7 @@ Flickable {
     RowLayout {
       MetroButton {
         text: Lua.tr("Give Flower")
-        visible: !Config.observing && !isObserving
+        visible: !Config.observing
         onClicked: {
           enabled = false;
           root.givePresent("Flower");
@@ -64,7 +97,7 @@ Flickable {
 
       MetroButton {
         text: Lua.tr("Give Egg")
-        visible: !Config.observing && !isObserving
+        visible: !Config.observing
         onClicked: {
           enabled = false;
           if (Math.random() < 0.03) {
@@ -78,7 +111,7 @@ Flickable {
 
       MetroButton {
         text: Lua.tr("Give Wine")
-        visible: !Config.observing && !isObserving
+        visible: !Config.observing
         enabled: Math.random() < 0.3
         onClicked: {
           enabled = false;
@@ -89,7 +122,7 @@ Flickable {
 
       MetroButton {
         text: Lua.tr("Give Shoe")
-        visible: !Config.observing && !isObserving
+        visible: !Config.observing
         enabled: Math.random() < 0.3
         onClicked: {
           enabled = false;
@@ -100,13 +133,13 @@ Flickable {
 
       MetroButton {
         text: {
-          const name = extra_data?.photo ? extra_data.photo.screenName : extra_data.screenName;
+          const name = dataModel.screenName;
           const blocked = !Config.blockedUsers.includes(name);
           return blocked ? Lua.tr("Block Chatter") : Lua.tr("Unblock Chatter");
         }
-        enabled: pid !== Cpp.self.id && pid > 0 // 旁观屏蔽不了正在被旁观的人
+        enabled: root.dataModel.playerid !== Cpp.self.id && root.dataModel.playerid > 0 // 旁观屏蔽不了正在被旁观的人
         onClicked: {
-          const name = extra_data?.photo ? extra_data.photo.screenName : extra_data.screenName;
+          const name = dataModel.screenName;
           const idx = Config.blockedUsers.indexOf(name);
           if (idx === -1) {
             if (name === "") return;
@@ -117,51 +150,6 @@ Flickable {
           Config.blockedUsersChanged();
         }
       }
-
-      /*
-      MetroButton {
-        text: Lua.tr("Change Skin")
-        visible: pid === Cpp.self.id && !root.isObserving
-        enabled: !(extra_data?.photo.changeSkinTimer.running)
-        onClicked: {
-          const photo = extra_data?.photo
-          if (photo) {
-            roomScene.startCheat("SkinsDetail", {
-              skins: getSkinsByName(photo.general),
-              deputy_skins: getSkinsByName(photo.deputyGeneral),
-              orig_general: photo.general,
-              orig_deputy: photo.deputyGeneral,
-            });
-          }
-        }
-        function getSkinsByName(general) {
-          let arr = Lua.evaluate(`(function()
-            return Fk:getSkinsByGeneral("${general}") or {}
-          end)()`);
-          return arr
-        }
-      }
-      */
-
-      /*
-      MetroButton {
-        text: Lua.tr("Kick From Room")
-        visible: !roomScene.isStarted && roomScene.isOwner
-        enabled: {
-          if (pid === Cpp.self.id) return false;
-          if (pid < -1) {
-            const { minComp, curComp } = Ltk.getCompNum();
-            return curComp > minComp;
-          }
-          return true;
-        }
-        onClicked: {
-          // 傻逼qml喜欢加1.0
-          ClientInstance.notifyServer("KickPlayer", Math.floor(pid));
-          root.finish();
-        }
-      }
-      */
     }
 
     RowLayout {
@@ -172,13 +160,13 @@ Flickable {
 
         GeneralCardItem {
           id: mainChara
-          dataModel: Ltk.createGeneralCardModel("caocao", { detailed: false })
+          dataModel: Ltk.createGeneralCardModel(root.dataModel.general)
           visible: true
         }
         GeneralCardItem {
           id: deputyChara
-          dataModel: Ltk.createGeneralCardModel("caocao", { detailed: false })
-          visible: false
+          dataModel: Ltk.createGeneralCardModel(root.dataModel.deputyGeneral || "caocao")
+          visible: !!root.dataModel.deputyGeneral
         }
       }
 
@@ -208,6 +196,8 @@ Flickable {
             text = '<a href="back">' + Lua.tr("Click to back") + '</a><br>' + Lua.tr(link);
           }
         }
+
+        text: root.getSkillDescText();
       }
     }
   }
@@ -217,16 +207,12 @@ Flickable {
       "Chat",
       {
         type: 2,
-        msg: "$@" + p + ":" + pid
+        msg: "$@" + p + ":" + dataModel.playerid
       }
     );
   }
 
-  onExtra_dataChanged: {
-    //if (!extra_data.photo) return;
-    const hasPhoto = !!extra_data.photo;
-    screenName.text = "";
-    playerGameData.text = "";
+  function getSkillDescText() {
     const skillnamecss = `
     <style>
     .skill-name {
@@ -242,47 +228,10 @@ Flickable {
     skillDesc.text = "";
     skillDesc.clearSavedText();
 
-
-    const id = hasPhoto? extra_data.photo.playerid : extra_data.id;
+    const id = dataModel.playerid;
     if (id === 0 || id === undefined) return;
-    root.pid = id;
-    root.isObserving = !hasPhoto && !!extra_data.observing;
     const player = Ltk.getPlayer(id);
     const self = Lua.selfPlayer;
-
-    avatar.general = hasPhoto? extra_data.photo.avatar : extra_data.avatar;
-    screenName.text = hasPhoto? extra_data.photo.screenName : extra_data.screenName;
-    mainChara.dataModel = Ltk.createGeneralCardModel(hasPhoto? extra_data.photo.general : extra_data.general);
-    const deputyName = hasPhoto? extra_data.photo.deputyGeneral : extra_data.deputyGeneral;
-    if (deputyName === "") {
-      deputyChara.visible = false;
-    } else {
-      deputyChara.visible = true;
-      deputyChara.dataModel = Ltk.createGeneralCardModel(hasPhoto? extra_data.photo.deputyGeneral : extra_data.deputyGeneral);
-    }
-
-    if (!Config.observing) {
-      const gamedata = Ltk.getPlayerGameData(id);
-      const total = gamedata[0];
-      const win = gamedata[1];
-      const run = gamedata[2];
-      const totalTime = gamedata[3];
-      const winRate = (win / total) * 100;
-      const runRate = (run / total) * 100;
-      playerGameData.text = total === 0 ? Lua.tr("Newbie") :
-        Lua.tr("Win=%1 Run=%2 Total=%3").arg(winRate.toFixed(2))
-        .arg(runRate.toFixed(2)).arg(total);
-
-      const h = (totalTime / 3600).toFixed(2);
-      const m = Math.floor(totalTime / 60);
-      if (m < 100) {
-        screenName.text += " (" + Lua.tr("TotalGameTime: %1 min").arg(m) + ")";
-      } else {
-        screenName.text += " (" + Lua.tr("TotalGameTime: %1 h").arg(h) + ")";
-      }
-    }
-
-    if (root.isObserving) return; // 以前可以看旁观玩家的详情时，有这个玩意
 
     Ltk.getPlayerSkills(id).forEach(t => {
       // TODO 等core更新强制重启后把这个智慧杀了 GetPlayerSkill直接返回invalid

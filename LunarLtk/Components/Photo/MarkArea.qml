@@ -62,16 +62,16 @@ Item {
       }
 
       W.TapHandler {
-        // FIXME: 必须解耦root.parent
-        enabled: root.parent.state != "candidate" || !root.parent.selectable
         onTapped: {
-          const data = markItem.modelData;
-          if (data.cheatSource) {
-            roomScene.startCheat(data.cheatSource, data.qmlData);
-          } else if (data.qmlPath) {
-            roomScene.startCheatByPath(data.qmlPath, data.qmlData);
-          } else {
-            return;
+          const spec = markItem.modelData.qml;
+          if (spec) {
+            const component = Lua.createComponent(spec);
+            const prop = spec.prop ?? {};
+
+            if (spec.model) {
+              prop.dataModel = createQmlObject(spec.model);
+            }
+            roomScene.showInfoPopup(component, prop);
           }
         }
       }

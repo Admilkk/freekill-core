@@ -219,14 +219,14 @@ Item {
       enabled: selected_skin || selected_deputy_skin
       onClicked: {
         Cpp.notifyServer("PushRequest", "changeskin," + selected_skin + "," + selected_deputy_skin)
-        roomScene.closeCheat()
+        finish();
       }
     }
 
     MetroButton {
       text: Lua.tr("Cancel")
       onClicked: {
-        roomScene.closeCheat()
+        finish();
       }
     }
   }

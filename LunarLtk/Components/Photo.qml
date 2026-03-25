@@ -155,6 +155,8 @@ PhotoBase {
     x: 23
 
     markModel: root.dataModel.marks
+
+    enabled: root.dataModel.state != "candidate" || !root.selectable
   }
 
   Image {

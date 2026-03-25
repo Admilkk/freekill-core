@@ -23,7 +23,7 @@ MetroButton {
 
   onClicked: {
     if (!dataModel.cancelable && dataModel.choices.length < 2) return;
-    roomScene.showPopup(Qt.createComponent("LunarLtk.Pages.Popups", "ChoicesBox"), { dataModel });
+    roomScene.showPopup(Qt.createComponent("LunarLtk.Pages.Popups", "ChoicesBox"), { dataModel, noOneLine: true });
     dataModel.accepted.connect(() => {
       answer = dataModel.result[0];
       roomScene.popupItem.finished();

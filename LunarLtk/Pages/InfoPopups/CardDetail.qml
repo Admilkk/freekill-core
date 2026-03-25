@@ -11,7 +11,8 @@ import LunarLtk.Components
 Flickable {
   id: root
   anchors.fill: parent
-  property var extra_data: ({})
+
+  property int cardId
 
   signal finish()
 
@@ -67,11 +68,9 @@ Flickable {
     }
   }
 
-  onExtra_dataChanged: {
-    const card = extra_data.card;
-    if (!card) return;
-    const model = Ltk.createCardModel(card.dataModel.cardId);
-    const data = Ltk.getCardData(card.dataModel.cardId, true);
+  onCardIdChanged: {
+    const model = Ltk.createCardModel(cardId);
+    const data = Ltk.getCardData(cardId, true);
     model.virtName = data.virt_name ?? "";
     model.selectable = true;
     cardPic.dataModel = model;

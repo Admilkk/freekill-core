@@ -348,6 +348,9 @@ QtObject {
     }
 
     let textValue = "";
+    let qmlComponentSpec = {
+      uri: "LunarLtk.Pages.InfoPopups",
+    };
     let qmlPath, cheatSource;
     let qmlData = { name: mark };
 
@@ -357,23 +360,28 @@ QtObject {
       if (pile.length === 0) return;
 
       textValue = pile.length.toString();
-      cheatSource = "ViewPile";
+      qmlComponentSpec.name = "ViewPile";
       qmlData.ids = pile;
+      qmlComponentSpec.prop = qmlData;
     } else if (mark.startsWith("@$")) {
       // 游戏牌名列表 但也可能是游戏牌id列表呢
       textValue = value.length.toString();
-      cheatSource = "ViewPile";
+      qmlComponentSpec.name = "ViewPile";
       if (typeof value[0] === "number") {
         qmlData.ids = value;
       } else {
         qmlData.cardNames = value;
       }
+      qmlComponentSpec.prop = qmlData;
+    } else if (mark.startsWith("@$")) {
     } else if (mark.startsWith("@&")) {
       // 武将牌名列表
       textValue = value.length.toString();
-      cheatSource = "ViewGeneralPile";
+      qmlComponentSpec.name = "ViewPile";
       qmlData.cardNames = value;
+      qmlComponentSpec.prop = qmlData;
     } else if (mark.startsWith("@[")) {
+      // TODO 大改QML mark!
       const close_br = mark.indexOf(']');
       if (close_br !== -1) {
         const mark_type = mark.slice(2, close_br);
@@ -398,13 +406,15 @@ QtObject {
         `${Lua.tr(":" + mark)}${textValue && "<br>" + textValue}`;
     }
 
+    if (!("name" in qmlComponentSpec || "url" in qmlComponentSpec)) {
+      qmlComponentSpec = null;
+    }
 
     if (elem) {
       elem.value = textValue;
       elem.origValue = value;
       elem.qmlPath = qmlPath;
-      elem.qmlData = qmlData;
-      elem.cheatSource = cheatSource;
+      elem.qml = qmlComponentSpec;
       elem.desc = desc;
     } else {
       marks.push({
@@ -412,7 +422,8 @@ QtObject {
         value: textValue,
         origName: mark,
         origValue: value,
-        qmlPath, qmlData, cheatSource,
+        qml: qmlComponentSpec,
+        qmlPath,
         desc,
       });
     }
@@ -430,6 +441,26 @@ QtObject {
 
     for (const {k, v} of data.mark) {
       Ltk.setMark(prop.marks, k, v);
+    }
+
+    if (additionalProp instanceof Object) Object.assign(prop, additionalProp);
+    return component.createObject(null, prop);
+  }
+
+  function createCardModelFromName(cardName, additionalProp) {
+    const component = Qt.createComponent("LunarLtk.Models", "CardModel");
+    const dataGetter = Lua.fn(`function(name)
+      local cd = Fk.all_card_types[name]
+      return {
+        name = cd.name,
+        extension = cd.package.extensionName,
+      }
+    end`)
+
+    const data = dataGetter(cardName);
+    const prop = {
+      name: data.name, extension: data.extension,
+      number: 0, suit: "",
     }
 
     if (additionalProp instanceof Object) Object.assign(prop, additionalProp);

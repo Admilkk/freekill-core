@@ -1,4 +1,4 @@
-module LunarLtk.Components.Cheat
+module LunarLtk.Pages.InfoPopups
 
 CardDetail 1.0 CardDetail.qml
 FreeAssign 1.0 FreeAssign.qml

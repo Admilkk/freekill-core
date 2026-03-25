@@ -20,9 +20,10 @@ GraphicsBox {
   height: contentLoader.height + title.height + (okCancel.visible ? okCancel.height : 0) + 24
 
   readonly property bool isOneLine: contentLoader.sourceComponent === onelineComponent
+  property bool noOneLine: false
 
   onShown: {
-    if (isOneLine && dataModel.minNum === 1 && dataModel.maxNum === 1) {
+    if (isOneLine && dataModel.minNum === 1 && dataModel.maxNum === 1 && !noOneLine) {
       title.visible = false;
       background.visible = false;
       x = (roomScene.width - root.width) / 2;
@@ -34,6 +35,24 @@ GraphicsBox {
     id: contentLoader
     x: 8
     y: root.title.height + 8
+
+    sourceComponent: {
+      if (root.dataModel.detailed) {
+        return detailedComponent;
+      }
+
+      const maxWidth = 1000;
+      const merged = root.dataModel.allChoices.map(v => Ltk.processPrompt(v))
+      .join("gksm")
+      .replace(/<[^>]*>/g, "");
+
+      const estimatedWidth = merged.length * 16;
+      if (estimatedWidth < maxWidth) {
+        return onelineComponent;
+      }
+
+      return gridComponent;
+    }
   }
 
   RowLayout {
@@ -158,25 +177,5 @@ GraphicsBox {
         }
       }
     }
-  }
-
-  onDataModelChanged: {
-    if (dataModel.detailed) {
-      contentLoader.sourceComponent = detailedComponent;
-      return;
-    }
-
-    const maxWidth = 1000;
-    const merged = dataModel.allChoices.map(v => Ltk.processPrompt(v))
-      .join("gksm")
-      .replace(/<[^>]*>/g, "");
-
-    const estimatedWidth = merged.length * 16;
-    if (estimatedWidth < maxWidth) {
-      contentLoader.sourceComponent = onelineComponent;
-      return;
-    }
-
-    contentLoader.sourceComponent = gridComponent;
   }
 }

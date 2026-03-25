@@ -131,7 +131,7 @@ GraphicsBox {
           text: Lua.tr("Same General Convert")
           onClicked: {
             const models = root.dataModel.generals.map(name => root.dataModel.generalDict[name]);
-            roomScene.startCheat("SameConvert", { dataModel: root.dataModel });
+            roomScene.showInfoPopup(Qt.createComponent("LunarLtk.Pages.InfoPopups", "SameConvert"), { dataModel: root.dataModel });
           }
         }
 
@@ -149,8 +149,8 @@ GraphicsBox {
           id: detailBtn
           enabled: !!root.dataModel.result.length
           text: Lua.tr("Show General Detail")
-          onClicked: roomScene.startCheat(
-            "GeneralDetail",
+          onClicked: roomScene.showInfoPopup(
+            Qt.createComponent("LunarLtk.Pages.InfoPopups", "GeneralDetail"),
             { generals: root.dataModel.result }
           );
         }
@@ -182,8 +182,10 @@ GraphicsBox {
       }
 
       onRightClicked: {
-        if (Lua.client.getSettings("enableFreeAssign"))
-          roomScene.startCheat("FreeAssign", { dataModel: root.dataModel, oldName: dataModel.name });
+        if (Lua.client.getSettings("enableFreeAssign")) {
+          roomScene.showInfoPopup(Qt.createComponent("LunarLtk.Pages.InfoPopups", "FreeAssign"),
+            { dataModel: root.dataModel, oldName: dataModel.name });
+        }
       }
 
       opacity: dragging ? 0.5 : 1

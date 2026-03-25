@@ -233,7 +233,7 @@ Game.BasicItem {
 
     W.TapHandler {
       onTapped: {
-        roomScene.startCheat("SkinsDetail", {
+        roomScene.showInfoPopup(Qt.createComponent("LunarLtk.Pages.InfoPopups", "SkinsDetail"), {
           skins: root.getSkinsByName(root.general),
           deputy_skins: root.getSkinsByName(root.deputyGeneral),
           orig_general: root.general,

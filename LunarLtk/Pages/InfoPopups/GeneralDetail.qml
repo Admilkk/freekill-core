@@ -10,7 +10,8 @@ import LunarLtk
 Flickable {
   id: root
   anchors.fill: parent
-  property var extra_data: ({})
+
+  property list<string> generals
 
   signal finish()
 
@@ -37,11 +38,8 @@ Flickable {
     }
   }
 
-  onExtra_dataChanged: {
-    if (!extra_data.generals) return;
-    skillDesc.text = "";
-
-    extra_data.generals.forEach((g) => {
+  onGeneralsChanged: {
+    generals.forEach((g) => {
       const data = Ltk.getGeneralDetail(g);
       skillDesc.append(Lua.tr(data.kingdom) + " " + Lua.tr(g) + " " + (data.hp === data.maxHp
         ? ((g.startsWith('hs__') || g.startsWith('ld__') || g.includes('heg__'))

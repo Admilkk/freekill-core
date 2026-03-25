@@ -38,8 +38,9 @@ Popup {
 
   // 辣鸡Qt这么一个破函数还跳票到6.14发布明明说了6.11就发我等了两年啊两年！
   function setSourceComponent(component, prop) {
-    item = component.createObject(container, prop);
+    if (item) item.destroy();
 
+    item = component.createObject(container, prop);
     item.finish?.connect(close);
   }
 }

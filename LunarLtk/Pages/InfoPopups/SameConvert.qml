@@ -5,7 +5,6 @@ import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
 
-import Fk
 import LunarLtk
 import LunarLtk.Models.Popups
 import LunarLtk.Components
@@ -13,7 +12,6 @@ import LunarLtk.Components
 Item {
   id: root
   anchors.fill: parent
-  property var extra_data: ({})
 
   signal finish()
 
@@ -83,10 +81,5 @@ Item {
         delegate: generalColumnComponent
       }
     }
-  }
-
-  onExtra_dataChanged: {
-    if (!extra_data.dataModel) return;
-    root.dataModel = extra_data.dataModel;
   }
 }

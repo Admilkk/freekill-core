@@ -3,20 +3,22 @@
 import QtQuick
 import QtQuick.Layouts
 import Fk
-import LunarLtk
 import LunarLtk.Components
+import LunarLtk
 
 ColumnLayout {
   id: root
   anchors.fill: parent
-  property var extra_data: ({})
+
+  property string name
+  property list<string> cardNames
   signal finish()
 
   BigGlowText {
     Layout.fillWidth: true
     Layout.preferredHeight: childrenRect.height + 4
 
-    text: Lua.tr(extra_data.name)
+    text: Lua.tr(root.name)
   }
 
   GridView {
@@ -27,23 +29,15 @@ ColumnLayout {
     Layout.alignment: Qt.AlignHCenter
     clip: true
 
-    model: extra_data.ids || extra_data.cardNames
+    model: root.cardNames
 
-    delegate: CardItem {
+    delegate: GeneralCardItem {
+      required property string modelData
       id: cardItem
       autoBack: false
-      Component.onCompleted: {
-        let data = {}
-        if (extra_data.ids) {
-          data = Ltk.getCardData(modelData);
-        } else {
-          data.cid = 0;
-          data.name = modelData;
-          data.suit = '';
-          data.number = 0;
-          data.color = '';
-        }
-        setData(data);
+      dataModel: Ltk.createGeneralCardModel(modelData, { detailed: false })
+      onClicked: { // FIXME: rightClicked不能覆写
+        roomScene.showInfoPopup(Qt.createComponent("LunarLtk.Pages.InfoPopups", "GeneralDetail"), { generals: [modelData] });
       }
     }
   }

@@ -54,7 +54,7 @@ Game.PokerCard {
   property bool showDetail: true
   onRightClicked: {
     if (!showDetail || !known) return;
-    roomScene.startCheat("CardDetail", { card: this });
+    roomScene.showInfoPopup(Qt.createComponent("LunarLtk.Pages.InfoPopups", "CardDetail"), { cardId: dataModel.cardId });
   }
 
   cardFrontSource: SkinBank.getCardPicture(dataModel.cardId || dataModel.name)

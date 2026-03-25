@@ -75,7 +75,7 @@ Rectangle {
        params.ids = data;
 
        // Just for using room's right drawer
-       roomScene.startCheat("ViewPile", params);
+       roomScene.showInfoPopup(Qt.createComponent("LunarLtk.Pages.InfoPopups", "ViewPile"), params);
      }
    }
  }

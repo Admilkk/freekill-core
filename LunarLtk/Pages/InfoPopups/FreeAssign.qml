@@ -8,6 +8,7 @@ import Fk
 
 import LunarLtk
 import LunarLtk.Components
+import LunarLtk.Models.Popups
 
 pragma ComponentBehavior: Bound
 
@@ -15,7 +16,9 @@ Item {
   id: root
   anchors.fill: parent
   property var generalModel
-  property var extra_data: ({})
+
+  required property ChooseGeneralModel dataModel
+  property string oldName
 
   signal finish()
 
@@ -140,7 +143,7 @@ Item {
           dataModel: Ltk.createGeneralCardModel(modelData)
           onClicked: {
             stack.pop();
-            root.extra_data.dataModel.changeGeneral(root.extra_data.oldName, dataModel);
+            root.dataModel.changeGeneral(root.oldName, dataModel);
             root.finish();
           }
         }
@@ -148,12 +151,8 @@ Item {
     }
   }
 
-  function load() {
+  Component.onCompleted: {
     const packs = Ltk.getAllGeneralPack();
     packs.forEach((name) => packages.append({ name: name }));
-  }
-
-  Component.onCompleted: {
-    load();
   }
 }

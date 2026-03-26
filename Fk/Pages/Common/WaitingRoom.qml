@@ -8,6 +8,8 @@ import Fk
 import Fk.Components.WaitingRoom
 import Fk.Widgets as W
 
+import LunarLtk
+
 W.PageBase {
   id: roomScene
 
@@ -89,12 +91,11 @@ W.PageBase {
         wrapMode: TextEdit.WordWrap
         function refresh() {
           const data = Lua.client.settings;
-          let cardpack = Lua.call("GetAllCardPack");
+          let cardpack = Ltk.getAllCardPack();
           cardpack = cardpack.filter(p => !data.disabledPack.includes(p));
           const gameMode = data.gameMode;
-          const getUIData = Lua.fn("GetUIDataOfSettings");
-          const boardgameSettingsData = getUIData(gameMode, data, true);
-          const gameSettingsData = getUIData(gameMode, data, false);
+          const boardgameSettingsData = Lua.getUIDataOfSettings(gameMode, data, true);
+          const gameSettingsData = Lua.getUIDataOfSettings(gameMode, data, false);
 
           let retText = Lua.tr("GameMode") + Lua.tr(gameMode) + "<br />"
             + Lua.tr("ResponseTime") + "<b>" + Config.roomTimeout + "</b><br />";
@@ -271,7 +272,7 @@ W.PageBase {
               if (!roomScene.isOwner) return false;
               if (model.id === Self.id) return false;
               if (model.id < -1) {
-                const { minComp, curComp } = Lua.call("GetCompNum");
+                const { minComp, curComp } = Lua.getCompNum();
                 return curComp > minComp;
               }
               return true;
@@ -394,13 +395,13 @@ W.PageBase {
 
   function checkCanAddRobot() {
     if (Config.serverFeatures.includes("AddRobot")) {
-      const num = Lua.call("GetCompNum");
+      const num = Lua.getCompNum();
       canAddRobot = num.maxComp > num.curComp;
     }
   }
 
   function addInitComputers() {
-    const num = Lua.call("GetCompNum");
+    const num = Lua.getCompNum();
     const min = num.minComp;
     const cur = num.curComp;
     const robotsToAdd = Math.max(0, min - cur);

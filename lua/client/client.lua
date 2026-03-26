@@ -59,7 +59,9 @@ end
 function CreateLuaClient(cpp_client)
   ClientInstance = Client:new(cpp_client)
 end
+
 dofile "lua/client/client_util.lua"
+dofile "lua/client/i18n/init.lua"
 
 if FileIO.pwd():endsWith("packages/freekill-core") then
   FileIO.cd("../..")

@@ -1169,7 +1169,7 @@ W.PageBase {
 
     const items = [];
     for (let i = 0; i < card_data.length; i++) {
-      const dat = Lua.call("ToQml", card_data[i]);
+      const dat = Lua.toQml(card_data[i]);
       const card = Lua.createQmlObject(dat, roomScene.dynamicCardArea);
       const parentPos = roomScene.mapFromItem(from, 0, 0);
       card.x = parentPos.x - card.width / 2;

@@ -602,7 +602,7 @@ QtObject {
     roomPage.addCallback(Command.FillAG, fillAG);
     roomPage.addCallback(Command.AskForAG, askForAG);
     roomPage.addCallback(Command.TakeAG, takeAG);
-    
+
     roomPage.addCallback(Command.ReplyToServer, (_, data) => replyToServer(data));
   }
 

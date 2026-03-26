@@ -7,6 +7,8 @@ import QtQuick.Layouts
 import Fk
 import Fk.Widgets as W
 
+import LunarLtk
+
 Item {
   id: root
   anchors.fill: parent
@@ -127,7 +129,7 @@ Item {
           for (k in Config.curScheme.banPkg) {
             arr = Config.curScheme.banPkg[k];
             if (arr.length !== 0) {
-              const generals = Lua.call("GetGenerals", k);
+              const generals = Ltk.getGenerals(k);
               if (generals.length !== 0) {
                 disabledGenerals.push(...generals.filter(g => !arr.includes(g)));
               }

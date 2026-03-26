@@ -48,7 +48,7 @@ PhotoBase {
       color: (totalGame > 0 && runGame / totalGame > 0.2) ? "red" : "white"
       style: Text.Outline
       text: {
-        const totalTime = Lua.call("GetPlayerGameData", root.playerid)[3];
+        const totalTime = Lua.getPlayerGameData(root.playerid)[3];
         let timeStr
         const h = (totalTime / 3600).toFixed(2);
         const m = Math.floor(totalTime / 60);

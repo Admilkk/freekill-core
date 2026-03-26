@@ -219,7 +219,7 @@ Item {
         if (self.dead && self.rest <= 0) {
           return;
         }
-        const surrenderCheck = Lua.call('CheckSurrenderAvailable');
+        const surrenderCheck = Lua.checkSurrenderAvailable();
         if (!surrenderCheck.length) {
           surrenderDialog.informativeText =
           Lua.tr('Surrender is disabled in this mode');
@@ -320,8 +320,7 @@ Item {
     onButtonClicked: function (button, role) {
       switch (button) {
         case MessageDialog.Ok: {
-          const surrenderCheck =
-          Lua.call('CheckSurrenderAvailable');
+          const surrenderCheck = Lua.checkSurrenderAvailable();
           if (surrenderCheck.length &&
           !surrenderCheck.find(check => !check.passed)) {
 
@@ -531,7 +530,7 @@ Item {
     onAboutToShow: {
       drawerBar.currentIndex = rememberedIdx;
       playerListModel.clear();
-      const ps = Lua.call("GetPlayersAndObservers");
+      const ps = Lua.getPlayersAndObservers();
       ps.forEach(p => {
         playerListModel.append({
           pid: p.id,
@@ -629,7 +628,7 @@ Item {
       }
     } else if (msg.startsWith("!") || msg.startsWith("~")) { // 胜利、阵亡
       const g = msg.slice(1);
-      const extension = Lua.call("GetGeneralData", g).extension;
+      const extension = Ltk.getGeneralData(g).extension;
       if (!Config.disableMsgAudio) {
         const path = SkinBank.getAudio(g, extension, msg.startsWith("!") ? "win" : "death");
         Backend.playSound(path);
@@ -654,7 +653,7 @@ Item {
         let dat;
         const tryPlaySound = (general) => {
           if (general) {
-            const dat = Lua.call("GetGeneralData", general);
+            const dat = Ltk.getGeneralData(general);
             const extension = dat.extension;
             const path = SkinBank.getAudio(skill + "_" + general, extension, "skill");
             if (path !== undefined) {
@@ -668,7 +667,7 @@ Item {
         // Try main general first, then deputy general
         if (!tryPlaySound(general)) {
           // finally normal skill
-          dat = Lua.call("GetSkillData", skill);
+          dat = Ltk.getSkillData(skill);
           extension = dat.extension;
           path = SkinBank.getAudio(skill, extension, "skill");
           Backend.playSound(path, i);
@@ -734,7 +733,7 @@ Item {
   }
 
   function resetRoomPage() {
-    Lua.call("ResetClientLua");
+    Lua.resetClientLua();
     gameLoader.sourceComponent = Qt.createComponent("Fk.Pages.Common", "WaitingRoom");
     log.clear();
     chat.clear();
@@ -742,7 +741,7 @@ Item {
   }
 
   function continueGame() {
-    Lua.call("ResetClientLua");
+    Lua.resetClientLua();
     gameLoader.sourceComponent = Qt.createComponent("Fk.Pages.Common", "WaitingRoom");
     log.clear();
     chat.clear();
@@ -761,7 +760,7 @@ Item {
   }
 
   function trySaveRecord() {
-    Lua.call("SaveRecord");
+    Lua.saveRecord();
     App.showToast("OK.");
   }
 

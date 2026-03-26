@@ -61,7 +61,7 @@ QtObject {
         if (target[prop]) return target[prop];
 
         const [tp, v] = fn(`function(prop)
-          local v = ${exp}[prop]
+          local v = (${exp})[prop]
           local tp = type(v)
 
           if tp == "function" or tp == "userdata" or tp == "thread" then
@@ -123,7 +123,7 @@ QtObject {
     const isClass = ev(`not not ${exp}.class`);
     const isClassArr = ev(`not not (${exp}[1] and ${exp}[1].class)`);
     if (!isClass && !isClassArr) return ev(exp);
-    
+
     if (isClass) {
       return createProxy(exp);
     }
@@ -154,5 +154,74 @@ QtObject {
     }
 
     return component.createObject(parent, prop);
+  }
+
+  // 以下为client_util.lua里面全局函数的封装
+  function getGameModes() {
+    return call("GetGameModes");
+  }
+
+  function resetClientLua() {
+    return call("ResetClientLua");
+  }
+
+  function getCompNum() {
+    return call("GetCompNum");
+  }
+
+  function getPlayerGameData(pid) {
+    return call("GetPlayerGameData", pid);
+  }
+
+  function setPlayerGameData(pid, data) {
+    return call("SetPlayerGameData", pid, data);
+  }
+
+  function setObserving(o) {
+    return call("SetObserving", o);
+  }
+
+  function setReplaying(o) {
+    return call("SetReplaying", o);
+  }
+
+  function setReplayingShowCards(o) {
+    return call("SetReplayingShowCards", o);
+  }
+
+  function checkSurrenderAvailable() {
+    return call("CheckSurrenderAvailable");
+  }
+
+  function saveRecord() {
+    return call("SaveRecord");
+  }
+
+  function getQmlMark(mtype, name, p) {
+    return call("GetQmlMark", mtype, name, p);
+  }
+
+  function updateRequestUI(elemType, id, action, data) {
+    return call("UpdateRequestUI", elemType, id, action, data);
+  }
+
+  function finishRequestUI() {
+    return call("FinishRequestUI");
+  }
+
+  function getPlayersAndObservers() {
+    return call("GetPlayersAndObservers");
+  }
+
+  function toUIString(v) {
+    return call("ToUIString", v);
+  }
+
+  function toQml(v) {
+    return call("ToQml", v);
+  }
+
+  function getUIDataOfSettings(mode, settings, isBoardGame) {
+    return call("GetUIDataOfSettings", mode, settings, isBoardGame);
   }
 }

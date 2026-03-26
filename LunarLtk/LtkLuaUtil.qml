@@ -48,6 +48,8 @@ QtObject {
     Void = 8
   }
 
+  readonly property var _L: Lua.createProxy(`require "packages.freekill-core.lunarltk.client.util"`)
+
   function getPlayer(id) {
     return Lua.evaluate(`ClientInstance:getPlayerById(${id})`);
   }
@@ -64,216 +66,148 @@ QtObject {
     return Lua.evaluate(`Fk.skills['${name}']`);
   }
 
-  function getPackage(name) {
-    return Lua.evaluate(`Fk.packages['${name}']`);
-  }
-
   ///////////////// 施工中 //////////////////////
   // 把client_util.lua公式化转了一遍。还没剔除
   ///////////////// 施工中 //////////////////////
 
   function getGeneralData(name) {
-    return Lua.call("GetGeneralData", name);
+    return _L.getGeneralData(name);
   }
 
   function getGeneralDetail(name) {
-    return Lua.call("GetGeneralDetail", name);
+    return _L.getGeneralDetail(name);
   }
 
   function getSameGenerals(name) {
-    return Lua.call("GetSameGenerals", name);
+    return _L.getSameGenerals(name);
   }
 
   function isCompanionWith(general, general2) {
-    return Lua.call("IsCompanionWith", general, general2);
+    return _L.isCompanionWith(general, general2);
   }
 
   function getCardData(id, filterCard) {
-    return Lua.call("GetCardData", id, filterCard);
+    return _L.getCardData(id, filterCard);
   }
 
   function getCardExtensionByName(cardName) {
-    return Lua.call("GetCardExtensionByName", cardName);
+    return _L.getCardExtensionByName(cardName);
   }
 
   function getAllGeneralPack() {
-    return Lua.call("GetAllGeneralPack");
+    return _L.getAllGeneralPack();
   }
 
   function getAllProperties() {
-    return Lua.call("GetAllProperties");
+    return _L.getAllProperties();
   }
 
   function getGenerals(pack_name) {
-    return Lua.call("GetGenerals", pack_name);
+    return _L.getGenerals(pack_name);
   }
 
   function searchAllGenerals(word) {
-    return Lua.call("SearchAllGenerals", word);
+    return _L.searchAllGenerals(word);
   }
 
   function searchGenerals(pack_name, word) {
-    return Lua.call("SearchGenerals", pack_name, word);
+    return _L.searchGenerals(pack_name, word);
   }
 
   function filterAllGenerals(filter) {
-    return Lua.call("FilterAllGenerals", filter);
+    return _L.filterAllGenerals(filter);
   }
 
   function updatePackageEnable(pkg, enabled) {
-    return Lua.call("UpdatePackageEnable", pkg, enabled);
+    return _L.updatePackageEnable(pkg, enabled);
   }
 
   function getAvailableGeneralsNum() {
-    return Lua.call("GetAvailableGeneralsNum");
+    return _L.getAvailableGeneralsNum();
   }
 
   function getAllCardPack() {
-    return Lua.call("GetAllCardPack");
+    return _L.getAllCardPack();
   }
 
   function getCards(pack_name) {
-    return Lua.call("GetCards", pack_name);
+    return _L.getCards(pack_name);
   }
 
   function getPlayerSkills(id) {
-    return Lua.call("GetPlayerSkills", id);
+    return _L.getPlayerSkills(id);
   }
 
   function getSkillData(skill_name) {
-    return Lua.call("GetSkillData", skill_name);
+    return _L.getSkillData(skill_name);
   }
 
   function cardFitPattern(card_name, pattern) {
-    return Lua.call("CardFitPattern", card_name, pattern);
+    return _L.cardFitPattern(card_name, pattern);
   }
 
   function getVirtualEquipData(playerid, cid) {
-    return Lua.call("GetVirtualEquipData", playerid, cid);
-  }
-
-  function getGameModes() {
-    return Lua.call("GetGameModes");
-  }
-
-  function resetClientLua() {
-    return Lua.call("ResetClientLua");
-  }
-
-  function getCompNum() {
-    return Lua.call("GetCompNum");
-  }
-
-  function getPlayerGameData(pid) {
-    return Lua.call("GetPlayerGameData", pid);
-  }
-
-  function setPlayerGameData(pid, data) {
-    return Lua.call("SetPlayerGameData", pid, data);
-  }
-
-  function setObserving(o) {
-    return Lua.call("SetObserving", o);
-  }
-
-  function setReplaying(o) {
-    return Lua.call("SetReplaying", o);
-  }
-
-  function setReplayingShowCards(o) {
-    return Lua.call("SetReplayingShowCards", o);
-  }
-
-  function checkSurrenderAvailable() {
-    return Lua.call("CheckSurrenderAvailable");
+    return _L.getVirtualEquipData(playerid, cid);
   }
 
   function findMosts() {
-    return Lua.call("FindMosts");
+    return _L.findMosts();
   }
 
   function entitle(data, seat, winner) {
-    return Lua.call("Entitle", data, seat, winner);
-  }
-
-  function saveRecord() {
-    return Lua.call("SaveRecord");
+    return _L.entitle(data, seat, winner);
   }
 
   function getCardProhibitReason(cid) {
-    return Lua.call("GetCardProhibitReason", cid);
+    return _L.getCardProhibitReason(cid);
   }
 
   function getTargetTip(pid) {
-    return Lua.call("GetTargetTip", pid);
+    return _L.getTargetTip(pid);
   }
 
   function canSortHandcards(pid) {
-    return Lua.call("CanSortHandcards", pid);
+    return _L.canSortHandcards(pid);
   }
 
   function chooseGeneralPrompt(rule_name, data, extra_data) {
-    return Lua.call("ChooseGeneralPrompt", rule_name, data, extra_data);
+    return _L.chooseGeneralPrompt(rule_name, data, extra_data);
   }
 
   function chooseGeneralFilter(rule_name, to_select, selected, data, extra_data) {
-    return Lua.call("ChooseGeneralFilter", rule_name, to_select, selected, data, extra_data);
+    return _L.chooseGeneralFilter(rule_name, to_select, selected, data, extra_data);
   }
 
   function chooseGeneralFeasible(rule_name, selected, data, extra_data) {
-    return Lua.call("ChooseGeneralFeasible", rule_name, selected, data, extra_data);
+    return _L.chooseGeneralFeasible(rule_name, selected, data, extra_data);
   }
 
   function poxiPrompt(poxi_type, data, extra_data) {
-    return Lua.call("PoxiPrompt", poxi_type, data, extra_data);
+    return _L.poxiPrompt(poxi_type, data, extra_data);
   }
 
   function poxiFilter(poxi_type, to_select, selected, data, extra_data) {
-    return Lua.call("PoxiFilter", poxi_type, to_select, selected, data, extra_data);
+    return _L.poxiFilter(poxi_type, to_select, selected, data, extra_data);
   }
 
   function poxiFeasible(poxi_type, selected, data, extra_data) {
-    return Lua.call("PoxiFeasible", poxi_type, selected, data, extra_data);
-  }
-
-  function getQmlMark(mtype, name, p) {
-    return Lua.call("GetQmlMark", mtype, name, p);
+    return _L.poxiFeasible(poxi_type, selected, data, extra_data);
   }
 
   function getMiniGame(gtype, p, data) {
-    return Lua.call("GetMiniGame", gtype, p, data);
-  }
-
-  function getPendingSkill() {
-    return Lua.call("GetPendingSkill");
+    return _L.getMiniGame(gtype, p, data);
   }
 
   function revertSelection() {
-    return Lua.call("RevertSelection");
-  }
-
-  function updateRequestUI(elemType, id, action, data) {
-    return Lua.call("UpdateRequestUI", elemType, id, action, data);
-  }
-
-  function finishRequestUI() {
-    return Lua.call("FinishRequestUI");
+    return _L.revertSelection();
   }
 
   function hasVisibleCard(me, other, special_name) {
-    return Lua.call("HasVisibleCard", me, other, special_name);
+    return _L.hasVisibleCard(me, other, special_name);
   }
 
   function refreshStatusSkills() {
-    return Lua.call("RefreshStatusSkills");
-  }
-
-  function getPlayersAndObservers() {
-    return Lua.call("GetPlayersAndObservers");
-  }
-
-  function toUIString(v) {
-    return Lua.call("ToUIString", v);
+    return _L.refreshStatusSkills();
   }
 
   // 以下为QML常用函数

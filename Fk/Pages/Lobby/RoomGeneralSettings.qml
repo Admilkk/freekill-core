@@ -6,6 +6,8 @@ import QtQuick.Layouts
 import Fk
 import Fk.Widgets as W
 
+import LunarLtk
+
 Item {
   width: 600
   height: 800
@@ -64,9 +66,9 @@ Item {
       playerNum.value = Config.preferedPlayerNum;
 
       for (let k in Config.curScheme.banPkg) {
-        Lua.call("UpdatePackageEnable", k, false);
+        Ltk.updatePackageEnable(k, false);
       }
-      Config.curScheme.banCardPkg.forEach(p => Lua.call("UpdatePackageEnable", p, false));
+      Config.curScheme.banCardPkg.forEach(p => Ltk.updatePackageEnable(p, false));
       Config.curSchemeChanged();
     }
   }

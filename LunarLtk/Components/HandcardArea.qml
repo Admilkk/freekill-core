@@ -33,7 +33,7 @@ Item {
   }
 
   function cardSelected(cardId, selected) {
-    Ltk.updateRequestUI("CardItem", cardId, "click", { selected, autoTarget: Config.autoTarget } );
+    Lua.updateRequestUI("CardItem", cardId, "click", { selected, autoTarget: Config.autoTarget } );
   }
 
   function add(inputs) {
@@ -207,7 +207,7 @@ Item {
 
   function doubleClickCard(card) {
     if (Config.doubleClickUse) {
-      Ltk.updateRequestUI("CardItem", card.dataModel.cardId, "doubleClick", { selected: card.selected, doubleClickUse: Config.doubleClickUse, autoTarget: Config.autoTarget } );
+      Lua.updateRequestUI("CardItem", card.dataModel.cardId, "doubleClick", { selected: card.selected, doubleClickUse: Config.doubleClickUse, autoTarget: Config.autoTarget } );
     }
   }
 

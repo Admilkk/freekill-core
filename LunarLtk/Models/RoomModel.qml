@@ -354,14 +354,14 @@ QtObject {
       // 不对自己使用的单目标锦囊牌无懈
       if (Config.noSelfNullification && nullfiData.effectFrom === Cpp.self.id &&
         !Ltk.getCardData(nullfiData.effectCardId).multiple_targets) { 
-        Ltk.updateRequestUI("Button", "Cancel");
+        Lua.updateRequestUI("Button", "Cancel");
         return;
       }
 
       // 如果已忽略本轮无懈可击，那么忽略，除非即将对自己生效
       if (nullfiData.effectTo !== Cpp.self.id && 
         skippedUseEventIds.find(id => id === nullfiData.useEventId)) {
-        Ltk.updateRequestUI("Button", "Cancel");
+        Lua.updateRequestUI("Button", "Cancel");
         return;
       }
 
@@ -552,7 +552,7 @@ QtObject {
 
   function skipNullification() {
     skippedUseEventIds.push(skipNullificationData.useEventId);
-    Ltk.updateRequestUI("Button", "Cancel");
+    Lua.updateRequestUI("Button", "Cancel");
   }
 
   // 确定只会修改model属性的逻辑都搬家到这里

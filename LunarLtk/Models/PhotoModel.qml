@@ -74,7 +74,7 @@ QtObject {
       // 因为selected被绑定到ui组件的selected同时也会被逻辑影响，此处是手动刷UI
       photoItem.selected = selected;
     } else {
-      Ltk.updateRequestUI("Photo", playerid, "click", { selected, autoTarget: Config.autoTarget } );
+      Lua.updateRequestUI("Photo", playerid, "click", { selected, autoTarget: Config.autoTarget } );
     }
   }
 

@@ -15,11 +15,11 @@ MetroButton {
 
   onAnswerChanged: {
     if (!answer) return;
-    Ltk.updateRequestUI("Interaction", "1", "update", answer);
+    Lua.updateRequestUI("Interaction", "1", "update", answer);
   }
 
   onClicked: {
-    Ltk.updateRequestUI("Interaction", "1", "update", []);
+    Lua.updateRequestUI("Interaction", "1", "update", []);
     roomScene.showPopup(Qt.createComponent("LunarLtk.Pages.Popups", "ChoicesBox"), { dataModel });
     dataModel.accepted.connect(() => {
       answer = dataModel.result;

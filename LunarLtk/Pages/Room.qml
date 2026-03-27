@@ -59,7 +59,7 @@ W.PageBase {
         popupItem.finished();
       }
 
-      Ltk.finishRequestUI();
+      Lua.finishRequestUI();
       applyChange({});
     }
 
@@ -404,7 +404,7 @@ W.PageBase {
             text: Lua.tr(modelData)
             checked: index === 0
             onCheckedChanged: {
-              Ltk.updateRequestUI("SpecialSkills", "1", "click", modelData);
+              Lua.updateRequestUI("SpecialSkills", "1", "click", modelData);
             }
           }
         }
@@ -439,14 +439,14 @@ W.PageBase {
         id: okButton
         enabled: dataModel.okEnabled
         text: Lua.tr("OK")
-        onClicked: Ltk.updateRequestUI("Button", "OK");
+        onClicked: Lua.updateRequestUI("Button", "OK");
       }
 
       Button {
         id: cancelButton
         enabled: dataModel.cancelEnabled
         text: Lua.tr("Cancel")
-        onClicked: Ltk.updateRequestUI("Button", "Cancel");
+        onClicked: Lua.updateRequestUI("Button", "Cancel");
       }
     }
 
@@ -458,7 +458,7 @@ W.PageBase {
       anchors.right: parent.right
       anchors.rightMargin: 30
       visible: dataModel.endButtonVisible
-      onClicked: Ltk.updateRequestUI("Button", "End");
+      onClicked: Lua.updateRequestUI("Button", "End");
     }
   }
 
@@ -473,7 +473,7 @@ W.PageBase {
     if (action === "click") data = { selected, autoTarget: Config.autoTarget };
     else if (action === "doubleClick") data = { selected, doubleClickUse: Config.doubleClickUse, autoTarget: Config.autoTarget };
     else data = { selected };
-    Ltk.updateRequestUI("SkillButton", skill_name, action, data);
+    Lua.updateRequestUI("SkillButton", skill_name, action, data);
   }
 
   W.PopupItem {
@@ -549,14 +549,14 @@ W.PageBase {
   Shortcut {
     sequence: "Return"
     enabled: dataModel.okEnabled
-    onActivated: Ltk.updateRequestUI("Button", "OK");
+    onActivated: Lua.updateRequestUI("Button", "OK");
   }
 
   Shortcut {
     sequence: "Space"
     enabled: dataModel.cancelEnabled || endPhaseButton.visible;
     onActivated: if (dataModel.cancelEnabled) {
-      Ltk.updateRequestUI("Button", "Cancel");
+      Lua.updateRequestUI("Button", "Cancel");
     } else {
       dataModel.replyToServer("");
     }

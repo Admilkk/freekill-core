@@ -3,7 +3,7 @@
 import QtQuick
 import QtQuick.Controls
 
-import LunarLtk
+import Fk
 
 SpinBox {
   id: root
@@ -13,6 +13,6 @@ SpinBox {
   // from, to
 
   onValueChanged: {
-    Ltk.updateRequestUI("Interaction", "1", "update", value);
+    Lua.updateRequestUI("Interaction", "1", "update", value);
   }
 }

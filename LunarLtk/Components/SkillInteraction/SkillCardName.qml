@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 import QtQuick
+import Fk
 import Fk.Components.Common
 import LunarLtk
 import LunarLtk.Models.Popups
@@ -16,7 +17,7 @@ MetroButton {
 
   onAnswerChanged: {
     if (!answer) return;
-    Ltk.updateRequestUI("Interaction", "1", "update", answer);
+    Lua.updateRequestUI("Interaction", "1", "update", answer);
   }
 
   onClicked: {

@@ -157,6 +157,8 @@ QtObject {
   }
 
   // 以下为client_util.lua里面全局函数的封装
+  // ------------------------------------------------
+
   function getGameModes() {
     return call("GetGameModes");
   }

@@ -276,7 +276,7 @@ QtObject {
       value = "";
     } else if (rawValue instanceof ArrayBuffer) {
       // cbor的情况
-      value = Ltk.toUIString(rawValue);
+      value = Lua.toUIString(rawValue);
     } else if (!(rawValue instanceof Object)) {
       value = rawValue.toString();
     }
@@ -316,7 +316,7 @@ QtObject {
       const close_br = mark.indexOf(']');
       if (close_br !== -1) {
         const mark_type = mark.slice(2, close_br);
-        const data = Ltk.getQmlMark(mark_type, mark, playerid);
+        const data = Lua.getQmlMark(mark_type, mark, playerid);
         if (data) {
           qmlComponentSpec = typeof data.qml == "object" ? data.qml : {};
           let propObj;

@@ -77,7 +77,7 @@ W.PageBase {
         [Command.AskForMoveCardInBoard]: "MoveCardInBoardBox",
         [Command.AskForCardsAndChoice]: "ChooseCardsAndChoiceBox",
 
-        [Command.GameOver]: "GameOver",
+        [Command.GameOver]: "GameOverBox",
       };
 
       if (command == Command.CustomDialog) {

@@ -8,6 +8,7 @@ import Fk
 import Fk.Components.Common
 import Fk.Widgets as W
 import LunarLtk
+import LunarLtk.Components
 
 pragma ComponentBehavior: Bound
 
@@ -22,9 +23,8 @@ W.PageBase {
     Item {
       required property var modelData
       width: 64; height: 64
-      Avatar {
-        general: modelData
-        detailed: true
+      CompactGeneralCardItem {
+        dataModel: Ltk.createGeneralCardModel(parent.modelData)
       }
 
       W.TapHandler {

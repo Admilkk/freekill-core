@@ -1356,7 +1356,7 @@ function Room:askToChooseCards(player, params)
       table.insertTable(cards, t[2])
     end
   end
-  if #cards <= min then return cards end
+  if #cards <= min and not params.cancelable then return cards end
 
   local data = {
     to = target.id,

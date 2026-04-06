@@ -1800,6 +1800,12 @@ function Room:askToGuanxing(player, params)
     params.area_names =  { "Top", "Bottom" }
   end
   params.prompt = params.prompt or ""
+
+  --not noPut的情况：默认操作牌堆里的牌，先移至处理区，再置于牌堆顶/底
+  if not noPut then
+    self:moveCardTo(cards, Card.Processing, nil, fk.ReasonPut, customNotify, nil, false, player, nil, player)
+  end
+
   local command = "AskForGuanxing"
   local max_top = top_limit[2]
   local card_map = {}
@@ -1842,22 +1848,31 @@ function Room:askToGuanxing(player, params)
   end
 
   if not noPut then
-    for i = #top, 1, -1 do
-      table.removeOne(self.draw_pile, top[i])
-      table.insert(self.draw_pile, 1, top[i])
+    local moveInfos = {}
+    if #top > 0 then
+      table.insert(moveInfos, {   ---@type CardsMoveInfo
+        ids = table.reverse(top),
+        toArea = Card.DrawPile,
+        moveReason = fk.ReasonPut,
+        proposer = player,
+        skillName = customNotify,
+        moveVisible = false,
+        visiblePlayers = player
+      })
     end
-    for i = 1, #bottom, 1 do
-      table.removeOne(self.draw_pile, bottom[i])
-      table.insert(self.draw_pile, bottom[i])
+    if #bottom > 0 then
+      table.insert(moveInfos, {   ---@type CardsMoveInfo
+        ids = bottom,
+        toArea = Card.DrawPile,
+        moveReason = fk.ReasonPut,
+        proposer = player,
+        skillName = customNotify,
+        drawPilePosition = -1,
+        moveVisible = false,
+        visiblePlayers = player,
+      })
     end
-
-    self:syncDrawPile()
-    self:sendLog{
-      type = "#GuanxingResult",
-      from = player.id,
-      arg = #top,
-      arg2 = #bottom,
-    }
+    self:moveCards(table.unpack(moveInfos))
   end
 
   return { top = top, bottom = bottom }

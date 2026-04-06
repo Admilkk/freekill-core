@@ -339,9 +339,15 @@ local function mergeMoves(moves)
   local ret = {}
   local temp = {}
   for _, move in ipairs(moves) do
-    local info = string.format("%q,%q,%q,%q,%s,%s,%q",
+    --这里的drawPilePosition仅播放log使用（下文sendMoveCardLog），不作为实际移动处理的依据
+    --约定：为nil（默认值）时为牌堆顶；为-1时为牌堆底；为其他数值时为非特定位置
+    local drawPilePosition = move.drawPilePosition
+    if drawPilePosition ~= nil and drawPilePosition ~= -1 then
+      drawPilePosition = 1
+    end
+    local info = string.format("%q,%q,%q,%q,%s,%s,%q,%q",
       move.from, move.to, move.fromArea, move.toArea,
-      move.specialName, move.fromSpecialName, move.proposer)
+      move.specialName, move.fromSpecialName, move.proposer, drawPilePosition)
     if temp[info] == nil then
       temp[info] = {
         ids = {},
@@ -354,12 +360,13 @@ local function mergeMoves(moves)
         fromSpecialName = move.fromSpecialName,
         skillName = move.skillName,
         proposer = move.proposer,
-        drawPilePosition = move.drawPilePosition,
+        drawPilePosition = drawPilePosition,
       }
     end
     -- table.insert(temp[info].ids, move.moveVisible and move.ids[1] or -1)
     table.insert(temp[info].ids, move.ids[1])
   end
+  --FIXME: pairs的遍历顺序是随机的，会导致移动log播放的顺序也是随机，这是不能接受的
   for _, v in pairs(temp) do
     table.insert(ret, v)
   end
@@ -485,7 +492,9 @@ local function sendMoveCardLog(move, visible_data)
     local pos = move.drawPilePosition
     local arg
     if pos == nil then
+      --置顶的牌因为是按单张依次处理，所以是逆序的，此时log再逆回来
       arg = "Top"
+      logCards = table.reverse(logCards)
     elseif pos == -1 then
       arg = "Bottom"
     else

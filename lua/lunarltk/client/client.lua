@@ -338,6 +338,7 @@ end
 local function mergeMoves(moves)
   local ret = {}
   local temp = {}
+  local moveInfos = {}
   for _, move in ipairs(moves) do
     --这里的drawPilePosition仅播放log使用（下文sendMoveCardLog），不作为实际移动处理的依据
     --约定：为nil（默认值）时为牌堆顶；为-1时为牌堆底；为其他数值时为非特定位置
@@ -362,13 +363,14 @@ local function mergeMoves(moves)
         proposer = move.proposer,
         drawPilePosition = drawPilePosition,
       }
+      table.insert(moveInfos, info)
     end
     -- table.insert(temp[info].ids, move.moveVisible and move.ids[1] or -1)
     table.insert(temp[info].ids, move.ids[1])
   end
   --FIXME: pairs的遍历顺序是随机的，会导致移动log播放的顺序也是随机，这是不能接受的
-  for _, v in pairs(temp) do
-    table.insert(ret, v)
+  for _, info in ipairs(moveInfos) do
+    table.insert(ret, temp[info])
   end
   return ret
 end

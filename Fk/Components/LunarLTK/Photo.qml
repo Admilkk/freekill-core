@@ -94,7 +94,11 @@ PhotoBase {
 
     // visible: root.drank > 0
     color: "red"
-    opacity: (root.drank <= 0 ? 0 : 0.4) + Math.log(root.drank) * 0.12
+    opacity: {
+      const drank = root.drank;
+      if (drank <= 0) return 0;
+      return Math.min(0.4 + Math.log(drank) * 0.12, 1);
+    }
     Behavior on opacity { NumberAnimation { duration: 300 } }
   }
 

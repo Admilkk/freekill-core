@@ -1681,6 +1681,7 @@ end
 
 ---@class AskToArrangeCardsParams: AskToSkillInvokeParams
 ---@field card_map any @ { "牌堆1卡表", "牌堆2卡表", …… }
+---@field names? string[] @ 左侧提示信息
 ---@field prompt? string @ 操作提示
 ---@field box_size? integer @ 数值对应卡牌平铺张数的最大值，为0则有单个卡位，每张卡占100单位长度，默认为7
 ---@field max_limit? integer[] @ 每一行牌上限 { 第一行, 第二行，…… }，不填写则不限
@@ -1696,10 +1697,10 @@ end
 ---@return table[] @ 排列后的牌堆结果
 function Room:askToArrangeCards(player, params)
   params.prompt = params.prompt or ""
-  local areaNames = {}
+  local areaNames = params.names or {}
   if type(params.card_map[1]) == "number" then
     params.card_map = {params.card_map}
-  else
+  elseif #areaNames == 0 then
     for i = #params.card_map, 1, -1 do
       if type(params.card_map[i]) == "string" then
         table.insert(areaNames, 1, params.card_map[i])

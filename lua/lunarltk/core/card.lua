@@ -765,7 +765,7 @@ end
 
 --- 获得卡牌的技能
 ---@param player ClientPlayer | Player | ServerPlayer @ 需要判断的玩家
----@return table
+---@return CardSkill | ActiveSkill
 function Card:getSkill(player)
   local ret = self.skill
   local filters = Fk:currentRoom().status_skills[FilterSkill] or Util.DummyTable---@type FilterSkill[]
@@ -775,6 +775,7 @@ function Card:getSkill(player)
       ret = Fk.skills[skill_name]
     end
   end
+  assert(ret)
   return ret
 end
 
@@ -794,7 +795,7 @@ function Card:getFixedTargets(player, extra_data)
     end
   end
   -- 卡牌自身赋予的默认目标
-  ret = card_skill:fixTargets(player, self, extra_data)
+  ret = card_skill:fixTargets(player, {}, self, extra_data)
   if ret then return ret end
   -- 以下为适用所有牌的默认值
   if card_skill:getMinTargetNum(player) == 0 and not self.is_passive then

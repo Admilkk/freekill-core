@@ -101,26 +101,41 @@ function Death:main()
   local logic = room.logic
   logic:trigger(fk.BeforeGameOverJudge, victim, deathData)
 
+  local hidden_role = (deathData.hidden_role or victim.rest > 0)
+  local bannerKey = victim.id .. "hidden_role"
+
+-- 只在第一次死亡时保存真实身份
+  if victim.room:getBanner(bannerKey) == nil then
+   victim.room:setBanner(bannerKey, victim.role)
+  end
+
+-- 取出原始真实身份（永远不变）
+  local original_role = victim.room:getBanner(bannerKey)
+
+-- 日志发送（用修复后的逻辑）
   local killer = deathData.killer
+  local logRole = hidden_role and "unknown" or original_role
   if killer then
-    room:sendLog{
+    room:sendLog {
       type = "#KillPlayer",
-      to = {killer.id},
+      to = { killer.id },
       from = victim.id,
-      arg = (victim.rest > 0 and 'unknown' or victim.role),
+      arg = logRole,
     }
   else
-    room:sendLog{
+    room:sendLog {
       type = "#KillPlayerWithNoKiller",
       from = victim.id,
-      arg = (victim.rest > 0 and 'unknown' or victim.role),
+      arg = logRole,
     }
   end
-  room:sendLogEvent("Death", {to = victim.id})
+  room:sendLogEvent("Death", { to = victim.id })
 
-  if victim.rest == 0 then
+  if hidden_role then
+    room:setPlayerProperty(victim, "role", "unknown")
+  else
+    room:setPlayerProperty(victim, "role", original_role)
     room:setPlayerProperty(victim, "role_shown", true)
-    -- room:broadcastProperty(victim, "role")
   end
   room:broadcastProperty(victim, "dead")
 

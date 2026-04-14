@@ -42,7 +42,7 @@ Column {
     spacing: -4
 
     Magatama {
-      state: (value >= 3 || value >= maxValue) ? 3 : (value <= 0 ? 0 : value)
+      state: (value * 3 > maxValue * 2) ? 3 : (value * 3 > maxValue) ? 2 : 1
     }
 
     GlowText {
@@ -51,12 +51,12 @@ Column {
       text: value
       color: {
         let idx;
-        if (value >= 3 || value >= maxValue) {
+        if (value * 3 > maxValue * 2) {
           idx = 3;
-        } else if (value <= 0) {
-          idx = 0;
+        } else if (value * 3 > maxValue) {
+          idx = 2;
         } else {
-          idx = value;
+          idx = 1;
         }
         return root.colors[idx];
       }

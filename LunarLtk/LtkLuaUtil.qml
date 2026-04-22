@@ -429,9 +429,10 @@ QtObject {
     const prop = {
       name: data.skill,
       origName: data.orig_skill,
-      isActive: data.freq === "active",
+      isActive: data.freq === "active"||additionalProp?.isActive == true,
       frequency: data.frequency ?? "",
       extension: data.extension,
+      enabled: additionalProp?.enabled === true,
     };
     return component.createObject(null, prop);
   }

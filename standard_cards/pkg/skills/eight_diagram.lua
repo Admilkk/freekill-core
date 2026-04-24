@@ -33,7 +33,7 @@ skill:addEffect(fk.AskForCardUse, {
     return target == player and player:hasSkill(skill.name) and
         Exppattern:Parse(data.pattern):matchExp("jink|0|nosuit|none") and
         not player:prohibitUse(Fk:cloneCard("jink")) 
-        and (data.extraData == {} or (data.extraData ~= {} and data.extraData.not_passive ~= true))
+        and (data.extraData == {} or data.extraData.not_passive ~= true)
   end,
   on_use = spec,
 })

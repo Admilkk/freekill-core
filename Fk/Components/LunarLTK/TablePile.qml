@@ -94,10 +94,16 @@ Item {
     visibleData = visibleData ?? {};
     let i, j;
 
+    // 桌面上可能同时存在多张同id的牌，每个ID只筛选1张，避免重复
+    const processedIds = new Set();
     const to_remove = cards.filter(cd => {
-      return ids.includes(cd.cid) &&
-        (!cd.known || visibleData[cd.cid.toString()]);
+      const valid = ids.includes(cd.cid) &&
+        (!cd.known || visibleData[cd.cid.toString()]) &&
+        !processedIds.has(cd.cid);
+      if (valid) processedIds.add(cd.cid);
+      return valid;
     }).map(c => c.cid);
+
     let result = area.remove(to_remove);
     result.forEach(c => {
       const idx = discardedCards.indexOf(c);

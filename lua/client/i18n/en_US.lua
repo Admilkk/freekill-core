@@ -230,7 +230,6 @@ Fk:loadTranslationTable({
 
   -- [" thinking..."] = " 思考中...",
   ["AskForGeneral"] = "Choosing character",
-  ["AskForGuanxing"] = "Stargazing",
   ["AskForExchange"] = "Exchaging",
   ["AskForChoice"] = "Making choice",
   ["AskForChoices"] = "Making choice",

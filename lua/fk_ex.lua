@@ -8,8 +8,8 @@
 
 TriggerEvent = require "core.trigger_event"
 require "lunarltk.core.events"
-dofile "lua/lunarltk/server/system_enum.lua"
-dofile "lua/lunarltk/server/mark_enum.lua"
+dofile "lunarltk/server/system_enum.lua"
+dofile "lunarltk/server/mark_enum.lua"
 TriggerSkill = require "lunarltk.core.skill_type.trigger"
 -- LegacyTriggerSkill = require "compat.trigger_legacy"
 ActiveSkill = require "lunarltk.core.skill_type.active"
@@ -380,9 +380,8 @@ end
 
 ---@class QmlMarkSpec
 ---@field name string
----@field qml_path? string | fun(name: string, value?: any, player?: Player): string
----@field qml_data? fun(name: string, value?: any, player?: Player): any
----@field how_to_show? fun(name: string, value?: any, player?: Player): string?
+---@field qml? QmlComponent | fun(name: string, value: any?, player: Player?): QmlComponent? 点击后想要显示什么页面？不写就没有
+---@field how_to_show? fun(name: string, value?: any, player?: Player): string? 显示在外的文本
 
 -- TODO: 断连 不操作的人观看 现在只做了专为22设计的框
 ---@class MiniGameSpec

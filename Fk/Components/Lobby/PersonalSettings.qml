@@ -25,7 +25,7 @@ Item {
     Text {
       text: {
         Config.totalTime;
-        const gamedata = Lua.call("GetPlayerGameData", Self.id);
+        const gamedata = Lua.getPlayerGameData(Self.id);
         const totalTime = gamedata[3];
         const h = (totalTime / 3600).toFixed(2);
         const m = Math.floor(totalTime / 60);

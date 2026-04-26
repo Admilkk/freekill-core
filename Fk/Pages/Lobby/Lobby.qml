@@ -476,7 +476,7 @@ W.PageBase {
       displayName += "[{id}]".replace("{id}", roomSettings.roomId);
     }
     Config.headerName = Lua.tr("Current room: %1").arg(displayName);
-    App.enterNewPage("Fk.Pages.Common", "RoomPage", {
+    App.enterNewPage(Qt.createComponent("Fk.Pages.Common", "RoomPage"), {
       gameComponent: Qt.createComponent("Fk.Pages.Common", "WaitingRoom"),
     });
     App.setBusy(false);
@@ -484,19 +484,10 @@ W.PageBase {
 
   function handleClickButton(data) {
     const { popup, qml } = data;
+    const comp = Lua.createComponent(qml);
     if (!popup) {
-      if (qml.uri && qml.name) {
-        App.enterNewPage(qml.uri, qml.name);
-      } else {
-        App.enterNewPage(Cpp.path + "/" + qml.url);
-      }
+      App.enterNewPage(comp);
     } else {
-      let comp;
-      if (qml.uri && qml.name) {
-        comp = Qt.createComponent(qml.uri, qml.name);
-      } else {
-        comp = Qt.createComponent(Cpp.path + "/" + qml.url);
-      }
       lobby_drawer.sourceComponent = comp;
       lobby_drawer.open();
     }
@@ -521,6 +512,10 @@ W.PageBase {
   }
 
   Component.onCompleted: {
+    Lua.client = Lua.createProxy("ClientInstance");
+    Lua.selfPlayer = Lua.createProxy("Self");
+    Lua.fk = Lua.createProxy("Fk");
+
     addCallback(Command.UpdateRoomList, updateRoomList);
     addCallback(Command.UpdatePlayerNum, updatePlayerNum);
 

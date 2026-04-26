@@ -288,7 +288,6 @@ Trang chủ: https://libgit2.org
 
   [" thinking..."] = " đang suy nghĩ...",
   ["AskForGeneral"] = "Chọn tướng",
-  ["AskForGuanxing"] = "Quan Tinh",
   ["AskForExchange"] = "Trao đổi",
   ["AskForChoice"] = "Lựa chọn",
   ["AskForChoices"] = "Lựa chọn",

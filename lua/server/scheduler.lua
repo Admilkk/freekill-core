@@ -1,9 +1,9 @@
 -- SPDX-License-Identifier: GPL-3.0-or-later
 
 Request = require "server.request"
-GameLogic = require "lunarltk.server.gamelogic"
-ServerPlayer = require "lunarltk.server.serverplayer"
-Room = require "lunarltk.server.room"
+GameLogic = require "ltk.server.gamelogic"
+ServerPlayer = require "ltk.server.serverplayer"
+Room = require "ltk.server.room"
 
 for _, l in ipairs(Fk._custom_events) do
   local name, p, m, c, e = l.name, l.p, l.m, l.c, l.e
@@ -21,7 +21,7 @@ end
 
 ---@type Player
 Self = nil -- `Self' is client-only, but we need it in AI
-dofile "lunarltk/server/ai/init.lua"
+dofile "ltk/server/ai/init.lua"
 
 local Task = require "server.task"
 

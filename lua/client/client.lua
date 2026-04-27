@@ -1,7 +1,7 @@
 ---@type table<string, fun(self: Client, data: any)>
 fk.client_callback = {}
 
-dofile "lunarltk/client/client.lua"
+dofile "ltk/client/client.lua"
 
 -- 总而言之就是会让roomScene.state变为responding或者playing的状态
 local pattern_refresh_commands = {

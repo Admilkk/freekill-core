@@ -48,7 +48,7 @@ QtObject {
     Void = 8
   }
 
-  readonly property var _L: Lua.createProxy(`require "packages.freekill-core.lunarltk.client.util"`)
+  readonly property var _L: Lua.createProxy(`require "packages.freekill-core.ltk.client.util"`)
   property var roomScene
   property var roomModel
 

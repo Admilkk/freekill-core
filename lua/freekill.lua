@@ -25,20 +25,20 @@ Util = require "core.util"
 dofile "lua/core/debug.lua"
 
 -- 加载游戏核心类
-Engine = require "lunarltk.core.engine"
-Package = require "lunarltk.core.package"
-General = require "lunarltk.core.general"
-CardSkeleton = require "lunarltk.core.card_skeleton"
-Card = require "lunarltk.core.card"
-Exppattern = require "lunarltk.core.exppattern"
-SkillSkeleton = require "lunarltk.core.skill_skeleton"
-Skill = require "lunarltk.core.skill"
-UsableSkill = require "lunarltk.core.skill_type.usable_skill"
-StatusSkill = require "lunarltk.core.skill_type.status_skill"
-Player = require "lunarltk.core.player"
+Engine = require "ltk.core.engine"
+Package = require "ltk.core.package"
+General = require "ltk.core.general"
+CardSkeleton = require "ltk.core.card_skeleton"
+Card = require "ltk.core.card"
+Exppattern = require "ltk.core.exppattern"
+SkillSkeleton = require "ltk.core.skill_skeleton"
+Skill = require "ltk.core.skill"
+UsableSkill = require "ltk.core.skill_type.usable_skill"
+StatusSkill = require "ltk.core.skill_type.status_skill"
+Player = require "ltk.core.player"
 GameMode = require "core.game_mode"
 RequestHandler = require "core.request_handler"
-AbstractRoom = require "lunarltk.core.room.abstract_room"
+AbstractRoom = require "ltk.core.room.abstract_room"
 UI = require "ui-util"
 GameEvent = require "server.gameevent"
 
@@ -88,7 +88,7 @@ end
 dofile "lua/fk_ex.lua"
 
 Fk = Engine:new()
-dofile "lunarltk/init.lua"
+dofile "ltk/init.lua"
 Fk:loadPackages()
 
 local boardgameCount = 0

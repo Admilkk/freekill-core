@@ -82,6 +82,7 @@ W.PageBase {
 
       if (command == Command.CustomDialog) {
         component = Lua.createComponent(data.component);
+        Object.assign(prop, data.component?.prop ?? {});
       } else {
         component = Qt.createComponent("LunarLtk.Pages.Popups", componentTable[command]);
       }
@@ -1261,5 +1262,8 @@ W.PageBase {
     }
 
     arrangePhotos();
+
+    Ltk.roomScene = this;
+    Ltk.roomModel = dataModel;
   }
 }

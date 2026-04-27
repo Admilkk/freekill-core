@@ -49,6 +49,8 @@ QtObject {
   }
 
   readonly property var _L: Lua.createProxy(`require "packages.freekill-core.lunarltk.client.util"`)
+  property var roomScene
+  property var roomModel
 
   function getPlayer(id) {
     return Lua.evaluate(`ClientInstance:getPlayerById(${id})`);

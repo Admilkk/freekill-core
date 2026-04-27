@@ -535,7 +535,7 @@ W.PageBase {
     transformOrigin: Item.TopLeft
     bgColor: "#BB838AEA"
 
-    markModel: roomScene.dataModel.marks
+    markModel: roomScene.dataModel.banners
   }
 
   Shortcut {

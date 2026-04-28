@@ -416,7 +416,7 @@ PhotoBase {
     anchors.right: parent.right
     anchors.topMargin: -4
 
-    dataModel: root.dataModel
+    markModel: root.dataModel.picMarks
   }
 
   Rectangle {

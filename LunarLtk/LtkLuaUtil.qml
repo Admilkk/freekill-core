@@ -267,9 +267,10 @@ QtObject {
   }
 
   function setMark(marks, mark, rawValue, playerid) {
-    const elem = marks.find(e => e.origName === mark);
+    const elemIdx = marks.findIndex(e => e.origName === mark);
+    const elem = marks[elemIdx];
     if (rawValue === 0) {
-      if (elem) marks.splice(marks.indexOf(elem), 1);
+      if (elemIdx !== -1) marks.splice(elemIdx, 1);
       return;
     }
 

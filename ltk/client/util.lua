@@ -105,6 +105,7 @@ function M:getCardData(id, filterCard)
     mark = mark,
     type = card.type,
     subtype = M.cardSubtypeStrings[card.sub_type],
+    pic_name = card:getPicName(),
   }
   if filterCard and card.skillName ~= "" then
     local orig = Fk:getCardById(id, true)

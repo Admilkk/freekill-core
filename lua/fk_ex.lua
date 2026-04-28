@@ -207,6 +207,7 @@ end
 ---@field public handly_cards? fun(self: FilterSkill, player: Player): integer[]? @ 视为拥有可以如手牌般使用或打出的牌
 ---@field public card_skill_filter? fun(self: FilterSkill, card: Card, player: Player): string?
 ---@field public skill_filter? fun(self: FilterSkill, player: Player): string[]? @ 视为拥有的技能
+---@field public card_pic_filter? fun(self: FilterSkill, card: Card): string? @ 修改卡面图片
 
 
 ---@class InvaliditySpec: StatusSkillSpec

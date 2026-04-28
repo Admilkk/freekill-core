@@ -46,7 +46,7 @@ Flickable {
 
             let ret = root.dataModel.screenName;
 
-            const gamedata = Ltk.getPlayerGameData(id);
+            const gamedata = Lua.getPlayerGameData(id);
             const totalTime = gamedata[3];
             const h = (totalTime / 3600).toFixed(2);
             const m = Math.floor(totalTime / 60);
@@ -69,7 +69,7 @@ Flickable {
             const id = dataModel.playerid;
             if (id === 0 || id === undefined) return "";
 
-            const gamedata = Ltk.getPlayerGameData(id);
+            const gamedata = Lua.getPlayerGameData(id);
             const total = gamedata[0];
             const win = gamedata[1];
             const run = gamedata[2];

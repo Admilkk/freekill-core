@@ -48,4 +48,11 @@ function FilterSkill:skillFilter(player)
   return {}
 end
 
+--- 判定此牌的图像视为什么牌名
+---@param card Card @ 待判定的牌
+---@return string? @ 牌名
+function FilterSkill:cardPicFilter(card)
+  return nil
+end
+
 return FilterSkill

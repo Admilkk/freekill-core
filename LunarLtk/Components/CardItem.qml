@@ -57,7 +57,7 @@ Game.PokerCard {
     roomScene.showInfoPopup(Qt.createComponent("LunarLtk.Pages.InfoPopups", "CardDetail"), { cardId: dataModel.cardId });
   }
 
-  cardFrontSource: SkinBank.getCardPicture(dataModel.cardId || dataModel.name)
+  cardFrontSource: SkinBank.getCardPicture(dataModel.picName || dataModel.cardId || dataModel.name)
   cardBackSource: SkinBank.searchBuiltinPic("/image/card/", "card-back")
 
   Rectangle {

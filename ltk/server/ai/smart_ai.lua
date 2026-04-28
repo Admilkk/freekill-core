@@ -349,8 +349,7 @@ end
 -- ========================================
 
 function SmartAI:handleAskForCardChosen(data)
-  local target_id, flag, reason, prompt = table.unpack(data)
-  local target = self.room:getPlayerById(target_id)
+  local target, card_data, prompt = table.unpack(data)
   local ai = self:findStrategyOfSkill(AI.CardChosenStrategy, reason)
   if ai then
     if self._debug then

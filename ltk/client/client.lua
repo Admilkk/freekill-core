@@ -840,7 +840,9 @@ function Client:setCardMark(data)
   local card, mark, value = data[1], data[2], data[3]
   Fk:getCardById(card):setMark(mark, value)
 
-  self:notifyUI("SetCardMark", data)
+  if string.sub(mark, 1, 1) == "@" then -- 仅更新可见标记
+    self:notifyUI("SetCardMark", data)
+  end
 end
 
 function Client:logEvent(data)

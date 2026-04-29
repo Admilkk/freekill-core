@@ -92,7 +92,7 @@ Item {
       if (idx !== -1) {
         discardedCards.splice(idx, 1);
       }
-      c.footnoteVisible = false;
+      c.dataModel.footnoteVisible = false;
       c.dataModel.selectable = false;
       c.cardScale = 1;
       c.rotation = 0;

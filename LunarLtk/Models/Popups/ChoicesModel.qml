@@ -12,7 +12,7 @@ QtObject {
   property bool cancelable: false
   property string skillName
   property string prompt
-  property bool detailed
+  property bool detailed : false
 
   property list<var> result: []
 

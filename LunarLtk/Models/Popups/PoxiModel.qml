@@ -7,7 +7,7 @@ QtObject {
   property string poxiType
   property list<var> cardData // var为如此list: [ name, ids ]
   property bool cancelable: true
-  property var extraData // 这啥啊
+  property var extraData // 储存卡牌可见性，或者用于cardFilter的额外信息
 
   // list<int>会无法传递到Lua 只做了QVariantList的适配
   // 写list的话无需手动触发changed信号

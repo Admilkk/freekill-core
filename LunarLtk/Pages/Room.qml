@@ -381,7 +381,7 @@ W.PageBase {
       color: "#88EEEEEE"
       radius: 8
       visible: {
-        if (roomScene.state !== "active") {
+        if (!progress.visible) {
           return false;
         }
         if (!specialCardSkills) {

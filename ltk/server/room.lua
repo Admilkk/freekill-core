@@ -1241,7 +1241,7 @@ function Room:askToChooseKingdom(players)
     end
 
     for _, p in ipairs(specialKingdomPlayers) do
-      p.kingdom = req:getResult(p)
+      p.kingdom = req:getResult(p)[1]
       self:notifyProperty(p, p, "kingdom")
     end
   end

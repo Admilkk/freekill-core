@@ -18,7 +18,7 @@ QtObject {
   property int number // 点数
   property string suit // 花色
   property string color // 颜色
-  property string picName // 卡片图像名
+  property string picName : "" // 卡片图像名
 
   property string extension
 
@@ -46,7 +46,7 @@ QtObject {
     Object.assign(root, {
       name, extension, number, suit, color, type, subtype,
       virtName: data.virt_name ?? "",
-      picName: data.pic_name
+      picName: data.pic_name ?? "",
     })
     known = Lua.selfPlayer.cardVisible(cardId);
   }

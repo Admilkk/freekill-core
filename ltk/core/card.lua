@@ -1031,7 +1031,7 @@ function Card:matchVSPattern(pattern)
 end
 
 --- 获取卡牌卡面名字
----@return string
+---@return string?
 function Card:getPicName()
   local filters = Fk:currentRoom().status_skills[FilterSkill] or Util.DummyTable---@type FilterSkill[]
   for _, filter in ipairs(filters) do
@@ -1040,7 +1040,6 @@ function Card:getPicName()
       return name
     end
   end
-  return self.name
 end
 
 return Card

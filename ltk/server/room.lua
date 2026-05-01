@@ -2060,7 +2060,7 @@ function Room:handleUseCardReply(player, data, params)
       end, use_data)
       return useResult
     end
-  else
+  elseif type(card) == "number" then
     if data.special_skill then
       local skill = Fk.skills[data.special_skill]
       if skill:isInstanceOf(ActiveSkill) then
@@ -2113,7 +2113,7 @@ function Room:handleUseCardReply(player, data, params)
     local use = {}
     use.from = player
     use.tos = table.map(targets or Util.DummyTable, Util.Id2PlayerMapper)
-    Fk:filterCard(card, player)
+    self:filterCard(card, player)
     use.card = Fk:getCardById(card)
     return use
   end

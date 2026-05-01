@@ -40,6 +40,7 @@ Item {
   }
 
   onSkillnameChanged: {
+    if (!skillname) return;
     let data = Ltk.getSkillData(skillname);
     if (data.frequency || data.switchSkillName) {
       skilltype = data.switchSkillName ? 'switch' : data.frequency;

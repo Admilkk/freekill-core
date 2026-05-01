@@ -246,7 +246,7 @@ PhotoBase {
     anchors.topMargin: role.height + 2
     anchors.rightMargin: 22
 
-    dataModel: root.dataModel
+    skillModel: root.dataModel.limitSkills
   }
 
   Image {

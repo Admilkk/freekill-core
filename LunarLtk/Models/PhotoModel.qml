@@ -99,11 +99,12 @@ QtObject {
   }
 
   function updateLimitSkill(skill, time) {
-    const elem = limitSkills.find(e => e.skill === skill);
+    const elemIdx = limitSkills.findIndex(e => e.skill === skill);
+    const elem = limitSkills[elemIdx];
     if (elem) {
       elem.time = time;
       if (time === -1) {
-        limitSkills.splice(limitSkills.indexOf(elem), 1);
+        limitSkills.splice(elemIdx, 1);
       }
     } else if (time > -1) {
       limitSkills.push({ skill, time });

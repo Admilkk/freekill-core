@@ -93,7 +93,11 @@ function AbstractRoom:filterCard(id, player, judgeEvent)
         if self:isInstanceOf(Room) and not f.mute then
           ---@cast self Room
           ---@cast player ServerPlayer
-          player:broadcastSkillInvoke(skill_name)
+          local audio_index = f.audio_index
+          if type(audio_index) == "table" then
+            audio_index = self:tableRandomPick(audio_index)
+          end
+          player:broadcastSkillInvoke(skill_name, audio_index)
           self:doAnimate("InvokeSkill", {
             name = skill_name,
             player = player.id,

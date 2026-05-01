@@ -349,6 +349,7 @@ QtObject {
     root.prompt = prompt || `#AskForUseCard:::${cardname}`;
 
     if (nullfiData) {
+      console.log(JSON.stringify(data))
       // 询问使用【无懈可击】相关
 
       // 不对自己使用的单目标锦囊牌无懈
@@ -365,7 +366,9 @@ QtObject {
         return;
       }
 
-      skipNullificationData = nullfiData;
+      if (nullfiData.useEventId && nullfiData.effectTo) {
+        skipNullificationData = nullfiData;
+      }
     }
 
     activate();

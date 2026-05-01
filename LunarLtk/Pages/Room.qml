@@ -569,6 +569,10 @@ W.PageBase {
     running: true
     repeat: true
     onTriggered: {
+      //ai说游戏结束别刷了
+      if (!Lua.client.gameStarted) {
+        return;
+      }
       dataModel.refreshData();
       Ltk.refreshStatusSkills();
       // 刷托管按钮

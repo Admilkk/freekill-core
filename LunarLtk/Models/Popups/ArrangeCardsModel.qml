@@ -53,12 +53,12 @@ QtObject {
   // 是否允许拖动到area中:
   // * 若为第0个area且card本来就在其中，不可freeAssign时不可
   // * 无法选中者不可
-  // * 超过limit时不可
   function isMoveAllowed(card, areaIdx) {
     if (result[areaIdx].includes(card.dataModel.cardId)) {
       if (areaIdx === 0 && !freeArrange) return false;
-    } else if (result[areaIdx].length >= areaCapacities[areaIdx]) {
-      return false;
+    // 超过limit时为替换牌，因此可
+    // } else if (result[areaIdx].length >= areaCapacities[areaIdx]) {
+    //   return false;
     } else if (!card.selectable) {
       return false;
     }

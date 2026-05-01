@@ -558,11 +558,11 @@ Item {
   }
 
   function canHandleCommand(cmd) {
-    return gameContent.canHandleCommand(cmd) || overlay.canHandleCommand(cmd);
+    return gameContent?.canHandleCommand(cmd) || overlay.canHandleCommand(cmd);
   }
 
   function handleCommand(sender, cmd, data) {
-    if (gameContent.canHandleCommand(cmd)) {
+    if (gameContent?.canHandleCommand(cmd)) {
       gameContent.handleCommand(sender, cmd, data);
     }
     if (overlay.canHandleCommand(cmd)) {

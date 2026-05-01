@@ -117,7 +117,7 @@ Item {
     if (!card.selectable) return;
 
     if (!card.selected) {
-      cardSelected(card.cid, true);
+      cardSelected(card.dataModel.cardId, true);
     }
 
     let belowPhoto;
@@ -158,7 +158,7 @@ Item {
         roomScene.okButton.clicked();
         return;
       } else if (_card.selected) {
-        cardSelected(_card.cid, false);
+        cardSelected(_card.dataModel.cardId, false);
       }
     }
 
@@ -215,7 +215,7 @@ Item {
   function enableCards(cardIds) {
     let card, i;
     cards.forEach(card => {
-      card.dataModel.selectable = cardIds.includes(card.cid);
+      card.dataModel.selectable = cardIds.includes(card.dataModel.cardId);
       if (!card.dataModel.selectable) {
         card.selected = false;
       }

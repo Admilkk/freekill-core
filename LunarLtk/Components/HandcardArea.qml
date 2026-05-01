@@ -14,7 +14,6 @@ Item {
   property alias length: cardArea.length
   property bool sortable: true
   property var selectedCards: []
-  property var movepos
 
   property var draggingCard
   property var draggingClickedPhoto
@@ -50,7 +49,7 @@ Item {
     card.markVisible = true;
     card.autoBack = true;
     // 只有会被频繁刷新的手牌才能拖动
-    // card.draggable = Ltk.canSortHandcards(Cpp.self.id);
+    card.draggable = Ltk.canSortHandcards(Cpp.self.id);
     card.dataModel.selectable = false;
     card.clicked.connect(selectCard);
     card.clicked.connect(adjustCards);
@@ -143,7 +142,8 @@ Item {
   function updateCardReleased(_card) {
     let i;
     let c;
-    let index;
+    let index = cards.indexOf(_card);
+    const cid = _card.dataModel.cardId;
 
     const inDragUse = (Config.enableSuperDrag && _card === draggingCard);
     draggingCard = null;
@@ -163,8 +163,8 @@ Item {
     }
 
     let card;
-    movepos = null;
-    for (let i = 0; i < cards.length; i++) {
+    let movepos = null;
+    for (i = 0; i < cards.length; i++) {
       card = cards[i];
       if (card.dragging) continue;
 
@@ -181,10 +181,11 @@ Item {
       const self = Lua.selfPlayer;
       const room = Lua.client;
       const handcardnum = self.getCardIds("h").length; // 不计入expand_pile
-      const isMyHandcard = room.getCardArea(_card.cid) == Ltk.Card.PlayerHand &&
-        room.getCardOwner(_card.cid).id == Cpp.self.id;
+      const isMyHandcard = room.getCardArea(cid) === Ltk.Card.PlayerHand &&
+        Lua.ev(`ClientInstance:getCardOwner(${cid}).id == Self.id`);
       if (isMyHandcard) {
         if (movepos >= handcardnum) movepos = handcardnum - 1;
+        dataModel.swapHandcard(movepos, index);
       } else {
         if (movepos < handcardnum) movepos = handcardnum;
       }

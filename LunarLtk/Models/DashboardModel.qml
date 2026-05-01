@@ -13,6 +13,15 @@ QtObject {
 
   signal handcardsSorted()
 
+  // 交换两个idx的卡牌，用于拖拽排序
+  function swapHandcard(fromIdx, toIdx) {
+    const from = handcards[fromIdx];
+    const to = handcards[toIdx];
+    if (!from || !to) return;
+    handcards.splice(toIdx, 1);
+    handcards.splice(fromIdx, 0, to);
+  }
+
   function sortHandcards(sortMethod) {
     const typeSorter = (a, b) => {
       if (a.type !== b.type) return a.type - b.type;

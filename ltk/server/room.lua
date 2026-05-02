@@ -1236,7 +1236,7 @@ function Room:askToChooseKingdom(players)
       end
       if #allKingdoms > 0 then
         req:setData(p, { allKingdoms, allKingdoms, { 1, 1 }, false, "AskForKingdom", "#ChooseInitialKingdom", false })
-        req:setDefaultReply(p, allKingdoms[1])
+        req:setDefaultReply(p, { allKingdoms[1] })
       end
     end
 

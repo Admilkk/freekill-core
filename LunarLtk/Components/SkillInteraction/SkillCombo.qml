@@ -27,7 +27,7 @@ MetroButton {
     roomScene.showPopup(Qt.createComponent("LunarLtk.Pages.Popups", "ChoicesBox"), { dataModel, noOneLine: true });
     dataModel.accepted.connect(() => {
       answer = dataModel.result[0];
-      roomScene.popupItem.finished();
+      roomScene.popupItem?.finished();
     });
   }
 }

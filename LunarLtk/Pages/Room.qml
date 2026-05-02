@@ -597,6 +597,9 @@ W.PageBase {
 
   function showPopup(component, prop) {
     const item = component.createObject(roomScene, prop);
+    if (popupItem) {
+      popupItem?.finished();
+    }
     popupItem = item;
 
     const moveToCenter = () => {

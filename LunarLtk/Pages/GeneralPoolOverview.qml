@@ -20,19 +20,17 @@ W.PageBase {
 
   Component {
     id: avatarCard
-    Item {
+    CompactGeneralCardItem {
       required property var modelData
       width: 64; height: 64
-      CompactGeneralCardItem {
-        dataModel: Ltk.createGeneralCardModel(parent.modelData)
-      }
+      dataModel: Ltk.createGeneralCardModel(modelData)
 
       W.TapHandler {
         acceptedButtons: Qt.LeftButton | Qt.NoButton
         gesturePolicy: TapHandler.WithinBounds
 
-        onTapped: () => {
-          popLoader.item.general = modelData;
+        onTapped: {
+          popLoader.item.general = parent.modelData;
           pop.open();
         }
       }
@@ -59,37 +57,7 @@ W.PageBase {
       anchors.top: favorBar.bottom
       cellWidth: 68; cellHeight: 68
       model: Config.favoriteGenerals
-      delegate: Item {
-        width: 64; height: 64
-        required property var modelData
-        Avatar {
-          general: modelData
-          detailed: true
-        }
-
-        Rectangle {
-          anchors.fill: parent
-          color: "black"
-          opacity: 0.6
-          visible: !root.allGenerals.includes(modelData)
-        }
-
-        Image {
-          width: 24; height: 23
-          source: SkinBank.miscDir + "favorite"
-          x: -8; y: 48
-        }
-
-        W.TapHandler {
-          acceptedButtons: Qt.LeftButton | Qt.NoButton
-          gesturePolicy: TapHandler.WithinBounds
-
-          onTapped: () => {
-            popLoader.item.general = modelData;
-            pop.open();
-          }
-        }
-      }
+      delegate: avatarCard
     }
   }
 

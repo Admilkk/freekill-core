@@ -17,8 +17,6 @@ ListView {
 
   z: Infinity
   spacing: 5
-  anchors.fill: parent
-  anchors.bottomMargin: 10
   verticalLayoutDirection: ListView.BottomToTop
 
   interactive: false
@@ -36,7 +34,7 @@ ListView {
     required property int index
     required property var listmodel
 
-    onFinish: {
+    onFinished: {
       listmodel.remove(index);
     }
 

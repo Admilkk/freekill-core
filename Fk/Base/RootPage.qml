@@ -125,6 +125,8 @@ W.PageBase {
 
   ToastManager {
     id: toast
+    anchors.fill: parent
+    anchors.bottomMargin: 10
   }
 
   Loader {

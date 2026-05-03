@@ -232,6 +232,11 @@ function Client:appendLog(msg, visible_data)
   if msg.toast then
     self:notifyUI("ShowToast", text)
   end
+
+  -- Ltk的appendLog自成一个函数了，来点动画小巧思不过分.jpg
+  if msg.type:startsWith("#InvokeSkill") then
+    self:notifyUI("Ltk.SkillInvoked", text)
+  end
 end
 
 ---@param msg LogMessage

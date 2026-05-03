@@ -495,6 +495,35 @@ W.PageBase {
     anchors.fill: parent
   }
 
+  ToastManager {
+    id: popupLogArea
+    height: roomArea.height * 0.61
+    width: roomArea.width
+    spacing: 2
+    z: 10
+
+    delegate: Toast {
+      required property string text
+      required property real duration
+      required property int index
+      required property var listmodel
+
+      color: "#eff2ecc8"
+      height: message.height + 8
+      width: message.width + 18
+      radius: 4
+      message.font.pixelSize: 14
+
+      onFinished: {
+        listmodel.remove(index);
+      }
+
+      Component.onCompleted: {
+        show(text, duration);
+      }
+    }
+  }
+
   GlowText {
     anchors.centerIn: dashboard
     visible: getPhoto(Cpp.self.id).rest > 0 && !Config.observing
@@ -1257,6 +1286,8 @@ W.PageBase {
     addCallback(Command.ChangeSkin, changeSkin);
 
     addCallback(Command.ShowVirtualCard, showVirtualCard);
+
+    addCallback("Ltk.SkillInvoked", (_, data) => popupLogArea.show(data));
   }
 
   Component.onCompleted: {

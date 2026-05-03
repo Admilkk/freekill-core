@@ -1204,7 +1204,7 @@ W.PageBase {
     dataModel.activate();
     showPopup(component);
     if (dat) {
-      roomScene.popupBox.item.loadData(dat);
+      roomScene.popupItem.loadData(dat);
     }
   }
 

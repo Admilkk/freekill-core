@@ -19,8 +19,10 @@ QtObject {
 
     for (const tab of cardData) {
       for (const cid of tab[1]) {
+        // 神姜维约定：为0也不可见，但不参与后续随机
+        const known = visibleData[cid.toString()];
         dict[cid] = Ltk.createCardModel(cid, {
-          known: visibleData[cid.toString()] !== false,
+          known: known === undefined || !!known,
         });
       }
     }

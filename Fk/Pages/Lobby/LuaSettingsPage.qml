@@ -105,6 +105,7 @@ Item {
   }
 
   function updateSettingsUI() {
+    if (!root.gameModeName) return;
     updatingData = true;
     const getUIData = Lua.fn("GetUIDataOfSettings");
     const settingsData = getUIData(root.gameModeName, root.config, root.isBoardgame) ?? [];
@@ -134,6 +135,7 @@ Item {
     for (let i = 0; i < settingsData.length; i++) {
       const dat = settingsData[i];
       const obj = dynamicChildObject[i];
+      if (!obj) continue;
       assignDataToObject(dat, obj);
       // 这里假设obj必定是W.PreferenceGroup了
       for (let j = 0; j < dat["_children"].length; j++) {

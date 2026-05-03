@@ -292,13 +292,16 @@ QtObject {
 
     if (!mark.startsWith("@")) {
       // Lua不会把不可见mark传来的，所以这部分肯定是玩家pile
-      const pile = Ltk.getPlayer(playerid).getPile(mark).filter(e => Lua.selfPlayer.cardVisible(e));
+      const pile = Ltk.getPlayer(playerid).getPile(mark);
       if (pile.length === 0) return;
+      const visibleIds = pile.filter(e => Lua.selfPlayer.cardVisible(e));
 
       textValue = pile.length.toString();
-      qmlComponentSpec.name = "ViewPile";
-      qmlData.ids = pile;
-      qmlComponentSpec.prop = qmlData;
+      if (visibleIds.length > 0) {
+        qmlComponentSpec.name = "ViewPile";
+        qmlData.ids = visibleIds; 
+        qmlComponentSpec.prop = qmlData;
+      }
     } else if (mark.startsWith("@$")) {
       // 游戏牌名列表 但也可能是游戏牌id列表呢
       textValue = value.length.toString();

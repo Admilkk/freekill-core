@@ -597,6 +597,7 @@ W.PageBase {
 
   function showPopup(component, prop) {
     const item = component.createObject(roomScene, prop);
+    item.z = 1000;
     if (popupItem) {
       popupItem?.finished();
     }

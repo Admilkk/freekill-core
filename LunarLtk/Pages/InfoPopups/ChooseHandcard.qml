@@ -31,24 +31,24 @@ ColumnLayout {
     Layout.alignment: Qt.AlignHCenter
     clip: true
 
-    model: cards
+    model: root.cards
 
     delegate: CardItem {
+      required property var modelData
       width: 93 * 0.9
       height: 130 * 0.9
+      dataModel: Ltk.createCardModel(modelData.cid)
+      selectable: true
       chosenInBox: modelData.chosen
       onClicked: {
         const clist = roomScene.dashboard.handcardArea.cards;
         for (let cd of clist) {
-          if (cd.cid == cid) {
+          if (cd.dataModel.cardId == modelData.cid) {
             cd.selected = !cd.selected;
             cd.clicked(cd);
             finish();
           }
         }
-      }
-      Component.onCompleted: {
-        setData(Ltk.getCardData(modelData.cid));
       }
     }
   }
@@ -56,7 +56,7 @@ ColumnLayout {
   Component.onCompleted: {
     cards = roomScene.dashboard.handcardArea.cards
       .filter(c => c.selectable)
-      .map(c => { return { cid: c.cid, chosen: c.selected }; });
+      .map(c => { return { cid: c.dataModel.cardId, chosen: c.selected }; });
   }
 }
 

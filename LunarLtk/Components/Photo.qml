@@ -23,6 +23,7 @@ PhotoBase {
   kingdom: dataModel.kingdom
   seatNumber: dataModel.seatNumber
   dead: dataModel.dead
+  surrendered: dataModel.surrendered
 
   selectable: dataModel.selectable
   onSelectedChanged: dataModel.selected = selected;

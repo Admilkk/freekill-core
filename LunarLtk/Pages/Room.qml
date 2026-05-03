@@ -1173,14 +1173,14 @@ W.PageBase {
     let from = drawPile;
     const photo = getPhoto(playerid);
     if (photo) {
-      from = (playerid === Cpp.self.id ? dashboard.handcardArea : photo.handcardArea);
+      from = (playerid === Cpp.self.id ? dashboard.handcardArea : photo.getAreaItem(Ltk.Card.PlayerHand));
     }
 
     const items = [];
     for (let i = 0; i < card_data.length; i++) {
       const dat = Lua.toQml(card_data[i]);
       const card = Lua.createQmlObject(dat, roomScene.dynamicCardArea);
-      const parentPos = roomScene.mapFromItem(from, 0, 0);
+      const parentPos = roomScene.mapFromItem(from, from.width / 2, from.height / 2);
       card.x = parentPos.x - card.width / 2;
       card.y = parentPos.y - card.height / 2;
       // card.holding_event_id = event_id;

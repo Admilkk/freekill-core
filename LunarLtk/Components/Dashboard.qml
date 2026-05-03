@@ -50,6 +50,13 @@ RowLayout {
     Layout.rightMargin: -175 / 8 + (roomArea.width - 175 * 0.75 * 7) / 8
   }
 
+  Connections {
+    target: root.dataModel
+    function onSelfChanged() {
+      root.handcardArea.syncCards();
+    }
+  }
+
   function disableAllCards() {
     handcardAreaItem.enableCards([]);
   }

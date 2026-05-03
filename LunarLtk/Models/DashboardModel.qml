@@ -12,6 +12,7 @@ QtObject {
   property list<SkillModel> fakeSkills: [];
 
   signal handcardsSorted()
+  signal selfChanged()
 
   // 交换两个idx的卡牌，用于拖拽排序
   function swapHandcard(fromIdx, toIdx) {
@@ -117,6 +118,8 @@ QtObject {
         addSkill(s.name);
       }
     }
+
+    selfChanged();
   }
 
   function refreshData() {

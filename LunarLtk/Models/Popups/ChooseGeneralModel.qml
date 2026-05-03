@@ -27,7 +27,7 @@ QtObject {
   signal rejected()
 
   readonly property string promptText: {
-    if (prompt !== "") return prompt;
+    if (prompt !== "") return Ltk.processPrompt(prompt);
     const pre_prompt = Ltk.processPrompt(Ltk.chooseGeneralPrompt(ruleType, generals, extraData));
     if (pre_prompt !== "") return pre_prompt;
     const suffix = Lua.client.getSettings("enableFreeAssign") ? `(${Lua.tr("Enable free assign")})` : "";

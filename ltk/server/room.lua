@@ -1179,6 +1179,7 @@ end
 ---@field rule? string @ 选将规则名（使用```Fk:addChooseGeneralRule```定义），默认为askForGeneralsChosen
 ---@field extra_data? table @ 额外信息，键值表。预留：```skill_name```技能名
 ---@field heg? boolean @ 是否应用国战ui（提示珠联璧合和主副将调整阴阳鱼）。默认选将规则为heg_general_choose
+---@field prompt? string @ 提示文本，会显示在标题（默认为请选择x名武将）
 
 --- 询问玩家选择一名武将。
 ---@param player ServerPlayer @ 询问目标
@@ -1204,6 +1205,7 @@ function Room:askToChooseGeneral(player, params)
     params.no_convert or false,
     params.heg or false,
     rule_type,
+    params.prompt or "",
     extra_data,
   }
   req:setData(player, data)

@@ -416,11 +416,12 @@ QtObject {
   }
 
   function askForGeneral(sender, data) {
-    const [generals, n, no_convert, heg, rule, extra_data] = data;
+    const [generals, n, no_convert, heg, rule, prompt, extra_data] = data;
     const modelComponent = Qt.createComponent("LunarLtk.Models.Popups", "ChooseGeneralModel");
     const model = modelComponent.createObject(null, {
       generals,
       choiceNum: n ?? 1,
+      prompt: prompt ?? "",
       convertDisabled: !!no_convert,
       hegemony: !!heg,
       ruleType: rule ?? (heg? "heg_general_choose" : "askForGeneralsChosen"),

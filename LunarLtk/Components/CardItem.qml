@@ -48,6 +48,7 @@ Game.PokerCard {
   }
 
   property bool markVisible: false
+  property string areaText: "" // 手牌中用来显示“装备区”、“木牛”等
 
   hoverHandler.cursorShape: selectable ? Qt.PointingHandCursor : Qt.ArrowCursor
 
@@ -148,5 +149,29 @@ Game.PokerCard {
     style: Text.Outline
     styleColor: "red"
     text: root.dataModel.prohibitReason
+  }
+
+  Rectangle {
+    anchors.bottom: parent.bottom
+    anchors.bottomMargin: 4
+    x: 1
+
+    visible: root.areaText !== ""
+    width: childrenRect.width + 12
+    height: 18
+    color: "#f2e286"
+    border.color: "#820307"
+    border.width: 1
+
+    Text {
+      text: Lua.tr(root.areaText)
+      x: 6
+      y: 1
+      font.family: Config.libianName
+      font.pixelSize: 16
+      font.bold: true
+      color: "#820327"
+      textFormat: Text.RichText
+    }
   }
 }

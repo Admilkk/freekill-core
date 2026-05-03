@@ -70,6 +70,7 @@ Item {
       card.released.disconnect(updateCardReleased);
       card.startDrag.disconnect(updateCardDragging);
       card.dataModel.prohibitReason = "";
+      card.areaText = "";
     }
     return result;
   }
@@ -265,6 +266,10 @@ Item {
         dataModel: model,
       });
       const selectable = model.selectable;
+      if (dataModel.expandedCards.includes(model)) {
+        // 手牌区固定不显示脚注了，之前手牌用来显示区域或提示的文本改了个UI
+        card.areaText = model.footnote;
+      }
       add(card);
       model.selectable = selectable;
     }

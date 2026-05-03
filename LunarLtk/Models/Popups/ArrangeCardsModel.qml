@@ -71,7 +71,7 @@ QtObject {
     const toArea = result[toAreaIdx];
 
     const needReplace = (fromAreaIdx !== toAreaIdx &&
-      toArea.length >= areaCapacities[toAreaIdx]);
+      toArea.length + 1 > areaCapacities[toAreaIdx]);
 
     const fromIdx = fromArea.indexOf(cardId);
     if (fromIdx === -1) return;
@@ -83,6 +83,8 @@ QtObject {
     } else if (toIdx > toArea.length) {
       toIdx = toArea.length;
     }
+    // toIdx最多是areaCapacities（上限值），然后数组下标需要减1。
+    toIdx = Math.min(toIdx, areaCapacities[toAreaIdx] - 1);
 
     toArea.splice(toIdx, 0, cardId);
 

@@ -18,6 +18,7 @@ GraphicsBox {
   property var draggingCard: null
   property int draggingToArea: -1
   property int draggingToIndex: -1
+  property bool draggingNeedReplace: false
   property int padding: 25
 
   title.text: dataModel.promptText
@@ -99,7 +100,7 @@ GraphicsBox {
       required property int modelData
       dataModel: root.dataModel.cardModels[modelData]
 
-      property int areaIdx: {
+      readonly property int areaIdx: {
         const ret = root.dataModel.result;
         for (let i = 0; i < ret.length; i++) {
           if (ret[i].includes(modelData)) return i;
@@ -176,6 +177,8 @@ GraphicsBox {
 
     draggingToArea = toAreaIdx;
     draggingToIndex = toCardsIdx;
+    draggingNeedReplace = (card.areaIdx !== toAreaIdx &&
+      dataModel.result[toAreaIdx].length + 1 > dataModel.areaCapacities[toAreaIdx]);
   }
 
   function updateCardReleased(card) {
@@ -191,7 +194,6 @@ GraphicsBox {
     const toCardsIdx = findTargetIndex(card, toAreaIdx);
 
     root.dataModel.moveCard(card.dataModel.cardId, toCardsIdx, card.areaIdx, toAreaIdx);
-    card.areaIdx = toAreaIdx;
   }
 
   function updateCardSelected(card) {
@@ -203,13 +205,11 @@ GraphicsBox {
     if (i === -1) {
       if (root.dataModel.isMoveAllowed(card, 0)) {
         root.dataModel.moveCard(cardId, result[0].length, card.areaIdx, 0);
-        card.areaIdx = 0;
       }
     } else {
       for (let j = 1; j < result.length; j++) {
         if (root.dataModel.isMoveAllowed(card, j)) {
           root.dataModel.moveCard(cardId, result[j].length, 0, j);
-          card.areaIdx = j;
           break;
         }
       }
@@ -229,27 +229,38 @@ GraphicsBox {
 
       const ids = result[areaIdx];
       let areaLen = ids.length;
-      const spacing = (size > 0 && areaLen > size) ? ((size - 1) * 100 / (areaLen - 1)) : 100;
+      const spacing = (size > 0 && areaLen > size) ? ((size - 1) * 96 / (areaLen - 1)) : 96;
 
       let b = 0;
       for (let i = 0; i < ids.length; i++) {
         const card = root.dataModel.cardModels[ids[i]].cardItem;
+        // 正在拖动的卡不管他
         if (card.dragging) {
           card.z = 999;
+          card.opacity = 0.8;
+          // 替换牌时，给原始位置留下空位
+          if (draggingNeedReplace) b++;
           continue;
         }
+
+        // 剩下的逻辑取决于被拖动的卡牌。
+        // 拖动分为重新排序和替换，若重新排序则将此牌及其后面的右移
+        // 若为替换，则显示“已选”
         const pos = mapFromItem(pile, box.x, box.y);
         card.glow.visible = false;
         card.chosenInBox = false;
         card.origX = pos.x + b * spacing;
+        card.origY = pos.y;
         if (draggingToArea === areaIdx) {
-          if (draggingToIndex === i) {
+          if (!draggingNeedReplace) {
+            if (draggingToIndex <= i) {
+              card.origX += 60;
+            }
+          } else if (draggingToIndex === i) {
+            // card.origY += 20 * (areaIdx > draggingCard.areaIdx ? -1 : 1);
             card.chosenInBox = true;
-          } else if (draggingToIndex < i) {
-            card.origX += 50;
           }
         }
-        card.origY = pos.y;
         card.opacity = 1;
         card.z = i + 1;
         card.initialZ = i + 1;

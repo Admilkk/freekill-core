@@ -62,4 +62,10 @@ UI.CheckBox = function(spec)
   return spec
 end
 
+-- spec可以填个ids: integer[]或者card_names: string[]显示一些卡牌。
+UI.ExpandItems = function(spec)
+  spec.type = "expandItems"
+  return spec
+end
+
 return UI

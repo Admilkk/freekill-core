@@ -50,6 +50,7 @@ W.PageBase {
     }
 
     onDeActivated: {
+      skillInteraction.item?.clear();
       skillInteraction.sourceComponent = undefined;
       progress.visible = false;
 
@@ -699,6 +700,7 @@ W.PageBase {
     // Interaction最后上桌 太给脸了居然插结
     uiUpdate["_delete"]?.forEach(data => {
       if (data.type == "Interaction") {
+        skillInteraction.item?.clear();
         skillInteraction.sourceComponent = undefined;
         if (roomScene.popupItem)
           roomScene.popupItem.finished();
@@ -742,6 +744,22 @@ W.PageBase {
           skillInteraction.item.value = data.default;
           skillInteraction.item?.clicked();
           break;
+        case "expandItems": {
+          skillInteraction.sourceComponent =
+            Qt.createComponent("LunarLtk.Components.SkillInteraction", "SkillExpandItems");
+
+          let specs = [];
+          if (data.ids) {
+            specs.push(...data.ids.map(cid => ({ type: "card", cid })));
+          }
+          if (data.card_names) {
+            specs.push(...data.card_names.map(name => ({ type: "card", name })));
+          }
+          // TODO: others
+          skillInteraction.item.specList = specs;
+          skillInteraction.item.clicked();
+          break;
+        }
         case "custom":
           skillInteraction.sourceComponent = Lua.createComponent(data.qml);
           if (data.qml.model) {

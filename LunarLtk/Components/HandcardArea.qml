@@ -2,6 +2,7 @@
 
 import QtQuick
 import Fk
+import Fk.Components.GameCommon
 import LunarLtk
 import LunarLtk.Components
 
@@ -18,6 +19,8 @@ Item {
   property var draggingCard
   property var draggingClickedPhoto
 
+  readonly property bool folded: miscExpandArea.length > 0
+
   Connections {
     target: root.dataModel
     function onHandcardsSorted() {
@@ -27,12 +30,44 @@ Item {
 
   CardArea {
     id: cardArea
-    anchors.fill: parent
+    // anchors.fill: parent
+    width: parent.folded ? Math.min(cards.length * 93, 120) : parent.width
+    onWidthChanged: root.adjustCards();
     onLengthChanged: root.updateCardPosition(true);
+  }
+
+  // 用来显示其余展开牌的区域。显示时，手牌区会被折叠。
+  // 需要自行构建想要传入的元素等。
+  ItemArea {
+    id: miscExpandArea
+    anchors.left: cardArea.right
+    anchors.leftMargin: 2
+    anchors.right: parent.right
+
+    scene: Ltk.roomScene
   }
 
   function cardSelected(cardId, selected) {
     Lua.updateRequestUI("CardItem", cardId, "click", { selected, autoTarget: Config.autoTarget } );
+  }
+
+  function addMiscExpand(inputs) {
+    miscExpandArea.add(inputs);
+    const myPos = roomScene.mapFromItem(miscExpandArea, 0, 0);
+    for (const item of inputs) {
+      item.x = myPos.x;
+      item.y = myPos.y;
+    }
+    miscExpandArea.updatePosition(true);
+  }
+
+  function clearMiscExpand() {
+    const myPos = roomScene.mapFromItem(miscExpandArea, 0, 0);
+    for (const item of miscExpandArea.remove([...miscExpandArea.items])) {
+      item.origY = myPos.y + 200;
+      item.destroyOnStop();
+      item.goBack(true);
+    }
   }
 
   function add(inputs) {

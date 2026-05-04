@@ -260,7 +260,7 @@ Item {
     const component = Qt.createComponent("LunarLtk.Components", "CardItem");
     for (const model of allCards) {
       if (cards.find(e => e.dataModel === model)) continue;
-      const card = component.createObject(roomScene, {
+      const card = component.createObject(roomScene.dynamicCardArea, {
         x: myPos.x + width,
         y: myPos.y,
         dataModel: model,

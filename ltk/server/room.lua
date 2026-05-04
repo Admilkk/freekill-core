@@ -975,7 +975,7 @@ function Room:askToChooseCardsAndChoice(player, params)
   local data = {
     cards = all_cards or cards,
     choices = choices,
-    prompt = prompt,
+    prompt = prompt or "",
     cancel_choices = cancel_choices,
     min = min,
     max = max,

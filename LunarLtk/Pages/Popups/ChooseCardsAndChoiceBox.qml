@@ -31,7 +31,7 @@ GraphicsBox {
       onSelectedChanged: {
         const selectedCards = root.dataModel.result.cards;
         if (!selectedCards) return;
-        const cardId = modelData.cardId;
+        const cardId = dataModel.cardId;
         if (selected) {
           origY = origY - 20;
           if (!selectedCards.includes(cardId)) selectedCards.push(cardId);
@@ -104,6 +104,7 @@ GraphicsBox {
       spacing: 8
 
       Repeater {
+        id: choicesRepeater
         model: root.dataModel.choices
 
         MetroButton {
@@ -133,6 +134,13 @@ GraphicsBox {
   function updateCardSelectable() {
     const selectedCards = root.dataModel.result.cards;
     const maxNum = root.dataModel.maxNum;
+    for (let i = 0; i < choicesRepeater.count; i++) {
+      const btn = choicesRepeater.itemAt(i);
+      if (btn) {
+        const choiceData = root.dataModel.choices[i];
+        btn.enabled = root.dataModel.choiceEnabled(selectedCards, choiceData, i);
+      }
+    }
     if (selectedCards.length <= maxNum) return;
 
     for (let i = 0; i < to_select.count; i++) {

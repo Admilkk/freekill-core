@@ -69,8 +69,18 @@ os = {
   difftime = os.difftime,
   getms = os.getms,
 }
+local _open = io.open
 io = {
-  lines = io.lines
+  open = function(f, mode)
+    local errmsg = "Refusing open file that not in game directory"
+    assert(not f:startsWith("/"), errmsg)
+    assert(not f:startsWith(".."), errmsg)
+    assert(not f:find(":"), errmsg)
+    if mode and mode ~= "r" and mode ~= "rb" then
+      error("Cannot open a file with read-only mode")
+    end
+    return _open(f, mode)
+  end,
 }
 package = nil
 -- load = nil

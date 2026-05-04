@@ -764,12 +764,9 @@ Item {
                 sourceCode = ret;
                 return;
               }
-              // 为什么lua那边给读文件留了个口子
               const readFile = Lua.fn(`function(path)
-                local ret = ""
-                for line in io.lines(path) do
-                  ret = ret .. line .. "\\n"
-                end
+                local f = io.open(path)
+                local ret = f:read("a")
                 return ret
               end`);
               sourceCode = ret +

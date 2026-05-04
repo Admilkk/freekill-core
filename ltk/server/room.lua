@@ -1518,7 +1518,7 @@ end
 
 ---@class askToJointChoiceParams
 ---@field players ServerPlayer[] @ 被询问的玩家
----@field choices string[] @ 可选选项列表
+---@field choices string[] | string[][] @ 可选选项列表。若玩家可选项不同，填写二维数组
 ---@field skill_name? string @ 技能名
 ---@field prompt? string @ 提示信息
 ---@field send_log? boolean @ 是否发Log，默认否
@@ -1526,42 +1526,51 @@ end
 --- 同时询问多名玩家从众多选项中选择一个（要求所有玩家选项相同，不同的请自行构造request）
 ---@param player ServerPlayer @ 发起者
 ---@param params askToJointChoiceParams @ 各种变量
----@return table<Player, string> @ 返回键值表，键为Player、值为选项
+---@return table<ServerPlayer, string> @ 返回键值表，键为Player、值为选项
 function Room:askToJointChoice(player, params)
   local skillName = params.skill_name or "AskForChoice"
   local prompt = params.prompt or "AskForChoice"
   local players, choices = params.players, params.choices
   local sendLog = params.send_log or false
 
+  local choicesMap = choices ---@type string[][]
+  if type(choices[1]) == "table" then
+    assert(#choices == #players)
+  else
+    choicesMap = table.map(players, function() return choices end)
+  end
+
   local req = Request:new(players, "AskForChoices")
   req.focus_text = skillName
   req.receive_decode = false
-  local data = {
-    choices,
-    choices,  --如果all_choices和choices不一样应该自行构造request
-    { 1, 1 },
-    false,
-    skillName,
-    prompt,
-  }
-  for _, p in ipairs(players) do
+  for i, p in ipairs(players) do
+    local p_choices = choicesMap[i]
+    local data = {
+      p_choices,
+      p_choices,
+      { 1, 1 },
+      false,
+      skillName,
+      prompt,
+      false,
+    }
     req:setData(p, data)
-    req:setDefaultReply(p, self:tableRandomPick(choices))  --默认项为随机选项
+    req:setDefaultReply(p, self:tableRandomPick(p_choices, 1))
   end
   req:ask()
+  local ret = {}
+  for _, p in ipairs(players) do
+    ret[p] = req:getResult(p)[1]
+  end
   if sendLog then
     for _, p in ipairs(players) do
       p.room:sendLog{
         type = "#Choice",
         from = p.id,
-        arg = req:getResult(p),
+        arg = ret[p],
         toast = true,
       }
     end
-  end
-  local ret = {}
-  for _, p in ipairs(players) do
-    ret[p] = req:getResult(p)
   end
   return ret
 end

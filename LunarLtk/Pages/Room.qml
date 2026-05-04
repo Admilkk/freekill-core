@@ -639,14 +639,22 @@ W.PageBase {
     }
 
     item.finished.connect(() => {
-      item.destroy();
       roomScene.popupItem = null;
+      if (item.outAnim) {
+        item.outAnim.start();
+        item.outAnim.finished.connect(() => {
+          item.destroy();
+        });
+      } else {
+        item.destroy();
+      }
     });
     item.widthChanged.connect(() => moveToCenter());
     item.heightChanged.connect(() => moveToCenter());
 
     moveToCenter();
 
+    item.showAnim?.start();
     item?.shown();
   }
 

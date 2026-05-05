@@ -142,6 +142,14 @@ function GetQmlMark(mtype, name, p)
   local qmlData = spec.qml
   if type(qmlData) == "function" then
     qmlData = qmlData(name, value, p)
+  elseif type(qmlData) == "table" then
+    -- 避免所有qml全都要写function传入必须的值
+    -- 如果不是函数的话，帮忙传入一下标记名、值和玩家id（如果有）
+    local prop = qmlData.prop or {}
+    prop.name = name
+    prop.value = value
+    prop.playerid = p and p.id
+    qmlData.prop = prop
   end
   return {
     qml = qmlData,

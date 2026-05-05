@@ -215,9 +215,9 @@ QtObject {
   // 以下为QML常用函数
   function convertNumber(number) {
     if (number === 1)
-    return "A";
+      return "A";
     if (number >= 2 && number <= 10)
-    return number;
+      return number.toString();
     if (number >= 11 && number <= 13) {
       const strs = ["J", "Q", "K"];
       return strs[number - 11];

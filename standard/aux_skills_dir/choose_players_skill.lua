@@ -36,9 +36,13 @@ choosePlayersSkill:addAI(Fk.Ltk.AI.newActiveStrategy {
 
     local cards, card_benefit = strategy:chooseCards(ai)
     local players, player_benefit = strategy:choosePlayers(ai)
-    if cards then
-      return { cards, players }, ((card_benefit == 0 and 1 or card_benefit) * player_benefit) or 0
+    if cards == nil then
+      cards, card_benefit = {}, 0
     end
+    if players == nil then
+      players, player_benefit = {}, 0
+    end
+    return { cards, players }, ((card_benefit == 0 and 1 or card_benefit) * player_benefit) or 0
   end,
 })
 

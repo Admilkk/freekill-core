@@ -9,9 +9,14 @@ import Fk.Components.Common
 
 import LunarLtk.Components
 
+pragma ComponentBehavior: Bound
+
 Item {
   id: root
-  property var extra_data: ({})
+  property var skins: []
+  property var deputy_skins: []
+  property string orig_general: ""
+  property string orig_deputy: ""
   property string selected_skin: ""
   property string selected_deputy_skin: ""
 
@@ -75,9 +80,10 @@ Item {
     Column {
       anchors.centerIn: parent
       Repeater {
-        model: Lua.tr(extra_data.orig_general).length
+        model: Lua.tr(root.orig_general).length
         Text {
-          text: Lua.tr(extra_data.orig_general).charAt(index)
+          required property int index
+          text: Lua.tr(root.orig_general).charAt(index)
           font.pixelSize: 20
           color: "white"
           style: Text.Outline
@@ -95,7 +101,7 @@ Item {
     anchors.right: root.right
     contentWidth: skinRow.width
     contentHeight: skinRow.height + 25
-    visible: !!(skinsRepeater.count > 0 && extra_data.orig_general)
+    visible: !!(skinsRepeater.count > 0 && root.orig_general)
     clip: true
 
     Row {
@@ -104,12 +110,14 @@ Item {
       
       Repeater {
         id: skinsRepeater
-        model: [extra_data.orig_general].concat(extra_data.skins ?? [])
+        model: [root.orig_general].concat(root.skins ?? [])
 
         SkinItem {
+          required property int index
+          required property var modelData
           source: {
             if (index === 0) {
-              return SkinBank.getGeneralPicture(extra_data.orig_general)
+              return SkinBank.getGeneralPicture(root.orig_general)
             } else {
               return Cpp.path + "/" + modelData
             }
@@ -151,9 +159,10 @@ Item {
     Column {
       anchors.centerIn: parent
       Repeater {
-        model: Lua.tr(extra_data.orig_deputy).length
+        model: Lua.tr(root.orig_deputy).length
         Text {
-          text: Lua.tr(extra_data.orig_deputy).charAt(index)
+          required property int index
+          text: Lua.tr(root.orig_deputy).charAt(index)
           font.pixelSize: 20
           color: "white"
           style: Text.Outline
@@ -170,7 +179,7 @@ Item {
     height: contentHeight
     contentWidth: deputySkinRow.width
     contentHeight: deputySkinRow.height + 25
-    visible: !!(deputySkinsRepeater.count > 0 && extra_data.orig_deputy)
+    visible: !!(deputySkinsRepeater.count > 0 && root.orig_deputy)
     clip: true
 
     Row {
@@ -178,12 +187,14 @@ Item {
       spacing: 6
       Repeater {
         id: deputySkinsRepeater
-        model: [extra_data.orig_deputy].concat(extra_data.deputy_skins ?? [])
+        model: [root.orig_deputy].concat(root.deputy_skins ?? [])
 
         SkinItem {
+          required property int index
+          required property var modelData
           source: {
             if (index === 0) {
-              return SkinBank.getGeneralPicture(extra_data.orig_deputy)
+              return SkinBank.getGeneralPicture(root.orig_deputy)
             } else {
               return Cpp.path + "/" + modelData
             }

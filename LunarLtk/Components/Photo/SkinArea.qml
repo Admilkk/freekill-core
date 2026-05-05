@@ -42,6 +42,7 @@ Item {
   Component {
     id: videoImg
     Video {
+      id: videoPlayer
       anchors.fill: parent
       source: root.source
       loops: MediaPlayer.Infinite
@@ -49,6 +50,15 @@ Item {
       muted: true
 
       Component.onCompleted: play()
+      Component.onDestruction: {
+        videoPlayer.stop();
+        videoPlayer.source = "";
+      }
+      onSourceChanged: {
+        if (source !== "") {
+          play();
+        }
+      }
     }
   }
 }

@@ -44,7 +44,7 @@ QtObject {
         return false;
       }
     }
-    if (poxiType) {
+    if (poxiType && result.length > 0) {
       return Ltk.poxiFeasible(poxiType, [], result, origCards);
     }
     return true;

@@ -608,4 +608,35 @@ function SmartAI:askToChooseCards(params)
   return ret, benefit
 end
 
+---@class AIAskToChoosePlayersParams
+---@field benefit_func function @ 计算选这些角色收益的函数
+---@field basic_benefit integer? @ 基础收益，默认为0（如“突袭”的基础收益是放弃摸牌）
+
+--- 选角色
+---@param params AIAskToChoosePlayersParams @ 各种变量
+---@return ServerPlayer[], integer @ 返回本次选角色收益最大的一种情况，选择的角色和收益
+function SmartAI:askToChoosePlayers(params)
+  params.skill_name = params.skill_name or ""
+  params.min_num = params.min_num or 0
+  params.max_num = params.max_num or params.min_num
+  local players = table.simpleClone(params.targets)
+  local benefits = table.map(players, function(p)
+    return { p, self:getBenefitOfEvents(function(logic)
+      params.benefit_func(logic, p)
+    end) }
+  end)
+  local total_benefit = params.basic_benefit or 0
+  local targets = {}
+  table.sort(benefits, function(a, b) return a[2] > b[2] end)
+  for i, benefit in ipairs(benefits) do
+    local p, val = table.unpack(benefit)
+    if val < 0 and i >= params.min_num then break end
+    table.insert(targets, p)
+    total_benefit = total_benefit + val
+    if i == params.max_num then break end
+  end
+  if #targets == 0 then return {}, 0 end
+  return targets, total_benefit
+end
+
 return SmartAI

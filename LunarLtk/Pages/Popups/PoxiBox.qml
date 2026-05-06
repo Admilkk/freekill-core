@@ -78,6 +78,13 @@ GraphicsBox {
     MetroButton {
       width: 120
       height: 35
+      text: Lua.tr("Revert Selection")
+      onClicked: root.dataModel.revertSelection()
+    }
+
+    MetroButton {
+      width: 120
+      height: 35
       text: Lua.tr("OK")
       enabled: root.dataModel.feasible
       onClicked: root.dataModel.shuffleAndOk()

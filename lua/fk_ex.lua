@@ -120,6 +120,7 @@ end
 ---@field public on_use? fun(self: ActiveSkill, room: Room, skillUseEvent: SkillUseData): any
 ---@field public prompt? string|fun(self: ActiveSkill, player: Player, selected_cards: integer[], selected_targets: Player[]): string @ 提示信息
 ---@field public interaction? fun(self: ActiveSkill, player: Player): table? @ 选项框
+---@field public card_tip? fun(self: ActiveSkill, player: Player, to_select: integer, selected: integer[], selected_targets: Player[], card?: Card, selectable: boolean, extra_data: any): string|CardTipDataSpec? @ 显示在牌上的提示
 ---@field public target_tip? fun(self: ActiveSkill, player: Player, to_select: Player, selected: Player[], selected_cards: integer[], card?: Card, selectable: boolean, extra_data: any): string|TargetTipDataSpec? @ 显示在目标武将牌脸上的提示
 ---@field public handly_pile? boolean @ 是否能够选择“如手牌使用或打出”的牌
 ---@field public click_count? boolean @ 是否在点击按钮瞬间就计数并播放特效和语音
@@ -141,6 +142,7 @@ end
 ---@field public offset_func? fun(self: CardSkill, room: Room, effect: CardEffectData): any @ 重新定义抵消方式
 ---@field public prompt? string|fun(self: CardSkill, player: Player, selected_cards: integer[], selected_targets: Player[], extra_data: any): string @ 提示信息
 ---@field public interaction? fun(self: CardSkill, player: Player, card: Card, extra_data: any): table? @ 选项框
+---@field public card_tip? fun(self: ActiveSkill, player: Player, to_select: integer, selected: integer[], selected_targets: Player[], card?: Card, selectable: boolean, extra_data: any): string|CardTipDataSpec? @ 显示在牌上的提示
 ---@field public target_tip? fun(self: CardSkill, player: Player, to_select: Player, selected: Player[], selected_cards: integer[], card?: Card, selectable: boolean, extra_data: any): string|TargetTipDataSpec? @ 显示在目标武将牌脸上的提示
 
 ---@class ViewAsSkillSpec: UsableSkillSpec
@@ -198,6 +200,7 @@ end
 ---@field public bypass_distances? fun(self: TargetModSkill, player: Player, skill: ActiveSkill, card?: Card, to?: Player): any @ 是否无距离限制
 ---@field public distance_limit_func? fun(self: TargetModSkill, player: Player, skill: ActiveSkill, card?: Card, to?: Player): number?
 ---@field public extra_target_func? fun(self: TargetModSkill, player: Player, skill: ActiveSkill, card?: Card): number?
+---@field public card_tip_func? fun(self: ActiveSkill, player: Player, to_select: integer, selected: integer[], selected_targets: Player[], card?: Card, selectable: boolean, extra_data: any): string|CardTipDataSpec? @ 显示在牌上的提示
 ---@field public target_tip_func? fun(self: TargetModSkill, player: Player, to_select: Player, selected: Player[], selected_cards: integer[], card?: Card, selectable: boolean, extra_data: any): string|TargetTipDataSpec?
 
 ---@class FilterSpec: StatusSkillSpec
@@ -390,6 +393,15 @@ end
 ---@field qml_path string | fun(player: Player, data: any): string
 ---@field update_func? fun(player: ServerPlayer, data: any)
 ---@field default_choice? fun(player: ServerPlayer, data: any): any
+
+
+---@class CardTipDataSpec
+---@field content string
+---@field type "normal"|"warning"
+
+---@class CardTipSpec
+---@field name string
+---@field card_tip fun(self: ActiveSkill, player: Player, to_select: integer, selected: integer[], selected_targets: Player[], card?: Card, selectable: boolean, extra_data: any): string|CardTipDataSpec?
 
 ---@class TargetTipDataSpec
 ---@field content string

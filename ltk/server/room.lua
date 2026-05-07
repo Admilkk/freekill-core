@@ -1003,6 +1003,7 @@ end
 ---@field pattern? string @ 选牌规则，默认为"."
 ---@field expand_pile? string|integer[] @ 可选私人牌堆名称，或额外可选牌
 ---@field will_throw? boolean @ 选卡牌须能弃置
+---@field card_tip_name? string @ 引用的选择卡牌提示的函数名
 
 --- 询问玩家选择X张牌和Y名角色。
 ---
@@ -1041,6 +1042,7 @@ function Room:askToChooseCardsAndPlayers(player, params)
     equal = params.equal,
     pattern = params.pattern,
     skillName = params.skill_name,
+    cardTipName = params.card_tip_name,
     targetTipName = params.target_tip_name,
     extra_data = params.extra_data,
     expand_pile = params.expand_pile or (params.extra_data and params.extra_data.expand_pile),

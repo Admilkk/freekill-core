@@ -773,6 +773,63 @@ function M:getCardProhibitReason(cid)
   end
 end
 
+function M:getCardTip(cid)
+  local handler = ClientInstance.current_request_handler --[[@as ReqPlayCard ]]
+  if (not handler) or (not handler:isInstanceOf(ClientInstance.request_handlers["AskForUseActiveSkill"])) then return "" end
+
+  local to_select = cid
+  local selected = handler.pendings
+  local selected_targets = handler.selected_targets
+  local card = handler.selected_card --[[@as Card?]]
+  local skill = Fk.skills[handler.skill_name]
+  local CardItem = handler.scene.items["CardItem"][cid] --[[@as CardItem]]
+  if not CardItem then return {} end
+  local extra_data = handler.extra_data
+
+  local ret = {}
+
+  if skill then
+    if skill:isInstanceOf(ActiveSkill) then
+      ---@cast skill ActiveSkill
+      local tip = skill:cardTip(Self, to_select, selected, table.map(selected_targets, Util.Id2PlayerMapper), nil, extra_data)
+      if type(tip) == "string" then
+        table.insert(ret, { content = tip, type = "normal" })
+      elseif type(tip) == "table" then
+        table.insertTable(ret, tip)
+      end
+    elseif skill:isInstanceOf(ViewAsSkill) then
+      ---@cast skill ViewAsSkill
+      card = skill:viewAs(Self, selected)
+    end
+  end
+
+  if card then
+    local status_skills = Fk:currentRoom().status_skills[TargetModSkill] or Util.DummyTable
+    for _, sk in ipairs(status_skills) do
+      ret = ret or {}
+      if #ret > 4 then
+        return ret
+      end
+
+      local tip = sk:getCardTip(Self, to_select, selected, table.map(selected_targets, Util.Id2PlayerMapper), card, extra_data)
+      if type(tip) == "string" then
+        table.insert(ret, { content = tip, type = "normal" })
+      elseif type(tip) == "table" then
+        table.insertTable(ret, tip)
+      end
+    end
+
+    ret = ret or {}
+    local tip = card:getSkill(Self):cardTip(Self, to_select, selected, table.map(selected_targets, Util.Id2PlayerMapper), card, extra_data)
+    if type(tip) == "string" then
+      table.insert(ret, { content = tip, type = "normal" })
+    elseif type(tip) == "table" then
+      table.insertTable(ret, tip)
+    end
+  end
+  return ret
+end
+
 function M:getTargetTip(pid)
   local handler = ClientInstance.current_request_handler --[[@as ReqPlayCard ]]
   if (not handler) or (not handler:isInstanceOf(ClientInstance.request_handlers["AskForUseActiveSkill"])) then return "" end

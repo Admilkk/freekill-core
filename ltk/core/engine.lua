@@ -30,6 +30,7 @@ local baseEngine = require "core.engine"
 ---@field public poxi_methods table<string, PoxiSpec> @ “魄袭”框操作方法表
 ---@field public qml_marks table<string, QmlMarkSpec> @ 自定义Qml标记的表
 ---@field public mini_games table<string, MiniGameSpec> @ 自定义多人交互表
+---@field public card_tips table<string, CardTipSpec> @ 选择卡牌提示对应表
 ---@field public target_tips table<string, TargetTipSpec> @ 选择目标提示对应表
 ---@field public choose_general_rule table<string, ChooseGeneralSpec> @ 选将框操作方法表
 ---@field public skin_packages table<string, string[]> @ Skins
@@ -83,6 +84,7 @@ function Engine:initialize()
   self.poxi_methods = {}
   self.qml_marks = {}
   self.mini_games = {}
+  self.card_tips = {}
   self.target_tips = {}
   self.choose_general_rule = {}
   self.skin_packages = {}
@@ -463,6 +465,15 @@ function Engine:addMiniGame(spec)
     fk.qCritical("Warning: duplicated mini game type " .. spec.name)
   end
   self.mini_games[spec.name] = spec
+end
+
+---@param spec CardTipSpec
+function Engine:addCardTip(spec)
+  assert(type(spec.name) == "string")
+  if self.card_tips[spec.name] then
+    fk.qCritical("Warning: duplicated card tip type " .. spec.name)
+  end
+  self.card_tips[spec.name] = spec
 end
 
 ---@param spec TargetTipSpec

@@ -164,6 +164,10 @@ QtObject {
     return _L.getCardProhibitReason(cid);
   }
 
+  function getCardTip(cid) {
+    return _L.getCardTip(cid);
+  }
+
   function getTargetTip(pid) {
     return _L.getTargetTip(pid);
   }

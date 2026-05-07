@@ -208,6 +208,16 @@ function ActiveSkill:onUse(room, cardUseEvent) end
 
 
 
+--- 选择牌时产生的目标提示，贴在牌上
+---@param player Player @ 使用者
+---@param to_select integer @ 当前牌
+---@param selected integer[] @ 已选角色目标
+---@param selected_targets ServerPlayer[] @ 已选目标表
+---@param card Card? @ (CardSkill?)所使用的牌
+---@param selectable boolean? @ 当前牌是否可选择
+---@param extra_data? table|UseExtraData @ 额外数据
+---@return string|CardTipDataSpec?
+function ActiveSkill:cardTip(player, to_select, selected, selected_targets, card, selectable, extra_data) end
 
 --- 选择目标时产生的目标提示，贴在目标脸上
 ---@param player Player @ 使用者

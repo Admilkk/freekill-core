@@ -78,6 +78,17 @@ end
 
 -- 技能描述
 ---@param player Player @ 使用者
+---@param to_select integer @ 待选牌
+---@param selected integer[] @ 已选牌
+---@param selected_targets ServerPlayer[] @ 已选目标
+---@param card? Card @ 使用牌时的牌
+---@param selectable boolean? @ 待选牌是否可选
+---@param extra_data? any @ 额外信息
+---@return string?
+function TargetModSkill:getCardTip(player, to_select, selected, selected_targets, card, selectable, extra_data) end
+
+-- 技能描述
+---@param player Player @ 使用者
 ---@param to_select Player @ 待选目标
 ---@param selected Player[] @ 已选目标
 ---@param selected_cards integer[] @ 已选牌

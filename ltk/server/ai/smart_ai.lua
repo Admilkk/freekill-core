@@ -617,9 +617,13 @@ end
 ---@return ServerPlayer[], integer @ 返回本次选角色收益最大的一种情况，选择的角色和收益
 function SmartAI:askToChoosePlayers(params)
   params.skill_name = params.skill_name or ""
-  params.min_num = params.min_num or 0
+  if params.cancelable then
+    params.min_num = 0
+  else
+    params.min_num = params.min_num or 1
+  end
   params.max_num = params.max_num or params.min_num
-  local players = table.simpleClone(params.targets)
+  local players = table.simpleClone(params.targets or self:getEnabledTargets())
   local benefits = table.map(players, function(p)
     return { p, self:getBenefitOfEvents(function(logic)
       params.benefit_func(logic, p)
@@ -630,7 +634,7 @@ function SmartAI:askToChoosePlayers(params)
   table.sort(benefits, function(a, b) return a[2] > b[2] end)
   for i, benefit in ipairs(benefits) do
     local p, val = table.unpack(benefit)
-    if val < 0 and i >= params.min_num then break end
+    if val < 0 and i > params.min_num then break end
     table.insert(targets, p)
     total_benefit = total_benefit + val
     if i == params.max_num then break end

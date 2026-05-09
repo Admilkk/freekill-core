@@ -39,6 +39,9 @@ QtObject {
   // 处理区中的ui常驻卡牌
   property list<CardModel> processing: [];
 
+  // 弃牌堆 仅用于展示
+  property list<CardModel> discard: [];
+
   // ====== 活跃状态下的额外UI信息 ======
 
   // 几个大按钮
@@ -230,6 +233,8 @@ QtObject {
     const getCardsModel = (area, playerid) => {
       if (area === Ltk.Card.Processing) {
         return processing;
+      } else if (area === Ltk.Card.DiscardPile) {
+        return discard;
       } else if (area === Ltk.Card.PlayerHand && playerid === Cpp.self.id) {
         return dashboard.handcards;
       } else if (area === Ltk.Card.PlayerEquip) {
@@ -257,9 +262,14 @@ QtObject {
     cardsMoved(move, models);
   }
 
+  function vanishDiscard(models) {
+    discard = discard.filter(e => !models.includes(e));
+  }
+
   function setCardFootnote(_, data) {
     const [id, note, virtual] = data;
-    const v = processing.find(e => e[virtual ? "virtId" : "cardId"] === id);
+    const v = processing.find(e => e[virtual ? "virtId" : "cardId"] === id)
+      || discard.find(e => e[virtual ? "virtId" : "cardId"] === id);
     if (v) {
       v.footnote = note;
       v.footnoteVisible = true;
@@ -269,7 +279,8 @@ QtObject {
   function setCardVirtName(_, data) {
     const [ids, note, virtual] = data;
     ids.forEach(id => {
-      const v = processing.find(e => e[virtual ? "virtId" : "cardId"] === id);
+      const v = processing.find(e => e[virtual ? "virtId" : "cardId"] === id)
+        || discard.find(e => e[virtual ? "virtId" : "cardId"] === id);
       if (v) v.virtName = note;
     });
   }

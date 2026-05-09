@@ -82,7 +82,7 @@ Item {
 
   function filterInputCard(card) {
     card.markVisible = true;
-    card.footnoteVisible = false;
+    card.dataModel.footnoteVisible = false;
     card.autoBack = true;
     // 只有会被频繁刷新的手牌才能拖动
     card.draggable = Ltk.canSortHandcards(Cpp.self.id);

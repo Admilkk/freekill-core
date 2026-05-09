@@ -2,10 +2,12 @@
 
 import QtQuick
 import Fk
+import LunarLtk.Models
 
 Item {
   id: root
 
+  required property RoomModel roomModel
   property var discardedCards: [] // 即将消失的牌
   property alias cards: area.cards
   property bool toVanish: false
@@ -50,6 +52,7 @@ Item {
         area.length = cards.length;
         updateCardPosition(true);
 
+        roomModel.vanishDiscard(discardedCards.map(e => e.dataModel));
         discardedCards = [];
         for (i = 0; i < cards.length; i++) {
           if (cards[i].busy || inTable(cards[i]))
@@ -84,7 +87,8 @@ Item {
     let i, j;
 
     const to_remove = cards.filter(cd =>
-      models.find(e => e.cardId === cd.dataModel.cardId && cd.dataModel.known === e.known)
+      models.find(e => e.cardId === cd.dataModel.cardId && cd.dataModel.known === e.known
+        && !discardedCards.includes(cd))
     ).map(c => c.dataModel);
     let result = area.remove(to_remove);
     result.forEach(c => {

@@ -159,6 +159,8 @@ W.PageBase {
 
     TablePile {
       id: tablePile
+      roomModel: roomScene.dataModel
+
       width: parent.width * 0.7
       height: 150
       x: parent.width * 0.15

@@ -26,6 +26,8 @@
 ---@field public max_game_use_time? integer | fun(self: SkillSkeleton, player: Player): integer? @ 该技能的最大使用次数——本局游戏
 ---@field public max_branches_use_time? table<string, table<integer, integer?>?> | fun(self: SkillSkeleton, player: Player): table<string, table<integer, integer?>?>? @ 该技能的最大使用次数——任意标签（内部有独立的时段细分）
 ---@field public mode_skill? boolean @ 是否为模式技能（诸如斗地主的“飞扬”和“跋扈”）
+---@field public related_skills? string[] @ 相关技能（如〖志继〗的〖观星〗，〖凿险〗的〖急袭〗）
+---@field public add_skills? string[] @ 在获得时此技能时房间添加的相关技能
 ---@field public extra? table @ 塞进技能里的各种数据
 
 ---@class SkillSkeleton : Object, SkillSkeletonSpec
@@ -110,6 +112,9 @@ function SkillSkeleton:initialize(spec)
       self.max_use_time[Player.HistoryGame] = 1
     end
   end
+
+  self.related_skills = spec.related_skills
+  self.add_skills = spec.add_skills
 end
 
 function SkillSkeleton:addEffect(key, data, attribute)
@@ -177,11 +182,11 @@ end
 
 ---@return Skill
 function SkillSkeleton:createSkill()
-  local main_skill
+  local main_skill ---@type Skill
   for i, effect in ipairs(self.effect_spec_list) do
     local k, attr, data = table.unpack(effect)
     attr = attr or Util.DummyTable
-    local sk
+    local sk ---@type Skill
     if type(k) == "string" then
       local createSkillFunc = Fk.skill_keys[k][1]
       if createSkillFunc then
@@ -748,6 +753,13 @@ function SkillSkeleton:onAcquire(player, is_start, src)
         room:handleAddLoseSkills(p, self.attached_skill_name, nil, false, true)
       end
     end
+  end
+  if self.add_skills then
+    table.forEach(self.add_skills, function(s)
+      if not room:hasSkill(s) then
+        room:addSkill(s)
+      end
+    end)
   end
   if self.on_acquire then
     self.on_acquire(player, is_start, src)

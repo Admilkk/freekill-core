@@ -140,6 +140,7 @@ function General:addSkills(skill_list)
 end
 
 --- 为武将增加相关技能
+--- 建议使用```SkillSkeleton.related_skills```替代
 ---@param skill Skill|string @ （单个）武将技能
 function General:addRelatedSkill(skill)
   if (type(skill) == "string") then
@@ -153,6 +154,7 @@ function General:addRelatedSkill(skill)
   end
 end
 
+--- 建议使用```SkillSkeleton.related_skills```替代
 ---@param skill_list string[]
 function General:addRelatedSkills(skill_list)
   for _, skill in ipairs(skill_list) do

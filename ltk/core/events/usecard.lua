@@ -641,12 +641,16 @@ end
 local AimEvent = TriggerEvent:subclass("AimData")
 
 ---@class fk.TargetSpecifying: AimEvent
+--- 指定目标时
 fk.TargetSpecifying = AimEvent:subclass("fk.TargetSpecifying")
 ---@class fk.TargetConfirming: AimEvent
+--- 成为目标时
 fk.TargetConfirming = AimEvent:subclass("fk.TargetConfirming")
 ---@class fk.TargetSpecified: AimEvent
+--- 指定目标后
 fk.TargetSpecified = AimEvent:subclass("fk.TargetSpecified")
 ---@class fk.TargetConfirmed: AimEvent
+--- 成为目标后
 fk.TargetConfirmed = AimEvent:subclass("fk.TargetConfirmed")
 
 --- CardEffectData 卡牌效果的数据

@@ -296,6 +296,12 @@ Item {
           if (!t.name.startsWith('#')) {
             generalText.append((`${skillnamecss}<font ${t.is_related_skill ? 'color="purple"' : ''} class='skill-name'><b>`) + Lua.tr(t.name) +
             "</b></font> " + `${t.is_related_skill ? '<font color="purple">' : ''}${t.description}${t.is_related_skill ? '</font>' : ''}`);
+            if (t.related_skills) {
+              for (const rs of t.related_skills) {
+                generalText.append((`${skillnamecss}<font color="purple" class='skill-name'><b>`) + Lua.tr(rs) +
+              "</b></font> <font color='purple'>" + Lua.evaluate(`Fk:getDescription('${rs}')`) + '</font>');
+              }
+            }
           }
         }
 

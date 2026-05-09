@@ -60,6 +60,12 @@ Flickable {
       data.skill.forEach(t => {
         skillDesc.append((t.is_related_skill ? "<font color=\"purple\"><b>" : "<b>") + Lua.tr(t.name) +
           "</b>: " + t.description + (t.is_related_skill ? "</font>" : ""));
+        if (t.related_skills) {
+          for (const rs of t.related_skills) {
+            skillDesc.append("<font color='purple'><b>" + Lua.tr(rs) +
+          "</b>: " + Lua.evaluate(`Fk:getDescription('${rs}')`) + '</font>');
+          }
+        }
       });
       if (data.endnote !== "") skillDesc.append("<font color=\"lightslategrey\">" + Lua.tr(data.endnote) + "</font>");
       skillDesc.append("\n");

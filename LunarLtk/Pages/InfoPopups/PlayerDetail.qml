@@ -233,7 +233,9 @@ Flickable {
     const player = Ltk.getPlayer(id);
     const self = Lua.selfPlayer;
 
-    Ltk.getPlayerSkills(id).forEach(t => {
+    const skills = Ltk.getPlayerSkills(id);
+    const skillNames = skills.map(s => s.orig_name);
+    skills.forEach(t => {
       // TODO 等core更新强制重启后把这个智慧杀了 GetPlayerSkill直接返回invalid
       const invalid = t.name.endsWith(Lua.tr('skill_invalidity'));
       let skillText = `${skillnamecss}<font class='${invalid ? "skill-name locked" : "skill-name"}'>${t.name}</font> `;
@@ -244,6 +246,13 @@ Flickable {
       }
 
       skillDesc.append(skillText);
+
+      for (const rs of t.related_skills) {
+        if (!skillNames.includes(rs)) {
+          skillDesc.append(`${skillnamecss}<font color="pink" class='skill-name'><b>` + Lua.tr(rs) +
+          "</b></font> <font color='pink'>" + Lua.evaluate(`Fk:getDescription('${rs}')`) + '</font>');
+        }
+      }
     });
 
     const ej = player.getCardIds("ej");

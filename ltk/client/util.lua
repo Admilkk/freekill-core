@@ -41,6 +41,7 @@ function M:getGeneralDetail(name)
       name = s[1],
       description = Fk:getDescription(s[1]),
       is_related_skill = s[2],
+      related_skills = Fk.skill_skels[s[1]].related_skills,
     })
   end
   local _companions = {}
@@ -356,23 +357,17 @@ end
 
 function M:getPlayerSkills(id)
   local p = ClientInstance:getPlayerById(id)
-  if p == Self then
-    return table.map(p.player_skills, function(s)
-      local skel = s:getSkeleton()
-      return s.visible and {
-        name = Fk:getSkillName(skel.name, nil, p, true),
-        description = Fk:getDescription(s.name, nil, p),
-      } or nil
-    end)
-  else
-    return table.map(p.player_skills, function(s)
-      local skel = s:getSkeleton()
-      return s.visible and not (s.attached_equip or s.name:endsWith("&")) and {
-        name = Fk:getSkillName(skel.name, nil, p, true),
-        description = Fk:getDescription(s.name, nil, p),
-      } or nil
-    end)
-  end
+  local isSelf = p == Self
+  return table.map(p.player_skills, function(s)
+    local skel = s:getSkeleton()
+    local include = s.visible and (isSelf or not (s.attached_equip or s.name:endsWith("&"))) -- 其他角色的装备技能和按钮技能不显示
+    return include and {
+      name = Fk:getSkillName(skel.name, nil, p, true),
+      description = Fk:getDescription(s.name, nil, p),
+      orig_name = skel.name,
+      related_skills = Fk.skill_skels[skel.name].related_skills or {},
+    } or nil
+  end)
 end
 
 -- Handle skills

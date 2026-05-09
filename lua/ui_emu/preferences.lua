@@ -111,7 +111,7 @@ end
 --]]
 
 ---@class W.CommonValueSpec : W.CommonSpec
----@field _settingsKey string 你这个value对应到settings的哪个key
+---@field _settingsKey string 此value对应的settings的key
 ---@field enabled? boolean|fun(settings: W.SettingsParam): boolean? 控件是否可交互？
 ---@field value? fun(settings: W.SettingsParam): any 要绑定的value，要么不写要么必须是function
 

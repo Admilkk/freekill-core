@@ -149,7 +149,7 @@ QtObject {
       if (dat.type !== "CardItem") return;
       const card = Ltk.createCardModel(dat.data.id);
       card.footnote = Lua.tr(dat.ui_data.footnote);
-      card.areaText = card.footnote;
+      card.footnoteVisible = true;
       const vcard = Ltk.getVirtualEquipData(0, dat.data.id);
       if (vcard) card.virtName = vcard.name;
       expandedCards.push(card);

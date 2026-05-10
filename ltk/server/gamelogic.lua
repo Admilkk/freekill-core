@@ -199,11 +199,10 @@ end
 
 function GameLogic:prepareDrawPile()
   local room = self.room
-  local gamemode = Fk.game_modes[self.room:getSettings('gameMode')] or Fk.game_modes["aaa_role_mode"]
-  local draw_pile = gamemode:buildDrawPile()
+  room:prepareDrawPile()
+  local draw_pile = room.draw_pile
   self.room:shuffleTable(draw_pile)
-  room:prepareDrawPile(draw_pile)
-  room:doBroadcastNotify("PrepareDrawPile", room.draw_pile)
+  room:doBroadcastNotify("PrepareDrawPile", draw_pile)
 end
 
 ---@param player ServerPlayer @ 要附加技能的角色

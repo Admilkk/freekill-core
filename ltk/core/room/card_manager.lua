@@ -174,12 +174,12 @@ end
 -- misc
 
 --- 准备房间牌堆
----@param new_draw_pile integer[]
+---@param new_draw_pile? integer[]
 function CardManager:prepareDrawPile(new_draw_pile)
   local gamemode = Fk.game_modes[self:getSettings('gameMode')] or Fk.game_modes["aaa_role_mode"]
-  local _, void_pile = gamemode:buildDrawPile()
+  local pile, void_pile = gamemode:buildDrawPile()
 
-  self.draw_pile = new_draw_pile
+  self.draw_pile = new_draw_pile or pile
 
   for _, id in ipairs(self.draw_pile) do
     self:setCardArea(id, Card.DrawPile, nil)

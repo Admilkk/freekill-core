@@ -73,7 +73,7 @@ Item {
   function add(inputs) {
     area.add(inputs);
     for (const c of inputs) {
-      c.footnoteVisible = true;
+      c.dataModel.footnoteVisible = true;
       c.markVisible = false;
       c.dataModel.selectable = true;
       c.cardScale = 0.8;

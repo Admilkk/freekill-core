@@ -1244,7 +1244,7 @@ W.PageBase {
       card.known = true;
       if (footnote) {
         card.footnote = footnote;
-        card.footnoteVisible = true;
+        card.dataModel.footnoteVisible = true;
       }
       items.push(card);
     }

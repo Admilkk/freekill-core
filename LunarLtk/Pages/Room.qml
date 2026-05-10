@@ -741,6 +741,7 @@ W.PageBase {
             result: data.default ? [data.default] : [],
             minNum: data.min_num ?? 1,
             maxNum: data.max_num ?? 1,
+            single: data.type === "combo" || data.type == "cardname",
           });
           skillInteraction.item.dataModel = model;
           skillInteraction.item.clicked();

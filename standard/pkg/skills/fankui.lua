@@ -40,10 +40,9 @@ fankui:addAI(Fk.Ltk.AI.newInvokeStrategy{
         proposer = player,
       },
     })
-    local val = ai:getBenefitOfEvents(function(logic)
+    return ai:getBenefitOfEvents(function(logic)
       logic:obtainCard(player, ret, false, fk.ReasonPrey, player, fankui.name)
-    end)
-    return val > 0
+    end) > 0
   end,
 })
 

@@ -23,7 +23,7 @@ GraphicsBox {
   property bool noOneLine: false
 
   onShown: {
-    if (isOneLine && dataModel.minNum === 1 && dataModel.maxNum === 1 && !noOneLine) {
+    if (isOneLine && dataModel.minNum === 1 && dataModel.maxNum === 1 && !noOneLine && dataModel.single) {
       title.visible = false;
       background.visible = false;
       x = (roomScene.width - root.width) / 2;
@@ -61,7 +61,7 @@ GraphicsBox {
     anchors.bottom: parent.bottom
     anchors.bottomMargin: 8
     anchors.horizontalCenter: parent.horizontalCenter
-    visible: root.dataModel && root.dataModel.maxNum !== 1
+    visible: root.dataModel && !root.dataModel.single
 
     spacing: 16
 

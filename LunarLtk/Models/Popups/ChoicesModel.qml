@@ -13,6 +13,7 @@ QtObject {
   property string skillName
   property string prompt
   property bool detailed : false
+  property bool single : false
 
   property list<var> result: []
 
@@ -41,7 +42,7 @@ QtObject {
       result.splice(0, 1);
     }
 
-    if (minNum === 1 && maxNum === 1 && result.length === 1) {
+    if (minNum === 1 && maxNum === 1 && result.length === 1 && single) {
       accepted();
     }
   }

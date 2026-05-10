@@ -407,7 +407,7 @@ QtObject {
   }
 
   function askForChoices(sender, data) {
-    const [ choices, all_choices, [ min_num, max_num], cancelable, skill_name, prompt, detailed ] = data;
+    const [ choices, all_choices, [ min_num, max_num], cancelable, skill_name, prompt, detailed, single ] = data;
     root.prompt = prompt || `#AskForChoice:::${skill_name}`;
     activate();
     const modelComponent = Qt.createComponent("LunarLtk.Models.Popups", "ChoicesModel");
@@ -420,6 +420,7 @@ QtObject {
       skillName: skill_name,
       prompt,
       detailed,
+      single,
     });
     model.accepted.connect(() => replyToServer(model.result));
     model.rejected.connect(() => replyToServer([]));

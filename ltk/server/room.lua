@@ -1451,6 +1451,7 @@ function Room:askToChoice(player, params)
   local dupParams = table.simpleClone(params) --[[@as AskToChoicesParams]]
   dupParams.min_num = 1
   dupParams.max_num = 1
+  dupParams.single = true
   local result = self:askToChoices(player, dupParams)[1]
 
   if result == nil then result = "" end
@@ -1467,6 +1468,7 @@ end
 ---@class AskToChoicesParams: AskToChoiceParams
 ---@field min_num number @ 最少选择项数
 ---@field max_num number @ 最多选择项数
+---@field single boolean? @ 是否是单选框，此时没确定取消
 
 --- 询问一名玩家从众多选项中勾选任意项。
 ---@param player ServerPlayer @ 要询问的玩家
@@ -1505,7 +1507,7 @@ function Room:askToChoices(player, params)
   req.focus_players = hide and self.alive_players or nil
 
   req:setData(player, {
-    params.choices, params.all_choices, {minNum, maxNum}, params.cancelable, params.skill_name, params.prompt, params.detailed
+    params.choices, params.all_choices, {minNum, maxNum}, params.cancelable, params.skill_name, params.prompt, params.detailed, params.single,
   })
   local result = req:getResult(player)
   if result == "" then

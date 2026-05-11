@@ -262,6 +262,7 @@ function fk.readCardSpecToCard(card, spec)
   card.is_passive = spec.is_passive
   card.extra_data = spec.extra_data
   card.dynamicDesc = spec.dynamic_desc
+  card.dynamicName = spec.dynamic_name
 end
 
 ---@class EquipCardSpec: CardSpec

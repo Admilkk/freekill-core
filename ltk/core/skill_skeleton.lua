@@ -17,8 +17,8 @@
 ---@field public attached_equip? string @ 属于什么装备的技能？
 ---@field public attached_kingdom? string[] @ 只有哪些势力可以获得，若为空则均可。用于势力技。
 ---@field public attached_skill_name? string @ 向其他角色分发的技能名（如黄天）
----@field public dynamic_name? fun(self: SkillSkeleton, player: Player, lang?: string): string @ 动态名称函数
----@field public dynamic_desc? fun(self: SkillSkeleton, player: Player, lang?: string): string? @ 动态描述函数
+---@field public dynamic_name? fun(self: SkillSkeleton, player: Player?, lang?: string): string @ 动态名称函数
+---@field public dynamic_desc? fun(self: SkillSkeleton, player: Player?, lang?: string): string? @ 动态描述函数
 ---@field public derived_piles? string | string[] @ 与该技能联系起来的私人牌堆名，失去该技能时将之置入弃牌堆
 ---@field public max_phase_use_time? integer | fun(self: SkillSkeleton, player: Player): integer? @ 该技能的最大使用次数——阶段
 ---@field public max_turn_use_time? integer | fun(self: SkillSkeleton, player: Player): integer? @ 该技能的最大使用次数——回合

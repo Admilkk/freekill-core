@@ -30,7 +30,8 @@
 ---@field public is_passive? boolean @ 是否只能在响应时使用或打出
 ---@field public is_derived? boolean @ 判断是否为衍生牌
 ---@field public virt_id integer @ 虚拟牌的特殊id，默认为0
----@field public dynamicDesc? fun(self: Card, player: Player, lang?: string): string: string? @ 动态描述
+---@field public dynamicDesc? fun(self: Card, player: Player?, lang?: string): string: string? @ 动态描述
+---@field public dynamicName? fun(self: Card, player: Player?, lang?: string): string: string? @ 动态牌名
 ---@field public extra_data? table @ 保存其他信息的键值表，如“合纵”、“应变”、“赠予”等
 local Card = class("Card")
 
@@ -292,6 +293,7 @@ function Card:clone(suit, number)
   newCard.is_passive = self.is_passive
   newCard.is_derived = self.is_derived
   newCard.dynamicDesc = self.dynamicDesc
+  newCard.dynamicName = self.dynamicName
   return newCard
 end
 
@@ -691,7 +693,7 @@ function Card:toLogString(colorful)
 
   -- 牌名与花色/颜色小尾巴
   local ret = string.format(colorful and '<font color="#0598BC"><b>%s</b></font>' or '<b>%s</b>',
-    Fk:translate(self.name) .. "[")
+    self:getDynamicName() .. "[")
 
   if self:isVirtual() and #self.subcards ~= 1 then
     ret = ret .. Fk:translate(self:getColorString())
@@ -1067,6 +1069,31 @@ function Card:getDynamicDescription(player, lang)
   end
 
   return Fk:translate(":" .. self.name, lang)
+end
+
+--- 获取卡牌动态牌名
+---@param player? Player
+---@param lang? string
+---@return string
+function Card:getDynamicName(player, lang)
+  local dynamicName = self.dynamicName and self:dynamicName(player, lang)
+  if type(dynamicName) == "string" and dynamicName ~= "" then
+    local nameFormatter = function(name)
+      local nameSplit = name:split(":")
+      local nameFormatted = Fk:translate(nameSplit[1], lang)
+      if nameFormatted ~= nameSplit[1] then
+        for i = 2, #nameSplit do
+          local curname = Fk:translate(nameSplit[i], lang)
+          nameFormatted = nameFormatted:gsub("{" .. (i - 1) .. "}", curname)
+        end
+        return nameFormatted
+      end
+      return name
+    end
+    return nameFormatter(dynamicName)
+  end
+
+  return Fk:translate(self.name, lang)
 end
 
 return Card

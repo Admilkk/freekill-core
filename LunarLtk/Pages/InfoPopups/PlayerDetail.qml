@@ -269,7 +269,7 @@ Flickable {
           );
         } else {
           skillDesc.append(
-            "<b>" + Lua.tr(t.name) + "(" + Lua.tr("log_" + t.suit) + Lua.tr(t.number.toString()) + ")"
+            "<b>" + Ltk.getCardName(cid) + "(" + Lua.tr("log_" + t.suit) + Lua.tr(t.number.toString()) + ")"
             + "</b>: " + Ltk.getCardDescription(cid)
           );
         }

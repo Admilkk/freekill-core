@@ -140,6 +140,10 @@ QtObject {
     return _L.getCardDescription(id);
   }
 
+  function getCardName(id) {
+    return _L.getCardName(id);
+  }
+
   function getSkillData(skill_name) {
     return _L.getSkillData(skill_name);
   }

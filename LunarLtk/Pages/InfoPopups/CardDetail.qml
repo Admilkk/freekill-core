@@ -74,7 +74,7 @@ Flickable {
     model.virtName = data.virt_name ?? "";
     model.selectable = true;
     cardPic.dataModel = model;
-    screenName.text = Lua.tr(model.name);
+    screenName.text = Ltk.getCardName(cardId);
     skillDesc.text = Ltk.getCardDescription(cardId);
   }
 }

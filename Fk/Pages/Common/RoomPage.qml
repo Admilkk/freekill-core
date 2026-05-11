@@ -10,6 +10,8 @@ import Fk.Components.GameCommon
 import Fk.Widgets as W
 import Fk.Pages.Lobby as L
 
+import LunarLtk
+
 Item {
   id: root
 

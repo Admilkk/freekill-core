@@ -58,7 +58,17 @@ Game.PokerCard {
     roomScene.showInfoPopup(Qt.createComponent("LunarLtk.Pages.InfoPopups", "CardDetail"), { cardId: dataModel.cardId });
   }
 
-  cardFrontSource: SkinBank.getCardPicture(dataModel.picName || dataModel.cardId || dataModel.name)
+  cardFrontSource: {
+    const picName = dataModel.picName
+    if (picName) {
+      if (picName.startsWith("general:")) 
+        return SkinBank.getGeneralPicture(picName.substring(8));
+      if (picName.startsWith("path:"))
+        return Cpp.path + "/" + picName.substring(5);
+      return SkinBank.getCardPicture(picName);
+    }
+    return SkinBank.getCardPicture(dataModel.cardId || dataModel.name)
+  }
   cardBackSource: SkinBank.searchBuiltinPic("/image/card/", "card-back")
 
   Rectangle {

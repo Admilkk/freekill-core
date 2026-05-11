@@ -1239,7 +1239,7 @@ function Room:askToChooseKingdom(players)
         allKingdoms = Fk:getKingdomMap(p.kingdom)
       end
       if #allKingdoms > 0 then
-        req:setData(p, { allKingdoms, allKingdoms, { 1, 1 }, false, "AskForKingdom", "#ChooseInitialKingdom", false })
+        req:setData(p, { allKingdoms, allKingdoms, { 1, 1 }, false, "AskForKingdom", "#ChooseInitialKingdom", false, true })
         req:setDefaultReply(p, { allKingdoms[1] })
       end
     end
@@ -1557,6 +1557,7 @@ function Room:askToJointChoice(player, params)
       skillName,
       prompt,
       false,
+      true,
     }
     req:setData(p, data)
     req:setDefaultReply(p, self:tableRandomPick(p_choices, 1))

@@ -420,6 +420,7 @@ QtObject {
 
   function createCardModelFromLuaValue(cardVal, additionalProp) {
     const data = Lua.toQml(cardVal);
+    if (additionalProp instanceof Object) Object.assign(data.model.prop, additionalProp);
     return Lua.createQmlObject(data.model);
   }
 

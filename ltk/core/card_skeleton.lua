@@ -5,6 +5,7 @@
 ---@field public type? integer
 ---@field public sub_type? integer
 ---@field public attack_range? integer
+---@field public dynamic_desc? fun(self: Card, player: Player, lang?: string): string? @ 动态描述
 
 ---@class CardSkeleton : Object
 ---@field public spec CardSkelSpec

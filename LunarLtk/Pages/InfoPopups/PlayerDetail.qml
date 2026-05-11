@@ -270,7 +270,7 @@ Flickable {
         } else {
           skillDesc.append(
             "<b>" + Lua.tr(t.name) + "(" + Lua.tr("log_" + t.suit) + Lua.tr(t.number.toString()) + ")"
-            + "</b>: " + Lua.tr(":" + t.name)
+            + "</b>: " + Ltk.getCardDescription(cid)
           );
         }
       } else {

@@ -54,6 +54,7 @@ Item {
     source: {
       const model = root.equips[root.equips.length - 1];
       if (!model) return "";
+      if (model.suit === "nosuit") return ""; // FIXME: 本体缺少无花色的图
       return SkinBank.cardSuitDir + model.suit;
     }
     width: implicitWidth / implicitHeight * height

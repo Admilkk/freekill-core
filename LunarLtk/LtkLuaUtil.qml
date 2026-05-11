@@ -68,10 +68,6 @@ QtObject {
     return Lua.evaluate(`Fk.skills['${name}']`);
   }
 
-  ///////////////// 施工中 //////////////////////
-  // 把client_util.lua公式化转了一遍。还没剔除
-  ///////////////// 施工中 //////////////////////
-
   function getGeneralData(name) {
     return _L.getGeneralData(name);
   }
@@ -138,6 +134,10 @@ QtObject {
 
   function getPlayerSkills(id) {
     return _L.getPlayerSkills(id);
+  }
+
+  function getCardDescription(id) {
+    return _L.getCardDescription(id);
   }
 
   function getSkillData(skill_name) {

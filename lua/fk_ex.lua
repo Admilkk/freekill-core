@@ -234,6 +234,7 @@ end
 ---@field public multiple_targets? boolean @ 是否为多目标卡牌
 ---@field public stackable_delayed? boolean @ 是否为可堆叠的延时锦囊牌
 ---@field public is_passive? boolean @ 是否为被动使用的卡牌，如闪、无懈
+---@field public dynamicDesc? fun(self: Card, player: Player, lang?: string): string? @ 动态描述
 ---@field public extra_data? table @ 保存其他信息的键值表，如“合纵”、“应变”、“赠予”等
 
 function fk.preprocessCardSpec(spec)
@@ -244,6 +245,8 @@ function fk.preprocessCardSpec(spec)
   if spec.number then assert(type(spec.number) == "number") end
 end
 
+---@param card Card
+---@param spec CardSkelSpec
 function fk.readCardSpecToCard(card, spec)
   if type(spec.skill) == "string" then
     spec.skill = Fk.skills[spec.skill]
@@ -258,6 +261,7 @@ function fk.readCardSpecToCard(card, spec)
   card.stackable_delayed = spec.stackable_delayed
   card.is_passive = spec.is_passive
   card.extra_data = spec.extra_data
+  card.dynamicDesc = spec.dynamic_desc
 end
 
 ---@class EquipCardSpec: CardSpec

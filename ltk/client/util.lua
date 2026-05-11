@@ -370,6 +370,18 @@ function M:getPlayerSkills(id)
   end)
 end
 
+
+--- 获取卡牌描述
+---@param cardId integer
+---@return string
+function M:getCardDescription(cardId)
+  local card = Fk:getCardById(cardId)
+  if not card then return "" end
+  -- 注意player参数是观察者，不是卡牌拥有者
+  return card:getDynamicDescription(Self) or ""
+end
+
+
 -- Handle skills
 
 function M:getSkillData(skill_name)

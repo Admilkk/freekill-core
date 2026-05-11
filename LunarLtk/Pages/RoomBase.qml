@@ -130,6 +130,7 @@ W.PageBase {
   Item {
     id: dynamicCardArea
     anchors.fill: parent
+    z: 2
   }
 
 

@@ -184,7 +184,7 @@ Item {
       color: "#E4D5A0"
     }
 
-    background: Rectangle { // same as cheatDrawer
+    background: Rectangle {
       color: "#CC2E2C27"
       radius: 5
       border.color: "#A6967A"

@@ -13,24 +13,29 @@ Item {
 
   required property SkillModel dataModel
 
-  width: root.dataModel.isActive ? Math.max(80, skillTxt.width + 8) : skillTxt.width
-  height: root.dataModel.isActive ? 36 : 24
+  width: (dataModel.isActive || dataModel.isPrelight) ? Math.max(80, skillTxt.width + 8) : skillTxt.width
+  height: (dataModel.isActive || dataModel.isPrelight) ? 36 : 24
 
   Image {
     x: -13 - 120 * 0.166
     y: -6 - 55 * 0.166
     scale: 0.66
     source: {
-      if (!root.dataModel.isActive) {
-        return "";
+      if (root.dataModel.isActive) {
+        let ret = Cpp.path + "/image/button/skill/active/";
+        const enabled = root.dataModel.enabled;
+        let suffix = enabled ? (root.dataModel.selected ? "pressed" : "normal") : "disabled";
+        if (enabled && root.dataModel.origName.endsWith("&")) {
+          suffix += "-attach";
+        }
+        return ret + suffix;
+      } else if (root.dataModel.isPrelight) {
+        let ret = Cpp.path + "/image/button/skill/prelight/";
+        const enabled = root.dataModel.enabled;
+        let suffix = enabled ? (root.dataModel.selected ? "pressed" : "normal") : "disabled";
+        return ret + suffix;
       }
-      let ret = Cpp.path + "/image/button/skill/active/";
-      const enabled = root.dataModel.enabled;
-      let suffix = enabled ? (root.dataModel.selected ? "pressed" : "normal") : "disabled";
-      if (enabled && root.dataModel.origName.endsWith("&")) {
-        suffix += "-attach";
-      }
-      return ret + suffix;
+      return "";
     }
   }
 
@@ -156,7 +161,7 @@ Item {
   W.TapHandler {
     acceptedButtons: Qt.LeftButton | Qt.RightButton | Qt.NoButton
     onTapped: (p, btn) => {
-      if ((btn === Qt.LeftButton || btn === Qt.NoButton) && root.dataModel.isActive && root.dataModel.enabled) {
+      if ((btn === Qt.LeftButton || btn === Qt.NoButton) && (root.dataModel.isActive || root.dataModel.isPrelight) && root.dataModel.enabled) {
         root.dataModel.selected = !root.dataModel.selected;
       } else if (btn === Qt.RightButton) {
         skillDetail.visible = true;

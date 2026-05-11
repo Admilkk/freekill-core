@@ -73,10 +73,14 @@ QtObject {
   function addSkill(skill_name, prelight) {
     const model = Ltk.createSkillModel(skill_name);
     const arr = prelight ? fakeSkills : skills;
+    if (prelight) {
+      model.isPrelight = true;
+      model.enabled = true;
+    }
 
     if (!arr.find(e => e.origName === skill_name)) {
       arr.push(model);
-      if (arr === fakeSkills) {
+      if (prelight) {
         model.selectedChanged.connect(() => {
           if (!model.selected) return;
           model.enabled = false;
@@ -97,6 +101,16 @@ QtObject {
     const arr = prelight ? fakeSkills : skills;
     const idx = arr.findIndex(e => e.origName === skill_name);
     if (idx !== -1) arr.splice(idx, 1);
+  }
+
+  function prelightSkill(skill_name, prelight) {
+    console.log(skill_name ,prelight)
+    const model = fakeSkills.find(e => e.origName === skill_name);
+    if (model) {
+      model.prelighted = prelight;
+      model.enabled = true;
+      model.selected = false;
+    }
   }
 
   function disableAllSkills() {

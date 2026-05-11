@@ -414,6 +414,11 @@ QtObject {
     return component.createObject(null, prop);
   }
 
+  function createCardModelFromLuaValue(cardVal, additionalProp) {
+    const data = Lua.toQml(cardVal);
+    return Lua.createQmlObject(data.model);
+  }
+
   function createGeneralCardModel(name, additionalProp) {
     const component = Qt.createComponent("LunarLtk.Models", "GeneralCardModel");
     const data = Ltk.getGeneralData(name);

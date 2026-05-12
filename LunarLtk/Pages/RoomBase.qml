@@ -461,6 +461,7 @@ W.PageBase {
   function showAG() {
     const component = Qt.createComponent("LunarLtk.Pages.Popups", "AG");
     const item = component.createObject(roomScene, { dataModel: dataModel.agModel });
+    item.z = 1000;
     agItem = item;
 
     const moveToCenter = () => {

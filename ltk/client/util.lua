@@ -383,10 +383,19 @@ end
 
 --- 获取卡牌牌名
 ---@param cardId integer
+---@param filterCard? boolean @ 是否应用锁视效果，默认否
 ---@return string
-function M:getCardName(cardId)
-  local card = Fk:getCardById(cardId)
+function M:getCardName(cardId, filterCard)
+  local card = Fk:getCardById(cardId, not filterCard)
   if not card then return "" end
+  -- 应用虚拟装备
+  if filterCard then
+    local owner = ClientInstance:getCardOwner(cardId)
+    if owner then
+      local vcard = owner:getVirtualEquip(cardId)
+      card = vcard or card
+    end
+  end
   -- 注意player参数是观察者，不是卡牌拥有者
   return card:getDynamicName(Self) or ""
 end

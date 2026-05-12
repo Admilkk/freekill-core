@@ -94,6 +94,7 @@ Item {
       const subtype = root.subtype;
       if (!model) {
         if (root.sealed) {
+          if (subtype.endsWith("_ride")) return Lua.tr("_sealed");
           return '  ' + Lua.tr(subtype + "_sealed");
         }
         return "";
@@ -104,7 +105,7 @@ Item {
       } else if (subtype === "offensive_ride") {
         return "-1";
       } else {
-        return Lua.tr(model.name);
+        return Ltk.getCardName(model.cardId, true);
       }
     }
   }

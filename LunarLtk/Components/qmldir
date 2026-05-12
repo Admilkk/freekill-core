@@ -20,3 +20,4 @@ UltSkillAnimation 1.0 UltSkillAnimation.qml
 TablePile 1.0 TablePile.qml
 SkinItem 1.0 SkinItem.qml
 PoxiLabel 1.0 PoxiLabel.qml
+DescriptionText 1.0 DescriptionText.qml

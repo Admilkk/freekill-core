@@ -28,7 +28,11 @@ QtObject {
   }
 
   function ev(lua) {
-    return backend.evalLuaExp(`return ${lua}`);
+    let ret = backend.evalLuaExp(`return ${lua}`);
+    if (ret instanceof ArrayBuffer) {
+      return createProxyFromCbor(ret);
+    }
+    return ret;
   }
 
   function tr(src) {

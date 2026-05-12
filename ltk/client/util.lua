@@ -954,9 +954,9 @@ function M:poxiPrompt(poxi_type, data, extra_data)
   local prompt = poxi.prompt
   if not prompt then return "" end
   if type(prompt) == "string" then
-    return Fk:translate(prompt)
+    return prompt
   else
-    return Fk:translate(prompt(data, extra_data))
+    return prompt(data, extra_data)
   end
 end
 

@@ -28,32 +28,46 @@ Item {
     spacing: -4
 
     Repeater {
-      model: root.dataModel.delayedTricks
+      model: {
+        const cards = root.dataModel.delayedTricks;
+        const lens = {};
+        let ret = [];
+        for (const card of cards) {
+          let name = card.name;
+          const vcardData = Ltk.getVirtualEquipData(root.dataModel.playerid, card.cardId);
+          if (vcardData) {
+            name = vcardData.name;
+          }
+          if (!lens[name]) ret.push(name);
+          lens[name] = lens[name] ?? 0;
+          ++lens[name];
+        }
+        return ret.map(name => ({ cardName: name, length: lens[name] }));
+      }
 
       Item {
-        required property CardModel modelData
+        required property var modelData
         height: 55 * 0.6
         width: 47 * 0.6
         Image {
           anchors.fill: parent
-          source: SkinBank.getDelayedTrickPicture(parent.modelData.name)
+          source: SkinBank.getDelayedTrickPicture(parent.modelData.cardName);
           fillMode: Image.PreserveAspectFit
         }
 
-        // 先鸽 看看怎么协调一下model
-        // Text { // 右下角的数量，1省略
-        //   anchors.right: parent.right
-        //   anchors.rightMargin: 5
-        //   anchors.bottom: parent.bottom
-        //   anchors.bottomMargin: 5
-        //   text: len
-        //   visible: len > 1
-        //   font.family: Config.libianName
-        //   font.pixelSize: 20
-        //   font.bold: true
-        //   color: "white"
-        //   style: Text.Outline
-        // }
+        Text { // 右下角的数量，1省略
+          anchors.right: parent.right
+          anchors.rightMargin: 5
+          anchors.bottom: parent.bottom
+          anchors.bottomMargin: 5
+          text: parent.modelData.length
+          visible: parent.modelData.length > 1
+          font.family: Config.libianName
+          font.pixelSize: 20
+          font.bold: true
+          color: "white"
+          style: Text.Outline
+        }
       }
     }
   }

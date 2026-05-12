@@ -13,8 +13,8 @@ QtObject {
 
   property string extension
 
-  property bool isPrelight: false // 这个技能按钮是用来预亮技能的？
-  property bool prelighted: false // 这个技能按钮是用来预亮技能的？
+  property bool isPrelight: false // 预亮按钮
+  property bool prelighted: false // 已预亮
   property bool nullified: false // 被失效了？失效的话一般会显示锁
 
   property int times: -1

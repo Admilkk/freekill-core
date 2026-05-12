@@ -262,10 +262,10 @@ GraphicsBox {
   }
 
   function updateCompanion(gcard1, gcard2, overwrite) {
-    if (Ltk.isCompanionWith(gcard1.name, gcard1.name)) {
-      gcard1.hasCompanions = true;
+    if (Ltk.isCompanionWith(gcard1.modelData, gcard2.modelData)) {
+      gcard1.dataModel.hasCompanion = true;
     } else if (overwrite) {
-      gcard1.hasCompanions = false;
+      gcard1.dataModel.hasCompanion = false;
     }
   }
 
@@ -279,48 +279,50 @@ GraphicsBox {
     const selectedItem = result.slice(0, 2).map(name => root.dataModel.generalDict[name]?.dataModel);
 
     // 主副将认定
+    for (i = 0; i < generalCardList.count; i++) {
+      item = generalCardList.itemAt(i);
+      item.dataModel.inPosition = 0;
+    }
     if (selectedItem[0]) {
-      if (selectedItem[0].mainMaxHp !== 0) {
-        selectedItem[0].inPosition = 1;
-      } else if (selectedItem[0].deputyMaxHp !== 0) {
-        selectedItem[0].inPosition = -1;
+      if (selectedItem[0].dataModel.mainMaxHp !== 0) {
+        selectedItem[0].dataModel.inPosition = 1;
+      } else if (selectedItem[0].dataModel.deputyMaxHp !== 0) {
+        selectedItem[0].dataModel.inPosition = -1;
       }
       if (selectedItem[1]) {
-        if (selectedItem[1].mainMaxHp !== 0) {
-          selectedItem[1].inPosition = -1;
-        } else if (selectedItem[1].deputyMaxHp !== 0) {
-          selectedItem[1].inPosition = 1;
+        if (selectedItem[1].dataModel.mainMaxHp !== 0) {
+          selectedItem[1].dataModel.inPosition = -1;
+        } else if (selectedItem[1].dataModel.deputyMaxHp !== 0) {
+          selectedItem[1].dataModel.inPosition = 1;
         }
       }
     }
 
     // 珠联璧合
     for (i = 0; i < generalCardList.count; i++) {
-      item = root.dataModel.generalDict[generalCardList.itemAt(i)]?.dataModel;
-      if (!item) break;
-      item.inPosition = 0;
+      item = generalCardList.itemAt(i);
 
-      if (selectedItem[0]) {
-        if (selectedItem[1]) {
+      if (selectedItem[0]) { // 有主将
+        if (selectedItem[1]) { // 有副将
           if (selectedItem[0] === item) {
             updateCompanion(item, selectedItem[1], true);
           } else if (selectedItem[1] === item) {
             updateCompanion(item, selectedItem[0], true);
           } else {
-            item.hasCompanions = false;
+            item.dataModel.hasCompanion = false;
           }
         } else {
           if (selectedItem[0] !== item) {
             updateCompanion(item, selectedItem[0], true);
           } else {
             for (let j = 0; j < generalCardList.count; j++) {
-              updateCompanion(item, root.dataModel.generalDict[generalCardList.itemAt(j)]?.dataModel, false);
+              updateCompanion(item, generalCardList.itemAt(j), false);
             }
           }
         }
       } else {
         for (let j = 0; j < generalCardList.count; j++) {
-          updateCompanion(item, root.dataModel.generalDict[generalCardList.itemAt(j)]?.dataModel, false);
+          updateCompanion(item, generalCardList.itemAt(j), false);
         }
       }
     }

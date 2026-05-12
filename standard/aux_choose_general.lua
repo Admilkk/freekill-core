@@ -28,6 +28,7 @@ Fk:addChooseGeneralRule{
 local function isHegPair(general, other)
   if general == other then return false end
   local g1, g2 = Fk.generals[general], Fk.generals[other]
+  if not g1 or not g2 then return false end
   if string.find(g2.kingdom, "wild") then
     return false
   end

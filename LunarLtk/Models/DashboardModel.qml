@@ -104,7 +104,6 @@ QtObject {
   }
 
   function prelightSkill(skill_name, prelight) {
-    console.log(skill_name ,prelight)
     const model = fakeSkills.find(e => e.origName === skill_name);
     if (model) {
       model.prelighted = prelight;

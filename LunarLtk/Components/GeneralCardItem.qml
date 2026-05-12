@@ -229,7 +229,7 @@ Game.BasicCard {
     id: companions
     width: parent.width
     fillMode: Image.PreserveAspectFit
-    visible: false
+    visible: parent.dataModel.hasCompanion
     source: {
       const f = SkinBank.getGeneralCardDir(parent.dataModel.kingdom) + parent.dataModel.kingdom + "-companions";
       if (Backend.exists(f + ".png")) return f;

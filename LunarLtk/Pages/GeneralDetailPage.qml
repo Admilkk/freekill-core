@@ -653,27 +653,21 @@ Item {
   Component {
     id: sameGeneralsComponent
 
-    Flickable {
+    GridView {
       clip: true
-      contentHeight: otherSameLayout.height
-      GridLayout {
-        id: otherSameLayout
-        columns: 5
-        columnSpacing: 5
-        rowSpacing: 5
-        Repeater {
-          model: root.getSameNameGenerals(root.general)
-          delegate: GeneralCardItem {
-            required property var modelData
-            id: sameNameGeneralCard
-            dataModel: Ltk.createGeneralCardModel(modelData)
-            scale: 1; transformOrigin: Item.TopLeft
+      id: otherSameLayout
+      cellWidth: 70
+      cellHeight: 70
+      model: root.getSameNameGenerals(root.general)
+      delegate: CompactGeneralCardItem {
+        required property var modelData
+        id: sameNameGeneralCard
+        dataModel: Ltk.createGeneralCardModel(modelData)
+        scale: 1; transformOrigin: Item.TopLeft
 
-            onClicked: {
-              drawerBar.currentIndex = 0;
-              root.changeGeneralDetailInside(modelData)
-            }
-          }
+        onClicked: {
+          drawerBar.currentIndex = 0;
+          root.changeGeneralDetailInside(modelData)
         }
       }
     }

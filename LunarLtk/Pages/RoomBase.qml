@@ -20,6 +20,7 @@ W.PageBase {
   property var agItem // 五谷框
   property var popupItem // 弹窗
   property alias dataModel: dataModel
+  property alias bigAnim: bigAnim
 
   property list<PhotoModel> photoModel
 

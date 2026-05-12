@@ -69,30 +69,37 @@ GraphicsBox {
     }
   }
 
-  Row {
-    anchors.margins: 8
+  Item {
+    anchors.left: parent.left
+    anchors.right: parent.right
     anchors.bottom: parent.bottom
-    anchors.horizontalCenter: parent.horizontalCenter
-    spacing: 32
+    anchors.bottomMargin: 8
+    height: 35
 
     MetroButton {
-      width: 120
+      width: 90
       height: 35
+      anchors.left: parent.left
+      anchors.leftMargin: 60
       text: Lua.tr("Revert Selection")
       onClicked: root.dataModel.revertSelection()
     }
 
-    MetroButton {
-      width: 120
+    MetroButton { // OK button must be centered
+      id : okButton
+      width: 140
       height: 35
+      anchors.centerIn: parent
       text: Lua.tr("OK")
       enabled: root.dataModel.feasible
       onClicked: root.dataModel.shuffleAndOk()
     }
 
     MetroButton {
-      width: 120
+      width: 90
       height: 35
+      anchors.left: okButton.right
+      anchors.leftMargin: 100
       text: Lua.tr("Cancel")
       visible: root.dataModel.cancelable
       onClicked: root.dataModel.rejected()

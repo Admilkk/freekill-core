@@ -19,14 +19,6 @@ end
 ---@param command string
 ---@param data any
 function ServerPlayerBase:doNotify(command, data)
-  if type(data) == "string" then
-    local err, dat = pcall(json.decode, data)
-    if err ~= false then
-      fk.qWarning("Don't use json.encode. Pass value directly to ServerPlayer:doNotify.\n"..debug.traceback())
-      data = dat
-    end
-  end
-
   local cbordata = cbor.encode(data)
 
   local room = self.room

@@ -429,6 +429,7 @@ RoomBase {
     anchors.fill: dashboard
     visible: Config.observing && !Config.replaying
     color: "transparent"
+    z: 10
     GlowText {
       anchors.centerIn: parent
       text: Lua.tr("Observing ...")

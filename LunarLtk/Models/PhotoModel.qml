@@ -83,6 +83,7 @@ QtObject {
   }
 
   function refreshData() {
+    if (Lua.ev(`not ClientInstance:getPlayerById(${playerid})`)) return;
     updateHandcards();
     maxCard = luaPlayer.getMaxCards();
     role_shown = Lua.selfPlayer.roleVisible(luaPlayer);

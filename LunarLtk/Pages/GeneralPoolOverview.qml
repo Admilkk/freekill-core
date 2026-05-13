@@ -5,7 +5,6 @@ import QtQuick.Layouts
 import QtQuick.Controls
 
 import Fk
-import Fk.Components.Common
 import Fk.Widgets as W
 import LunarLtk
 import LunarLtk.Components
@@ -18,21 +17,18 @@ W.PageBase {
   property int generalCount: 0
   property var allGenerals: []
 
-  Component {
-    id: avatarCard
-    CompactGeneralCardItem {
-      required property var modelData
-      width: 64; height: 64
-      dataModel: Ltk.createGeneralCardModel(modelData)
+  component AvatarCard: CompactGeneralCardItem {
+    required property var modelData
+    width: 64; height: 64
+    dataModel: Ltk.createGeneralCardModel(modelData)
 
-      W.TapHandler {
-        acceptedButtons: Qt.LeftButton | Qt.NoButton
-        gesturePolicy: TapHandler.WithinBounds
+    W.TapHandler {
+      acceptedButtons: Qt.LeftButton | Qt.NoButton
+      gesturePolicy: TapHandler.WithinBounds
 
-        onTapped: {
-          popLoader.item.general = parent.modelData;
-          pop.open();
-        }
+      onTapped: {
+        popLoader.item.general = parent.modelData;
+        pop.open();
       }
     }
   }
@@ -57,7 +53,14 @@ W.PageBase {
       anchors.top: favorBar.bottom
       cellWidth: 68; cellHeight: 68
       model: Config.favoriteGenerals
-      delegate: avatarCard
+      delegate: AvatarCard {
+        Rectangle {
+          anchors.fill: parent
+          color: "black"
+          opacity: 0.6
+          visible: !root.allGenerals.includes(parent.modelData)
+        }
+      }
     }
   }
 
@@ -167,7 +170,7 @@ W.PageBase {
         Repeater {
           id: repeater
           model: JSON.parse(sbqt.model.generals)
-          delegate: avatarCard
+          delegate: AvatarCard {}
         }
       }
     }
@@ -183,7 +186,7 @@ W.PageBase {
     interactive: !showByPkg.checked
     cellWidth: 68; cellHeight: 68
     model: root.allGenerals
-    delegate: avatarCard
+    delegate: AvatarCard {}
   }
 
   Popup {

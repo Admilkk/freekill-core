@@ -106,6 +106,7 @@ Item {
       card.startDrag.disconnect(updateCardDragging);
       card.dataModel.prohibitReason = "";
       card.areaText = "";
+      card.dataModel.known = Lua.selfPlayer.cardVisible(card.dataModel.cardId);
     }
     return result;
   }

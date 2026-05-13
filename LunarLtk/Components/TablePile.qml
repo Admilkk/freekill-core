@@ -76,7 +76,6 @@ Item {
       c.dataModel.footnoteVisible = true;
       c.markVisible = false;
       c.dataModel.selectable = true;
-      c.dataModel.known = Lua.selfPlayer.cardVisible(c.dataModel.cardId);
       c.cardScale = 0.8;
       if (Config.rotateTableCard) {
         c.rotation = (Math.random() - 0.5) * 5;

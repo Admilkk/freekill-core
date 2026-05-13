@@ -1914,7 +1914,7 @@ function Room:askToExchange(player, params)
   })
 end
 
---- 抽个武将
+--- 抽武将
 ---
 --- 同getNCards，抽出来就没有了，所以记得放回去。
 ---@param n number @ 数量
@@ -1943,7 +1943,7 @@ function Room:getNGenerals(n, position)
   return generals
 end
 
---- 把武将牌塞回去（……）
+--- 把武将牌塞回武将牌堆
 ---@param g string[] @ 武将名数组
 ---@param position? "top"|"bottom"|"random" @置入牌堆顶/牌堆底/随机位置，默认置于随机位置
 ---@return boolean @ 是否成功
@@ -1967,7 +1967,7 @@ function Room:returnToGeneralPile(g, position)
 end
 
 --- 抽特定名字的武将（抽了就没了）
----@param name string? @ 武将name，如找不到则查找truename，再找不到则返回nil
+---@param name string? @ 武将name，如找不到则查找trueName，再找不到则返回nil
 ---@return string? @ 抽出的武将名
 function Room:findGeneral(name)
   if not Fk.generals[name] then return nil end

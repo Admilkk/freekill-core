@@ -697,6 +697,43 @@ function ServerPlayer:hideGeneral(isDeputy)
   room.logic:trigger(fk.GeneralHidden, self, generalName)
 end
 
+--- 获取下家
+---@param ignoreRemoved? boolean @ 忽略被移除
+---@param num? integer @ 第几个，默认1
+---@param ignoreRest? boolean @ 是否忽略休整
+---@return ServerPlayer
+function ServerPlayer:getNextAlive(ignoreRemoved, num, ignoreRest)
+  if #self.room.alive_players == 0 then
+    return self.rest > 0 and self.next.rest > 0 and self.next or self
+  end
+  local doNotIgnore = not ignoreRemoved
+  if doNotIgnore and table.every(self.room.alive_players, function(p) return p:isRemoved() end) then
+    return self
+  end
+
+  local ret = self
+  num = num or 1
+  for _ = 1, num do
+    ret = ret.next ---@type ServerPlayer
+    while (ret.dead and (ret.rest == 0 or not ignoreRest)) or (doNotIgnore and ret:isRemoved()) do
+      ret = ret.next
+    end
+  end
+  return ret
+end
+
+--- 获取上家
+---@param ignoreRemoved? boolean @ 忽略被移除
+---@param num? integer @ 第几个，默认1
+---@param ignoreRest? boolean @ 是否忽略休整
+---@return ServerPlayer
+function ServerPlayer:getLastAlive(ignoreRemoved, num, ignoreRest)
+  num = num or 1
+  local alive_players = table.filter(self.room.players, function(p) return (not p.dead or (p.rest > 0 and ignoreRest)) and (ignoreRemoved or not p:isRemoved()) end)
+  local index = #alive_players - num
+  return self:getNextAlive(ignoreRemoved, index, ignoreRest)
+end
+
 --- 是否为友方
 ---@param to ServerPlayer @ 待判断的角色
 ---@return boolean

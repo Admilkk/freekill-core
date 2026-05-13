@@ -348,6 +348,12 @@ W.PageBase {
         onClicked: {
           Cpp.notifyServer("AddRobot", "");
         }
+        onPressAndHold: { // 长按以机器人补全
+          for (let i = 0; i < playerNum; i++) {
+            if (!canAddRobot) break;
+            Cpp.notifyServer("AddRobot", "");
+          }
+        }
       }
 
       W.ButtonContent {

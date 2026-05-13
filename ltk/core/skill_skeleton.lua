@@ -113,8 +113,8 @@ function SkillSkeleton:initialize(spec)
     end
   end
 
-  self.related_skills = spec.related_skills
-  self.add_skills = spec.add_skills
+  self.related_skills = spec.related_skills or {}
+  self.add_skills = spec.add_skills or {}
 end
 
 function SkillSkeleton:addEffect(key, data, attribute)
@@ -754,13 +754,11 @@ function SkillSkeleton:onAcquire(player, is_start, src)
       end
     end
   end
-  if self.add_skills then
-    table.forEach(self.add_skills, function(s)
-      if not room:hasSkill(s) then
-        room:addSkill(s)
-      end
-    end)
-  end
+  table.forEach(self.add_skills, function(s)
+    if not room:hasSkill(s) then
+      room:addSkill(s)
+    end
+  end)
   if self.on_acquire then
     self.on_acquire(player, is_start, src)
   end

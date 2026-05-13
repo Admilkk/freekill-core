@@ -296,12 +296,6 @@ Item {
           if (!t.name.startsWith('#')) {
             generalText.append((`${skillnamecss}<font ${t.is_related_skill ? 'color="purple"' : ''} class='skill-name'><b>`) + Lua.tr(t.name) +
             "</b></font> " + `${t.is_related_skill ? '<font color="purple">' : ''}${t.description}${t.is_related_skill ? '</font>' : ''}`);
-            if (t.related_skills) {
-              for (const rs of t.related_skills) {
-                generalText.append((`${skillnamecss}<font color="purple" class='skill-name'><b>`) + Lua.tr(rs) +
-              "</b></font> <font color='purple'>" + Lua.evaluate(`Fk:getDescription('${rs}')`) + '</font>');
-              }
-            }
           }
         }
 
@@ -569,8 +563,8 @@ Item {
       function update() {
         otherText.clear();
         const descLen = Lua.fn(`function(general)
-          local allDesc = table.map(Fk.generals[general].all_skills, function(s)
-            return Fk:translate(s[1]) + Fk:translate(":" .. s[1])
+          local allDesc = table.map(Fk.generals[general]:getSkillNameList(true, true), function(s)
+            return Fk:translate(s) + Fk:translate(":" .. s)
           end)
           local ret = 0
           for _, s in ipairs(allDesc) do
@@ -687,7 +681,7 @@ Item {
         spacing: 0
 
         Repeater {
-          model: root.general ? Lua.evaluate(`table.map(Fk.generals["${root.general}"].all_skills, function(e) return e[1] end)`) : []
+          model: root.general ? Lua.evaluate(`Fk.generals["${root.general}"]:getSkillNameList(true, true)`) : []
 
           ColumnLayout {
             Layout.fillWidth: true

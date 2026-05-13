@@ -41,8 +41,14 @@ function M:getGeneralDetail(name)
       name = s[1],
       description = Fk:getDescription(s[1]),
       is_related_skill = s[2],
-      related_skills = Fk.skill_skels[s[1]].related_skills,
     })
+    for _, rs in ipairs(Fk.skill_skels[s[1]].related_skills) do
+      table.insert(ret.skill, {
+        name = rs,
+        description = Fk:getDescription(rs),
+        is_related_skill = true,
+      })
+    end
   end
   local _companions = {}
   for _, gname in ipairs(general.companions) do

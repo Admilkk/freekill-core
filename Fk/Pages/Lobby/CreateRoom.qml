@@ -23,9 +23,9 @@ Item {
     height: parent.height
     model: ListModel {
       ListElement { name: "General Settings" }
-      ListElement { name: "游戏模式选择" }
-      ListElement { name: "游戏设置" }
-      ListElement { name: "模式设置" }
+      ListElement { name: "Game Mode Select" }
+      ListElement { name: "Game Settings" }
+      ListElement { name: "Mode Settings" }
       ListElement { name: "Package Settings" }
       ListElement { name: "Ban General Settings" }
     }

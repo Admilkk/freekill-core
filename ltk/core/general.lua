@@ -71,7 +71,7 @@ function General:initialize(package, name, kingdom, hp, maxHp, gender)
   self.related_skills = {} -- skills related to this general, but not first added to it, e.g. "jixi" of dengai
   self.related_other_skills = {} -- skills related to this general and belong to other generals, e.g. "yingzi" of sunce
   self.attached_personal_mark = ""
-  self.all_skills = {}
+  self.all_skills = {} -- 包含related_skills信息，UI用
 
   self.companions = {}
 
@@ -164,18 +164,25 @@ end
 
 --- 获取武将牌上的技能名。
 ---@param include_lord? boolean @ 是否包含主公技。默认否
+---@param include_related? boolean @ 是否包含相关技能。默认否
 ---@return string[]
-function General:getSkillNameList(include_lord)
+function General:getSkillNameList(include_lord, include_related)
   local ret = {}
   local other_skills = table.map(self.other_skills, Util.Name2SkillMapper)
   local skills = table.connect(self.skills, other_skills)
   for _, skill in ipairs(skills) do
     if include_lord or not skill:hasTag(Skill.Lord) then
       table.insert(ret, skill.name)
+      if include_related then
+        table.insertTable(ret, skill.skeleton.related_skills)
+      end
     end
   end
-
-  -- table.insertTable(ret, self.other_skills)
+  if include_related then
+    for _, skill in ipairs(self.related_other_skills) do
+      table.insert(ret, skill)
+    end
+  end
   return ret
 end
 

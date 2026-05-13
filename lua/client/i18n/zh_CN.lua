@@ -112,6 +112,9 @@ Fk:loadTranslationTable {
   ["Observer can view card"] = "旁观者可见手牌",
   ["help: Observer can view card"] = "开启后，旁观者将可以看到其视角下的牌，包括切换视角后",
   ["General Settings"] = "通常设置",
+  ["Game Mode Select"] = "游戏模式选择",
+  ["Game Settings"] = "游戏设置",
+  ["Mode Settings"] = "模式设置",
   ["Package Settings"] = "拓展包设置",
   ["General Packages"] = "武将拓展包",
   ["General Packages Help"] = "武将拓展包设置请移步大厅界面右下角的“武将一览”", -- TODO

@@ -35,9 +35,9 @@ ColumnLayout {
       required property string modelData
       id: cardItem
       autoBack: false
-      dataModel: Ltk.createGeneralCardModel(modelData, { detailed: false })
+      dataModel: Ltk.createGeneralCardModel(modelData)
       onClicked: { // FIXME: rightClicked不能覆写
-        roomScene.showInfoPopup(Qt.createComponent("LunarLtk.Pages.InfoPopups", "GeneralDetail"), { generals: [modelData] });
+        Ltk.roomScene.showInfoPopup(Qt.createComponent("LunarLtk.Pages.InfoPopups", "GeneralDetail"), { generals: [modelData] });
       }
     }
   }

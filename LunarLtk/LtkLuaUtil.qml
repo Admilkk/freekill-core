@@ -307,7 +307,7 @@ QtObject {
       textValue = pile.length.toString();
       if (visibleIds.length > 0) {
         qmlComponentSpec.name = "ViewPile";
-        qmlData.ids = visibleIds; 
+        qmlData.ids = visibleIds;
         qmlComponentSpec.prop = qmlData;
       }
     } else if (mark.startsWith("@$")) {
@@ -323,7 +323,7 @@ QtObject {
     } else if (mark.startsWith("@&")) {
       // 武将牌名列表
       textValue = value.length.toString();
-      qmlComponentSpec.name = "ViewPile";
+      qmlComponentSpec.name = "ViewGeneralPile";
       qmlData.cardNames = value;
       qmlComponentSpec.prop = qmlData;
     } else if (mark.startsWith("@[")) {

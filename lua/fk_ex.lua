@@ -202,6 +202,7 @@ end
 ---@field public extra_target_func? fun(self: TargetModSkill, player: Player, skill: ActiveSkill, card?: Card): number?
 ---@field public card_tip_func? fun(self: ActiveSkill, player: Player, to_select: integer, selected: integer[], selected_targets: Player[], card?: Card, selectable: boolean, extra_data: any): string|CardTipDataSpec? @ 显示在牌上的提示
 ---@field public target_tip_func? fun(self: TargetModSkill, player: Player, to_select: Player, selected: Player[], selected_cards: integer[], card?: Card, selectable: boolean, extra_data: any): string|TargetTipDataSpec?
+---@field public remove_func? fun(self: TargetModSkill, player: Player): boolean? @ 判断是否被移除
 
 ---@class FilterSpec: StatusSkillSpec
 ---@field public card_filter? fun(self: FilterSkill, card: Card, player: Player, isJudgeEvent: boolean?): any

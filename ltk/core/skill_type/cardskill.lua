@@ -197,7 +197,13 @@ end
 ---@param to Player @ 目标
 ---@return boolean?
 function CardSkill:withinDistanceLimit(player, isattack, card, to)
-  if not to or player:distanceTo(to, nil, nil, table.connect(Card:getIdList(card), card.fake_subcards), nil, card) < 1 then return false end
+  if not to or player == to or to.dead then return false end
+
+  if card:hasMark(MarkEnum.BypassDistancesLimit)
+  or player:hasMark(MarkEnum.BypassDistancesLimit)
+  or to:hasMark(MarkEnum.BypassDistancesLimitTo) then
+    return true
+  end
   local status_skills = Fk:currentRoom().status_skills[TargetModSkill] or Util.DummyTable
   if not card and self.name:endsWith("_skill") then
     card = Fk:cloneCard(self.name:sub(1, #self.name - 6))
@@ -206,11 +212,14 @@ function CardSkill:withinDistanceLimit(player, isattack, card, to)
     if skill:bypassDistancesCheck(player, self, card, to) then return true end
   end
 
-  return (isattack and player:inMyAttackRange(to, nil, table.connect(Card:getIdList(card), card.fake_subcards), nil, card)) or
-  (player:distanceTo(to, nil, nil, table.connect(Card:getIdList(card), card.fake_subcards), nil, card) <= self:getDistanceLimit(player, card, to)) or
-  not not card:hasMark(MarkEnum.BypassDistancesLimit) or
-  not not player:hasMark(MarkEnum.BypassDistancesLimit) or
-  not not to:hasMark(MarkEnum.BypassDistancesLimitTo)
+  local distance = player:distanceTo(to, nil, nil, table.connect(Card:getIdList(card), card.fake_subcards), nil, card)
+  if distance < 1 then return false end
+
+  if isattack then
+    return player:inMyAttackRange(to, nil, table.connect(Card:getIdList(card), card.fake_subcards), nil, card)
+  else
+    return distance <= self:getDistanceLimit(player, card, to)
+  end
 end
 
 -- 判断一个角色是否在此牌技能的次数限制内

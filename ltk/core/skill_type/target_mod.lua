@@ -98,4 +98,12 @@ function TargetModSkill:getCardTip(player, to_select, selected, selected_targets
 ---@return string?
 function TargetModSkill:getTargetTip(player, to_select, selected, selected_cards, card, selectable, extra_data) end
 
+
+-- 判定某角色是否被移除
+---@param player Player @ 待判定角色
+---@return boolean?
+function TargetModSkill:isRemoved(player)
+  return false
+end
+
 return TargetModSkill

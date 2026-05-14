@@ -554,7 +554,7 @@ function Player:getAttackRange(excludeIds, excludeSkills)
   return math.max(math.max(baseValue, (max_fixed or 0)) + correct, 0)
 end
 
---- 获取角色是否被移除。
+--- 获取角色是否被移除(不计入座位)
 ---@return boolean
 function Player:isRemoved()
   for mark, _ in pairs(self.mark) do
@@ -565,6 +565,11 @@ function Player:isRemoved()
       end
     end
   end
+  local status_skills = Fk:currentRoom().status_skills[TargetModSkill] or Util.DummyTable ---@type TargetModSkill[]
+  for _, skill in ipairs(status_skills) do
+    if skill:isRemoved(self) then return true end
+  end
+  return false
 end
 
 --- 获取玩家与其他角色的实际距离。

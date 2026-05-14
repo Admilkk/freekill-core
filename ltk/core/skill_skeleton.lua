@@ -456,6 +456,9 @@ function SkillSkeleton:createTargetModSkill(_skill, idx, key, attr, spec)
   if spec.target_tip_func then
     skill.getTargetTip = spec.target_tip_func
   end
+  if spec.remove_func then
+    skill.isRemoved = spec.remove_func
+  end
 
   return skill
 end

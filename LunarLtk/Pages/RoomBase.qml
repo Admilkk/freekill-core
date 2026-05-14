@@ -397,12 +397,12 @@ W.PageBase {
     }
   }
 
-  function playSkillSound(skill, idx) {
-    if (playGeneralSkillSound(data.general)) {
+  function playSkillSound(skill, idx, general, deputy) {
+    if (playGeneralSkillSound(skill, idx, general)) {
       return;
     }
 
-    if (playGeneralSkillSound(data.deputy)) {
+    if (playGeneralSkillSound(skill, idx, deputy)) {
       return;
     }
 
@@ -442,7 +442,7 @@ W.PageBase {
         break;
       }
       case "PlaySkillSound": {
-        playSkillSound(data.name, data.i, data.extension);
+        playSkillSound(data.name, data.i, data.general, data.deputy);
         break;
       }
       case "PlaySound": {

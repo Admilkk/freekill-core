@@ -2457,13 +2457,6 @@ end
 ---@field extra_data? UseExtraData|table @ 额外信息，因技能而异了
 ---@field event_data? CardEffectData @ 事件信息，如借刀事件之于询问杀
 
--- available extra_data:
--- * must_targets: integer[]
--- * exclusive_targets: integer[]
--- * fix_targets: integer[]
--- * bypass_distances: boolean
--- * bypass_times: boolean
----
 --- 询问玩家使用一张牌。
 ---@param player ServerPlayer @ 要询问的玩家
 ---@param params AskToUseCardParams @ 各种变量

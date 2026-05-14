@@ -37,17 +37,21 @@ function M:getGeneralDetail(name)
     endnote = general.endnote,
   }
   for _, s in ipairs(general.all_skills) do
+    local s_name = s[1]
     table.insert(ret.skill, {
-      name = s[1],
-      description = Fk:getDescription(s[1]),
+      name = s_name,
+      description = Fk:getDescription(s_name),
       is_related_skill = s[2],
     })
-    for _, rs in ipairs(Fk.skill_skels[s[1]].related_skills) do
-      table.insert(ret.skill, {
-        name = rs,
-        description = Fk:getDescription(rs),
-        is_related_skill = true,
-      })
+    for _ = 1, 2 do -- 最多两层相关技能
+      for _, rs in ipairs(Fk.skill_skels[s_name].related_skills) do
+        s_name = rs
+        table.insert(ret.skill, {
+          name = s_name,
+          description = Fk:getDescription(s_name),
+          is_related_skill = true,
+        })
+      end
     end
   end
   local _companions = {}

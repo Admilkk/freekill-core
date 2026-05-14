@@ -175,6 +175,9 @@ function General:getSkillNameList(include_lord, include_related)
       table.insert(ret, skill.name)
       if include_related then
         table.insertTable(ret, skill.skeleton.related_skills)
+        for _, rs in ipairs(skill.skeleton.related_skills) do -- 最多两层相关技能
+          table.insertTableIfNeed(ret, Fk.skill_skels[rs].related_skills)
+        end
       end
     end
   end

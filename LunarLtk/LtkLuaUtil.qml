@@ -388,6 +388,7 @@ QtObject {
       cardId: data.cid,
       marks: [],
       name, extension, number, suit, color, type, subtype,
+      picName: data.pic_name,
     };
 
     for (const {k, v} of data.mark) {

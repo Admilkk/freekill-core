@@ -18,7 +18,7 @@ QtObject {
   property int number // 点数
   property string suit // 花色
   property string color // 颜色
-  property string picName : "" // 卡片图像名
+  property var picName : null // 卡片图像名
 
   property string extension
 

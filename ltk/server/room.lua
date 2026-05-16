@@ -808,6 +808,7 @@ end
 ---@return ServerPlayer[] @ 选择的玩家列表，可能为空
 function Room:askToChoosePlayers(player, params)
   local maxNum, minNum = params.max_num, params.min_num
+  assert(params.max_num >= params.min_num, "limits error: The lower limit should be less than the upper limit")
   if maxNum < 1 then
     return {}
   end
@@ -830,6 +831,12 @@ function Room:askToChoosePlayers(player, params)
     extra_data = data,
     no_indicate = params.no_indicate
   }
+  if #params.targets < params.min_num and not params.cancelable then
+    if not params.no_indicate then
+      self:doIndicate(player, params.targets)
+    end
+    return params.targets
+  end
   local _, ret = self:askToUseActiveSkill(player, activeParams)
   if ret then
     return ret.targets
@@ -969,7 +976,7 @@ function Room:askToChooseCardsAndChoice(player, params)
   cancel_choices = cancel_choices or {}
   min = min or 1
   max = max or 1
-  assert(min <= max, "limits error: The upper limit should be less than the lower limit")
+  assert(min <= max, "limits error: The lower limit should be less than the upper limit")
   assert(#cards >= min or #cancel_choices > 0, "limits Error: No enough cards")
   assert(#choices > 0 or #cancel_choices > 0, "should have choice to choose")
   local data = {
@@ -1811,11 +1818,11 @@ function Room:askToGuanxing(player, params)
   bottom_limit = bottom_limit or { 0, leng }
   if #top_limit > 0 then
     assert(top_limit[1] >= 0 and top_limit[2] >= 0, "limits error: The lower limit should be greater than 0")
-    assert(top_limit[1] <= top_limit[2], "limits error: The upper limit should be less than the lower limit")
+    assert(top_limit[1] <= top_limit[2], "limits error: The lower limit should be less than the upper limit")
   end
   if #bottom_limit > 0 then
     assert(bottom_limit[1] >= 0 and bottom_limit[2] >= 0, "limits error: The lower limit should be greater than 0")
-    assert(bottom_limit[1] <= bottom_limit[2], "limits error: The upper limit should be less than the lower limit")
+    assert(bottom_limit[1] <= bottom_limit[2], "limits error: The lower limit should be less than the upper limit")
   end
   if #top_limit > 0 and #bottom_limit > 0 then
     assert(leng >= top_limit[1] + bottom_limit[1] and leng <= top_limit[2] + bottom_limit[2], "limits Error: No enough space")

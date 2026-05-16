@@ -47,6 +47,7 @@ Skill.Force = "Force" --奋武技
 Skill.Spirited = "Spirited" --昂扬技
 Skill.Ambition = "Ambition" --移志技
 Skill.GrowUp = "GrowUp" --成器技
+Skill.Contract = "Contract" --契定技
 
 
 --- 构造函数，不可随意调用。
@@ -253,14 +254,16 @@ end
 --- 判断技能是否有某标签
 ---@param tag SkillTag  待判断的标签
 ---@param compulsory_expand boolean?  是否“拓展”锁定技和限定技标签的含义，包括觉醒技。默认是
+---@param player Player?  待判断的角色
 ---@return boolean
-function Skill:hasTag(tag, compulsory_expand)
+function Skill:hasTag(tag, compulsory_expand, player)
   local expand = (compulsory_expand == nil or compulsory_expand)
   local skel = self:getSkeleton()
   if not skel then return false end
   if expand then
     if tag == Skill.Compulsory then
-      return table.contains(skel.tags, Skill.Compulsory) or table.contains(skel.tags, Skill.Wake)
+      return table.contains(skel.tags, Skill.Compulsory) or table.contains(skel.tags, Skill.Wake) or
+        (table.contains(skel.tags, Skill.Contract) and player ~= nil and table.contains(player:getTableMark("contracted_skills"), skel.name))
     elseif tag == Skill.Limited then
       return table.contains(skel.tags, Skill.Limited) or table.contains(skel.tags, Skill.Wake)
     end

@@ -22,7 +22,7 @@ W.PageBase {
   property alias dataModel: dataModel
   property alias bigAnim: bigAnim
 
-  property list<PhotoModel> photoModel
+  property alias photoModel: photoModel
 
   property alias dynamicCardArea: dynamicCardArea
 
@@ -36,12 +36,16 @@ W.PageBase {
   required property Item drawPile
   required property Item tablePile
 
+  ListModel {
+    id: photoModel
+  }
+
   RoomModel {
     id: dataModel
     roomPage: roomScene
 
     onSeatChanged: roomScene.arrangePhotos();
-    onPlayerAdded: model => roomScene.photoModel.push(model);
+    onPlayerAdded: model => roomScene.photoModel.append({ modelData: model });
     onCardsMoved: (move, data) => roomScene.moveCards(move, data);
 
     onActivated: {
@@ -729,7 +733,8 @@ W.PageBase {
   }
 
   function showDistance(show) {
-    for (const model of photoModel) {
+    for (let i = 0; i < photoModel.count; i++) {
+      const model = photoModel.get(i).modelData;
       if (show) {
         model.distance = Lua.selfPlayer.distanceTo(model.luaPlayer);
       } else {
@@ -797,7 +802,7 @@ W.PageBase {
       if (!item)
         continue;
 
-      region = regions[photoModel[i].index];
+      region = regions[photoModel.get(i).modelData.index];
       item.x = region.x;
       item.y = region.y;
       item.scale = region.scale;
@@ -858,7 +863,7 @@ W.PageBase {
       if (!item)
         continue;
 
-      region = regions[seatIndex[photoModel[i].index]];
+      region = regions[seatIndex[photoModel.get(i).modelData.index]];
       item.x = region.x;
       item.y = region.y;
     }
@@ -897,7 +902,7 @@ W.PageBase {
     setupCallbacks();
 
     for (let i = 0; i < dataModel.playerNum; i++) {
-      photoModel.push(dataModel.players[i]);
+      photoModel.append({ modelData: dataModel.players[i] });
     }
 
     bgm.play();

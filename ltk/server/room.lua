@@ -2662,17 +2662,6 @@ end
 function Room:askToNullification(players, params)
   params.cancelable = (params.cancelable == nil) and true or params.cancelable
   local extra_data = params.extra_data and table.simpleClone(params.extra_data) or {}
-  local extra_data_for_request = table.clone(extra_data) -- 不要将函数传输给客户端
-  local function clearFunc(t)
-    for k, v in pairs(t) do
-      if type(v) == "function" then
-        t[k] = nil
-      elseif type(v) == "table" then
-        clearFunc(v)
-      end
-    end
-  end
-  clearFunc(extra_data_for_request)
   params.prompt = params.prompt or ""
 
   local card_name, pattern, prompt, cancelable, event_data =
@@ -2691,7 +2680,13 @@ function Room:askToNullification(players, params)
   repeat
     useResult = nil
 
-    local data = {card_name, pattern, prompt, cancelable, extra_data_for_request, disabledSkillNames}
+    local data = {card_name, pattern, prompt, cancelable, {
+      -- 以QML中实际用到的为准得了 这些变量根本没在注释中记载
+      effectFrom = extra_data.effectFrom,
+      effectTo = extra_data.effectTo,
+      effectCardId = extra_data.effectCardId,
+      useEventId = extra_data.useEventId,
+    }, disabledSkillNames}
 
     Fk.currentResponsePattern = pattern
 

@@ -162,9 +162,11 @@ local UseCard = GameEvent:subclass("GameEvent.UseCard")
 
 function UseCard:__tostring()
   local data = self.data
-  return string.format("<UseCard %s: %s => [%s] #%d>",
-    data.card, data.from, table.concat(
-      table.map(data.tos or {}, ServerPlayer.__tostring), ", "), self.id)
+  return string.format("<UseCard %s: %s => [%s] %s #%d>",
+    data.card, data.from,
+    table.concat(table.map(data.tos or {}, ServerPlayer.__tostring), ", "),
+    data.toCard and data.toCard:__tostring() or "",
+    self.id)
 end
 
 function UseCard:main()

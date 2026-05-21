@@ -262,17 +262,36 @@ function ReqActiveSkill:expandPiles()
 
   -- 展开该技能本身的额外牌堆
   local pile = skill.expand_pile
+  local ids
   if type(pile) == "function" then
-    local ids = pile(skill, player)
-    ids = table.filter(ids, function(id) return not table.contains(cardsExpanded, id) end)
-    self:expandPile("_extra", ids, self.extra_data and self.extra_data.skillName)
+    ids = table.filter(pile(skill, player), function(id) return not table.contains(cardsExpanded, id) end)
   elseif type(pile) == "string" then
     self:expandPile(pile, player:getPile(pile), self.extra_data and self.extra_data.skillName)
   elseif type(pile) == "table" then
-    local ids = table.filter(pile, function(id) return not table.contains(cardsExpanded, id) end)
-    self:expandPile("_extra", ids, self.extra_data and self.extra_data.skillName)
+    ids = table.filter(pile, function(id) return not table.contains(cardsExpanded, id) end)
   end
-
+  if ids == nil or #ids < 1 then return end
+  local room = Fk:currentRoom()
+  local areas = { 
+    [Card.DrawPile] = "pile_draw", 
+    [Card.Processing] = "processing_area",
+    [Card.DiscardPile] = "pile_discard"
+  }
+  local area
+  for _, id in ipairs(ids) do
+    if area == nil then
+      area = room.card_place[id]
+      if areas[area] == nil then break end
+    elseif area ~= room.card_place[id] then
+      area = nil
+      break
+    end
+  end
+  if areas[area] then
+    self:expandPile("_extra", ids, areas[area])
+  else
+    self:expandPile("_extra", ids, self.extra_data and self.extra_data.skillName or self.skill_name)
+  end
 end
 
 --- 判断确认键是否可用

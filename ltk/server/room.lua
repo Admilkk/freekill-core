@@ -1812,7 +1812,8 @@ end
 ---@return table<"top"|"bottom", integer[]> @ 观星后的牌堆结果
 function Room:askToGuanxing(player, params)
   -- 这一大堆都是来提前报错的
-  local cards, top_limit, bottom_limit, skillName, noPut = params.cards, params.top_limit, params.bottom_limit, params.skill_name, params.skip
+  local cards, top_limit, bottom_limit, skillName, noPut =
+  params.cards, params.top_limit, params.bottom_limit, params.skill_name or "", params.skip
   local leng = #cards
   top_limit = top_limit or { 0, leng }
   bottom_limit = bottom_limit or { 0, leng }
@@ -1836,7 +1837,7 @@ function Room:askToGuanxing(player, params)
 
   --not noPut的情况：默认操作牌堆里的牌，先移至处理区，再置于牌堆顶/底
   if not noPut then
-    self:moveCardTo(cards, Card.Processing, nil, fk.ReasonPut, customNotify, nil, false, player, nil, player)
+    self:moveCardTo(cards, Card.Processing, nil, fk.ReasonPut, skillName, nil, false, player, nil, player)
   end
 
   local command = "AskForGuanxing"
@@ -1877,7 +1878,7 @@ function Room:askToGuanxing(player, params)
         toArea = Card.DrawPile,
         moveReason = fk.ReasonPut,
         proposer = player,
-        skillName = customNotify,
+        skillName = skillName,
         moveVisible = false,
         visiblePlayers = player
       })
@@ -1888,7 +1889,7 @@ function Room:askToGuanxing(player, params)
         toArea = Card.DrawPile,
         moveReason = fk.ReasonPut,
         proposer = player,
-        skillName = customNotify,
+        skillName = skillName,
         drawPilePosition = -1,
         moveVisible = false,
         visiblePlayers = player,

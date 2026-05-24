@@ -234,7 +234,7 @@ function Engine:addGeneral(general)
 
   if general.name ~= general.trueName then
     local tName = general.trueName
-    self.same_generals[tName] = self.same_generals[tName] or { tName }
+    self.same_generals[tName] = self.same_generals[tName] or {}
     table.insert(self.same_generals[tName], general.name)
   end
 end

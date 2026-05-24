@@ -731,11 +731,12 @@ Fk:loadTranslationTable {
   ["#ResponsePlayV0Card"] = "%from 打出了 %arg",
   ["#FilterCard"] = "由于 %arg 的效果，与 %from 相关的 %arg2 被视为了 %arg3",
 
-  ["#AddTargetsBySkill"] = "用于 %arg 的效果，%from 使用的 %arg2 增加了目标 %to",
-  ["#RemoveTargetsBySkill"] = "用于 %arg 的效果，%from 使用的 %arg2 减少了目标 %to",
+  ["#AddTargetsBySkill"] = "由于 %arg 的效果，%from 使用的 %arg2 增加了目标 %to",
+  ["#RemoveTargetsBySkill"] = "由于 %arg 的效果，%from 使用的 %arg2 减少了目标 %to",
 
   ["#TargetAdded"] = "%from 使用的 %arg 增加了目标 %to",
   ["#TargetCancelled"] = "%from 使用的 %arg 取消了目标 %to",
+  ["#TargetNullified"] = "%from 使用的 %arg 对 %to 无效",
 
   -- skill
   ["#InvokeSkill"] = "%from 发动了〖%arg〗",

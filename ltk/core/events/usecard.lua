@@ -616,6 +616,13 @@ function AimData:setNullified(target)
   if #target == 0 then return end
   self.use.nullifiedTargets = self.use.nullifiedTargets or {}
   table.insertTableIfNeed(self.use.nullifiedTargets, target)
+
+  RoomInstance:sendLog{
+    type = "#TargetNullified",
+    from = self.from.id,
+    to = table.map(target, Util.IdMapper),
+    arg = self.card,
+  }
 end
 
 --- 响应当前牌需要的牌张数，默认1

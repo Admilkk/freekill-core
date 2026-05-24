@@ -66,6 +66,8 @@ MarkEnum.TempMarkSuffix = { "-phase", "-turn", "-round", "-noclear" }
 ---inhand：离开手牌区后
 ---
 ---inarea：离开标记值指定的特定区域后
+---
+---public：对所有玩家公开
 MarkEnum.CardTempMarkSuffix = { "-phase", "-turn", "-round",
                                 "-inhand", "-inarea", "-public" }
 

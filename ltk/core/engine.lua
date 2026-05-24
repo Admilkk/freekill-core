@@ -214,7 +214,7 @@ end
 
 --- 加载一个武将到Engine中。
 ---
---- 如果武将的trueName和name不同的话，那么也会将其加到同将清单中。
+--- 同时加入同将清单。
 ---@param general General @ 要添加的武将
 function Engine:addGeneral(general)
   assert(general:isInstanceOf(General))
@@ -232,11 +232,9 @@ function Engine:addGeneral(general)
     table.insertIfNeed(self.kingdoms, general.kingdom)
   end
 
-  if general.name ~= general.trueName then
-    local tName = general.trueName
-    self.same_generals[tName] = self.same_generals[tName] or {}
-    table.insert(self.same_generals[tName], general.name)
-  end
+  local tName = general.trueName
+  self.same_generals[tName] = self.same_generals[tName] or {}
+  table.insert(self.same_generals[tName], general.name)
 end
 
 --- 加载一系列武将。

@@ -103,5 +103,7 @@ QtObject {
     for (const t of origCards) {
       result.push([...t]);
     }
+
+    resultChanged();
   }
 }

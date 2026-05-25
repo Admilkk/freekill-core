@@ -39,7 +39,7 @@
 ---@field public dynamicName fun(self: SkillSkeleton, player: Player, lang?: string): string @ 动态名称函数
 ---@field public dynamicDesc fun(self: SkillSkeleton, player: Player, lang?: string): string @ 动态描述函数
 ---@field public derived_piles? string[] @ 与该技能同在的私有牌堆名，失去时弃置其中的所有牌
----@field public max_use_time table<integer, integer?> @ 该技能在各时机内最大的使用次数
+---@field public max_use_time table<integer, integer|fun(self: SkillSkeleton, player: Player): integer?> @ 该技能在各时机内最大的使用次数，可能是函数或整数，若为nil则表示不限制
 ---@field public max_branches_use_time? table<string, table<integer, integer?>?> | fun(self: SkillSkeleton, player: Player): table<string, table<integer, integer?>?>? @ 该技能的最大使用次数——任意标签（内部有独立的时段细分）
 ---@field public addTest fun(self: SkillSkeleton, fn: fun(room: Room, me: ServerPlayer)) @ 测试函数
 ---@field public onAcquire fun(self: SkillSkeleton, player: ServerPlayer, is_start: boolean, src: ServerPlayer) @ 获得技能时执行的函数
@@ -858,14 +858,13 @@ end
 -- 获得技能的最大使用次数
 ---@param player Player @ 使用者
 ---@param scope integer @ 查询历史范围（默认为回合）
----@param to? Player @ 目标
 ---@return number? @ 最大使用次数，nil就是无限
-function SkillSkeleton:getMaxUseTime(player, scope, to)
+function SkillSkeleton:getMaxUseTime(player, scope)
   scope = scope or Player.HistoryTurn
   local time = self.max_use_time[scope]
   local ret = time
   if type(time) == "function" then
-    ret = time(self, player, to)
+    ret = time(self, player)
   end
   if ret == nil then return nil end
   return ret
@@ -875,9 +874,8 @@ end
 ---@param player Player @ 使用者
 ---@param branch string @ 分支名（没有后缀）
 ---@param scope integer @ 查询历史范围（默认为回合）
----@param to? Player @ 目标
 ---@return number? @ 最大使用次数，nil就是无限
-function SkillSkeleton:getBranchMaxUseTime(player, branch, scope, to)
+function SkillSkeleton:getBranchMaxUseTime(player, branch, scope)
   scope = scope or Player.HistoryTurn
   local times_table
   if type(self.max_branches_use_time) == "function" then
@@ -895,12 +893,11 @@ end
 -- 获得技能的剩余使用次数
 ---@param player Player @ 使用者
 ---@param scope integer @ 查询历史范围（默认为回合）
----@param to? Player @ 目标
 ---@return number? @ 剩余使用次数，nil就是无限
-function SkillSkeleton:getRemainUseTime(player, scope, to)
+function SkillSkeleton:getRemainUseTime(player, scope)
   scope = scope or Player.HistoryTurn
 
-  local limit = self:getMaxUseTime(player, scope, to)
+  local limit = self:getMaxUseTime(player, scope)
   if limit == nil then return nil end
 
   return math.max(0, limit - player:usedSkillTimes(self.name, scope))
@@ -909,25 +906,23 @@ end
 -- 判断一个角色是否在技能的次数限制内
 ---@param player Player @ 使用者
 ---@param scope? integer @ 查询历史范围（默认为回合）
----@param to? Player @ 目标
 ---@return boolean
-function SkillSkeleton:withinTimesLimit(player, scope, to)
+function SkillSkeleton:withinTimesLimit(player, scope)
   scope = scope or Player.HistoryTurn
   if not self:withinBranchTimesLimit(player, nil, scope) then return false end
 
-  local limit = self:getMaxUseTime(player, scope, to)
+  local limit = self:getMaxUseTime(player, scope)
   if limit == nil then return true end
 
-  return self:getRemainUseTime(player, scope, to) > 0
+  return self:getRemainUseTime(player, scope) > 0
 end
 
 -- 判断一个角色是否在技能的**所有分支**次数限制内
 ---@param player Player @ 使用者
 ---@param branch? string @ 查询分支范围（无则检查所有分支）
 ---@param scope? integer @ 查询历史范围（默认为回合）
----@param to? Player @ 目标
 ---@return boolean
-function SkillSkeleton:withinBranchTimesLimit(player, branch, scope, to)
+function SkillSkeleton:withinBranchTimesLimit(player, branch, scope)
   scope = scope or Player.HistoryTurn
   local times_table
   if type(self.max_branches_use_time) == "function" then

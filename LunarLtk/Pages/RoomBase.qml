@@ -329,7 +329,7 @@ W.PageBase {
     bigAnim.sourceComponent = Qt.createComponent("LunarLtk.Components", "UltSkillAnimation");
     bigAnim.item.loadData({
       skillName,
-      general: data.deputy ? photo.deputyGeneral : photo.general,
+      general: isDeputy ? photo.deputyGeneral : photo.general,
     });
   }
 

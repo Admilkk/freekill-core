@@ -1239,6 +1239,19 @@ function Player:getAllSkills()
   return ret
 end
 
+--- 当前是否处于额外的回合。
+--- @return boolean
+function Player:insideExtraTurn()
+  return self:getCurrentExtraTurnReason() ~= "game_rule"
+end
+
+--- 当前额外回合的技能原因。非额外回合则为game_rule
+---@return string
+function Player:getCurrentExtraTurnReason()
+  local mark = self:getTableMark("_extra_turn_count")
+  return mark[#mark] or "game_rule"
+end
+
 --- 确认玩家是否可以使用特定牌。
 ---@param card Card @ 特定牌
 ---@param extra_data? UseExtraData @ 额外数据

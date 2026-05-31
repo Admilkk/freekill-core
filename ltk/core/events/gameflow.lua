@@ -67,15 +67,9 @@ function TurnData:initialize(who, reason, phases)
   TriggerData.initialize(self, {})
   self.who = who
   self.reason = reason or "game_rule"
+  local phases = phases or who.room.logic:getPhaseTable()
   self.phase_table = table.map(
-    phases or {
-      Player.Start,
-      Player.Judge,
-      Player.Draw,
-      Player.Play,
-      Player.Discard,
-      Player.Finish
-    },
+    phases,
     function(phase)
       return
         PhaseData:new{

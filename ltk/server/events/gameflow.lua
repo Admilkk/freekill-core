@@ -386,103 +386,11 @@ function Phase:main()
 
   logic:trigger(fk.EventPhaseProceeding, player, data)
   if data.phase_end then return end
-
-  switch(player.phase, {
-    [Player.PhaseNone] = function()
-      error("You should never proceed PhaseNone")
-    end,
-    [Player.NotActive] = function()
-      error("You should never proceed NotActive")
-    end,
-    [Player.RoundStart] = function()
-
-    end,
-    [Player.Start] = function()
-
-    end,
-    [Player.Judge] = function()
-      local cards = player:getCardIds(Player.Judge)
-      while #cards > 0 do
-        if data.phase_end then break end
-        local cid = table.remove(cards)
-        if not cid then return end
-        local card = player:getVirtualEquip(cid)
-        if not card then
-          card = Fk:getCardById(cid)
-        end
-        if table.contains(player:getCardIds(Player.Judge), cid) and card.skill and card.skill.name ~= "default_card_skill" then
-          room:moveCardTo(card, Card.Processing, nil, fk.ReasonPut, "phase_judge")
-          if card:isVirtual() then
-            room:sendCardVirtName({cid}, card.name)
-          end
-
-          local effect_data = CardEffectData:new {
-            card = card,
-            to = player,
-            tos = { player },
-          }
-          room:doCardEffect(effect_data)
-          if effect_data.isCancellOut then
-            card.skill:onNullified(room, effect_data)
-          end
-        end
-      end
-    end,
-    [Player.Draw] = function()
-      data.n = 2 -- FIXME: 等待阶段拆分
-      room.logic:trigger(fk.DrawNCards, player, data)
-      if data.n > 0 then
-        room:drawCards(player, data.n, "phase_draw")
-      end
-      room.logic:trigger(fk.AfterDrawNCards, player, data)
-    end,
-    [Player.Play] = function()
-      while not player.dead do
-        if data.phase_end then break end
-
-        logic:trigger(fk.BeforePlayCard, player, data)
-        if data.phase_end then break end
-
-        local dat = { timeout = room:getBanner("Timeout") and room:getBanner("Timeout")[tostring(player.id)] or room.timeout }
-        logic:trigger(fk.StartPlayCard, player, dat, true)
-
-        local req = Request:new(player, "PlayCard")
-        req.timeout = dat.timeout
-        local result = req:getResult(player)
-        if result == "" then break end
-
-        local useResult = room:handleUseCardReply(player, result)
-        if type(useResult) == "table" then
-          room:useCard(useResult)
-        end
-      end
-    end,
-    [Player.Discard] = function()
-      local discardNum = #table.filter(
-        player:getCardIds(Player.Hand), function(id)
-          local card = Fk:getCardById(id)
-          return table.every(room.status_skills[MaxCardsSkill] or Util.DummyTable, function(skill)
-            return not skill:excludeFrom(player, card)
-          end)
-        end
-      ) - player:getMaxCards()
-      room:broadcastProperty(player, "MaxCards")
-      if discardNum > 0 then
-        room:askToDiscard(player, {
-          min_num = discardNum,
-          max_num = discardNum,
-          include_equip = false,
-          skill_name = "phase_discard",
-          cancelable = false,
-        })
-      end
-    end,
-    [Player.Finish] = function()
-
-    end,
-  })
-
-
+  --回合流程已搬到ltk.server.gamelogic
+  local process = logic:processPhase(player.phase)
+  if process then
+    return process(room, player, data)
+  end
 end
 
 function Phase:clear()

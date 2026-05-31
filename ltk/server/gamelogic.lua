@@ -4,7 +4,6 @@ local baseGameLogic = require "server.gamelogic"
 
 ---@class GameLogic: Base.GameLogic --, GameLogicLegacyMixin
 ---@field public role_table string[][]
----@field public phase_process [key=Phase, function] 每回合经历的阶段流程
 local GameLogic = baseGameLogic:subclass("GameLogic")
 
 function GameLogic:initialize(room)
@@ -38,16 +37,15 @@ function GameLogic:initialize(room)
       "rebel", "rebel", "rebel", "rebel", "rebel", "rebel", "renegade"
     },
   }
-  self.phase_process = {}
-  self:initPhaseProcess()
 end
 
 function GameLogic:run()
   -- default logic
   local room = self.room
   room:shuffleTable(room.players)
-    
+
   self:prepareGlobalSkills()
+
   self:assignRoles()
   self:adjustSeats()
   self:chooseGenerals()
@@ -68,113 +66,6 @@ local function execGameEvent(tp, ...)
   return ret
 end
 
---初始化每回合该进行的阶段
-function GameLogic:initPhaseProcess()
-  self.phase_process = {
-    [Player.RoundStart] = Util.FalseFunc,
-    [Player.Start] = Util.FalseFunc,
-    [Player.Judge] = function(room, player, data)
-      local cards = player:getCardIds(Player.Judge)
-      while #cards > 0 do
-        if data.phase_end then break end
-        local cid = table.remove(cards)
-        if not cid then return end
-        local card = player:getVirtualEquip(cid)
-        if not card then
-          card = Fk:getCardById(cid)
-        end
-        if table.contains(player:getCardIds(Player.Judge), cid) and card.skill and card.skill.name ~= "default_card_skill" then
-          room:moveCardTo(card, Card.Processing, nil, fk.ReasonPut, "phase_judge")
-          if card:isVirtual() then
-            room:sendCardVirtName({cid}, card.name)
-          end
-
-          local effect_data = CardEffectData:new {
-            card = card,
-            to = player,
-            tos = { player },
-          }
-          room:doCardEffect(effect_data)
-          if effect_data.isCancellOut then
-            card.skill:onNullified(room, effect_data)
-          end
-        end
-      end
-    end,
-    [Player.Draw] = function(room, player, data)
-      data.n = 2 -- FIXME: 等待阶段拆分
-      self:trigger(fk.DrawNCards, player, data)
-      if data.n > 0 then
-        room:drawCards(player, data.n, "phase_draw")
-      end
-      self:trigger(fk.AfterDrawNCards, player, data)
-    end,
-    [Player.Play] = function(room, player, data)
-      while not player.dead do
-        if data.phase_end then break end
-        self:trigger(fk.BeforePlayCard, player, data)
-        if data.phase_end then break end
-
-        local dat = { timeout = room:getBanner("Timeout") and room:getBanner("Timeout")[tostring(player.id)] or room.timeout }
-        self:trigger(fk.StartPlayCard, player, dat, true)
-
-        local req = Request:new(player, "PlayCard")
-        req.timeout = dat.timeout
-        local result = req:getResult(player)
-        if result == "" then break end
-
-        local useResult = room:handleUseCardReply(player, result)
-        if type(useResult) == "table" then
-          room:useCard(useResult)
-        end
-      end
-    end,
-    [Player.Discard] = function(room, player, data)
-      local discardNum = #table.filter(
-        player:getCardIds(Player.Hand), function(id)
-          local card = Fk:getCardById(id)
-          return table.every(room.status_skills[MaxCardsSkill] or Util.DummyTable, function(skill)
-            return not skill:excludeFrom(player, card)
-          end)
-        end
-      ) - player:getMaxCards()
-      room:broadcastProperty(player, "MaxCards")
-      if discardNum > 0 then
-        room:askToDiscard(player, {
-          min_num = discardNum,
-          max_num = discardNum,
-          include_equip = false,
-          skill_name = "phase_discard",
-          cancelable = false,
-        })
-      end
-    end,
-    [Player.Finish] = Util.FalseFunc,
-  }
-end
-
---- 获得该阶段的主要流程
---- @ ---@param phase Phase @ 阶段名称
---- 返回function（需要另外call）
-function GameLogic:processPhase(phase)
-  local process = self.phase_process[phase]
-  if process == nil then
-    error(Util.PhaseStrMapper(phase) .." is never processing in this gamemode")
-    return nil
-  end
-  return process --process(room, player, data)
-end
-
----获取游戏的阶段列表
---顺序就按phase_process怎样排
----返回Phase[]
-function GameLogic:getPhaseTable()
-  local ret = {}
-  for phase, _ in pairs(self.phase_process) do
-    table.insert(ret, phase)
-  end
-  return ret
-end
 --- 分配身份
 function GameLogic:assignRoles()
   local room = self.room

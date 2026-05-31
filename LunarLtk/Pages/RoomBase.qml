@@ -710,7 +710,7 @@ W.PageBase {
   }
 
   function updateMiniGame(sender, data) {
-    popupItem?.updateData(data);
+    roomScene.popupItem?.updateData(data);
   }
 
   function changeSkin(sender, data) {

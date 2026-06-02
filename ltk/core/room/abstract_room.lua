@@ -18,7 +18,7 @@ local AbstractRoom = RoomBase:subclass("AbstractRoom")
 ---@field public getPlayerById fun(self: AbstractRoom, id: integer): Player
 ---@field public getPlayerBySeat fun(self: AbstractRoom, seat: integer): Player
 ---@field public setCurrent fun(self: AbstractRoom, p: Player)
----@field public getCurrent fun(self: AbstractRoom): Player
+---@field public getCurrent fun(self: AbstractRoom): Player?
 
 local CardManager = require 'ltk.core.room.card_manager'
 AbstractRoom:include(CardManager)

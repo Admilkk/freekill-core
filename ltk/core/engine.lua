@@ -380,12 +380,22 @@ end
 ---@param name string @ 牌名
 ---@param suit? Suit @ 花色
 ---@param number? integer @ 点数
+---@param skill_name? string @ 技能名
+---@param subcards? integer[] @ 牌的子牌
 ---@return Card
-function Engine:cloneCard(name, suit, number)
+function Engine:cloneCard(name, suit, number, skill_name, subcards)
   local cd = self.all_card_types[name]
   assert(cd, string.format("Attempt to clone a card that not added to engine: name=%s", name))
   local ret = cd:clone(suit, number)
   ret.package = cd.package
+  if skill_name then
+    ret.skillNames = { skill_name }
+  end
+  if subcards then
+    ret:addSubcards(subcards)
+    if suit then ret.suit = suit end
+    if number then ret.number = number end
+  end
   return ret
 end
 

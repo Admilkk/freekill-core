@@ -12,7 +12,7 @@ Client = AbstractRoom:subclass('Client')
 ---@field public getPlayerById fun(self: AbstractRoom, id: integer): ClientPlayer
 ---@field public getPlayerBySeat fun(self: AbstractRoom, seat: integer): ClientPlayer
 ---@field public setCurrent fun(self: AbstractRoom, p: ClientPlayer)
----@field public getCurrent fun(self: AbstractRoom): ClientPlayer
+---@field public getCurrent fun(self: AbstractRoom): ClientPlayer?
 
 -- load client classes
 ClientPlayer = require "ltk.client.clientplayer"

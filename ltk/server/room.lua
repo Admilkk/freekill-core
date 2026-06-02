@@ -20,7 +20,7 @@ local Room = AbstractRoom:subclass("Room")
 ---@field public getPlayerById fun(self: AbstractRoom, id: integer): ServerPlayer
 ---@field public getPlayerBySeat fun(self: AbstractRoom, seat: integer): ServerPlayer
 ---@field public setCurrent fun(self: AbstractRoom, p: ServerPlayer)
----@field public getCurrent fun(self: AbstractRoom): ServerPlayer
+---@field public getCurrent fun(self: AbstractRoom): ServerPlayer?
 ---@field public logic GameLogic
 
 local ServerRoomBase = Fk.Base.ServerRoomBase

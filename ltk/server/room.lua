@@ -3966,8 +3966,9 @@ function Room:getCardsFromPileByRule(pattern, num, fromPile)
   end
 
   local matchedIds = {}
+  local exp = Exppattern:Parse(pattern)
   for _, id in ipairs(pileToSearch) do
-    if Fk:getCardById(id):matchPattern(pattern) then
+    if exp:match(Fk:getCardById(id)) then
       table.insert(matchedIds, id)
     end
   end

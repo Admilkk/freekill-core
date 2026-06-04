@@ -1517,7 +1517,8 @@ function Room:askToChoices(player, params)
     params.choices, params.all_choices, {minNum, maxNum}, params.cancelable, params.skill_name, params.prompt, params.detailed, params.single,
   })
   local result = req:getResult(player)
-  if result == "" then
+  if type(result) ~= "table" or #result > maxNum or (#result < minNum and not params.cancelable)
+  or table.find(result, function (r) return not table.contains(params.choices, r) end) then
     if params.cancelable then
       return {}
     else
@@ -2281,8 +2282,9 @@ function Room:askToUseVirtualCard(player, params)
       if #subcards > 0 then
         card:addSubcards(subcards)
       elseif params.card_filter.n[1] > 0 then
+        local exp = Exppattern:Parse(params.card_filter.pattern)
         local cards = table.filter(params.card_filter.cards, function (id)
-          return Fk:getCardById(id):matchPattern(params.card_filter.pattern)
+          return exp:match(Fk:getCardById(id))
         end)
         if #cards < params.card_filter.n[1] then
           return nil
@@ -2334,8 +2336,9 @@ function Room:askToUseVirtualCard(player, params)
       if #subcards > 0 then
         card:addSubcards(subcards)
       elseif params.card_filter.n[1] > 0 then
+        local exp = Exppattern:Parse(params.card_filter.pattern)
         local cards = table.filter(params.card_filter.cards, function (id)
-          return Fk:getCardById(id):matchPattern(params.card_filter.pattern)
+          return exp:match(Fk:getCardById(id))
         end)
         if #cards < params.card_filter.n[1] then
           return nil

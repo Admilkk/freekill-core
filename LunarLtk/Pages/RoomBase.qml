@@ -617,6 +617,9 @@ W.PageBase {
           }
           skillInteraction.item.model = model;
         }
+        if (data.qml.prop) {
+          Object.assign(skillInteraction.item, data.qml.prop);
+        }
         skillInteraction.item?.clicked();
         break;
       default:

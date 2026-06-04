@@ -57,7 +57,7 @@ QtObject {
       let invisible = [];
       for (const cid in cardModels) {
         if (visibleData[cid.toString()] == false) {
-          invisible.push(cid);
+          invisible.push(Number(cid));
         }
       }
 
@@ -71,7 +71,8 @@ QtObject {
       let p = 0;
       for (let i = 0; i < output.length; i++) {
         if (invisible.includes(output[i])) {
-          output[i] = invisible[p++];
+          output[i] = invisible[p];
+          p++;
         }
       }
 
@@ -88,7 +89,7 @@ QtObject {
       let model = cardModels[cid];
       model.selected = false;
     }
-    for (var cidstr in cardModels) {
+    for (const cidstr in cardModels) {
       let cid = Number(cidstr); // 为啥这里变成字符串了
       if (old_selected.indexOf(cid) === -1 && cardFilter(cid)) {
         let model = cardModels[cid];

@@ -1493,6 +1493,7 @@ function Room:askToChoices(player, params)
   params.prompt = params.prompt or ""
   params.all_choices = params.all_choices or params.choices
   params.detailed = params.detailed or false
+  params.single = params.single or false
 
   local req = Request:new(player, command)
 

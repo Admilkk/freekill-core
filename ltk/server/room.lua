@@ -1038,7 +1038,13 @@ function Room:askToChooseCardsAndPlayers(player, params)
   pcards = table.filter(pcards, function(cid)
     return exp:match(Fk:getCardById(cid)) and not (params.will_throw and player:prohibitDiscard(cid))
   end)
-  if #pcards < minCardNum and not params.cancelable then return {}, {}, false end
+  if not params.cancelable then -- 牌不够的情况
+    if #pcards == 0 then
+      return {}, {}, false
+    elseif #pcards < minCardNum then
+      minCardNum = #pcards -- 防止牌不够的情况无法按确定和取消
+    end
+  end
 
   local data = {
     targets = table.map(params.targets, Util.IdMapper),
@@ -1532,11 +1538,12 @@ end
 ---@class askToJointChoiceParams
 ---@field players ServerPlayer[] @ 被询问的玩家
 ---@field choices string[] | string[][] @ 可选选项列表。若玩家可选项不同，填写二维数组
+---@field all_choices? string[] | string[][] @ 全部选项列表
 ---@field skill_name? string @ 技能名
 ---@field prompt? string @ 提示信息
 ---@field send_log? boolean @ 是否发Log，默认否
 
---- 同时询问多名玩家从众多选项中选择一个（要求所有玩家选项相同，不同的请自行构造request）
+--- 同时询问多名玩家从众多选项中选择一个（选项可不同）
 ---@param player ServerPlayer @ 发起者
 ---@param params askToJointChoiceParams @ 各种变量
 ---@return table<ServerPlayer, string> @ 返回键值表，键为Player、值为选项
@@ -1550,7 +1557,19 @@ function Room:askToJointChoice(player, params)
   if type(choices[1]) == "table" then
     assert(#choices == #players)
   else
-    choicesMap = table.map(players, function() return choices end)
+    choicesMap = table.map(players, function() return choices end) ---@type string[][]
+  end
+
+  local all_choices = params.all_choices
+  local allChoicesMap ---@type string[][]
+  if all_choices then
+    if type(all_choices[1]) == "table" then
+      allChoicesMap = all_choices ---@type string[][]
+    else
+      allChoicesMap = table.map(players, function() return all_choices end) ---@type string[][]
+    end
+  else
+    allChoicesMap = choicesMap
   end
 
   local req = Request:new(players, "AskForChoices")
@@ -1558,9 +1577,10 @@ function Room:askToJointChoice(player, params)
   req.receive_decode = false
   for i, p in ipairs(players) do
     local p_choices = choicesMap[i]
+    local p_all_choices = allChoicesMap[i]
     local data = {
       p_choices,
-      p_choices,
+      p_all_choices,
       { 1, 1 },
       false,
       skillName,

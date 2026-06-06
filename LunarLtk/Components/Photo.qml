@@ -179,8 +179,11 @@ PhotoBase {
     source: {
       if (root.surrendered) {
         return SkinBank.deathDir + "surrender";
-      } else if (root.dead) {
-        return SkinBank.getRoleDeathPic(root.dataModel.role);
+      } else if (root.dead && !root.dataModel.rest) {
+        if (root.dataModel.role_shown)
+          return SkinBank.getRoleDeathPic(root.dataModel.role);
+        else
+          return SkinBank.getRoleDeathPic("hidden");
       }
       return SkinBank.deathDir + "saveme";
     }

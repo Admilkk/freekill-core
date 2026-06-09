@@ -5,7 +5,7 @@ import LunarLtk
 QtObject {
   id: root
 
-  property var generals: [] // string[]
+  property var generals: [] // 初始武将，只有位置是有意义的 string[]
   property int choiceNum: 1
   property bool convertDisabled: false
   property bool cancelable: false
@@ -17,14 +17,16 @@ QtObject {
   property bool hegemony: false
 
   // 已选择的武将
-  property list<string> result: [] // string[]
+  property list<int> resultInt: [] // int[]
 
-  property var generalDict: ({}) // 武将名到GeneralModel的映射
+  property var generalDict: ([]) // 武将名到GeneralModel的映射
 
-  signal generalChanged(string oldname, string newname)
+  signal generalChanged(int idx, string newname)
 
   signal accepted()
   signal rejected()
+
+  readonly property list<string> result: resultInt.map(e => generals[e]) // 真正要传过去的结果
 
   readonly property string promptText: {
     if (prompt !== "") return Ltk.processPrompt(prompt);
@@ -36,72 +38,65 @@ QtObject {
   }
 
   readonly property bool feasible: {
-    return choiceNum === result.length;
+    return choiceNum === resultInt.length;
   }
 
   readonly property bool canConvert: {
     for (const name of generals) {
+      console.log(name, Ltk.getSameGenerals(name));
       if (Ltk.getSameGenerals(name).length > 0) return true;
     }
     return false;
   }
 
   function generalFilter(choice) {
-    const len = result.length;
-    // 因为list<string>作为ListModel传不到lua只好复制
-    const luaResult = result.map(e => e);
+    const len = resultInt.length;
+    const luaResult = resultInt.map(e => Number(e)); // 需要转化成正经number
     return choiceNum > len && Ltk.chooseGeneralFilter(ruleType, choice, luaResult,
         generals, extraData);
   }
 
-  function selectGeneralCard(choice) {
-    if (result.includes(choice)) {
-      moveGeneral(choice, false);
-    } else if (generalFilter(choice)) {
-      result.push(choice);
+  function selectGeneralCard(index) {
+    if (resultInt.find(e => Number(e) === index)) {
+      moveGeneral(index, false);
+    } else if (generalFilter(index)) {
+      moveGeneral(index, true, resultInt.length);
     }
   }
 
-  function moveGeneral(general, toSelect, toIndex) {
-    const idx = result.findIndex(e => e === general);
+  function moveGeneral(generalIndex, toSelect, toIndex) {
+    const idx = resultInt.findIndex(e => Number(e) === generalIndex);
     if (!toSelect) {
-      if (idx !== -1) result.splice(idx, 1);
+      if (idx !== -1) resultInt.splice(idx, 1);
       return;
     }
 
-    if (!generalFilter(general)) return;
+    if (!generalFilter(generalIndex)) return;
 
-    toIndex = Math.min(result.length, toIndex);
+    toIndex = Math.min(resultInt.length, toIndex);
 
     if (idx !== toIndex) {
-      const to_pos = toIndex ?? (result.length - 1)
-      result[to_pos] = general;
+      const to_pos = toIndex ?? (choiceNum - 1)
+      resultInt[to_pos] = generalIndex;
     }
   }
 
   // 武将牌变更（自选或者同名替换）
-  function changeGeneral(oldName, newModel) {
+  function changeGeneral(idx, newModel) {
+    const numberfiedIdx = Number(idx);
     const newName = newModel.name;
-    for (let i = 0; i < generals.length; i++) {
-      if (generals[i] === oldName) {
-        generals[i] = newName;
-      }
-    }
-    for (let i = 0; i < result.length; i++) {
-      if (result[i] === oldName) {
-        result[i] = newName;
-      }
-    }
-    generalDict[newModel.name] = newModel;
-    generalChanged(oldName, newName);
+    generalDict[numberfiedIdx] = newModel;
+    generals[numberfiedIdx] = newName;
+    generalChanged(numberfiedIdx, newName);
+    
   }
 
   function initGeneralModels() {
-    generalDict = {};
+    generalDict = [];
 
     for (const name of generals) {
-      const model = Ltk.createGeneralCardModel(name)
-      generalDict[name] = model;
+      const model = Ltk.createGeneralCardModel(name);
+      generalDict.push(model);
     }
   }
 }

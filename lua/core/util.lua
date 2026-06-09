@@ -504,6 +504,18 @@ function table.removeOne(self, element)
   return false
 end
 
+---@generic T
+---@param self T[]
+---@param list T[]
+function table.removeTable(self, list)
+  for _, e in ipairs(list) do
+    if table.contains(self,e) then
+      table.removeOne(self, e)
+    end
+  end
+end
+
+
 -- Note: only clone key and value, no metatable
 -- so dont use for class or instance
 ---@generic T

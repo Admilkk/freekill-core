@@ -117,16 +117,12 @@ function ChangeProperty:main()
     if s:hasTag(Skill.AttachedKingdom) then
       if table.contains(s:getSkeleton().attached_kingdom, player.kingdom) then
         table.insertIfNeed(skills, s.name)
-      else
-        if table.contains(skills, s.name) then
-          table.removeOne(skills, s.name)
-        else
-          table.insertIfNeed(skills, "-"..s.name)
-        end
+      elseif not table.removeOne(skills, s.name) then
+        table.insertIfNeed(skills, "-"..s.name)
       end
     end
   end
-  room:handleAddLoseSkills(player, table.concat(skills, "|"), nil, false, false)
+  room:handleAddLoseSkills(player, skills, nil, false, false)
 
   logic:trigger(fk.AfterPropertyChange, player, data)
 end

@@ -132,7 +132,7 @@ function ReqActiveSkill:setSkillPrompt(skill, selected_cards)
 end
 
 function ReqActiveSkill:updatePrompt()
-  local skill = Fk.skills[self.skill_name]
+  local skill = Fk.skills[self.skill_name] --[[@as ActiveSkill | ViewAsSkill]]
   if skill then
     self:setSkillPrompt(skill)
   else
@@ -142,7 +142,7 @@ end
 
 --- 初始化Interaction
 function ReqActiveSkill:setupInteraction()
-  local skill = Fk.skills[self.skill_name]---@type ActiveSkill
+  local skill = Fk.skills[self.skill_name] --[[@as ActiveSkill | ViewAsSkill]]
   if skill and skill.interaction then
     skill.interaction.data = nil
     local interaction = skill:interaction(self.player)
@@ -216,7 +216,7 @@ end
 
 -- 展开额外牌堆（即将所有不在手牌区的牌在手牌区域展开）
 function ReqActiveSkill:expandPiles()
-  local skill = Fk.skills[self.skill_name]---@type ActiveSkill | ViewAsSkill
+  local skill = Fk.skills[self.skill_name] --[[@as ActiveSkill | ViewAsSkill]]
   local player = self.player
   if not skill then return end
 
@@ -270,10 +270,10 @@ function ReqActiveSkill:expandPiles()
   elseif type(pile) == "table" then
     ids = table.filter(pile, function(id) return not table.contains(cardsExpanded, id) end)
   end
-  if ids == nil or #ids < 1 then return end
+  if ids == nil or next(ids) == nil then return end
   local room = Fk:currentRoom()
-  local areas = { 
-    [Card.DrawPile] = "pile_draw", 
+  local areas = {
+    [Card.DrawPile] = "pile_draw",
     [Card.Processing] = "processing_area",
     [Card.DiscardPile] = "pile_discard"
   }
@@ -290,7 +290,17 @@ function ReqActiveSkill:expandPiles()
   if areas[area] then
     self:expandPile("_extra", ids, areas[area])
   else
-    self:expandPile("_extra", ids, self.extra_data and self.extra_data.skillName or self.skill_name)
+    local owner_pile, owners = {}, {}
+    for _, id in ipairs(ids) do
+      local owner = room:getCardOwner(id)
+      local owner_key = owner and owner:toLogString() or ""
+      owner_pile[owner_key] = table.insertIfNeed(owners, owner_key) and {} or owner_pile[owner_key]
+      table.insert(owner_pile[owner_key], id)
+    end
+    for _, owner_key in ipairs(owners) do
+      self:expandPile("_extra", owner_pile[owner_key], owner_key ~= "" and owner_key or
+        (self.extra_data and self.extra_data.skillName or self.skill_name))
+    end
   end
 end
 
@@ -414,7 +424,7 @@ end
 
 --- 更新interaction数据
 function ReqActiveSkill:updateInteraction(data)
-  local skill = Fk.skills[self.skill_name]
+  local skill = Fk.skills[self.skill_name] --[[@as ActiveSkill | ViewAsSkill]]
   if skill and skill.interaction then
     skill.interaction.data = data
     self.scene:update("Interaction", "1", { data = data })
@@ -423,7 +433,7 @@ function ReqActiveSkill:updateInteraction(data)
 end
 
 function ReqActiveSkill:doOKButton()
-  local skill = Fk.skills[self.skill_name]
+  local skill = Fk.skills[self.skill_name] --[[@as ActiveSkill | ViewAsSkill]]
   local cardstr = {
     skill = self.skill_name,
     subcards = self.pendings

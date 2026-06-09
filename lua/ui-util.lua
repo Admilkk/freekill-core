@@ -53,6 +53,12 @@ UI.CardNameBox = function(spec)
   return spec
 end
 
+-- 多选框
+-- 可以赋值的属性有：
+-- * choices: string[] 类型，保存可选项
+-- * cancelable: bool 是否可取消
+-- * detailed: bool 为真的话送详细信息
+-- * all_choices: string[] 类型，保存所有选项
 UI.CheckBox = function(spec)
   spec.choices = type(spec.choices) == "table" and spec.choices or Util.DummyTable
   spec.all_choices = type(spec.all_choices) == "table" and spec.all_choices or spec.choices

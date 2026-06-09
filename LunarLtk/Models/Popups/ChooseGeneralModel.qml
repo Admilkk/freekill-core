@@ -66,10 +66,8 @@ QtObject {
 
   function moveGeneral(generalIndex, toSelect, toIndex) {
     const idx = resultInt.findIndex(e => Number(e) === generalIndex);
-    if (!toSelect) {
-      if (idx !== -1) resultInt.splice(idx, 1);
-      return;
-    }
+    if (idx !== -1) resultInt.splice(idx, 1);
+    if (!toSelect) return;
 
     if (!generalFilter(generalIndex)) return;
 

@@ -513,7 +513,7 @@ end
 ---@param list T[]
 ---@return T[] --- 返回被删除的元素表
 function table.removeTable(self, list)
-  if #self == 0 or #list == 0 or type(self[1]) ~= type(list[1]) then return {} end
+  if next(self) == nil or next(list) == nil then return {} end
   local removeTable = {}
   for _, e in ipairs(list) do
     if table.removeOne(self, e) then

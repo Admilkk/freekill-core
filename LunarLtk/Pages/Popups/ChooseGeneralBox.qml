@@ -167,7 +167,7 @@ GraphicsBox {
       selectable: {
         const result = root.dataModel.resultInt?.map(e => Number(e));
         if (result) {
-          return result.includes(index) || root.dataModel.generalFilter(modelData);
+          return result.includes(index) || root.dataModel.generalFilter(index);
         }
         return false;
       }

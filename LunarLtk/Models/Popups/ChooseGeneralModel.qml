@@ -38,12 +38,11 @@ QtObject {
   }
 
   readonly property bool feasible: {
-    return choiceNum === resultInt.length;
+    return choiceNum === resultInt.length && Ltk.chooseGeneralFeasible(ruleType, result, generals, extraData);
   }
 
   readonly property bool canConvert: {
     for (const name of generals) {
-      console.log(name, Ltk.getSameGenerals(name));
       if (Ltk.getSameGenerals(name).length > 0) return true;
     }
     return false;
@@ -51,8 +50,7 @@ QtObject {
 
   function generalFilter(choice) {
     const len = resultInt.length;
-    const luaResult = resultInt.map(e => Number(e)); // 需要转化成正经number
-    return choiceNum > len && Ltk.chooseGeneralFilter(ruleType, choice, luaResult,
+    return choiceNum > len && Ltk.chooseGeneralFilter(ruleType, generals[choice], result,
         generals, extraData);
   }
 
@@ -79,6 +77,7 @@ QtObject {
     }
   }
 
+  // FIXME: 选中的变更无效。feasible和选将仍用了之前的。
   // 武将牌变更（自选或者同名替换）
   function changeGeneral(idx, newModel) {
     const numberfiedIdx = Number(idx);

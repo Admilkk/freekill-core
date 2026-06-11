@@ -50,6 +50,7 @@ QtObject {
 
   function generalFilter(choice) {
     const len = resultInt.length;
+    const result = resultInt.map(e => generals[Number(e)]);
     return choiceNum > len && Ltk.chooseGeneralFilter(ruleType, generals[choice], result,
         generals, extraData);
   }

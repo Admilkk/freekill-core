@@ -57,7 +57,7 @@ QtObject {
   }
 
   function selectGeneralCard(index) {
-    if (resultInt.find(e => Number(e) === index)) {
+    if (resultInt.findIndex(e => Number(e) === index) >= 0) {
       moveGeneral(index, false);
     } else if (generalFilter(index)) {
       moveGeneral(index, true, resultInt.length);

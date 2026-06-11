@@ -102,11 +102,15 @@ function ChangeHp:main()
     data.who.hp = math.min(data.who.hp + data.num, data.who.maxHp)
     room:broadcastProperty(data.who, "hp")
 
+    local skillName = Fk:translate(data.skillName) or ""
+    if skillName ~= "" then skillName = "</b><font color='gray'>(" .. skillName .. ")</font><b>" end
+
     if reason == "loseHp" then
       room:sendLog{
         type = "#LoseHP",
         from = data.who.id,
         arg = 0 - data.num,
+        arg2 = skillName,
       }
       room:sendLogEvent("LoseHP", {})
     elseif reason == "recover" then
@@ -114,6 +118,7 @@ function ChangeHp:main()
         type = "#HealHP",
         from = data.who.id,
         arg = data.num,
+        arg2 = skillName,
       }
     end
 

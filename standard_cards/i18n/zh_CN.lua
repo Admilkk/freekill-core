@@ -92,6 +92,7 @@ Fk:loadTranslationTable{
 
   ["peach"] = "桃",
   [":peach"] = "基本牌<br /><b>时机</b>：出牌阶段/一名角色处于濒死状态时<br /><b>目标</b>：已受伤的你/处于濒死状态的角色<br /><b>效果</b>：目标角色回复1点体力。",
+  ["peach_skill"] = "桃",
   ["#peach_skill"] = "你回复1点体力",
   ["#peach_dying"] = "%dest 回复1点体力",
 

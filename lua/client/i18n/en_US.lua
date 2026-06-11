@@ -534,8 +534,8 @@ Fk:loadTranslationTable({
   -- damage, heal and lose HP
   ["#Damage"] = "%to dealt %arg %arg2 DMG to %from",
   ["#DamageWithNoFrom"] = "%from took %arg %arg2 DMG",
-  ["#LoseHP"] = "%from lost %arg HP",
-  ["#HealHP"] = "%from healed %arg HP",
+  ["#LoseHP"] = "%from lost %arg HP %arg2",
+  ["#HealHP"] = "%from healed %arg HP %arg2",
   ["#ShowHPAndMaxHP"] = "%from now has %arg HP (max HP = %arg2)",
   ["#LoseMaxHP"] = "%from lost %arg max HP",
   ["#HealMaxHP"] = "%from healed %arg max HP",

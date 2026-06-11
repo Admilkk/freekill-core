@@ -1748,8 +1748,7 @@ function Room:askToArrangeCards(player, params)
   elseif #areaNames == 0 then
     for i = #params.card_map, 1, -1 do
       if type(params.card_map[i]) == "string" then
-        table.insert(areaNames, 1, params.card_map[i])
-        table.remove(params.card_map, i)
+        table.insert(areaNames, 1, table.remove(params.card_map, i))
       end
     end
   end
@@ -4007,8 +4006,7 @@ function Room:getCardsFromPileByRule(pattern, num, fromPile)
   local i
   for _ = 1, loopTimes do
     i = self:random(1, #matchedIds)
-    table.insert(cardPack, matchedIds[i])
-    table.remove(matchedIds, i)
+    table.insert(cardPack, table.remove(matchedIds, i))
   end
 
   return cardPack

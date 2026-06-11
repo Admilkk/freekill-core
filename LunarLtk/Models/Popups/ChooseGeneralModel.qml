@@ -37,9 +37,7 @@ QtObject {
     return ret;
   }
 
-  readonly property bool feasible: {
-    return choiceNum === resultInt.length && Ltk.chooseGeneralFeasible(ruleType, result, generals, extraData);
-  }
+  readonly property bool feasible: choiceNum === resultInt.length && Ltk.chooseGeneralFeasible(ruleType, result, generals, extraData);
 
   readonly property bool canConvert: {
     for (const name of generals) {
@@ -50,8 +48,8 @@ QtObject {
 
   function generalFilter(choice) {
     const len = resultInt.length;
-    const result = resultInt.map(e => generals[Number(e)]);
-    return choiceNum > len && Ltk.chooseGeneralFilter(ruleType, generals[choice], result,
+    const luaResult = resultInt.map(e => generals[Number(e)]);
+    return choiceNum > len && Ltk.chooseGeneralFilter(ruleType, generals[choice], luaResult,
         generals, extraData);
   }
 
@@ -78,15 +76,22 @@ QtObject {
     }
   }
 
-  // FIXME: 选中的变更无效。feasible和选将仍用了之前的。
   // 武将牌变更（自选或者同名替换）
   function changeGeneral(idx, newModel) {
     const numberfiedIdx = Number(idx);
     const newName = newModel.name;
     generalDict[numberfiedIdx] = newModel;
     generals[numberfiedIdx] = newName;
+
+    resultInt = resultInt;
+    const origIdx = resultInt.findIndex(e => Number(e) === numberfiedIdx);
+    if (origIdx >= 0) {
+      moveGeneral(numberfiedIdx, false);
+      if (generalFilter(numberfiedIdx)) {
+        moveGeneral(numberfiedIdx, true, origIdx);
+      }
+    }
     generalChanged(numberfiedIdx, newName);
-    
   }
 
   function initGeneralModels() {

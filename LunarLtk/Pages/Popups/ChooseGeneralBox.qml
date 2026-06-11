@@ -26,6 +26,7 @@ GraphicsBox {
     function onGeneralChanged(idx, newName) {
       const item = generalCardList.itemAt(idx);
       item.dataModel = root.dataModel.generalDict[idx];
+      arrangeCards();
     }
   }
 

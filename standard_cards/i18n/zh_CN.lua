@@ -134,6 +134,7 @@ Fk:loadTranslationTable{
 
   ["god_salvation"] = "桃园结义",
   [":god_salvation"] = "锦囊牌<br /><b>时机</b>：出牌阶段<br /><b>目标</b>：所有角色<br /><b>效果</b>：每名目标角色回复1点体力。",
+  ["god_salvation_skill"] = "桃园结义",
   ["#god_salvation_skill"] = "所有角色回复1点体力",
 
   ["amazing_grace"] = "五谷丰登",

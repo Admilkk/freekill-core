@@ -18,7 +18,8 @@ MetroButton {
     function onAccepted() {
       answer = dataModel.result;
       roomScene.popupItem?.finished();
-    };
+    }
+
     function onRejected() {
       roomScene.popupItem?.finished();
     }

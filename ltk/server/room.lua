@@ -3102,10 +3102,23 @@ end
 ---@param player ServerPlayer
 ---@param num integer @ 变化量
 function Room:changeShield(player, num)
+  num = math.min(num, player:getMaxShield() - player.shield)
+  num = math.max(num, -player.shield)
   if num == 0 then return end
-  player.shield = math.max(player.shield + num, 0)
-  player.shield = math.min(player.shield, 5)
-  self:broadcastProperty(player, "shield")
+  if num > 0 then
+    self:sendLog {
+      type = "#AddShield",
+      from = player.id,
+      arg = num,
+    }
+  else
+    self:sendLog {
+      type = "#LoseShield",
+      from = player.id,
+      arg = -num,
+    }
+  end
+  self:setPlayerProperty(player, "shield", player.shield + num)
 end
 
 -- 杂项函数

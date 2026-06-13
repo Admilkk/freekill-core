@@ -136,7 +136,7 @@ local function resetPlayerHp(player, full, maxHpChange)
   local oldHp, oldMaxHp = player.hp, player.maxHp
   if (maxHpChange == nil) or maxHpChange then
     local maxHp = player:getGeneralMaxHp()
-    local changer = Fk.game_modes[room:getSettings('gameMode')]:getAdjustedProperty(player)
+    local changer = room:getGameMode():getAdjustedProperty(player)
     if changer and changer.maxHp then
       maxHp = maxHp + (changer.maxHp - player.maxHp)
     end

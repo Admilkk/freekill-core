@@ -768,6 +768,8 @@ Fk:loadTranslationTable {
   ["#ShowHPAndMaxHP"] = "%from 的体力值为 %arg，体力上限为 %arg2",
   ["#LoseMaxHP"] = "%from 减了 %arg 点体力上限",
   ["#HealMaxHP"] = "%from 加了 %arg 点体力上限",
+  ["#LoseShield"] = "%from 获得了 %arg 点护甲",
+  ["#AddShield"] = "%from 失去了 %arg 点护甲",
 
   -- dying and death
   ["#EnterDying"] = "%from 进入了濒死状态",

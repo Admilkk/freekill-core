@@ -143,4 +143,10 @@ function AbstractRoom:isGameMode(mode)
   return table.contains(Fk.main_mode_list[mode] or {}, self:getSettings('gameMode'))
 end
 
+--- 获取当前游戏模式
+---@return GameMode
+function AbstractRoom:getGameMode()
+  return Fk.game_modes[self:getSettings('gameMode')]
+end
+
 return AbstractRoom

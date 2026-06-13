@@ -1842,6 +1842,12 @@ function Player:canAttachSkill(skill, relate_to_place)
   return true
 end
 
+--- 最大护甲值
+---@return integer
+function Player:getMaxShield()
+  return math.max(0, 5 + self:getMark(MarkEnum.MaxShieldChanged))
+end
+
 function Player:serialize()
   local o = basePlayer.serialize(self)
 

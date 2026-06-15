@@ -164,7 +164,7 @@ end
 ---@param extra_footnote? string @ 卡牌底注
 ---@return integer[] @ 展开的牌id数组
 function ReqActiveSkill:expandPile(pile, extra_ids, extra_footnote)
-  if self.expanded_piles[pile] ~= nil then return {} end
+  if pile ~= "_extra" and self.expanded_piles[pile] ~= nil then return {} end
   local ids, footnote
   local player = self.player
 
@@ -176,13 +176,16 @@ function ReqActiveSkill:expandPile(pile, extra_ids, extra_footnote)
     ids = extra_ids
     footnote = extra_footnote
     -- self.extra_cards = exira_ids
+    self.expanded_piles[pile] = self.expanded_piles[pile] or {}
+    table.insertTable(self.expanded_piles[pile],ids)
   else
     -- expand_pile为私人牌堆名的情况
     -- FIXME: 可能存在的浅拷贝
     ids = extra_ids or table.simpleClone(player:getPile(pile))
     footnote = extra_footnote or pile
   end
-  self.expanded_piles[pile] = ids
+
+  self.expanded_piles[pile] = self.expanded_piles[pile] or ids
 
   local scene = self.scene
   for _, id in ipairs(ids) do

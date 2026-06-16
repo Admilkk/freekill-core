@@ -1858,27 +1858,37 @@ function Room:askToGuanxing(player, params)
 
   --not noPut的情况：默认操作牌堆里的牌，先移至处理区，再置于牌堆顶/底
   if not noPut then
-    self:moveCardTo(cards, Card.Processing, nil, fk.ReasonPut, skillName, nil, false, player, nil, player)
+    local toProcessing = table.filter(cards, function (id) return self:getCardArea(id) == Card.DrawPile end)
+    self:moveCardTo(toProcessing, Card.Processing, nil, fk.ReasonPut, skillName, nil, false, player, nil, player)
   end
 
   local command = "AskForGuanxing"
   local max_top = top_limit[2]
   local card_map = {}
+  local area_names = {}
+  local max_limit, min_limit = {}, {}
   if max_top > 0 then
     table.insert(card_map, table.slice(cards, 1, max_top + 1))
+    table.insert(area_names, params.area_names[1])
+    table.insert(max_limit, max_top)
+    table.insert(min_limit, top_limit[1])
   end
-  if max_top < leng then
+  if bottom_limit[2] > 0 then
     table.insert(card_map, table.slice(cards, max_top + 1))
+    table.insert(area_names, params.area_names[2])
+    table.insert(max_limit, bottom_limit[2])
+    table.insert(min_limit, bottom_limit[1])
   end
   local default_pos = math.min(top_limit[2], leng - bottom_limit[1])
+
   local result = self:askToArrangeCards(player, {
     skill_name = skillName,
     card_map = card_map,
     box_size = math.min(#cards, 7),
     prompt = params.prompt,
-    max_limit = { top_limit[2] or leng, bottom_limit[2] or leng },
-    min_limit = { top_limit[1] or 0, bottom_limit[1] or 0 },
-    names = params.area_names,
+    max_limit = max_limit,
+    min_limit = min_limit,
+    names = area_names,
     free_arrange = true,
     default_choice = {table.slice(cards, 1, default_pos + 1), table.slice(cards, default_pos + 1)},
   })

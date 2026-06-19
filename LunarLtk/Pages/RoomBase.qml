@@ -897,7 +897,7 @@ W.PageBase {
 
     addCallback(Command.ShowVirtualCard, showVirtualCard);
 
-    addCallback("Ltk.SkillInvoked", (_, data) => popupLogArea.show(data));
+    addCallback("Ltk.SkillInvoked", (_, data) => popupLogArea.show(data, 3000, 2));
   }
 
   Component.onCompleted: {

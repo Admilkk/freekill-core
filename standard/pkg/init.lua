@@ -171,7 +171,7 @@ local role_mode = fk.CreateGameMode{
   is_counted = function(self, room)
     return #room.players >= 5
   end,
-  surrender_func = function(self, playedTime)
+  surrender_func = function(self, playedTime, player)
     local roleCheck = false
     local roleText = ""
 
@@ -179,19 +179,19 @@ local role_mode = fk.CreateGameMode{
       return not p.dead or p.rest > 0
     end)
 
-    if Self.role == "renegade" then
+    if player.role == "renegade" then
       roleCheck = not table.find(alive_players, function(p)
-        return p ~= Self and table.contains({"rebel", "rebel_chief", "renegade"}, p.role)
+        return p ~= player and table.contains({"rebel", "rebel_chief", "renegade"}, p.role)
       end)
       roleText = "left lord and loyalist alive"
-    elseif Self.role == "rebel" or Self.role == "rebel_chief" then
+    elseif player.role == "rebel" or player.role == "rebel_chief" then
       roleCheck = #table.filter(alive_players, function(p)
         return table.contains({"rebel", "rebel_chief", "renegade"}, p.role)
       end) == 1
       roleText = "left one rebel alive"
     else
-      if Self.role == "loyalist" or Self.role == "civilian" then
-        return { { text = Self.role.." never surrender", passed = false } }
+      if player.role == "loyalist" or player.role == "civilian" then
+        return { { text = player.role.." never surrender", passed = false } }
       else
         if #alive_players < 3 then
           roleCheck = true
@@ -199,7 +199,7 @@ local role_mode = fk.CreateGameMode{
           roleText = "left you alive"
           local left_loyalist, left_rebel, left_renegade = false, false, false
           for _, p in ipairs(alive_players) do
-            if p ~= Self then
+            if p ~= player then
               if table.contains({"lord", "loyalist"}, p.role) then
                 left_loyalist = true
                 break

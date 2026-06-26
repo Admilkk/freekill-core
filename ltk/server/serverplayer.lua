@@ -1,7 +1,7 @@
 -- SPDX-License-Identifier: GPL-3.0-or-later
 
 ---@class ServerPlayer : Player, ServerPlayerBase
----@field public surrender boolean 是否投降
+---@field public surrendered boolean 是否投降
 ---@field public mini_game_data any
 ---@field public phases Phase[]
 ---@field public phase_state table[]

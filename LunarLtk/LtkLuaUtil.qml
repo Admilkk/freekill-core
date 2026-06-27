@@ -248,8 +248,21 @@ QtObject {
         ret = ret + "/" + Lua.tr(deputy);
       }
     }
+    const hasSameName = Lua.fn(`function(player)
+      local ret = false
+      for _, p2 in ipairs(Fk:currentRoom().players) do
+        if p2 ~= player and p2.general == player.general and p2.deputyGeneral == player.deputyGeneral then
+          ret = true
+          break
+        end
+      end
+      return ret
+    end`)(player);
+    if (hasSameName) {
+      ret = ret + ("[") + player.seat + ("]");
+    }
     if (playerid == Cpp.self.id) {
-      ret = ret + Lua.tr("playerstr_self")
+      ret = ret + Lua.tr("playerstr_self");
     }
     return ret;
   }

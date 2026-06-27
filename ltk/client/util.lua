@@ -988,6 +988,7 @@ function M:getMiniGame(gtype, p, data)
   data = json.decode(data)
   return {
     qml_path = type(spec.qml_path) == "function" and spec.qml_path(p, data) or spec.qml_path,
+    model = type(spec.model) == "function" and spec.model(p, data) or spec.model,
   }
 end
 

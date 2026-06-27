@@ -532,6 +532,33 @@ QtObject {
     }
   }
 
+  function miniGame(sender, data) {
+    // console.log("miniGame", data.type, JSON.stringify(data.data));
+    const game = data.type;
+    const dat = data.data;
+    const gdata = Ltk.getMiniGame(game, Cpp.self.id, JSON.stringify(dat));
+
+    const CustomDialogData = {
+      component: { url: gdata.qml_path + ".qml" },
+      model: gdata.model,
+      data: dat
+    };
+    activate();
+    if (CustomDialogData.model) {
+      // console.log("miniGame model creating", JSON.stringify(CustomDialogData.model));
+      const mod = Lua.createQmlObject(CustomDialogData.model);
+      const modFunc = mod.initialize;
+      if (typeof modFunc === "function") {
+        modFunc.call(mod);
+      }
+      mod.accepted.connect(() => replyToServer(mod.result));
+      mod.rejected.connect(() => replyToServer(""));
+      popupReady(Command.MiniGame, CustomDialogData, mod);
+    } else {
+      popupReady(Command.MiniGame, CustomDialogData, null);
+    }
+  }
+
   function fillAG(sender, data) {
     const ids = data[0];
 
@@ -613,6 +640,7 @@ QtObject {
     roomPage.addCallback(Command.AskForCardsAndChoice, askForCardsAndChoice);
     roomPage.addCallback(Command.GameOver, gameOver);
     roomPage.addCallback(Command.CustomDialog, customDialog);
+    roomPage.addCallback(Command.MiniGame, miniGame);
 
     roomPage.addCallback(Command.FillAG, fillAG);
     roomPage.addCallback(Command.AskForAG, askForAG);

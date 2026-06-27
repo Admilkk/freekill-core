@@ -86,14 +86,29 @@ W.PageBase {
         [Command.GameOver]: "GameOverBox",
       };
 
+      let needLoadData = null;
       if (command == Command.CustomDialog) {
         component = Lua.createComponent(data.component);
         Object.assign(prop, data.component?.prop ?? {});
+      } else if (command == Command.MiniGame) {
+        if (data.model) {
+          component = Lua.createComponent(data.component);
+          // console.log(component.status, component.errorString());
+          Object.assign(prop, data.data?.prop ?? {});
+        } else { // 兼容旧版
+          component = Qt.createComponent(Cpp.path + "/" + data.component.url);
+          needLoadData = data.data;
+        }
       } else {
         component = Qt.createComponent("LunarLtk.Pages.Popups", componentTable[command]);
       }
 
       roomScene.showPopup(component, prop);
+      if (needLoadData) roomScene.popupItem.loadData(needLoadData); // 兼容旧版
+
+      if (roomScene.popupItem.timeout) {
+        roomScene.progress.visible = false;
+      }
     }
 
     onAgReady: roomScene.showAG();
@@ -700,17 +715,18 @@ W.PageBase {
   }
 
   // TODO: 处理minigame，但现在懒得管
-  function handleMiniGame(sender, data) {
+  /* function handleMiniGame(sender, data) {
     const game = data.type;
     const dat = data.data;
     const gdata = Ltk.getMiniGame(game, Cpp.self.id, JSON.stringify(dat));
     const component = Qt.createComponent(Cpp.path + "/" + gdata.qml_path + ".qml")
+    console.log(component.status, component.errorString());
     dataModel.activate();
     showPopup(component);
     if (dat) {
       roomScene.popupItem.loadData(dat);
     }
-  }
+  } */
 
   function updateMiniGame(sender, data) {
     roomScene.popupItem?.updateData(data);
@@ -889,7 +905,6 @@ W.PageBase {
 
     addCallback(Command.CloseAG, () => agItem.close());
 
-    addCallback(Command.MiniGame, handleMiniGame);
     addCallback(Command.UpdateMiniGame, updateMiniGame);
 
     addCallback(Command.UpdateRequestUI, updateRequestUI);

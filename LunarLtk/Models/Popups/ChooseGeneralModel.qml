@@ -12,8 +12,8 @@ QtObject {
   property string skillName
   property string prompt: ""
   property bool detailed
-  property string ruleType: ""
-  property var extraData
+  property string ruleType: "askForGeneralsChosen"
+  property var extraData: ({ n: choiceNum }) // 额外数据，传给Lua的chooseGeneralFilter函数
   property bool hegemony: false
 
   // 已选择的武将
@@ -101,5 +101,9 @@ QtObject {
       const model = Ltk.createGeneralCardModel(name);
       generalDict.push(model);
     }
+  }
+
+  function initialize() {
+    this.initGeneralModels();
   }
 }

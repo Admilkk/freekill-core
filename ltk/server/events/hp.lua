@@ -185,6 +185,8 @@ function Damage:main()
   local room = self.room
   local logic = room.logic
 
+  damageData.last_damage = damageData.damage
+
   if not damageData.chain and logic:damageByCardEffect(false) then
     local cardEffectData = logic:getCurrentEvent():findParent(GameEvent.CardEffect)
     if cardEffectData then
@@ -234,6 +236,7 @@ function Damage:main()
           from = damageData.to.id,
           arg = eventObj.break_reason,
           arg2 = damageName,
+          arg3 = damageData.last_damage,
         }
       else
         room:sendLog {
@@ -241,6 +244,7 @@ function Damage:main()
           from = damageData.to.id,
           arg = eventObj.break_reason,
           arg2 = damageName,
+          arg3 = damageData.last_damage,
         }
       end
       logic:breakEvent(false)

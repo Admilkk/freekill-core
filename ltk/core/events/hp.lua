@@ -79,7 +79,26 @@ DamageData = TriggerData:subclass("DamageData")
 --- 改变伤害事件的伤害值
 ---@param num integer 伤害值改变量
 function DamageData:changeDamage(num)
+  self.last_damage = self.damage
   self.damage = self.damage + num
+  if self.from then
+    RoomInstance:sendLog {
+      type = "#ChangeDamage",
+      to = {self.from.id},
+      from = self.to.id,
+      arg = Fk:getDamageNatureName(self.damageType),
+      arg2 = self.last_damage,
+      arg3 = self.damage,
+    }
+  else
+    RoomInstance:sendLog {
+      type = "#ChangeDamageWithNoFrom",
+      from = self.to.id,
+      arg = Fk:getDamageNatureName(self.damageType),
+      arg2 = self.last_damage,
+      arg3 = self.damage,
+    }
+  end
   if self.damage < 1 then
     self:preventDamage()
   end
@@ -87,6 +106,9 @@ end
 
 --- 防止伤害
 function DamageData:preventDamage()
+  if self.damage > 0 then
+    self.last_damage = self.damage
+  end
   self.damage = 0
   self.prevented = true
 end

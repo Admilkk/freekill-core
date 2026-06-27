@@ -759,8 +759,10 @@ Fk:loadTranslationTable {
   -- damage, heal and lose HP
   ["#Damage"] = "%to 对 %from 造成了 %arg 点 %arg2 伤害",
   ["#DamageWithNoFrom"] = "%from 受到了 %arg 点 %arg2 伤害",
-  ["#PreventDamage"] = "由于 %arg，%to 即将对 %from 造成的 %arg2 伤害被防止了",
-  ["#PreventDamageWithNoFrom"] = "由于 %arg，%from 即将受到的 %arg2 伤害被防止了",
+  ["#ChangeDamage"] = "%to 即将对 %from 造成的 %arg2 点 %arg 伤害变为 %arg3 点",
+  ["#ChangeDamageWithNoFrom"] = "%from 即将受到的 %arg2 点 %arg 伤害变为 %arg3 点",
+  ["#PreventDamage"] = "由于 %arg，%to 即将对 %from 造成的 %arg3 点 %arg2 伤害被防止了",
+  ["#PreventDamageWithNoFrom"] = "由于 %arg，%from 即将受到的 %arg3 点 %arg2 伤害被防止了",
   ["#GameEventDamage"] = "伤害事件：%to 对 %from 造成 %arg 点 %arg2 伤害",
   ["#GameEventDamageNoFrom"] = "伤害事件：%from 受到 %arg 点 %arg2 伤害",
   ["#LoseHP"] = "%from 失去了 %arg 点体力 %arg2",

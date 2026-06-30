@@ -2884,7 +2884,7 @@ end
 ---@class AskToMiniGameParams
 ---@field skill_name string @ 烧条时显示的技能名
 ---@field game_type string @ 小游戏框关键词
----@field data_table table<integer, any> @ 以每个playerID为键的数据数组
+---@field data_table table<integer, any> @ 以每个playerID为键的数据数组 注意```prop```可以为使用model的qml框额外指定初始值
 ---@field timeout? integer @ 烧条时间，单位为秒。默认使用房间的timeout
 
 -- TODO: 重构request机制，不然这个还得手动拿client_reply

@@ -380,19 +380,6 @@ end
 
 -- other
 
--- 负责逻辑运算的dataModel定义式/url版
----@class ModelURLSpec
----@field url string 本体的qml物件路径
----@field prop table 用于初始化的dataModel属性
-
--- 负责逻辑运算的dataModel定义式/uri版
----@class ModelURISpec
----@field uri string 本体的qml文件夹路径
----@field name string 本体的qml文件名
----@field prop table 用于初始化的dataModel属性
-
----@alias ModelSpec ModelURLSpec|ModelURISpec
-
 ---@class PoxiSpec
 ---@field name string
 ---@field card_filter fun(to_select: integer, selected: integer[], data: any, extra_data: any): any
@@ -412,7 +399,7 @@ end
 ---@field qml_path string | fun(player: Player, data: any): string 框的qml路径
 ---@field update_func? fun(player: ServerPlayer, data: any) 更新函数
 ---@field default_choice? fun(player: ServerPlayer, data: any): any 默认值函数 
----@field model? ModelSpec | fun(player: ServerPlayer, data: any): ModelSpec 给dataModel的model赋值，通常是一个table，里面是一些初始属性
+---@field model? QmlComponent | fun(player: ServerPlayer, data: any): QmlComponent 给dataModel的model赋值，通常是一个table，里面是一些初始属性
 
 ---@class CardTipDataSpec
 ---@field content string

@@ -31,7 +31,7 @@ MetroButton {
   }
 
   onClicked: {
-    if (!dataModel.cancelable && dataModel.choices.length < 2) return;
+    if (!dataModel.cancelable && !dataModel.detailed && dataModel.choices.length < 2) return;
     roomScene.showPopup(Qt.createComponent("LunarLtk.Pages.Popups", "ChoicesBox"), { dataModel, noOneLine: true });
   }
 }

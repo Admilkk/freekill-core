@@ -586,6 +586,11 @@ QtObject {
     agModel.takeAG(general, cid);
   }
 
+  function disableAG(sender, data) {
+    if (!agModel) return;
+    agModel.interactive = false;
+  }
+
   // 蒋琬专属；啥时候删了这玩意啊？
   function jiangwanHandler(sender, data) {
     const hand = dashboard.handcards.map(c => c.cardId);
@@ -645,6 +650,7 @@ QtObject {
     roomPage.addCallback(Command.FillAG, fillAG);
     roomPage.addCallback(Command.AskForAG, askForAG);
     roomPage.addCallback(Command.TakeAG, takeAG);
+    roomPage.addCallback(Command.DisableAG, disableAG);
 
     roomPage.addCallback(Command.ReplyToServer, (_, data) => replyToServer(data));
   }

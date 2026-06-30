@@ -2849,6 +2849,20 @@ function Room:takeAG(taker, id, notify_list)
   end
 end
 
+--- 禁用player视角的AG（不可与之交互）。
+---
+--- 若不传参（即player为nil），那么禁用所有玩家的AG。
+--- 
+--- 注意想要真正关掉AG的话应该调用closeAG。
+---@see Room.closeAG
+---@param player? ServerPlayer @ 要禁用AG的玩家
+function Room:disableAG(player)
+  if player then player:doNotify("DisableAG", "")
+  else
+    self:doBroadcastNotify("DisableAG", "")
+  end
+end
+
 --- 关闭player那侧显示的AG。
 ---
 --- 若不传参（即player为nil），那么关闭所有玩家的AG。

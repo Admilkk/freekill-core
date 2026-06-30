@@ -94,6 +94,7 @@ export const GameOver = "GameOver";
 export const FillAG = "FillAG";
 export const AskForAG = "AskForAG";
 export const TakeAG = "TakeAG";
+export const DisableAG = "DisableAG";
 export const CloseAG = "CloseAG";
 export const CustomDialog = "CustomDialog";
 export const MiniGame = "MiniGame";

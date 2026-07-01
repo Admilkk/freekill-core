@@ -309,6 +309,7 @@ function Damage:exit()
           card = damageData.card,
           skillName = damageData.skillName,
           chain = true,
+          parent = damageData,
         }
 
         room:damage(dmg)

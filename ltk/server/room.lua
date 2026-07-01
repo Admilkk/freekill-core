@@ -3894,7 +3894,7 @@ function Room:showCards(cards, from, proposer)
 
   self:doBroadcastNotify("ShowCard", { cards, src, n })
 
-  self.logic:trigger(fk.CardShown, proposer, { cardIds = cards })
+  self.logic:trigger(fk.CardShown, proposer, { cardIds = cards, from = from })
 end
 
 --- 将虚拟牌展示到桌面（仅动画）

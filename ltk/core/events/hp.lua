@@ -71,6 +71,7 @@ fk.IceDamage = 4
 ---@field public isVirtualDMG? boolean @ 是否是虚拟伤害
 ---@field public dealtRecorderId integer? @ “实际造成的伤害”中对应的事件ID
 ---@field public prevented boolean? @ 伤害是否被防止
+---@field public parent DamageData? @ 传导的来源伤害数据
 
 --- 描述和伤害事件有关的数据
 ---@class DamageData: DamageDataSpec, TriggerData

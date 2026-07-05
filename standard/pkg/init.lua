@@ -130,11 +130,17 @@ local role_getlogic = function()
           end
         end
       end
+
       for _, skill in ipairs(lord_skills) do
-        room:doBroadcastNotify("AddSkill", {
-          lord.id,
-          skill
-        })
+        room:doBroadcastNotify("AddSkill", { lord.id, skill })
+      end
+
+      if room:getSettings("WangzhanFourEmblems") then
+        local emblems = { "qinglong_emblem&", "baihu_emblem&", "zhuque_emblem&", "xuanwu_emblem&" }
+        local skill = room:tableRandomPick(emblems)
+        table.removeOne(emblems, skill)
+        room:setBanner("WangzhanFourEmblems", emblems)
+        room:handleAddLoseSkills(lord, skill, nil, false, true)
       end
     end
 
@@ -227,6 +233,24 @@ local role_mode = fk.CreateGameMode{
     }
   end,
 }
+
+local W = require "ui_emu.preferences"
+role_mode.ui_settings = {
+  W.PreferenceGroup {
+    title = "m_wangzhan_enhance",
+
+    W.SwitchRow {
+      _settingsKey = "WangzhanBattleRoyal",
+      title = "WangzhanBattleRoyal",
+    },
+
+    W.SwitchRow {
+      _settingsKey = "WangzhanFourEmblems",
+      title = "WangzhanFourEmblems",
+    },
+  },
+}
+
 extension:addGameMode(role_mode)
 Fk:loadTranslationTable{
   ["time limitation: 5 min"] = "游戏时长达到5分钟",
@@ -235,6 +259,14 @@ Fk:loadTranslationTable{
   ["left you alive"] = "主忠方仅剩你存活且其他阵营仅剩一方",
   ["loyalist never surrender"] = "忠臣永不投降！",
   ["civilian never surrender"] = "平民坚持就是成功！",
+
+  ["m_wangzhan_enhance"] = "王战比赛规则",
+  ["WangzhanBattleRoyal"] = "鏖战",
+  ["help: WangzhanBattleRoyal"] = "8人/6人局第3/4轮结束时进入鏖战，回合结束时需弃牌或失去体力",
+  ["WangzhanFourEmblems"] = "四象标记",
+  ["help: WangzhanFourEmblems"] = "主公开局随机获得一个四象标记(一次性技能)",
+  ["@[:]WangzhanBattleRoyal"] = "",
+  [":WangzhanBattleRoyal"] = "每回合所有行动结束后，当前回合角色须选择一项：1.将两张牌置入弃牌堆；2.失去1点体力。结算中当前回合角色不触发任何武将技能。",
 }
 
 local anjiang = General(extension, "anjiang", "unknown", 5)

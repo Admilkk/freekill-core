@@ -99,17 +99,18 @@ function Room:handleChangeSkin(id, data)
   self:doBroadcastNotify("ChangeSkin", data)
 end
 
--- 构造武将牌堆。同名武将只留下一张
+-- 构造武将牌堆。若没有开启禁止同名替换，同名武将只留下一张
 function Room:makeGeneralPile()
   local trueNames = {}
   local ret = {}
-  if self.game_started then
+  local enableSameName = self:getSettings("disableSameConvert")
+  if self.game_started and not enableSameName then
     for _, player in ipairs(self.players) do
       trueNames[Fk.generals[player.general].trueName] = true
     end
   end
   for name, general in pairs(Fk.generals) do
-    if Fk:canUseGeneral(name) and not trueNames[general.trueName] then
+    if Fk:canUseGeneral(name) and (enableSameName or not trueNames[general.trueName]) then
       table.insert(ret, name)
       trueNames[general.trueName] = true
     end
@@ -1190,7 +1191,7 @@ end
 ---@class AskToChooseGeneralParams
 ---@field generals string[] @ 可选武将
 ---@field n? integer @ 可选数量，默认为1
----@field no_convert? boolean @ 可否同名替换，默认可
+---@field no_convert? boolean @ 禁止同名替换，默认不禁止
 ---@field rule? string @ 选将规则名（使用```Fk:addChooseGeneralRule```定义），默认为askForGeneralsChosen
 ---@field extra_data? table @ 额外信息，键值表。预留：```skill_name```技能名
 ---@field heg? boolean @ 是否应用国战ui（提示珠联璧合和主副将调整阴阳鱼）。默认选将规则为heg_general_choose
@@ -1207,6 +1208,7 @@ function Room:askToChooseGeneral(player, params)
   if not rule then return {} end
 
   local n, generals = params.n or 1, params.generals
+  local no_convert = params.no_convert or self:getSettings("disableSameConvert") or false
   if #generals == n then return n == 1 and generals[1] or generals end
   local extra_data = params.extra_data or {}
   extra_data.n = extra_data.n or n
@@ -1217,7 +1219,7 @@ function Room:askToChooseGeneral(player, params)
   local data = {
     generals,
     n,
-    params.no_convert or false,
+    no_convert,
     params.heg or false,
     rule_type,
     params.prompt or "",

@@ -67,28 +67,28 @@ Item {
           root.updateCardMap(root.discardedCards[i]);
         }
         root.discardedCards = [];
+        const model_component = Qt.createComponent("LunarLtk.Models", "CardModel");
         for (i = 0; i < root.cards.length; i++) {
           const orig_card = root.cards[i];
           if (orig_card.busy || root.inTable(orig_card))
             continue;
           const orig_data = orig_card.dataModel;
-          let model = orig_card.dataModel;
-          if (model.cid) {
-            model = Ltk.createCardModel(model.cid);
-          } else if (model.name) {
-            // 针对虚拟牌的凑合复制
-            model = Ltk.createCardModelFromName(model.name, {
-              marks: orig_data.marks,
-              name: orig_data.name,
-              extension: orig_data.extension,
-              number: orig_data.number,
-              suit: orig_data.suit,
-              color: orig_data.color,
-              type: orig_data.type,
-              subtype: orig_data.subtype,
-              picName: orig_data.pic_name,
-            });
-          }
+          let model = model_component.createObject(null, {
+            cardId: orig_data.cardId,
+            virtId: orig_data.virtId,
+            name: orig_data.name,
+            virtName: orig_data.virtName,
+            number: orig_data.number,
+            suit: orig_data.suit,
+            color: orig_data.color,
+            picName: orig_data.pic_name,
+            extension: orig_data.extension,
+            type: orig_data.type,
+            subtype: orig_data.subtype,
+            known: orig_data.known,
+            marks: orig_data.marks,
+            footnote: orig_data.footnote,
+          });
           root.cardMap.set(model, [orig_card, orig_data]);
           orig_card.dataModel = model;
           root.discardedCards.push(orig_card);

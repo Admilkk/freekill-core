@@ -63,7 +63,8 @@ Item {
       } else {
         for (i = 0; i < discardedCards.length; i++) {
           if (!inTable((discardedCards[i])))
-            discardedCards[i].dataModel.selectable = false;
+            // 令已离开处理区的卡牌变灰，注意不能修改dataModel，否则将导致在其他区域的此牌变为不可选中
+            discardedCards[i].selectable = false;
         }
         toVanish = true;
       }

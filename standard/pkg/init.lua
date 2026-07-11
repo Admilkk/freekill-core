@@ -311,6 +311,16 @@ local role_mode = fk.CreateGameMode{
 local W = require "ui_emu.preferences"
 role_mode.ui_settings = {
   W.PreferenceGroup {
+    title = "role_misc_change",
+
+    W.ComboRow {
+      _settingsKey = "LordIsWhat",
+      title = "LordIsWhat",
+      model = { "LordIsWhat_Null", "lord", "loyalist", "rebel", "renegade" }
+    },
+  },
+
+  W.PreferenceGroup {
     title = "m_wangzhan_enhance",
 
     W.SwitchRow {
@@ -323,20 +333,15 @@ role_mode.ui_settings = {
       title = "WangzhanFourEmblems",
     },
   },
-  W.PreferenceGroup {
-    title = "role_misc_change",
 
-    W.ComboRow {
-      _settingsKey = "LordIsWhat",
-      title = "LordIsWhat",
-      model = { "LordIsWhat_Null", "lord", "loyalist", "rebel", "renegade" }
-    },
+  W.PreferenceGroup {
+    title = "role_double_renegade",
 
     W.SwitchRow {
       _settingsKey = "MakeCivilian",
       title = "MakeCivilian",
       enabled = function(settings)
-        return settings.playerNum > 5 and settings._mode["DoubleRenegade"] == false
+        return (settings.playerNum or 0) > 5 and settings._mode["DoubleRenegade"] == false
       end,
     },
 
@@ -344,7 +349,7 @@ role_mode.ui_settings = {
       _settingsKey = "DoubleRenegade",
       title = "DoubleRenegade",
       enabled = function(settings)
-        return settings.playerNum > 5 and settings._mode["MakeCivilian"] == false
+        return (settings.playerNum or 0) > 5 and settings._mode["MakeCivilian"] == false
       end,
     },
 
@@ -352,7 +357,7 @@ role_mode.ui_settings = {
       _settingsKey = "RenegadeTogether",
       title = "RenegadeTogether",
       enabled = function(settings)
-        return settings._mode["DoubleRenegade"] == true
+        return (settings.playerNum or 0) > 5 and settings._mode["DoubleRenegade"] == true
       end
     },
   },
@@ -379,6 +384,8 @@ Fk:loadTranslationTable{
   ["LordIsWhat"] = "真人特定身份",
   ["help: LordIsWhat"] = "最早加入房间的真人始终是特定身份（调试用）",
   ["LordIsWhat_Null"] = "不设置",
+  ["role_double_renegade"] = "双内模式相关",
+  ["help: role_double_renegade"] = "仅在游戏人数<b>不小于6</b>时有效",
   ["MakeCivilian"] = "置入平民",
   ["help: MakeCivilian"] = "将最后一个反贼替换为平民，平民只要存活就能胜利",
   ["DoubleRenegade"] = "双内奸",

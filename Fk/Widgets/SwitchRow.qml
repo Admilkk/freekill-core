@@ -10,8 +10,8 @@ ActionRow {
   property alias value: root.checked
 
   suffixComponent: Switch {
-    checked: root.checked
-    onCheckedChanged: root.checked = checked
+    checked: root.enabled ? root.checked : false
+    onCheckedChanged: root.checked = root.enabled ? checked : false
   }
 
   onClicked: {

@@ -1,3 +1,5 @@
+pragma ComponentBehavior: Bound
+
 import QtQuick
 import QtQuick.Controls
 
@@ -13,7 +15,11 @@ ActionRow {
   }
 
   onClicked: {
-    checked = !checked;
+    root.checked = !root.checked;
+  }
+
+  onEnabledChanged: {
+    root.checked = false;
   }
 }
 

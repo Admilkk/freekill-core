@@ -1358,10 +1358,12 @@ function Room:askToPoxi(player, params)
         end
       end
       if #unknownIndexs > 1 then
+        local newIds = table.simpleClone(ids)
         self:shuffleTable(unknownVals)
         for j, idx in ipairs(unknownIndexs) do
-          ids[idx] = unknownVals[j]
+          newIds[idx] = unknownVals[j]
         end
+        card_data[2] = newIds
       end
     end
   end

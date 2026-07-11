@@ -213,6 +213,13 @@ local role_mode = fk.CreateGameMode{
   is_counted = function(self, room)
     return #room.players >= 5
   end,
+  friend_enemy_judge = function (self, targetOne, targetTwo)
+    if targetOne == targetTwo then return true end
+    if targetOne.role == "renegade" and targetTwo.role == "renegade" then
+      return Fk:currentRoom():getSettings("RenegadeTogether") -- 内奸是否需要内讧
+    end
+    return GameMode.friendEnemyJudge(self, targetOne, targetTwo)
+  end,
   winner_getter = function(self, victim)
     if not victim.surrendered and victim.rest > 0 then
       return ""

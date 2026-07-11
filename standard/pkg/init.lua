@@ -41,6 +41,42 @@ General:new(extension, "diaochan", "qun", 3, 3, General.Female):addSkills { "lij
 local role_getlogic = function()
   local role_logic = GameLogic:subclass("role_logic")
 
+--- 分配身份
+  function role_logic:assignRoles()
+    local room = self.room
+    local n = #room.players
+    local roles = self.role_table[n]
+
+    local rebel_index = table.indexOf(roles, "rebel")
+    if rebel_index then
+      if room:getSettings("MakeCivilian") then
+        table.remove(roles, rebel_index)
+        table.insert(roles, rebel_index, "civilian")
+      elseif room:getSettings("DoubleRenegade") then
+        table.remove(roles, rebel_index)
+        table.insert(roles, rebel_index, "renegade")
+      end
+    end
+
+    room:shuffleTable(roles)
+
+    local roomLordID = table.findIndex(room.players, function(p) return p.id > 0 end)
+    local roomRole = room:getSettings("LordIsWhat")
+    local roomRoleIndex = table.indexOf(roles, roomRole)
+    if roomRole ~= "LordIsWhat_Null" and math.min(roomLordID, roomRoleIndex) ~= -1 then
+      roles[roomLordID], roles[roomRoleIndex] = roles[roomRoleIndex], roles[roomLordID]
+    end
+
+    for i = 1, n do
+      local p = room.players[i]
+      p.role = roles[i]
+      if p.role == "lord" then
+        room:setPlayerProperty(p, "role_shown", true)
+      end
+      room:broadcastProperty(p, "role")
+    end
+  end
+
   function role_logic:chooseGenerals()
     local room = self.room ---@class Room
     local generalNum = room:getSettings('generalNum')
@@ -177,6 +213,44 @@ local role_mode = fk.CreateGameMode{
   is_counted = function(self, room)
     return #room.players >= 5
   end,
+  winner_getter = function(self, victim)
+    if not victim.surrendered and victim.rest > 0 then
+      return ""
+    end
+
+    local room = victim.room
+    local winner = ""
+    local alive = table.filter(room.players, function(p)
+      return not p.surrendered and not (p.dead and p.rest == 0) and p.role ~= "civilian"
+    end)
+
+    if victim.role == "lord" then
+      if room:getSettings("RenegadeTogether") and table.every(alive, function(p) return p.role == "renegade" end) then
+        winner = "renegade"
+      elseif #alive == 1 and alive[1].role == "renegade" then
+        winner = "renegade"
+      else
+        winner = "rebel+rebel_chief"
+      end
+    elseif victim.role ~= "loyalist" then
+      local lord_win = true
+      for _, p in ipairs(alive) do
+        if p.role == "rebel" or p.role == "rebel_chief" or p.role == "renegade" then
+          lord_win = false
+          break
+        end
+      end
+      if lord_win then
+        winner = "lord+loyalist"
+      end
+    end
+
+    if winner ~= "" then
+      winner = winner.. "+civilian"
+    end
+
+    return winner
+  end,
   surrender_func = function(self, playedTime, player)
     local roleCheck = false
     local roleText = ""
@@ -249,6 +323,39 @@ role_mode.ui_settings = {
       title = "WangzhanFourEmblems",
     },
   },
+  W.PreferenceGroup {
+    title = "role_misc_change",
+
+    W.ComboRow {
+      _settingsKey = "LordIsWhat",
+      title = "LordIsWhat",
+      model = { "LordIsWhat_Null", "lord", "loyalist", "rebel", "renegade" }
+    },
+
+    W.SwitchRow {
+      _settingsKey = "MakeCivilian",
+      title = "MakeCivilian",
+      enabled = function(settings)
+        return settings.playerNum > 5 and settings._mode["DoubleRenegade"] == false
+      end,
+    },
+
+    W.SwitchRow {
+      _settingsKey = "DoubleRenegade",
+      title = "DoubleRenegade",
+      enabled = function(settings)
+        return settings.playerNum > 5 and settings._mode["MakeCivilian"] == false
+      end,
+    },
+
+    W.SwitchRow {
+      _settingsKey = "RenegadeTogether",
+      title = "RenegadeTogether",
+      enabled = function(settings)
+        return settings._mode["DoubleRenegade"] == true
+      end
+    },
+  },
 }
 
 extension:addGameMode(role_mode)
@@ -267,6 +374,17 @@ Fk:loadTranslationTable{
   ["help: WangzhanFourEmblems"] = "主公开局随机获得一个四象标记(一次性技能)",
   ["@[:]WangzhanBattleRoyal"] = "",
   [":WangzhanBattleRoyal"] = "每回合所有行动结束后，当前回合角色须选择一项：1.将两张牌置入弃牌堆；2.失去1点体力。结算中当前回合角色不触发任何武将技能。",
+
+  ["role_misc_change"] = "身份小改动",
+  ["LordIsWhat"] = "真人特定身份",
+  ["help: LordIsWhat"] = "最早加入房间的真人始终是特定身份（调试用）",
+  ["LordIsWhat_Null"] = "不设置",
+  ["MakeCivilian"] = "置入平民",
+  ["help: MakeCivilian"] = "将最后一个反贼替换为平民，平民只要存活就能胜利",
+  ["DoubleRenegade"] = "双内奸",
+  ["help: DoubleRenegade"] = "将最后一个反贼替换为内奸",
+  ["RenegadeTogether"] = "内奸同阵营",
+  ["help: RenegadeTogether"] = "不要求内奸杀死其余所有内奸才能胜利",
 }
 
 local anjiang = General(extension, "anjiang", "unknown", 5)

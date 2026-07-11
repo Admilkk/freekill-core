@@ -391,6 +391,19 @@ end
 ---@generic T
 ---@param self T[]
 ---@param func fun(element: T, index: integer, array: T[]): boolean?
+---@return integer
+function table.findIndex(self, func)
+  for i, v in ipairs(self) do
+    if func(v, i, self) then
+      return i
+    end
+  end
+  return -1
+end
+
+---@generic T
+---@param self T[]
+---@param func fun(element: T, index: integer, array: T[]): boolean?
 ---@return T[]
 function table.filter(self, func)
   local ret = {}

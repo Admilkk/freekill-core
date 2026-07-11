@@ -1321,9 +1321,13 @@ end
 ---@class PoxiExtraData
 ---@field visible_data? table<string, boolean> @ 牌id是否可见的映射表
 
+---@class PoxiCardData
+---@field [1] string @ 牌堆名
+---@field [2] integer[] @ 卡牌id表
+
 ---@class AskToPoxiParams
 ---@field poxi_type string @ poxi关键词
----@field data any @ 牌堆信息
+---@field data PoxiCardData[] @ 牌堆信息
 ---@field extra_data? table|PoxiExtraData @ 额外信息
 ---@field cancelable? boolean @ 是否可取消
 
@@ -1339,6 +1343,28 @@ function Room:askToPoxi(player, params)
   params.cancelable = (params.cancelable == nil) and true or params.cancelable
   local poxi = Fk.poxi_methods[params.poxi_type]
   if not poxi then return {} end
+
+  -- 打乱暗牌
+  local visibleData = (params.extra_data or Util.DummyTable).visible_data
+  if visibleData then
+    local cardDatas = params.data
+    for _, card_data in ipairs(cardDatas) do
+      local ids = card_data[2]
+      local unknownIndexs, unknownVals = {}, {}
+      for i, id in ipairs(ids) do
+        if visibleData[tostring(id)] == false then
+          table.insert(unknownIndexs, i)
+          table.insert(unknownVals, id)
+        end
+      end
+      if #unknownIndexs > 1 then
+        self:shuffleTable(unknownVals)
+        for j, idx in ipairs(unknownIndexs) do
+          ids[idx] = unknownVals[j]
+        end
+      end
+    end
+  end
 
   local command = "AskForPoxi"
   local req = Request:new(player, command)

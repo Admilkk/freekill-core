@@ -293,7 +293,7 @@ function Room:getNCards(num, from)
   assert(from == "top" or from == "bottom")
   if #self.draw_pile < num then
     self:shuffleDrawPile()
-    if #self.draw_pile < num then
+    if #self.draw_pile < num and not self:getBanner("SkipNoCardDraw") then
       self:sendLog{
         type = "#NoCardDraw",
         toast = true,

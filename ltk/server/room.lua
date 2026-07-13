@@ -1208,7 +1208,7 @@ function Room:askToChooseGeneral(player, params)
   if not rule then return {} end
 
   local n, generals = params.n or 1, params.generals
-  local no_convert = params.no_convert or self:getSettings("disableSameConvert") or false
+  local no_convert = params.no_convert or false
   if #generals == n then return n == 1 and generals[1] or generals end
   local extra_data = params.extra_data or {}
   extra_data.n = extra_data.n or n

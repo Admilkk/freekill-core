@@ -434,7 +434,7 @@ QtObject {
       generals,
       choiceNum: n ?? 1,
       prompt: prompt ?? "",
-      convertDisabled: !!no_convert,
+      convertDisabled: !!Lua.client.getSettings("disableSameConvert") || !!no_convert,
       hegemony: !!heg,
       ruleType: rule ?? (heg? "heg_general_choose" : "askForGeneralsChosen"),
       extraData: extra_data ?? { n : n },

@@ -934,7 +934,7 @@ end
 ---@class AskToViewCardsAndChoiceParams: ViewCardsParams
 ---@field choices? string[] @ 可选选项列表，默认值为“确定”
 
---- 询问玩家观看一些牌并做出选项，但是选项有额外的点亮标准
+--- 询问玩家观看一些牌并选择选项
 ---@param player ServerPlayer @ 要询问的玩家
 ---@param params AskToViewCardsAndChoiceParams @ 参数列表
 ---@return string

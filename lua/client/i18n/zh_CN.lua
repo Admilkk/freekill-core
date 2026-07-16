@@ -617,6 +617,8 @@ Fk:loadTranslationTable {
   ["weapon_sealed"] = "武器栏废除",
   ["armor_sealed"] = "防具栏废除",
   ["treasure_sealed"] = "宝物栏废除",
+  ["defensive_ride_sealed"] = "防御坐骑废除",
+  ["offensive_ride_sealed"] = "进攻坐骑废除",
 
   ["WeaponSlot"] = "武器栏",
   ["ArmorSlot"] = "防具栏",

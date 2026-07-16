@@ -21,6 +21,7 @@ W.PageBase {
   property var popupItem // 弹窗
   property alias dataModel: dataModel
   property alias bigAnim: bigAnim
+  property alias bgm: bgm
 
   property alias photoModel: photoModel
 
@@ -197,6 +198,22 @@ W.PageBase {
   }
 
   // ==== function 区 ====
+
+  function initializeRoom() {
+    dataModel.initialize();
+    setupCallbacks();
+
+    for (let i = 0; i < dataModel.playerNum; i++) {
+      photoModel.append({ modelData: dataModel.players[i] });
+    }
+
+    bgm.play();
+
+    Ltk.roomScene = this;
+    Ltk.roomModel = dataModel;
+
+    arrangePhotos();
+  }
 
   function cancelAllFocus() {
     for (const model of dataModel.players) {
@@ -916,18 +933,6 @@ W.PageBase {
   }
 
   Component.onCompleted: {
-    dataModel.initialize();
-    setupCallbacks();
-
-    for (let i = 0; i < dataModel.playerNum; i++) {
-      photoModel.append({ modelData: dataModel.players[i] });
-    }
-
-    bgm.play();
-
-    Ltk.roomScene = this;
-    Ltk.roomModel = dataModel;
-
-    arrangePhotos();
+    initializeRoom()
   }
 }

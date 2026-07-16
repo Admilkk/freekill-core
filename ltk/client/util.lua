@@ -421,7 +421,9 @@ function M:getSkillData(skill_name)
     freq = "active"
   end
   local frequency
-  if skill:hasTag(Skill.Limited, false) then
+  if skill:hasTag(Skill.Compulsory, false) then
+    frequency = "compulsory"
+  elseif skill:hasTag(Skill.Limited, false) then
     frequency = "limit"
   elseif skill:hasTag(Skill.Wake) then
     frequency = "wake"

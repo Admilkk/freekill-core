@@ -331,33 +331,28 @@ QtObject {
     const photoModel = getPhoto(Number(data[0]));
     const skinData = photoModel.luaPlayer.skins;
     if (!skinData) return;
-    
 
-    if (skinData.main) {
-      photoModel.skin = {
-        name: skinData.main.name,
-        path: skinData.main.path
-      }
+    photoModel.skin = {
+      name: skinData.main?.name ?? "",
+      path: skinData.main?.path ?? ""
     }
 
-    if (skinData.deputy) {
-      photoModel.deputySkin = {
-        name: skinData.deputy.name,
-        path: skinData.deputy.path
-      }
+    photoModel.deputySkin = {
+      name: skinData.deputy?.name ?? "",
+      path: skinData.deputy?.path ?? ""
     }
 
     if (photoModel.playerid === dashboardId) {
       if (skinData.main) {
         Config.enabledSkins[photoModel.general] = skinData.main.name
-      }
+      } else delete Config.enabledSkins[photoModel.general]
       if (skinData.deputy && photoModel.deputyGeneral) {
         Config.enabledSkins[photoModel.deputyGeneral] = skinData.deputy.name
-      }
+      } else delete Config.enabledSkins[photoModel.deputyGeneral]
     }
 
     if (photoModel.photoItem) {
-      photoModel.photoItem.changeSkinTimer.start()
+      photoModel.photoItem?.changeSkinTimer?.start()
     }
   }
 

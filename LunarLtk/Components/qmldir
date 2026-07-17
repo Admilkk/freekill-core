@@ -6,6 +6,7 @@ Dashboard 1.0 Dashboard.qml
 GeneralCardItem 1.0 GeneralCardItem.qml
 CompactGeneralCardItem 1.0 CompactGeneralCardItem.qml
 BigGlowText 1.0 BigGlowText.qml
+GeneralSkinOverview 1.0 GeneralSkinOverview.qml
 HandcardArea 1.0 HandcardArea.qml
 IndicatorLine 1.0 IndicatorLine.qml
 InvisibleCardArea 1.0 InvisibleCardArea.qml

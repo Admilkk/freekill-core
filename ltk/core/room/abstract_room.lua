@@ -124,9 +124,13 @@ function AbstractRoom:getPlayerSkinsData(id, data)
   local skinsData = {}
   if data[3] ~= "" then
     skinsData.main = Fk:getSkinByName(player.general, data[3])
+  elseif data[3] ~= "-" then
+    skinsData.main = player.skins.main
   end
-  if data[4] ~= "" and player.deputyGeneral ~= "" then
+  if data[4] ~= "" and data[4] ~= "-" and player.deputyGeneral ~= "" then
     skinsData.deputy = Fk:getSkinByName(player.deputyGeneral, data[4])
+  elseif data[4] ~= "-" then
+    skinsData.deputy = player.skins.deputy
   end
   return skinsData
 end

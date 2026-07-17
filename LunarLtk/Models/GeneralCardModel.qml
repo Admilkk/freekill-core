@@ -48,9 +48,12 @@ QtObject {
   property bool selectable: false
   property bool selected: false // 这个反过来被绑定
 
+  // 皮肤
+  property bool showSkin: true
+
   // 次生参数
   readonly property var frontSkin: {
-    return (Config.enabledSkins[name] && Config.enabledSkins[name] !== "-") ? Ltk.getFullSkinPath(name, Config.enabledSkins[name]) : SkinBank.getGeneralPicture(name);
+    return (Config.enabledSkins[name] && showSkin) ? Ltk.getFullSkinPath(name, Config.enabledSkins[name]) : SkinBank.getGeneralPicture(name);
   }
   readonly property var backSkin: {
     return SkinBank.generalCardDir + 'card-back';

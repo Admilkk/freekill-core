@@ -33,6 +33,7 @@ Item {
 
   function updateGeneral() {
     detailGeneralCard.dataModel = Ltk.createGeneralCardModel(general);
+    detailGeneralCard.dataModel.showSkin = false;
   }
 
   function getSameNameGenerals(general) {
@@ -231,6 +232,16 @@ Item {
           fav.push(g);
         }
         root.isFavor = fav.includes(g);
+      }
+    }
+
+    Win.Button {
+      Layout.preferredWidth: 130
+      text: Lua.tr("Check Skins")
+      visible: Ltk.getSkinNamesByGeneral(root.general).length > 0
+
+      onClicked: {
+        detailSwipeView.drawer.currentIndex = 5
       }
     }
   }
@@ -773,6 +784,14 @@ Item {
     }
   }
 
+  Component {
+    id: chechSkinsComponent
+    GeneralSkinOverview {
+      id: generalSkinOverview
+      general: root.general
+    }
+  }
+
   ColumnLayout {
     width: parent.width - 40 - generalInfo.width
     height: parent.height - 10
@@ -787,6 +806,8 @@ Item {
       interactive: false
       currentIndex: drawerBar.currentIndex
       clip: true
+
+      property alias drawer: drawerBar
 
       // 出于性能考虑，改为Loader延迟加载
       Loader {
@@ -812,6 +833,11 @@ Item {
       Loader {
         active: SwipeView.isCurrentItem
         sourceComponent: sourceCodeComponent
+      }
+
+      Loader {
+        active: SwipeView.isCurrentItem
+        sourceComponent: chechSkinsComponent
       }
     }
 

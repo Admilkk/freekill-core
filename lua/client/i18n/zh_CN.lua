@@ -63,6 +63,7 @@ Fk:loadTranslationTable {
   ["Favorite Generals"] = "特别关注",
   ["Set as Favorite"] = "设为关注",
   ["Remove from Favorite"] = "移除关注",
+  ["Check Skins"] = "查看皮肤",
   ["Search"] = "搜索",
   ["Back"] = "返回",
   ["Click to back"] = "点击返回",

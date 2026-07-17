@@ -2,15 +2,15 @@ import QtQuick
 import Qt5Compat.GraphicalEffects
 
 import Fk
+import Fk.Components.GameCommon
 import LunarLtk.Components.Photo
 
-Item {
+BasicItem {
   id: root
   width: childrenRect.width
   height: childrenRect.height
 
   property url source: ""
-  property bool selected: false
   property alias text: skinName.text
 
   SkinArea {
@@ -58,6 +58,7 @@ Item {
 
   HoverHandler {
     id: hover
+    enabled: root.selectable
     cursorShape: Qt.PointingHandCursor
   }
 

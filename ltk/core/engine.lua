@@ -520,8 +520,9 @@ end
 ---@param generalPool? General[] @ 选择的范围，默认是已经启用的所有武将
 ---@param except? string[] @ 特别要排除掉的武将名列表，默认是空表
 ---@param filter? fun(g: General): boolean? @ 可选参数，若这个函数返回true的话这个武将被排除在外
+---@param includeSameName? boolean @ 可选参数，是否置入全部同名武将
 ---@return General[] @ 随机选出的武将列表
-function Engine:getGeneralsRandomly(num, generalPool, except, filter)
+function Engine:getGeneralsRandomly(num, generalPool, except, filter, includeSameName)
   if filter then
     assert(type(filter) == "function")
   end
@@ -535,10 +536,10 @@ function Engine:getGeneralsRandomly(num, generalPool, except, filter)
   local availableGenerals = {}
   for _, general in pairs(generalPool) do
     if not table.contains(except, general.name) and not (filter and filter(general)) then
-      if (not general.hidden and not general.total_hidden) and
-        #table.filter(availableGenerals, function(g)
+      if not (general.hidden or general.total_hidden or
+        (not includeSameName and table.find(availableGenerals, function(g)
         return g.trueName == general.trueName
-      end) == 0 then
+      end))) then
         table.insert(availableGenerals, general)
       end
     end

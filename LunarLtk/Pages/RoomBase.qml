@@ -749,25 +749,6 @@ W.PageBase {
     roomScene.popupItem?.updateData(data);
   }
 
-  function changeSkin(sender, data) {
-    const photo = getPhoto(Number(data[0]));
-    const path = data[2];
-    const deputypath = data[3];
-    if (path) {
-      if (Number(data[0]) === Cpp.self.id) {
-        Config.enabledSkins[photo.general] = path === "-" ? "" : path;
-      }
-      photo.skinSource = path === "-" ? "" : (AppPath + "/" + path);
-    }
-    if (deputypath) {
-      if (Number(data[0]) === Cpp.self.id) {
-        Config.enabledSkins[photo.deputyGeneral] = deputypath === "-" ? "" : deputypath;
-      }
-      photo.deputySkinSource = deputypath === "-" ? "" : (AppPath + "/" + deputypath);
-    }
-    photo.changeSkinTimer.start()
-  }
-
   function showDistance(show) {
     for (let i = 0; i < photoModel.count; i++) {
       const model = photoModel.get(i).modelData;
@@ -925,7 +906,6 @@ W.PageBase {
     addCallback(Command.UpdateMiniGame, updateMiniGame);
 
     addCallback(Command.UpdateRequestUI, updateRequestUI);
-    addCallback(Command.ChangeSkin, changeSkin);
 
     addCallback(Command.ShowVirtualCard, showVirtualCard);
 

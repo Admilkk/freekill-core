@@ -4,6 +4,7 @@
 ---@field public seat integer @ 座位号
 ---@field public next Base.Player @ 下家
 ---@field public mark table<string, any> @ 当前拥有的所有标记，键为标记名，值为标记值
+---@field public skins table<string, SkinContent?> @ 启用的皮肤，未启用则为空，主将为"main"，副将为"deputy"
 local Player = class("Base.Player")
 
 function Player:initialize()
@@ -17,6 +18,7 @@ function Player:initialize()
   self.seat = 0
   self.next = nil
   self.mark = {}
+  self.skins = {}
 end
 
 --- 为角色```mark```增加```count```个。
@@ -107,6 +109,10 @@ function Player:hasMark(mark, suffixes)
     end
   end
   return nil
+end
+
+function Player:setSkin(skins)
+  self.skins = skins
 end
 
 -- 底层逻辑之序列化

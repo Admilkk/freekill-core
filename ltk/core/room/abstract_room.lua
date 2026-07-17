@@ -115,6 +115,22 @@ function AbstractRoom:filterCard(id, player, judgeEvent)
   return card
 end
 
+---根据客户端传过来的data获得用于存储在player的skin数据，放在这里只是因为server和client都要用
+---@param id integer @ playerId
+---@param data table @ 客户端传过来的数据
+---@return table<string, SkinContent> @ player.skins
+function AbstractRoom:getPlayerSkinsData(id, data)
+  local player = self:getPlayerById(id)
+  local skinsData = {}
+  if data[3] ~= "" then
+    skinsData.main = Fk:getSkinByName(player.general, data[3])
+  end
+  if data[4] ~= "" and player.deputyGeneral ~= "" then
+    skinsData.deputy = Fk:getSkinByName(player.deputyGeneral, data[4])
+  end
+  return skinsData
+end
+
 
 function AbstractRoom:serialize()
   local o = RoomBase.serialize(self)

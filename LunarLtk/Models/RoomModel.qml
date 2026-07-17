@@ -327,6 +327,40 @@ QtObject {
     }
   }
 
+  function changeSkin(sender, data) {
+    const photoModel = getPhoto(Number(data[0]));
+    const skinData = photoModel.luaPlayer.skins;
+    if (!skinData) return;
+    
+
+    if (skinData.main) {
+      photoModel.skin = {
+        name: skinData.main.name,
+        path: skinData.main.path
+      }
+    }
+
+    if (skinData.deputy) {
+      photoModel.deputySkin = {
+        name: skinData.deputy.name,
+        path: skinData.deputy.path
+      }
+    }
+
+    if (photoModel.playerid === dashboardId) {
+      if (skinData.main) {
+        Config.enabledSkins[photoModel.general] = skinData.main.name
+      }
+      if (skinData.deputy && photoModel.deputyGeneral) {
+        Config.enabledSkins[photoModel.deputyGeneral] = skinData.deputy.name
+      }
+    }
+
+    if (photoModel.photoItem) {
+      photoModel.photoItem.changeSkinTimer.start()
+    }
+  }
+
   function playCard() {
     skippedUseEventIds = [];
     activate();
@@ -625,6 +659,7 @@ QtObject {
     roomPage.addCallback(Command.EmptyRequest, activate);
     roomPage.addCallback(Command.CancelRequest, deActivate);
     roomPage.addCallback(Command.PlayerRunned, playerRunned);
+    roomPage.addCallback(Command.ChangeSkin, changeSkin);
 
     roomPage.addCallback(Command.SetCardMark, setCardMark);
     roomPage.addCallback(Command.GetPlayerHandcards, jiangwanHandler);

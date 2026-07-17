@@ -49,6 +49,8 @@ QtObject {
   // 其他UI元素
   property var targetTip: []  // “可烈弓”之类的目标提示文本，已翻译好
   property list<var> limitSkills: []  // 限定技区域，var的内容为 { skill, time }
+  property var skin: ({})
+  property var deputySkin: ({})
 
   // 此人的所有标记，不分图和无图，毕竟这里是数据model环节
   // var的结构为如此的object：

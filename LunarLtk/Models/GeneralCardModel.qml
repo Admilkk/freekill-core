@@ -50,7 +50,7 @@ QtObject {
 
   // 次生参数
   readonly property var frontSkin: {
-    return (Config.enabledSkins[name] && Config.enabledSkins[name] !== "-") ? (Cpp.path + "/" + Config.enabledSkins[name]) : SkinBank.getGeneralPicture(name);
+    return (Config.enabledSkins[name] && Config.enabledSkins[name] !== "-") ? Ltk.getFullSkinPath(name, Config.enabledSkins[name]) : SkinBank.getGeneralPicture(name);
   }
   readonly property var backSkin: {
     return SkinBank.generalCardDir + 'card-back';

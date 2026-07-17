@@ -96,6 +96,8 @@ function Room:handleUpdateMini(id, reqlist)
 end
 
 function Room:handleChangeSkin(id, data)
+  local player = self:getPlayerById(id)
+  player.skins = self:getPlayerSkinsData(id, data)
   self:doBroadcastNotify("ChangeSkin", data)
 end
 

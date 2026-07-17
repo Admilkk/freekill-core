@@ -493,6 +493,22 @@ function M:getVirtualEquipData(playerid, cid)
   }
 end
 
+function M:getSkinNamesByGeneral(general)
+  return Fk:getSkinNamesByGeneral(general)
+end
+
+function M:getSkinByName(general, name)
+  local skin_data =  Fk:getSkinByName(general, name)
+  if skin_data.name then
+    return {
+      name = skin_data.name,
+      path = skin_data.path,
+      url = skin_data.path .. skin_data.name
+    }
+  end
+  return
+end
+
 function M:findMosts()          -- 从所有的玩家结算数据中找出最佳/差玩家
   local data = ClientInstance:getBanner("GameSummary")
   if not data then return end -- 兼容老录像

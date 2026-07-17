@@ -156,6 +156,14 @@ QtObject {
     return _L.getVirtualEquipData(playerid, cid);
   }
 
+  function getSkinNamesByGeneral(general) {
+    return _L.getSkinNamesByGeneral(general);
+  }
+
+  function getSkinByName(general, name) {
+    return _L.getSkinByName(general, name);
+  }
+
   function findMosts() {
     return _L.findMosts();
   }
@@ -469,5 +477,11 @@ QtObject {
       enabled: additionalProp?.enabled === true,
     };
     return component.createObject(null, prop);
+  }
+
+  function getFullSkinPath(genral, name) {
+    let skin = getSkinByName(genral, name)
+    if (!skin) return SkinBank.getGeneralPicture(genral);
+    return Cpp.path + "/" + skin.path + skin.name
   }
 }

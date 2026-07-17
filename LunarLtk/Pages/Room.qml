@@ -60,9 +60,10 @@ RoomBase {
         }
 
         Component.onCompleted: {
-          if (dataModel.index === 0) {
-            enableChangeSkin = true;
-          }
+          // if (dataModel.playerid === roomScene.dataModel.dashboardId) {
+          //   enableChangeSkin = true;
+          // }
+          enableChangeSkin = false; // 经典ui关闭
         }
       }
     }

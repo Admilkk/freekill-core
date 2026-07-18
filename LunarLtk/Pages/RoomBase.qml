@@ -39,6 +39,12 @@ W.PageBase {
 
   ListModel {
     id: photoModel
+
+    signal modelDataChanged()
+
+    onDataChanged: modelDataChanged()
+    onRowsInserted: modelDataChanged()
+    onRowsRemoved: modelDataChanged()
   }
 
   RoomModel {

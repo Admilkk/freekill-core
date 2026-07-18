@@ -148,7 +148,7 @@ function ReqPlayCard:doOKButton()
   local reply = {
     card = self.selected_card:getEffectiveId(),
     targets = self.selected_targets,
-    special_skill = self.skill_name
+    special_skill = self.skill_name,
   }
   if ClientInstance then
     ClientInstance:notifyUI("ReplyToServer", reply)
@@ -192,12 +192,28 @@ function ReqPlayCard:selectCard(cid, data)
     scene:unselectOtherCards(cid)
     -- self:setSkillPrompt(self.selected_card.skill, self.selected_card:getEffectiveId())
     local sp_skills = {}
-    if self.selected_card.special_skills and table.contains(self.player:getCardIds("h"), cid) then
-      sp_skills = table.simpleClone(self.selected_card.special_skills)
-      if self.player:canUse(self.selected_card) then
-        table.insert(sp_skills, 1, "_normal_use")
-      else
-        self:selectSpecialUse(sp_skills[1])
+    if self.selected_card.special_skills then
+      for _, s in ipairs(self.selected_card.special_skills or {}) do
+        local skill = Fk.skills[s]
+        if skill:isInstanceOf(ActiveSkill) then
+          skill = skill  ---@cast skill ActiveSkill
+          if skill:canUse(self.player) and table.contains(self.player:getCardIds("h"), cid) then
+            table.insert(sp_skills, s)
+          end
+        elseif skill:isInstanceOf(ViewAsSkill) then
+          skill = skill  ---@cast skill ViewAsSkill
+          if skill:enabledAtPlay(self.player) then
+            table.insert(sp_skills, s)
+          end
+        end
+      end
+      if #sp_skills > 0 then
+        if self.player:canUse(self.selected_card) then
+          table.insert(sp_skills, 1, "_normal_use")
+        else
+          self:selectSpecialUse(sp_skills[1])
+        end
+        self.scene:update("SpecialSkills", "1", { skills = sp_skills })
       end
     end
     self.scene:update("SpecialSkills", "1", { skills = sp_skills })

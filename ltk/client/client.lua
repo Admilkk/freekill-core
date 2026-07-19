@@ -1002,6 +1002,7 @@ function Client:changeSkin(data)
   local playerId = tonumber(data[1]) or 0
   if playerId == 0 then return end
   local player = self:getPlayerById(playerId)
+  if not player then return end
   player.skins = self:getPlayerSkinsData(playerId, data)
   self:notifyUI("ChangeSkin", data)
 end

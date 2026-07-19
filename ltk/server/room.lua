@@ -97,6 +97,7 @@ end
 
 function Room:handleChangeSkin(id, data)
   local player = self:getPlayerById(id)
+  if not player then return end
   player.skins = self:getPlayerSkinsData(id, data)
   self:doBroadcastNotify("ChangeSkin", data)
 end

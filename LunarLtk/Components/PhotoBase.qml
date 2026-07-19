@@ -257,7 +257,7 @@ Game.BasicItem {
   }
 
   function refreshSkins() {
-    if (root.playerid === roomScene.dataModel?.dashboardId) {
+    if (root.playerid === roomScene.dataModel?.dashboardId && !Config.observing) {
       let command = "changeskin,";
       const source = root.getConfigSkin(root.general);
       command = command + source + ","

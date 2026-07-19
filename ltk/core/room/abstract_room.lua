@@ -121,6 +121,7 @@ end
 ---@return table<string, SkinContent> @ player.skins
 function AbstractRoom:getPlayerSkinsData(id, data)
   local player = self:getPlayerById(id)
+  if not player then error("No player! Check weather the player exist or not!") end
   local skinsData = {}
   if data[3] ~= "" and data[3] ~= "-" then
     skinsData.main = Fk:getSkinByName(player.general, data[3]) or player.skins.main

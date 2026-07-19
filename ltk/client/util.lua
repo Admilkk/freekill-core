@@ -499,7 +499,7 @@ end
 
 function M:getSkinByName(general, name)
   local skin_data =  Fk:getSkinByName(general, name)
-  if skin_data.name then
+  if (skin_data or {}).name then
     return {
       name = skin_data.name,
       path = skin_data.path,

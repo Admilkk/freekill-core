@@ -49,14 +49,20 @@ QtObject {
   property bool selected: false // 这个反过来被绑定
 
   // 皮肤
-  property bool showSkin: true
+  property bool showSkin: false
+  property string skinName: (Config.enabledSkins[name] && showSkin) ? Config.enabledSkins[name] : "" //当前使用的皮肤
 
   // 次生参数
   readonly property var frontSkin: {
-    return (Config.enabledSkins[name] && showSkin) ? Ltk.getFullSkinPath(name, Config.enabledSkins[name]) : SkinBank.getGeneralPicture(name);
+    return skinName ? Ltk.getFullSkinPath(name, Config.enabledSkins[name]) : SkinBank.getGeneralPicture(name);
   }
   readonly property var backSkin: {
     return SkinBank.generalCardDir + 'card-back';
+  }
+
+  // Config内容改变不会触发skinName改变，必须手动触发
+  function refreshSkin() {
+    showSkinChanged()
   }
 }
 

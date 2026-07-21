@@ -52,7 +52,9 @@ W.PageBase {
     roomPage: roomScene
 
     onSeatChanged: roomScene.arrangePhotos();
-    onPlayerAdded: model => roomScene.photoModel.append({ modelData: model });
+    onPlayerAdded: model => {
+      roomScene.photoModel.append({ modelData: model });
+    };
     onCardsMoved: (move, data) => roomScene.moveCards(move, data);
 
     onActivated: {

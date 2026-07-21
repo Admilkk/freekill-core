@@ -63,7 +63,7 @@ QtObject {
   property var skippedUseEventIds: []
   readonly property bool canSkipNullification: {
     return !!skipNullificationData &&
-      !skippedUseEventIds.find(id => id === skipNullificationData.useEventId)
+    !skippedUseEventIds.find(id => id === skipNullificationData.useEventId)
   }
 
   readonly property string promptText: Ltk.processPrompt(prompt)
@@ -176,6 +176,7 @@ QtObject {
   function propertyUpdate(_, data) {
     const [uid, property_name, value] = data;
     const model = getPhoto(uid);
+    // FIXME: skins这边写成这样不太好看
     if (model && property_name in model) {
       model[property_name] = value;
     }
@@ -269,7 +270,7 @@ QtObject {
   function setCardFootnote(_, data) {
     const [id, note, virtual] = data;
     const v = processing.find(e => e[virtual ? "virtId" : "cardId"] === id)
-      || discard.find(e => e[virtual ? "virtId" : "cardId"] === id);
+    || discard.find(e => e[virtual ? "virtId" : "cardId"] === id);
     if (v) {
       v.footnote = note;
       v.footnoteVisible = true;
@@ -280,7 +281,7 @@ QtObject {
     const [ids, note, virtual] = data;
     ids.forEach(id => {
       const v = processing.find(e => e[virtual ? "virtId" : "cardId"] === id)
-        || discard.find(e => e[virtual ? "virtId" : "cardId"] === id);
+      || discard.find(e => e[virtual ? "virtId" : "cardId"] === id);
       if (v) v.virtName = note;
     });
   }
@@ -330,17 +331,8 @@ QtObject {
   function changeSkin(sender, data) {
     const photoModel = getPhoto(Number(data[0]));
     const skinData = photoModel.luaPlayer.skins;
-    if (!skinData) return;
 
-    photoModel.skin = {
-      name: skinData.main?.name ?? "",
-      path: skinData.main?.path ?? ""
-    }
-
-    photoModel.deputySkin = {
-      name: skinData.deputy?.name ?? "",
-      path: skinData.deputy?.path ?? ""
-    }
+    photoModel.skins = skinData;
 
     if (photoModel.playerid === dashboardId) {
       if (skinData.main) {
@@ -349,10 +341,19 @@ QtObject {
       if (skinData.deputy && photoModel.deputyGeneral) {
         Config.enabledSkins[photoModel.deputyGeneral] = skinData.deputy.name
       } else delete Config.enabledSkins[photoModel.deputyGeneral]
-    }
 
-    if (photoModel.photoItem) {
-      photoModel.photoItem?.changeSkinTimer?.start()
+      if (photoModel.photoItem) {
+        photoModel.photoItem?.changeSkinTimer?.start()
+      }
+    }
+  }
+
+  function syncSkins() {
+    for (let model of players) {
+      if (model.luaPlayer) {
+        const skinData = model.luaPlayer.skins
+        model.skins = skinData
+      }
     }
   }
 
@@ -393,14 +394,14 @@ QtObject {
 
       // 不对自己使用的单目标锦囊牌无懈
       if (Config.noSelfNullification && nullfiData.effectFrom === Cpp.self.id &&
-        !Ltk.getCardData(nullfiData.effectCardId).multiple_targets) { 
+      !Ltk.getCardData(nullfiData.effectCardId).multiple_targets) {
         Lua.updateRequestUI("Button", "Cancel");
         return;
       }
 
       // 如果已忽略本轮无懈可击，那么忽略，除非即将对自己生效
-      if (nullfiData.effectTo !== Cpp.self.id && 
-        skippedUseEventIds.find(id => id === nullfiData.useEventId)) {
+      if (nullfiData.effectTo !== Cpp.self.id &&
+      skippedUseEventIds.find(id => id === nullfiData.useEventId)) {
         Lua.updateRequestUI("Button", "Cancel");
         return;
       }
@@ -704,14 +705,14 @@ QtObject {
     buttons?.forEach(bdata => {
       switch (bdata.id) {
         case "OK":
-          okEnabled = bdata.enabled;
-          break;
+        okEnabled = bdata.enabled;
+        break;
         case "Cancel":
-          cancelEnabled = bdata.enabled;
-          break;
+        cancelEnabled = bdata.enabled;
+        break;
         case "End":
-          endButtonVisible = bdata.enabled;
-          break;
+        endButtonVisible = bdata.enabled;
+        break;
       }
     });
   }

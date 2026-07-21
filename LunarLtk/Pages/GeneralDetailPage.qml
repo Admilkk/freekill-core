@@ -33,7 +33,6 @@ Item {
 
   function updateGeneral() {
     detailGeneralCard.dataModel = Ltk.createGeneralCardModel(general);
-    detailGeneralCard.dataModel.showSkin = false;
   }
 
   function getSameNameGenerals(general) {

@@ -73,6 +73,7 @@ function fk.readUsableSpecToSkill(skill, spec)
   }
   skill.distance_limit = spec.distance_limit or skill.distance_limit
   skill.expand_pile = spec.expand_pile
+  skill.visible_pile = spec.visible_pile
   skill.times = spec.times or skill.times
   skill.is_delay_effect = not not spec.is_delay_effect
   skill.late_refresh = not not spec.late_refresh
@@ -126,6 +127,7 @@ end
 ---@field public click_count? boolean @ 是否在点击按钮瞬间就计数并播放特效和语音
 ---@field public include_equip? boolean @ 选牌时是否展开装备区
 ---@field public fix_targets? fun(self: ActiveSkill, player: Player, selected_cards: integer[], card: Card, extra_data: any): Player[]? @ 设置固定目标
+---@field public visible_pile? integer[] | string | fun(self: ActiveSkill, player: Player): integer[] | string @ 可见的手牌id，同时筛选手牌和expand_pile。如果返回值为字符串，当返回"_expand_pile"时会转为expand_pile，为其他字符串时则转为对应name的私人牌堆。注意：这是纯ui方案，不要用这种方式来做合法牌的筛选
 
 ---@class CardSkillSpec: UsableSkillSpec
 ---@field public mod_target_filter? fun(self: ActiveSkill, player: Player, to_select: Player, selected: Player[], card: Card, extra_data: any): any @ 判定目标是否合法（例如不能杀自己，火攻无手牌目标）
@@ -167,6 +169,7 @@ end
 ---@field public enabled_at_nullification? fun(self: ViewAsSkill, player: Player, data: CardEffectData): boolean? @ 判断一张牌是否能被此技能转化无懈来响应
 ---@field public include_equip? boolean @ 选牌时是否展开装备区
 ---@field public fix_targets? fun(self: ViewAsSkill, player: Player, selected_cards: integer[], card: Card, extra_data: any): Player[]? @ 设置固定目标
+---@field public visible_pile? integer[] | string | fun(self: ActiveSkill, player: Player): integer[] | string @ 可见的手牌id，同时筛选手牌和expand_pile。如果返回值为字符串，当返回"_expand_pile"时会转为expand_pile，为其他字符串时则转为对应name的私人牌堆。注意：这是纯ui方案，不要用这种方式来做合法牌的筛选
 
 ---@class DistanceSpec: StatusSkillSpec
 ---@field public correct_func? fun(self: DistanceSkill, from: Player, to: Player, card?: Card): integer?

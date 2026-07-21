@@ -23,6 +23,7 @@ local CardItem = (require 'ui_emu.common').CardItem
 ---@field public pendings integer[] 卡牌id数组
 ---@field public selected_targets integer[] 选择的目标
 ---@field public expanded_piles { [string]: integer[] } 用于展开/收起
+---@field public visible_pile integer[]
 ---@field public original_prompt string 最开始的提示信息；这种涉及技能按钮的需要这样一下
 local ReqActiveSkill = RequestHandler:subclass("ReqActiveSkill")
 
@@ -101,6 +102,8 @@ function ReqActiveSkill:setup(ignoreInteraction)
 
   self:updateButtons()
   self:updatePrompt()
+
+  self:visualizePile()
 end
 
 function ReqActiveSkill:finish()
@@ -305,6 +308,35 @@ function ReqActiveSkill:expandPiles()
         (self.extra_data and self.extra_data.skillName or self.skill_name))
     end
   end
+end
+
+--- 刷新一下当前可见牌
+function ReqActiveSkill:visualizePile()
+  local skill = Fk.skills[self.skill_name] --[[@as ActiveSkill | ViewAsSkill]]
+  if not skill then return end
+  local player = self.player
+  local pile = skill.visible_pile or {}
+  local _pile
+  if type(pile) == "function" then
+    _pile = pile(skill, player)
+  else
+    _pile = pile
+  end
+  if type(_pile) == "table" then
+    self.visible_pile = _pile
+  elseif type(_pile) == "string" then
+    if _pile == "_expand_pile" then
+      self.visible_pile = self.expanded_piles["_extra"] or {}
+    else
+      self.visible_pile = player:getPile(_pile)
+    end
+  else
+    self.visible_pile = {}
+  end
+
+  -- 因为visible_pile是纯ui方案，与操作合法性无关，故不需要scene参与，直接改RequestHandler.change
+  self.change = self.change or {}
+  self.change["visible_cards"] = self.visible_pile
 end
 
 --- 判断确认键是否可用

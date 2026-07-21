@@ -271,7 +271,12 @@ Item {
 
   function syncCards() {
     // sync expandedCards
-    const allCards = [...dataModel.handcards, ...dataModel.expandedCards];
+    const allCards = [...dataModel.handcards, ...dataModel.expandedCards].filter(model => {
+      const ids = dataModel.visible_ids ?? [];
+      if (ids.length === 0) return true;
+      if (ids.indexOf(model.cardId) !== -1) return true;
+      return false
+    });
     const orderedCards = [];
     const extractedCards = [];
     for (const card of cards) {

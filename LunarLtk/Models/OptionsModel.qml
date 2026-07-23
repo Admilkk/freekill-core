@@ -16,6 +16,7 @@ QtObject {
 
   property bool enableOK: false // 强制启用OK选项，只在ActiveSkill里使用
   property bool acceptable: true // ActiveSkill会重新指定此属性
+  property list<var> enabledOptions: options //用于refresh_interaction传入， 默认是options
   property list<var> result: []
 
   signal accepted()

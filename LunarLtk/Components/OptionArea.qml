@@ -31,7 +31,7 @@ Row {
     MetroButton {
       required property string modelData
       text: Lua.tr(Ltk.processPrompt(modelData))
-      enabled: (root.dataModel?.options ?? []).indexOf(modelData) !== -1
+      enabled: ((root.dataModel?.options ?? []).indexOf(modelData) !== -1) && ((root.dataModel?.enabledOptions ?? []).indexOf(modelData) !== -1)
 
       onClicked: {
         if (root.toggleable) {

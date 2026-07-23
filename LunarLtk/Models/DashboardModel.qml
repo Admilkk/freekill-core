@@ -196,6 +196,8 @@ QtObject {
 
     if (uiUpdate["visible_cards"]) {
       visible_ids = uiUpdate["visible_cards"];
+    } else {
+      visible_ids = []
     }
   }
 }

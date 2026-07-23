@@ -72,7 +72,7 @@ end
 ---@field options string[]
 ---@field all_options? string[]
 ---@field single? boolean
----@field direct_send? boolean （目前无效果）危险参数，按下一个选项会直接返回值，并且强制启用single
+---@field direct_send? boolean 危险参数，按下一个选项会直接返回值，并且强制启用single，建议配合fresh_interacion一起使用
 ---@field min_num? integer
 ---@field max_num? integer
 ---@field type? string

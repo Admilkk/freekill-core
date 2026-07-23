@@ -599,6 +599,11 @@ W.PageBase {
       skillInteraction.sourceComponent = undefined;
       if (roomScene.popupItem)
       roomScene.popupItem.finished();
+      if (dataModel.options) {
+        dataModel.options.destroy();
+        dataModel.options = null;
+      }
+      dataModel.optionVisible = false;
     }
     for (const dat of (uiUpdate["_new"] || [])) {
       if (dat.type !== "Interaction") continue;
@@ -631,7 +636,7 @@ W.PageBase {
         skillInteraction.item.clicked();
         break;
       case "optionbox":
-        const [options, all_options, single, min_num, max_num] = [data.options, data.all_options, data.single, data.min_num, data.max_num];
+        const [options, all_options, single, min_num, max_num, direct] = [data.options, data.all_options, data.single, data.min_num, data.max_num, data.direct_send];
         const optionComponent = Qt.createComponent("LunarLtk.Models", "OptionsModel");
         const optionModel = optionComponent.createObject(null, {
           options,
@@ -641,14 +646,19 @@ W.PageBase {
           cancelable: roomScene.dataModel.cancelEnabled,
           skillName: skill_name,
           prompt: "",
-          single: single,
-          enableOK: true, // 暂时先这样
+          single: direct || single,
+          enableOK: !direct,
           acceptable: roomScene.dataModel.okEnabled
         });
         optionModel.update.connect(option => {
           Lua.updateRequestUI("Interaction", "1", "update", optionModel.single ? (optionModel.result[0] ?? "") : optionModel.result)
           });
-        optionModel.accepted.connect(() => Lua.updateRequestUI("Button", "OK"));
+        optionModel.accepted.connect(() => {
+          if (direct) {
+            Lua.updateRequestUI("Interaction", "1", "finish", optionModel.result[0] ?? "");
+          }
+          Lua.updateRequestUI("Button", "OK")
+        });
         optionModel.rejected.connect(() => Lua.updateRequestUI("Button", "Cancel"));
         dataModel.options = optionModel;
 
@@ -696,6 +706,25 @@ W.PageBase {
       default:
         skillInteraction.sourceComponent = undefined;
         break;
+      }
+    }
+
+    if (uiUpdate["Interaction"]) handleInteractionRefresh(uiUpdate);
+  }
+
+  // interaction真神了，这么多函数伺候它一个
+  function handleInteractionRefresh(uiUpdate) {
+    const dat = uiUpdate["Interaction"][0]
+    const [type, refresh_data] = [dat.spec?.type, dat.refresh_data]
+    if (!type || !refresh_data) return; 
+    // 所有允许refresh_interaction的skillInteraction都要在这里把数据传到interaction里
+
+    switch (type) {
+      case "optionbox":
+      const optionModel = roomScene.dataModel.options
+      if (optionModel) {
+        const orig_options = optionModel.options
+        optionModel.enabledOptions = refresh_data.filter(str => orig_options.indexOf(str) !== -1)
       }
     }
   }

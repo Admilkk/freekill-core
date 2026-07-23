@@ -102,6 +102,7 @@ function ReqActiveSkill:setup(ignoreInteraction)
     end
   end
 
+  self:refreshInteraction()
   self:updateButtons()
   self:updatePrompt()
 end
@@ -154,6 +155,7 @@ function ReqActiveSkill:setupInteraction()
     end
     skill.interaction.data = interaction.default or interaction.default_choice or nil -- FIXME
     -- 假设只有1个interaction （其实目前就是这样）
+    skill.interaction.spec = table.simpleClone(interaction)
     local i = Interaction:new(self.scene, "1", interaction)
     i.skill_name = interaction.skill_name or self.skill_name
     self.scene:addItem(i)
@@ -458,12 +460,14 @@ function ReqActiveSkill:initiateTargets()
 end
 
 --- 更新interaction数据
-function ReqActiveSkill:updateInteraction(data)
+function ReqActiveSkill:updateInteraction(data, ignoreSetup)
   local skill = Fk.skills[self.skill_name] --[[@as ActiveSkill | ViewAsSkill]]
   if skill and skill.interaction then
     skill.interaction.data = data
     self.scene:update("Interaction", "1", { data = data })
-    ReqActiveSkill.setup(self, true) -- interaction变动后需复原
+    if not ignoreSetup then
+      ReqActiveSkill.setup(self, true) -- interaction变动后需复原
+    end
   end
 end
 
@@ -589,6 +593,20 @@ local function autoSelectOnlyFeasibleTarget(req, data)
   end
 end
 
+-- 刷新interaction（不是重新加载，区别于updateInteraction）
+function ReqActiveSkill:refreshInteraction()
+  local skill = Fk.skills[self.skill_name] --[[@as ActiveSkill|ViewAsSkill]]
+  if not skill or not skill.refresh_interaction then return end
+  if skill and skill.interaction then
+    local refresh_data = skill:refresh_interaction(
+      self.player, self.pendings or {},
+      table.map(self.selected_targets,
+      Util.Id2PlayerMapper),
+      self.extra_data or {})
+    self.scene:update("Interaction", "1", { refresh_data = refresh_data })
+  end
+end
+
 function ReqActiveSkill:update(elemType, id, action, data)
   if elemType == "Button" then
     if id == "OK" then self:doOKButton()
@@ -638,9 +656,16 @@ function ReqActiveSkill:update(elemType, id, action, data)
     end
     ]]
   elseif elemType == "Interaction" then
-    self:updateInteraction(data)
+    local ignore = action == "finish"
+    self:updateInteraction(data, ignore)
+  end
+
+  -- 防止冗余计算
+  if elemType ~= "Interaction" then
+    self:refreshInteraction()
   end
   self:updatePrompt()
+  self:visualizePile()
 end
 
 return ReqActiveSkill

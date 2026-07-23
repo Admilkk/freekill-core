@@ -596,6 +596,9 @@ function SkillSkeleton:createActiveSkill(_skill, idx, key, attr, spec)
   end
 
   fk.readInteractionToSkill(skill, spec)
+  if spec.refresh_interaction and type(spec.refresh_interaction) == "function" then
+    skill.refresh_interaction = spec.refresh_interaction
+  end
   return skill
 end
 
@@ -715,6 +718,10 @@ function SkillSkeleton:createViewAsSkill(_skill, idx, key, attr, spec)
   if spec.prompt then skill.prompt = spec.prompt end
 
   fk.readInteractionToSkill(skill, spec)
+
+  if spec.refresh_interaction and type(spec.refresh_interaction) == "function" then
+    skill.refresh_interaction = spec.refresh_interaction
+  end
 
   if spec.before_use and type(spec.before_use) == "function" then
     skill.beforeUse = spec.before_use

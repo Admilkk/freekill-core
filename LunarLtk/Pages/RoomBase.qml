@@ -69,10 +69,17 @@ W.PageBase {
       roomScene.progress.visible = false;
 
       roomScene.dashboard.disableAllCards();
+      roomScene.dashboard.clearVisiblePile();
 
       if (roomScene.popupItem != null) {
         roomScene.popupItem.finished();
       }
+
+      if (dataModel.options) {
+        dataModel.options.destroy();
+        dataModel.options = null;
+      }
+      dataModel.optionVisible = false;
 
       Lua.finishRequestUI();
       applyChange({});
@@ -622,6 +629,30 @@ W.PageBase {
         });
         skillInteraction.item.dataModel = model;
         skillInteraction.item.clicked();
+        break;
+      case "optionbox":
+        const [options, all_options, single, min_num, max_num] = [data.options, data.all_options, data.single, data.min_num, data.max_num];
+        const optionComponent = Qt.createComponent("LunarLtk.Models", "OptionsModel");
+        const optionModel = optionComponent.createObject(null, {
+          options,
+          allOptions: all_options,
+          minNum: min_num,
+          maxNum: max_num,
+          cancelable: roomScene.dataModel.cancelEnabled,
+          skillName: skill_name,
+          prompt: "",
+          single: single,
+          enableOK: true, // 暂时先这样
+          acceptable: roomScene.dataModel.okEnabled
+        });
+        optionModel.update.connect(option => {
+          Lua.updateRequestUI("Interaction", "1", "update", optionModel.single ? (optionModel.result[0] ?? "") : optionModel.result)
+          });
+        optionModel.accepted.connect(() => Lua.updateRequestUI("Button", "OK"));
+        optionModel.rejected.connect(() => Lua.updateRequestUI("Button", "Cancel"));
+        dataModel.options = optionModel;
+
+        dataModel.optionVisible = true;
         break;
       case "spin":
         skillInteraction.sourceComponent =

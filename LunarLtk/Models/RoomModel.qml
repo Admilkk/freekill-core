@@ -36,6 +36,8 @@ QtObject {
   // 我们主视角的数据在此
   property DashboardModel dashboard: DashboardModel {}
 
+  property OptionsModel options
+
   // 处理区中的ui常驻卡牌
   property list<CardModel> processing: [];
 
@@ -49,6 +51,7 @@ QtObject {
   property bool okEnabled: false // 可以点确定按钮？
   property bool cancelEnabled: false // 可以点取消按钮？
   property bool endButtonVisible: false // 结束回合可见？
+  property bool optionVisible: false // 结束回合可见？
 
   // 读条信息
   property real requestTotal // 总共的读条时长
@@ -72,6 +75,7 @@ QtObject {
   signal playerAdded(PhotoModel model); // 新玩家加入的信号（addNpc）
   signal cardsMoved(var move, var models); // 操作完移牌数据后通知ui
   signal popupReady(string command,var data, var model); // 准备好弹窗所需model后通知ui
+  signal optionReady(var model)
 
   signal agReady(); // FIXME 烂完了五谷
 
@@ -457,6 +461,28 @@ QtObject {
     popupReady(Command.AskForChoices, data, model);
   }
 
+  function askForOptions(sender, data) {
+    const [ options, all_options, [ min_num, max_num], cancelable, skill_name, prompt, single ] = data;
+    root.prompt = prompt || `#AskForOption:::${skill_name}`;
+    activate();
+    const modelComponent = Qt.createComponent("LunarLtk.Models", "OptionsModel");
+    const model = modelComponent.createObject(null, {
+      options,
+      allOptions: all_options,
+      minNum: min_num,
+      maxNum: max_num,
+      cancelable,
+      skillName: skill_name,
+      prompt,
+      single,
+    });
+    model.accepted.connect(() => replyToServer(model.result));
+    model.rejected.connect(() => replyToServer([]));
+    root.options = model;
+    optionVisible = true;
+    optionReady(model)
+  }
+
   function askForGeneral(sender, data) {
     const [generals, n, no_convert, heg, rule, prompt, extra_data] = data;
     const modelComponent = Qt.createComponent("LunarLtk.Models.Popups", "ChooseGeneralModel");
@@ -668,6 +694,7 @@ QtObject {
     roomPage.addCallback(Command.AskForUseCard, askForUseCard);
 
     roomPage.addCallback(Command.AskForChoices, askForChoices);
+    roomPage.addCallback(Command.AskForOptions, askForOptions);
     roomPage.addCallback(Command.AskForGeneral, askForGeneral);
     roomPage.addCallback(Command.AskForPoxi, askForPoxi);
     roomPage.addCallback(Command.AskForArrangeCards, askForArrangeCards);
@@ -706,9 +733,11 @@ QtObject {
       switch (bdata.id) {
         case "OK":
         okEnabled = bdata.enabled;
+        if (optionVisible && options) options.acceptable = bdata.enabled;
         break;
         case "Cancel":
         cancelEnabled = bdata.enabled;
+        if (optionVisible && options) options.cancelable = bdata.enabled;
         break;
         case "End":
         endButtonVisible = bdata.enabled;

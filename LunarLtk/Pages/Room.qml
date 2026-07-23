@@ -348,7 +348,7 @@ RoomBase {
       anchors.bottom: parent.bottom
       anchors.horizontalCenter: progress.horizontalCenter
       spacing: 20
-      visible: dataModel.okCancelVisible
+      visible: dataModel.okCancelVisible && !roomScene.dataModel.optionVisible
 
       Button {
         id: skipNullificationButton
@@ -372,6 +372,16 @@ RoomBase {
         text: Lua.tr("Cancel")
         onClicked: Lua.updateRequestUI("Button", "Cancel");
       }
+    }
+
+    OptionArea {
+      id: optionArea
+      anchors.bottom: parent.bottom
+      anchors.horizontalCenter: progress.horizontalCenter
+      spacing: 20
+      visible: roomScene.dataModel.optionVisible
+      
+      dataModel: roomScene.dataModel.options
     }
 
     Button {

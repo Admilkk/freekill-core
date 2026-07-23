@@ -84,7 +84,9 @@ function ReqActiveSkill:setup(ignoreInteraction)
   self:updateUnselectedCards()
   self:updateUnselectedTargets()
 
-  if ignoreInteraction then -- 修改Interaction时重新筛选一次原选择牌
+  self:visualizePile()
+
+  if ignoreInteraction and #(self.visible_pile or {}) == 0 then -- 修改Interaction时重新筛选一次原选择牌
     for _, cid in ipairs(old_pendings) do
       local item -- 必须确定此牌是否还在UI内
       for _cid, _item in pairs(scene:getAllItems("CardItem")) do
@@ -102,8 +104,6 @@ function ReqActiveSkill:setup(ignoreInteraction)
 
   self:updateButtons()
   self:updatePrompt()
-
-  self:visualizePile()
 end
 
 function ReqActiveSkill:finish()

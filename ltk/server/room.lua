@@ -1738,7 +1738,170 @@ function Room:askToJointCards(player, params)
   return ret
 end
 
+---@class AskToOptionParams
+---@field skill_name? string
+---@field prompt? string
+---@field options string[]
+---@field all_options? string[]
+---@field cancelable? boolean
 
+--- 选择一个选项
+---@param player ServerPlayer
+---@param params AskToOptionParams
+---@return string
+function Room:askToOption(player, params)
+  if #params.options == 1 and not params.all_options then return params.options[1] end
+
+  local dupParams = table.simpleClone(params) --[[@as AskToOptionsParams]]
+  dupParams.min_num = 1
+  dupParams.max_num = 1
+  dupParams.single = true
+  local result = self:askToOptions(player, dupParams)[1]
+
+  if result == nil then result = "" end
+  if result == "" then
+    if table.contains(params.options, "Cancel") then
+      result = "Cancel"
+    else
+      result = params.options[1]
+    end
+  end
+  return result
+end
+
+---@class AskToOptionsParams: AskToOptionParams
+---@field min_num integer
+---@field max_num integer
+---@field single? boolean
+
+--- 让一些玩家同时选择一个option
+---@param player ServerPlayer
+---@param params AskToOptionsParams
+---@return string[]
+function Room:askToOptions(player, params)
+  local minNum, maxNum = params.min_num, params.max_num
+  if #params.options <= minNum and not params.all_options and not params.cancelable then return params.options end
+  assert(minNum <= maxNum)
+  assert(not params.all_options or table.every(params.options, function(c) return table.contains(params.all_options, c) end))
+
+  params.skill_name = params.skill_name or ""
+  params.all_options = params.all_options or params.options
+  params.prompt = params.prompt or ""
+  params.single = params.single and params.single
+  if params.cancelable == nil then
+    params.cancelable = true
+  end
+
+  local command = "AskForOptions"
+  local req = Request:new(player, command)
+
+  local hide = false -- 是否隐藏读条，用于国战同时机技能选择
+  if params.skill_name == "trigger" then
+    for _, s in ipairs(params.options) do
+      local skill_name = s
+      if skill_name:startsWith("#skill_muti_trigger") then
+        local strSplited = skill_name:split(":")
+        skill_name = strSplited[#strSplited - 1]
+      end
+      if player:isFakeSkill(skill_name) then
+        hide = true
+        break
+      end
+    end
+  end
+  req.focus_text = hide and "" or params.skill_name
+
+  req:setData(player, {
+    params.options, params.all_options, {minNum, maxNum}, params.cancelable, params.skill_name, params.prompt, params.single,
+  })
+
+  local result = req:getResult(player)
+  if type(result) ~= "table" or #result > maxNum or (#result < minNum and not params.cancelable)
+  or (table.find(result, function (r)
+      return not table.contains(params.options, r) and not (params.cancelable and r == "Cancel")
+    end)) then
+    if params.cancelable then
+      return {}
+    else
+      return self:tableRandomPick(params.options, math.min(minNum, #params.all_options))
+    end
+  end
+
+  return result
+end
+
+---@class askToJointOptionParams
+---@field players ServerPlayer[] @ 被询问的玩家
+---@field options string[] | string[][] @ 可选选项列表。若玩家可选项不同，填写二维数组
+---@field all_options? string[] | string[][] @ 全部选项列表
+---@field skill_name? string @ 技能名
+---@field prompt? string @ 提示信息
+---@field send_log? boolean @ 是否发Log，默认否
+
+--- 同时询问多名玩家从众多选项中选择一个（选项可不同）
+---@param player ServerPlayer @ 发起者
+---@param params askToJointOptionParams @ 各种变量
+---@return table<ServerPlayer, string> @ 返回键值表，键为Player、值为选项
+function Room:askToJointOption(player, params)
+  local skillName = params.skill_name or "AskForChoice"
+  local prompt = params.prompt or "AskForChoice"
+  local players, options = params.players, params.options
+  local sendLog = params.send_log or false
+
+  local choicesMap = options ---@type string[][]
+  if type(options[1]) == "table" then
+    assert(#options == #players)
+  else
+    choicesMap = table.map(players, function() return options end) ---@type string[][]
+  end
+
+  local all_options = params.all_options
+  local allChoicesMap ---@type string[][]
+  if all_options then
+    if type(all_options[1]) == "table" then
+      allChoicesMap = all_options ---@type string[][]
+    else
+      allChoicesMap = table.map(players, function() return all_options end) ---@type string[][]
+    end
+  else
+    allChoicesMap = choicesMap
+  end
+
+  local req = Request:new(players, "AskForOptions")
+  req.focus_text = skillName
+  req.receive_decode = false
+  for i, p in ipairs(players) do
+    local p_choices = choicesMap[i]
+    local p_all_choices = allChoicesMap[i]
+    local data = {
+      p_choices,
+      p_all_choices,
+      { 1, 1 },
+      false,
+      skillName,
+      prompt,
+      true,
+    }
+    req:setData(p, data)
+    req:setDefaultReply(p, self:tableRandomPick(p_choices, 1))
+  end
+  req:ask()
+  local ret = {}
+  for _, p in ipairs(players) do
+    ret[p] = req:getResult(p)[1]
+  end
+  if sendLog then
+    for _, p in ipairs(players) do
+      p.room:sendLog{
+        type = "#Choice",
+        from = p.id,
+        arg = ret[p],
+        toast = true,
+      }
+    end
+  end
+  return ret
+end
 
 ---@class AskToSkillInvokeParams
 ---@field skill_name string @ 询问技能名（烧条时显示的技能名）

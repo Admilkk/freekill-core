@@ -72,6 +72,7 @@ export const AskForGeneral = "AskForGeneral";
 export const AskForSkillInvoke = "AskForSkillInvoke";
 export const AskForArrangeCards = "AskForArrangeCards";
 export const AskForChoices = "AskForChoices";
+export const AskForOptions = "AskForOptions";
 export const AskForCardChosen = "AskForCardChosen";
 export const AskForPoxi = "AskForPoxi";
 export const AskForMoveCardInBoard = "AskForMoveCardInBoard";

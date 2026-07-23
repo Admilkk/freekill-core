@@ -377,6 +377,7 @@ RoomBase {
     OptionArea {
       id: optionArea
       anchors.bottom: parent.bottom
+      anchors.bottomMargin: 7
       anchors.horizontalCenter: progress.horizontalCenter
       spacing: 20
       visible: roomScene.dataModel.optionVisible

@@ -45,9 +45,36 @@ function ReqActiveSkill:initialize(player, data)
   end
 end
 
+--- 自动选择唯一目标
+---@param req ReqActiveSkill
+local function autoSelectOnlyFeasibleTarget(req, data)
+  if data.autoTarget and not req:feasible() then
+    local tars = {}
+    for _, to in ipairs(req.room.alive_players) do
+      if req:targetValidity(to.id) then
+        table.insert(tars, to.id)
+        if #tars > 1 then return end
+      end
+    end
+    if #tars == 1 then
+      req.selected_targets = tars
+      req.scene:update("Photo", tars[1], { selected = true })
+      req:updateUnselectedTargets()
+      if req:feasible() then
+        req:updateButtons()
+      else
+        req.selected_targets = {}
+        req.scene:update("Photo", tars[1], { selected = false })
+        req:updateUnselectedTargets()
+      end
+    end
+  end
+end
+
 --- 初始化所有信息
 ---@param ignoreInteraction? boolean @ 是否不初始化Interaction，继承原数据
-function ReqActiveSkill:setup(ignoreInteraction)
+---@param data? table @ 出牌阶段发动的技能需要主动传入是否自动选择
+function ReqActiveSkill:setup(ignoreInteraction, data)
   local scene = self.scene
 
   local old_pendings = table.simpleClone(self.pendings or {})
@@ -100,6 +127,10 @@ function ReqActiveSkill:setup(ignoreInteraction)
         self:initiateTargets()
       end
     end
+  end
+
+  if data then
+    autoSelectOnlyFeasibleTarget(self, data)
   end
 
   self:refreshInteraction()
@@ -337,6 +368,7 @@ function ReqActiveSkill:visualizePile()
   end
 
   -- 因为visible_pile是纯ui方案，与操作合法性无关，故不需要scene参与，直接改RequestHandler.change
+  
   self.change = self.change or {}
   self.change["visible_cards"] = self.visible_pile
 end
@@ -565,32 +597,6 @@ function ReqActiveSkill:selectTarget(playerid, data)
   end
   self:updateUnselectedCards()
   self:updateButtons()
-end
-
---- 自动选择唯一目标
----@param req ReqActiveSkill
-local function autoSelectOnlyFeasibleTarget(req, data)
-  if data.autoTarget and not req:feasible() then
-    local tars = {}
-    for _, to in ipairs(req.room.alive_players) do
-      if req:targetValidity(to.id) then
-        table.insert(tars, to.id)
-        if #tars > 1 then return end
-      end
-    end
-    if #tars == 1 then
-      req.selected_targets = tars
-      req.scene:update("Photo", tars[1], { selected = true })
-      req:updateUnselectedTargets()
-      if req:feasible() then
-        req:updateButtons()
-      else
-        req.selected_targets = {}
-        req.scene:update("Photo", tars[1], { selected = false })
-        req:updateUnselectedTargets()
-      end
-    end
-  end
 end
 
 -- 刷新interaction（不是重新加载，区别于updateInteraction）

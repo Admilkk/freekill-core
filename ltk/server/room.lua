@@ -859,6 +859,7 @@ end
 ---@field include_equip? boolean @ 能不能选装备
 ---@field pattern? string @ 选牌规则
 ---@field expand_pile? string|integer[] @ 可选私人牌堆名称，或额外可选牌
+---@field visible_pile? string|integer[] @ 可见的牌
 
 --- 询问一名玩家选择自己的几张牌。
 ---
@@ -867,7 +868,7 @@ end
 ---@param params AskToCardsParams @ 各种变量
 ---@return integer[] @ 选择的牌的id列表，可能是空的
 function Room:askToCards(player, params)
-  local maxNum, minNum, expand_pile = params.max_num, params.min_num, params.expand_pile
+  local maxNum, minNum, expand_pile, visible_pile = params.max_num, params.min_num, params.expand_pile, params.visible_pile
   if maxNum < 1 then
     return {}
   end
@@ -901,6 +902,7 @@ function Room:askToCards(player, params)
     skillName = params.skill_name,
     pattern = params.pattern,
     expand_pile = params.expand_pile,
+    visible_pile = params.visible_pile,
   }
   local activeParams = { ---@type AskToUseActiveSkillParams
     skill_name = "choose_cards_skill",
@@ -1013,6 +1015,7 @@ end
 ---@field equal? boolean @ 是否要求牌数和目标数相等，默认否
 ---@field pattern? string @ 选牌规则，默认为"."
 ---@field expand_pile? string|integer[] @ 可选私人牌堆名称，或额外可选牌
+---@field visible_pile? string|integer[] @ 可见的牌
 ---@field will_throw? boolean @ 选卡牌须能弃置
 ---@field card_tip_name? string @ 引用的选择卡牌提示的函数名
 
@@ -1063,6 +1066,7 @@ function Room:askToChooseCardsAndPlayers(player, params)
     targetTipName = params.target_tip_name,
     extra_data = params.extra_data,
     expand_pile = params.expand_pile or (params.extra_data and params.extra_data.expand_pile),
+    visible_pile = params.visible_pile or (params.extra_data and params.extra_data.visible_pile),
     will_throw = params.will_throw,
   }
   local activeParams = { ---@type AskToUseActiveSkillParams
@@ -1089,6 +1093,7 @@ end
 ---@field targets? ServerPlayer[] @ 可分配的目标角色。**默认为所有存活角色**
 ---@field cards? integer[] @ 要分配的卡牌。**默认拥有的所有牌**
 ---@field expand_pile? string|integer[] @ 可选私人牌堆名称，或额外可选牌
+---@field visible_pile? string|integer[] @ 可见的牌
 ---@field single_max? integer|table @ 限制每人能获得的最大牌数。输入整数或(以角色id为键以整数为值)的表
 ---@field cancelable? boolean @ 是否可取消。**默认不可**
 ---@field skip? boolean @ 是否跳过移动。**默认不跳过**
@@ -1107,8 +1112,8 @@ function Room:askToYiji(player, params)
   params.skill_name = params.skill_name or "distribution_select_skill"
   params.min_num = params.min_num or 0
   params.max_num = params.max_num or #cards
-  local skillName, minNum, maxNum, single_max, expand_pile = params.skill_name,
-    params.min_num, params.max_num, params.single_max, params.expand_pile
+  local skillName, minNum, maxNum, single_max, expand_pile, visible_pile = params.skill_name,
+    params.min_num, params.max_num, params.single_max, params.expand_pile, params.visible_pile
 
   local list = {}
   for _, pid in ipairs(targets) do
@@ -1135,6 +1140,7 @@ function Room:askToYiji(player, params)
     targets = targets,
     residued_list = residueMap,
     expand_pile = expand_pile,
+    visible_pile = visible_pile,
     skillName = skillName,
   }
 
@@ -1652,6 +1658,7 @@ end
 ---@field pattern? string @ 选牌规则
 ---@field prompt? string @ 提示信息
 ---@field expand_pile? string @ 可选私人牌堆名称
+---@field visible_pile? string|integer[] @ 可见的牌
 ---@field will_throw? boolean @ 是否是弃牌，默认否（在这个流程中牌不会被弃掉，仅用作禁止弃置技判断）
 
 --- 同时询问多名玩家选择一些牌（要求所有玩家选牌规则相同，不同的请自行构造request）
@@ -1665,6 +1672,7 @@ function Room:askToJointCards(player, params)
   local players, maxNum, minNum = params.players, params.max_num, params.min_num
   local include_equip = params.include_equip or false
   local expand_pile = params.expand_pile or nil
+  local visible_pile = params.visible_pile or nil
   local will_throw = params.will_throw or false
   local prompt = params.prompt or ("#AskForCard:::" .. maxNum .. ":" .. minNum)
 
@@ -1715,6 +1723,7 @@ function Room:askToJointCards(player, params)
       skillName = skill_name,
       pattern = pattern,
       expand_pile = expand_pile,
+      visible_pile = visible_pile,
     },
   }
 

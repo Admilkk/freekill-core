@@ -73,6 +73,10 @@ function M:getSameGenerals(name)
   return Fk:getSameGenerals(name)
 end
 
+function M:canMatchInHegemony(general, deputy, enabled_kingdoms)
+  return Fk:canMatchInHegemony(general, deputy, enabled_kingdoms)
+end
+
 function M:isCompanionWith(general, general2)
   local _general, _general2 = Fk.generals[general], Fk.generals[general2]
   return _general:isCompanionWith(_general2)
@@ -412,6 +416,10 @@ end
 
 function M:getEnableKingdoms(general)
   return Fk:getKingdomsNeedToChoose(general)
+end
+
+function M:getKingdomInHegemony(general, deputy, enabled_kingdoms)
+  return Fk:getKingdomInHegemony(general, deputy, enabled_kingdoms)
 end
 
 -- Handle skills

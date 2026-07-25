@@ -52,7 +52,7 @@ GraphicsBox {
     anchors.bottomMargin: 10
     width: 98 * coloumNum + 20
 
-    property int coloumNum: Math.ceil(root.dataModel.generals.length / 3)
+    property int coloumNum: Math.min(Math.ceil(root.dataModel.generals.length / 3), 6)
 
     clip:true
 
@@ -76,7 +76,7 @@ GraphicsBox {
           dataModel: root.dataModel.generalDict[index]
           selectable: {
             if (root.dataModel.choiceNum == 1) return true
-            const result = root.dataModel.resultInt?.map(e => Number(e));
+            const result = root.dataModel.resultInt.map(e => Number(e));
             if (result) {
               return result.includes(index) || root.dataModel.generalFilter(index);
             }
@@ -202,13 +202,18 @@ GraphicsBox {
         anchors.leftMargin: 50
         height: parent.height
         width: 130
-        text: (root.dataModel.lordRole ? Lua.tr(root.dataModel.lordRole) : Lua.tr("lord")) + "已选择："
+        text: {
+          if (root.dataModel.hegemony) {
+            return "启用势力："
+          }
+          return (root.dataModel.lordRole ? Lua.tr(root.dataModel.lordRole) : Lua.tr("lord")) + "已选择："
+        }
         font.pixelSize: 22
         font.family: Config.li2Name
         color: "white"
         horizontalAlignment: Text.AlignHCenter
         verticalAlignment: Text.AlignVCenter
-        visible: root.dataModel.lordGeneral
+        visible: root.dataModel.lordGeneral || root.dataModel.hegemony
       }
 
       CompactGeneralCardItem {
@@ -228,6 +233,35 @@ GraphicsBox {
         visible: root.dataModel.lordDeputy
       }
 
+      Rectangle {
+        anchors.left: lordGeneralText.right
+        anchors.right: parent.right
+        anchors.rightMargin: 10
+        height: Math.max(parent.height, hegEnabledKingdomFlow.height)
+        color: '#93555555'
+        radius: 5
+        visible: hegEnabledKingdomFlow.visible
+        Flow {
+          id: hegEnabledKingdomFlow
+          height: Math.ceil(root.dataModel.enabledKingdoms.length / 6) * 25
+          width: root.dataModel.enabledKingdoms.length * 25
+          anchors.verticalCenter: parent.verticalCenter
+          visible: root.dataModel.hegemony
+
+          Repeater {
+            model: root.dataModel.enabledKingdoms
+            Image {
+              required property string modelData
+              width: 25; height: 25
+              source: {
+                const ret = SkinBank.getGeneralCardDir(modelData) + modelData;
+                if (Backend.exists(ret + ".png")) return ret;
+                return ""
+              }
+            }
+          }
+        }
+      }
     }
 
     Text {
@@ -236,7 +270,7 @@ GraphicsBox {
       wrapMode: Text.WrapAnywhere
       horizontalAlignment: Text.AlignHCenter
       verticalAlignment: Text.AlignBottom
-      text: "你的身份是"
+      text: root.dataModel.hegemony ? "你的势力是" : "你的身份是"
       font.pixelSize: 22
       font.family: "LiSu"
       color: "white"
@@ -256,13 +290,33 @@ GraphicsBox {
       glow.spread: 1
       glow.radius: 2.5
 
-      visible: root.dataModel.selfRole && !root.dataModel.hideRole
+      visible: root.dataModel.selfRole && !root.dataModel.hideRole && !root.dataModel.hegemony
       readonly property var roleColor: {
         "lord": '#c00707',
         "loyalist": '#e7b100',
         "rebel": '#0a6d0a',
         "renegade": '#0d32ac',
         "rebel_chief": '#0a6d0a'
+      }
+    }
+
+    Image {
+      id: selfKingdom
+      height: 45
+      width: 45
+      anchors.horizontalCenter: parent.horizontalCenter
+      visible: root.dataModel.hegemony
+      source: {
+        const mainGeneral = Ltk.getGeneralData(root.dataModel.generalResult[0] ?? "caocao")
+        if (mainGeneral?.kingdom === "wild") {
+          return SkinBank.getGeneralCardDir("wild") + "wild"
+        }
+        if (root.dataModel.selectedKingdom) return SkinBank.getGeneralCardDir(root.dataModel.selectedKingdom) + root.dataModel.selectedKingdom;
+        const kingdom = Ltk.getKingdomInHegemony(root.dataModel.generalResult[0], root.dataModel.generalResult[1] ?? "", root.dataModel.enabledKingdoms)
+        if (kingdom.length == 1) {
+          return SkinBank.getGeneralCardDir(kingdom[0]) + `${kingdom[0]}`
+        }
+        return ""
       }
     }
 
@@ -508,7 +562,7 @@ GraphicsBox {
         item.selected = true;
       }
     }
-    setHegemonyData();
+    // setHegemonyData();
   }
 
   function updateCompanion(gcard1, gcard2, overwrite) {

@@ -80,6 +80,10 @@ QtObject {
     return _L.getSameGenerals(name);
   }
 
+  function canMatchInHegemony(general, deputy, enabled_kingdoms) {
+    return _L.canMatchInHegemony(general, deputy, enabled_kingdoms)
+  }
+
   function isCompanionWith(general, general2) {
     return _L.isCompanionWith(general, general2);
   }
@@ -146,6 +150,10 @@ QtObject {
 
   function getEnableKingdoms(general) {
     return _L.getEnableKingdoms(general)
+  }
+
+  function getKingdomInHegemony(general, deputy, enabled_kingdoms) {
+    return _L.getKingdomInHegemony(general, deputy, enabled_kingdoms)
   }
 
   function getSkillData(skill_name) {

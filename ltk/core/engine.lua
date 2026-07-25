@@ -555,7 +555,7 @@ function Engine:getGeneralsRandomly(num, generalPool, except, filter, includeSam
   return table.random(availableGenerals, num)
 end
 
----获取一个武将所需要选择的势力
+---获取一个武将所需要选择的势力，不做选择合法性判断
 ---@param general string
 ---@return string[]
 function Engine:getKingdomsNeedToChoose(general)
@@ -569,6 +569,60 @@ function Engine:getKingdomsNeedToChoose(general)
     table.insertIfNeed(arr, v)
   end
   return arr
+end
+
+---@param general string
+---@param deputy string
+---@param enabled_kingdoms string[]
+---@return string[]
+function Engine:getKingdomInHegemony(general, deputy, enabled_kingdoms)
+  local g = self.generals[general]
+  local d = self.generals[deputy or ""]
+  if d then
+    local arr = {}
+    if g.kingdom == "wild" then
+      if d.subkingdom then
+        arr = { d.kingdom, d.subkingdom }
+      else
+        arr = { d.kingdom }
+      end
+    else
+      if g.kingdom == d.kingdom or g.kingdom == (d.subkingdom or " ") then
+        table.insertIfNeed(arr, g.kingdom)
+      end
+      if g.subkingdom == d.kingdom or g.subkingdom == (d.subkingdom or " ") then
+        table.insertIfNeed(arr, g.subkingdom)
+      end
+    end
+
+    if enabled_kingdoms and #arr > 0 then
+      for _, v in ipairs(table.simpleClone(arr)) do
+        if not table.contains(enabled_kingdoms, v) then
+          arr = {}
+        end
+      end
+    end
+    return arr
+  end
+  return {}
+end
+
+---是否能在国战中组一对
+---@param general string
+---@param deputy string
+---@param enabled_kingdoms string[]
+function Engine:canMatchInHegemony(general, deputy, enabled_kingdoms)
+  local g = self.generals[general]
+  local d = self.generals[deputy]
+  if g and d and general ~= deputy then
+    if g.kingdom == "wild" then return true end
+    if d.kingdom == "wild" then return false end
+    local arr = {g.kingdom, g.subkingdom or ""}
+    return (table.contains(arr, d.kingdom) and table.contains(enabled_kingdoms, d.kingdom))
+    or (table.contains(arr, d.subkingdom or " ") and table.contains(enabled_kingdoms, d.subkingdom or " "))
+    or general == "mouxusheng" or deputy == "mouxusheng" --测试用
+  end
+  return false
 end
 
 --- 获取已经启用的所有武将的列表。

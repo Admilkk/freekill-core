@@ -1252,7 +1252,9 @@ end
 ---@field num? integer @ 默认选武将数
 ---@field lordNum? integer @ 主公额外选将
 ---@field isHeg? boolean @ 是否为国战
+---@field enabledKingdoms? string[] @ 允许使用的势力（国战专属参数）
 ---@field hideRole? boolean @ 是否隐藏身份显示
+---@field skipSetup? boolean @ 跳过设置武将
 
 ---初始选将
 ---@param player ServerPlayer @ 无用参数
@@ -1267,6 +1269,7 @@ function Room:askToChooseIniticalGeneral(player, params)
   params.num = params.num or 5
   params.lordNum = params.lordNum or 3
   params.isHeg = params.isHeg or false
+  params.enabledKingdoms = params.enabledKingdoms or {}
   params.hideRole = params.hideRole or false
 
   if params.lordGeneral == "" and params.lordDeputy ~= "" then
@@ -1285,9 +1288,39 @@ function Room:askToChooseIniticalGeneral(player, params)
   for i, pl in ipairs(targets) do
     local arg
     if params.generals then
-      arg = generals
+      local pNum = math.floor(#generals / #targets)
+      arg = table.slice(generals, (i - 1) * pNum + 1, i * pNum + 1)
     else
       arg = table.slice(generals, (i - 1) * params.num + 1, i * params.num + 1)
+    end
+
+    -- 国战的话就整理一下武将顺序
+    if params.isHeg then
+      local g_map = {}
+      local default_order = { "wei", "shu", "wu", "qun", "jin" }
+      for _, g in ipairs(arg) do
+        local gdata = Fk.generals[g]
+        if g_map[gdata.kingdom] then
+          table.insert(g_map[gdata.kingdom], g)
+        else
+          g_map[gdata.kingdom] = {g}
+        end
+      end
+
+      local arr = {}
+      for _, ki in ipairs(default_order) do
+        if g_map[ki] then
+          table.insertTable(arr, g_map[ki])
+        end
+      end
+      for k, v in pairs(g_map) do
+        if not table.contains(default_order, k) then
+          table.insertTable(arr, v)
+        end
+      end
+
+      arg = arr
+
     end
     
     local dat = {
@@ -1306,6 +1339,7 @@ function Room:askToChooseIniticalGeneral(player, params)
             lordRole = params.lordRole,
             hegemony = params.isHeg,
             hideRole = params.hideRole,
+            enabledKingdoms = params.enabledKingdoms
           }
         },
       },
@@ -1314,6 +1348,18 @@ function Room:askToChooseIniticalGeneral(player, params)
     req.timeout = self:getSettings('generalTimeout')
     req:setData(pl, dat)
     req:setDefaultReply(pl, {table.concat(self:tableRandomPick(arg, double), ","), "kingdom,"})
+    if params.isHeg then
+      for _, g in ipairs(arg) do
+        if table.find(arg, function (g2)
+          if Fk:canMatchInHegemony(g, g2, params.enabledKingdoms) then
+            req:setDefaultReply(pl, {table.concat({g, g2}, ","), "kingdom,"})
+            return true
+          end
+        end) then
+          break
+        end
+      end
+    end
   end
 
   local ans, ans2 = {}, {}
@@ -1323,20 +1369,24 @@ function Room:askToChooseIniticalGeneral(player, params)
     local result = req:getResult(pl)
     local g_data = string.split(result[1], ",")
     local extra_data = string.split(result[2], ",")
-    if extra_data[2] == "" and #Fk:getKingdomsNeedToChoose(g_data[1]) > 0 then
-      extra_data[2] = self:tableRandomPick(Fk:getKingdomsNeedToChoose(g_data[1]), 1)[1]
+    local ava_kingdoms = Fk:getKingdomsNeedToChoose(g_data[1])
+    if params.isHeg then ava_kingdoms = Fk:getKingdomInHegemony(g_data[1], g_data[2], params.enabledKingdoms) end
+    if extra_data[2] == "" and #ava_kingdoms > 0 then
+      extra_data[2] = self:tableRandomPick(ava_kingdoms, 1)[1]
     end
 
-    if #g_data == double then
-      self:prepareGeneral(pl, g_data[1], g_data[2] or "", true)
-    else
-      fk.qCritical("not reasonable reply!")
-      self:gameOver("")
-    end
+    if not params.skipSetup then
+      if #g_data == double then
+        self:prepareGeneral(pl, g_data[1], g_data[2] or "", true)
+      else
+        fk.qCritical("not reasonable reply!")
+        self:gameOver("")
+      end
 
-    if extra_data[1] == "kingdom" and extra_data[2] and extra_data[2] ~= "" then
-      pl.kingdom = extra_data[2]
-      self:notifyProperty(pl, pl, "kingdom")
+      if extra_data[1] == "kingdom" and extra_data[2] and extra_data[2] ~= "" then
+        pl.kingdom = extra_data[2]
+        self:notifyProperty(pl, pl, "kingdom")
+      end
     end
 
     ans[pl] = g_data
@@ -1346,9 +1396,7 @@ function Room:askToChooseIniticalGeneral(player, params)
     end
   end
 
-  if not params.generals then
-    self:returnToGeneralPile(_generals, "random")
-  end
+  self:returnToGeneralPile(_generals, "random")
 
   return ans, ans2, _generals
 end

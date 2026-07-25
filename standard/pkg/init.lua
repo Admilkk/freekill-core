@@ -108,8 +108,6 @@ local role_getlogic = function()
         needDeputy = room:getSettings('enableDeputy'),
       })
 
-      room:returnToGeneralPile(_generals)
-
       room:broadcastProperty(lord, "kingdom")
 
       -- 显示技能

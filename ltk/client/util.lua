@@ -410,6 +410,9 @@ function M:getCardName(cardId, filterCard)
   return card:getDynamicName(Self) or ""
 end
 
+function M:getEnableKingdoms(general)
+  return Fk:getKingdomsNeedToChoose(general)
+end
 
 -- Handle skills
 

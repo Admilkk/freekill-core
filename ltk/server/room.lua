@@ -1241,6 +1241,118 @@ function Room:askToChooseGeneral(player, params)
   return choices
 end
 
+---@class AskToChooseIniticalGeneralParams
+---@field targets ServerPlayer | ServerPlayer[]
+---@field generals? string[] @ 提前传入可选的武将牌，该参数会覆盖isLord、num和lordNum，需自行returnToGeneralPile放回武将牌堆
+---@field lordRole? string @ “主公”身份，默认为主公，明忠模式则为忠臣
+---@field isLord? boolean @ 是否为“主公”，决定是否调用lordNum取武将牌
+---@field lordGeneral? string @ 主公主将
+---@field lordDeputy? string @ 主公副将
+---@field needDeputy? boolean @ 是否需要副将
+---@field num? integer @ 默认选武将数
+---@field lordNum? integer @ 主公额外选将
+---@field isHeg? boolean @ 是否为国战
+---@field hideRole? boolean @ 是否隐藏身份显示
+
+---初始选将
+---@param player ServerPlayer @ 无用参数
+---@param params AskToChooseIniticalGeneralParams
+---@return table<ServerPlayer, string[]>, table<ServerPlayer, table>, string[] @ 第一个参数是每个玩家选的武将，第二个参数是每个玩家选将拥有的额外信息，比如神将选的势力和一些额外选择，第三个参数是未选武将
+function Room:askToChooseIniticalGeneral(player, params)
+  params.isLord = params.isLord or false
+  params.lordRole = params.lordRole or ""
+  params.lordGeneral = params.lordGeneral or ""
+  params.lordDeputy = params.lordDeputy or ""
+  params.needDeputy = params.needDeputy or false
+  params.num = params.num or 5
+  params.lordNum = params.lordNum or 3
+  params.isHeg = params.isHeg or false
+  params.hideRole = params.hideRole or false
+
+  if params.lordGeneral == "" and params.lordDeputy ~= "" then
+    error("can't assign lordDeputy but left lordGeneral empty")
+  end
+
+  local targets = params.targets
+  if params.targets.id then
+    targets = {params.targets}
+  end
+
+  local double = params.needDeputy and 2 or 1
+  local generalNum = params.isLord and (#targets * (params.num + params.lordNum) * double) or (#targets * params.num * double)
+  local generals = params.generals or self:getNGenerals(generalNum)
+  local req = Request:new(targets, "CustomDialog")
+  for i, pl in ipairs(targets) do
+    local arg
+    if params.generals then
+      arg = generals
+    else
+      arg = table.slice(generals, (i - 1) * params.num + 1, i * params.num + 1)
+    end
+    
+    local dat = {
+      component = {
+        name = "ChooseInitialGeneralBox",
+        uri = "LunarLtk.Pages.Popups",
+        model = {
+          name = "ChooseInitialGeneralModel",
+          uri = "LunarLtk.Models.Popups",
+          prop = {
+            generals = arg,
+            choiceNum = double,
+            lordGeneral = params.lordGeneral,
+            lordDeputy = params.lordDeputy,
+            selfRole = params.hideRole and "" or pl.role,
+            lordRole = params.lordRole,
+            hegemony = params.isHeg,
+            hideRole = params.hideRole,
+          }
+        },
+      },
+    }
+    req.focus_text = "AskForGeneral"
+    req.timeout = self:getSettings('generalTimeout')
+    req:setData(pl, dat)
+    req:setDefaultReply(pl, {table.concat(self:tableRandomPick(arg, double), ","), "kingdom,"})
+  end
+
+  local ans, ans2 = {}, {}
+
+  local _generals = table.simpleClone(generals)
+  for _, pl in ipairs(targets) do
+    local result = req:getResult(pl)
+    local g_data = string.split(result[1], ",")
+    local extra_data = string.split(result[2], ",")
+    if extra_data[2] == "" and #Fk:getKingdomsNeedToChoose(g_data[1]) > 0 then
+      extra_data[2] = self:tableRandomPick(Fk:getKingdomsNeedToChoose(g_data[1]), 1)[1]
+    end
+
+    if #g_data == double then
+      self:prepareGeneral(pl, g_data[1], g_data[2] or "", true)
+    else
+      fk.qCritical("not reasonable reply!")
+      self:gameOver("")
+    end
+
+    if extra_data[1] == "kingdom" and extra_data[2] and extra_data[2] ~= "" then
+      pl.kingdom = extra_data[2]
+      self:notifyProperty(pl, pl, "kingdom")
+    end
+
+    ans[pl] = g_data
+    ans2[pl] = { [extra_data[1]] = extra_data[2] }
+    for _, g in ipairs(g_data) do
+      table.removeOne(_generals, g)
+    end
+  end
+
+  if not params.generals then
+    self:returnToGeneralPile(_generals, "random")
+  end
+
+  return ans, ans2, _generals
+end
+
 --- 询问玩家若为神将、双势力需选择一个势力。
 ---@param players? ServerPlayer[] @ 询问目标
 function Room:askToChooseKingdom(players)

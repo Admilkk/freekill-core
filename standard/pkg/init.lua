@@ -82,7 +82,6 @@ local role_getlogic = function()
     local generalNum = room:getSettings('generalNum')
     local n = room:getSettings('enableDeputy') and 2 or 1
     local lord = room:getLord()
-    local lord_generals = {}
     local lord_num = 3
 
     if lord ~= nil then
@@ -102,25 +101,15 @@ local role_getlogic = function()
       local generals = table.connect(room:findGenerals(function(g)
         return table.contains(Fk.lords, g)
       end, lord_num), room:getNGenerals(generalNum))
-      lord_generals = room:askToChooseGeneral(lord, { generals = generals, n = n })
-      local lord_general, deputy
-      if type(lord_generals) == "table" then
-        deputy = lord_generals[2]
-        lord_general = lord_generals[1]
-      else
-        lord_general = lord_generals
-        lord_generals = {lord_general}
-      end
-      generals = table.filter(generals, function(g)
-        return not table.find(lord_generals, function(lg)
-          return Fk.generals[lg].trueName == Fk.generals[g].trueName
-        end)
-      end)
-      room:returnToGeneralPile(generals)
 
-      room:prepareGeneral(lord, lord_general, deputy, true)
+      local dat, ext, _generals = room:askToChooseIniticalGeneral(lord, {
+        targets = lord,
+        generals = generals,
+        needDeputy = room:getSettings('enableDeputy'),
+      })
 
-      room:askToChooseKingdom({lord})
+      room:returnToGeneralPile(_generals)
+
       room:broadcastProperty(lord, "kingdom")
 
       -- 显示技能
@@ -181,24 +170,13 @@ local role_getlogic = function()
     end
 
     local nonlord = room:getOtherPlayers(lord, true)
-    local req = Request:new(nonlord, "AskForGeneral")
-    req.timeout = self.room:getSettings('generalTimeout')
-    local generals = room:tableRandomPick(room.general_pile, #nonlord * generalNum)
-    for i, p in ipairs(nonlord) do
-      local arg = table.slice(generals, (i - 1) * generalNum + 1, i * generalNum + 1)
-      req:setData(p, { arg, n })
-      req:setDefaultReply(p, room:tableRandomPick(arg, n))
-    end
-
-    for _, p in ipairs(nonlord) do
-      local result = req:getResult(p)
-      local general, deputy = result[1], result[2]
-      room:findGeneral(general)
-      room:findGeneral(deputy)
-      room:prepareGeneral(p, general, deputy)
-    end
-
-    room:askToChooseKingdom(nonlord)
+    room:askToChooseIniticalGeneral(lord, {
+        targets = nonlord,
+        num = generalNum,
+        needDeputy = room:getSettings('enableDeputy'),
+        lordGeneral = lord.general,
+        lordDeputy = lord.deputyGeneral,
+      })
   end
 
   return role_logic

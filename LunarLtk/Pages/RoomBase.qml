@@ -105,7 +105,11 @@ W.PageBase {
       let needLoadData = null;
       if (command == Command.CustomDialog) {
         component = Lua.createComponent(data.component);
-        Object.assign(prop, data.component?.prop ?? {});
+        if (model) {
+          model?.initialize()
+        } else {
+          Object.assign(prop, data.component?.prop ?? {});
+        }
       } else if (command == Command.MiniGame) {
         if (data.model) {
           component = Lua.createComponent(data.component);

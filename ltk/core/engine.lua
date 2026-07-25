@@ -555,6 +555,22 @@ function Engine:getGeneralsRandomly(num, generalPool, except, filter, includeSam
   return table.random(availableGenerals, num)
 end
 
+---获取一个武将所需要选择的势力
+---@param general string
+---@return string[]
+function Engine:getKingdomsNeedToChoose(general)
+  local arr = {}
+  local g = self.generals[general]
+  if g.subkingdom ~= nil then
+    arr = { g.kingdom }
+    table.insertIfNeed(arr, g.subkingdom)
+  end
+  for _, v in ipairs(self:getKingdomMap(g.kingdom) or {}) do
+    table.insertIfNeed(arr, v)
+  end
+  return arr
+end
+
 --- 获取已经启用的所有武将的列表。
 ---@param except? General[] @ 特别指明要排除在外的武将
 ---@return General[] @ 所有武将的列表

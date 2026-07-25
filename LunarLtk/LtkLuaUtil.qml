@@ -144,6 +144,10 @@ QtObject {
     return _L.getCardName(id, filterCard);
   }
 
+  function getEnableKingdoms(general) {
+    return _L.getEnableKingdoms(general)
+  }
+
   function getSkillData(skill_name) {
     return _L.getSkillData(skill_name);
   }

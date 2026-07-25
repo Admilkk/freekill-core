@@ -179,7 +179,7 @@ end
 ---@field public fixed_func? fun(self: DistanceSkill, from: Player, to: Player, card?: Card): integer?
 
 ---@class ProhibitSpec: StatusSkillSpec
----@field public is_prohibited? fun(self: ProhibitSkill, from: Player?, to: Player, card: Card): any
+---@field public is_prohibited? fun(self: ProhibitSkill, from?: Player, to: Player, card: Card): any
 ---@field public prohibit_use? fun(self: ProhibitSkill, player: Player, card: Card): any
 ---@field public prohibit_response? fun(self: ProhibitSkill, player: Player, card: Card): any
 ---@field public prohibit_discard? fun(self: ProhibitSkill, player: Player, card: Card): any

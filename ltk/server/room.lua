@@ -1322,7 +1322,7 @@ function Room:askToChooseIniticalGeneral(player, params)
       arg = arr
 
     end
-    
+
     local dat = {
       component = {
         name = "ChooseInitialGeneralBox",
@@ -1339,6 +1339,7 @@ function Room:askToChooseIniticalGeneral(player, params)
             lordRole = params.lordRole,
             hegemony = params.isHeg,
             hideRole = params.hideRole,
+            convertDisabled = self:getSettings("disableSameConvert") or false,
             enabledKingdoms = params.enabledKingdoms
           }
         },
@@ -3266,7 +3267,6 @@ end
 ---@field data_table table<integer, any> @ 以每个playerID为键的数据数组 注意```prop```可以为使用model的qml框额外指定初始值
 ---@field timeout? integer @ 烧条时间，单位为秒。默认使用房间的timeout
 
--- TODO: 重构request机制，不然这个还得手动拿client_reply
 ---@param players ServerPlayer[] @ 需要参与这个框的角色
 ---@param params AskToMiniGameParams @ 各种变量
 ---@return Request

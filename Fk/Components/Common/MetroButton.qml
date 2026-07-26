@@ -7,13 +7,14 @@ import Fk.Widgets as W
 
 Item {
   property bool enabled: true
+  property alias title: title
   property alias text: title.text
   property alias textColor: title.color
   property alias textFont: title.font
   property alias backgroundColor: bg.color
   property alias border: bg.border
   property alias iconSource: icon.source
-  property int padding: 8
+  property int padding: 0
   property bool hovered: false
   property bool checked: false
 
@@ -21,8 +22,8 @@ Item {
   signal rightClicked
 
   id: button
-  width: icon.width + title.implicitWidth + padding * 2 + (icon.visible ? 4 : 0)
-  height: Math.max(icon.height, title.implicitHeight) + padding * 2
+  width: icon.width + title.implicitWidth + padding * 2 + (icon.visible ? 4 : 0) + 16
+  height: Math.max(icon.height, title.implicitHeight) + padding * 2 + 16
 
   // 背景阴影
   RectangularGlow {
@@ -42,7 +43,9 @@ Item {
   // 主背景
   Rectangle {
     id: bg
-    anchors.fill: parent
+    anchors.centerIn: parent
+    width: parent.width - parent.padding * 2
+    height: parent.height - parent.padding * 2
     radius: 6
     color: checked ? "#3D2E2E" : (hover.hovered ? "#5C3D3D" : "#2A1F1F")
     border.width: checked ? 2 : 1
@@ -65,10 +68,10 @@ Item {
 
   // 顶部高光线（玻璃质感）
   Rectangle {
-    anchors.top: parent.top
-    anchors.left: parent.left
-    anchors.right: parent.right
-    height: parent.height * 0.45
+    anchors.top: bg.top
+    anchors.left: bg.left
+    anchors.right: bg.right
+    height: bg.height * 0.45
     radius: bg.radius
     color: "transparent"
     clip: true
@@ -84,7 +87,7 @@ Item {
 
   // 内容行
   Row {
-    anchors.centerIn: parent
+    anchors.centerIn: bg
     spacing: 6
 
     Image {

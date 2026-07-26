@@ -343,6 +343,16 @@ RoomBase {
       anchors.rightMargin: 20
     }
 
+    component OKCancelButton: MetroButton {
+      width: 136
+      height: 56
+      padding: 8
+      textFont.bold: true
+      textFont.family: Config.libianName
+      textFont.pixelSize: 20
+      title.style: Text.Outline
+    }
+
     Row {
       id: okCancel
       anchors.bottom: parent.bottom
@@ -350,8 +360,11 @@ RoomBase {
       spacing: 20
       visible: dataModel.okCancelVisible && !roomScene.dataModel.optionVisible
 
-      Button {
+      MetroButton {
         id: skipNullificationButton
+        width: 120
+        height: 40
+        textFont.family: Config.fontLibianName
         text: Lua.tr("SkipNullification")
         visible: dataModel.canSkipNullification
         onClicked: {
@@ -359,15 +372,21 @@ RoomBase {
         }
       }
 
-      Button {
+      OKCancelButton {
         id: okButton
+        textColor: "#f7dbcb"
+        title.styleColor: "#975a36"
+        backgroundColor: "#C26028"
         enabled: dataModel.okEnabled
         text: Lua.tr("OK")
         onClicked: Lua.updateRequestUI("Button", "OK");
       }
 
-      Button {
+      OKCancelButton {
         id: cancelButton
+        textColor: "#f4dbc1"
+        title.styleColor: "#746c60"
+        backgroundColor: "#ae7842"
         enabled: dataModel.cancelEnabled
         text: Lua.tr("Cancel")
         onClicked: Lua.updateRequestUI("Button", "Cancel");
@@ -385,9 +404,12 @@ RoomBase {
       dataModel: roomScene.dataModel.options
     }
 
-    Button {
+    OKCancelButton {
       id: endPhaseButton
       text: Lua.tr("End")
+      textColor: "#d0eff0"
+      title.styleColor: "#426b6d"
+      backgroundColor: "#42b1b5"
       anchors.bottom: parent.bottom
       anchors.bottomMargin: 40
       anchors.right: parent.right

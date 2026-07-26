@@ -34,7 +34,12 @@ W.PageBase {
     anchors.right: parent.right
     anchors.rightMargin: 12
     text: Lua.tr("Menu")
-    visible: !root.overlayOpened
+    visible: {
+      if (root.gameContent?.item && root.gameContent.item.hideMenuButton) {
+        return false
+      }
+      return !root.overlayOpened
+    }
     onClicked: {
       if (root.overlayOpened){
         root.closeOverlay();

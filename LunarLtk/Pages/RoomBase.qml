@@ -57,79 +57,11 @@ W.PageBase {
     };
     onCardsMoved: (move, data) => roomScene.moveCards(move, data);
 
-    onActivated: {
-      roomScene.progressAnim.from = (dataModel.requestDuration / dataModel.requestTotal) * 100.0;
-      roomScene.progressAnim.duration = dataModel.requestDuration;
-      roomScene.progress.visible = true;
-    }
+    onActivated: roomScene.handleOnActivated()
 
-    onDeActivated: {
-      roomScene.skillInteraction.item?.clear();
-      roomScene.skillInteraction.sourceComponent = undefined;
-      roomScene.progress.visible = false;
+    onDeActivated: roomScene.handleOnDeActivated()
 
-      roomScene.dashboard.disableAllCards();
-      roomScene.dashboard.clearVisiblePile();
-
-      if (roomScene.popupItem != null) {
-        roomScene.popupItem.finished();
-      }
-
-      if (dataModel.options) {
-        dataModel.options.destroy();
-        dataModel.options = null;
-      }
-      dataModel.optionVisible = false;
-
-      Lua.finishRequestUI();
-      applyChange({});
-    }
-
-    onPopupReady: (command, data, model) => {
-      let component;
-      let prop = { dataModel: model };
-      if (!model) delete prop.dataModel;
-
-      const componentTable = {
-        [Command.AskForArrangeCards]: "ArrangeCardsBox",
-        [Command.AskForChoices]: "ChoicesBox",
-        [Command.AskForGeneral]: "ChooseGeneralBox",
-        [Command.AskForCardChosen]: "PlayerCardBox",
-        [Command.AskForPoxi]: "PoxiBox",
-        [Command.AskForMoveCardInBoard]: "MoveCardInBoardBox",
-        [Command.AskForCardsAndChoice]: "ChooseCardsAndChoiceBox",
-
-        [Command.GameOver]: "GameOverBox",
-      };
-
-      let needLoadData = null;
-      if (command == Command.CustomDialog) {
-        component = Lua.createComponent(data.component);
-        if (model) {
-          model?.initialize()
-        } else {
-          Object.assign(prop, data.component?.prop ?? {});
-        }
-      } else if (command == Command.MiniGame) {
-        if (data.model) {
-          component = Lua.createComponent(data.component);
-          // console.log(component.status, component.errorString());
-          Object.assign(prop, data.data?.prop ?? {});
-        } else { // 兼容旧版
-          component = Qt.createComponent(Cpp.path + "/" + data.component.url);
-          needLoadData = data.data;
-        }
-      } else {
-        component = Qt.createComponent("LunarLtk.Pages.Popups", componentTable[command]);
-      }
-
-      roomScene.showPopup(component, prop);
-      if (needLoadData) roomScene.popupItem.loadData(needLoadData); // 兼容旧版
-
-      if (roomScene.popupItem.timeout) {
-        roomScene.progress.visible = false;
-      }
-    }
+    onPopupReady: (command, data, model) => roomScene.handleOnPopupReady(command, data, model)
 
     onAgReady: roomScene.showAG();
   }
@@ -258,6 +190,80 @@ W.PageBase {
       item.progressBar.visible = true;
       item.progressTip = Lua.tr(command)
         + Lua.tr(" thinking...");
+    }
+  }
+
+  function handleOnActivated() {
+    roomScene.progressAnim.from = (dataModel.requestDuration / dataModel.requestTotal) * 100.0;
+    roomScene.progressAnim.duration = dataModel.requestDuration;
+    roomScene.progress.visible = true;
+  }
+
+  function handleOnDeActivated() {
+    roomScene.skillInteraction.item?.clear();
+    roomScene.skillInteraction.sourceComponent = undefined;
+    roomScene.progress.visible = false;
+
+    roomScene.dashboard.disableAllCards();
+    roomScene.dashboard.clearVisiblePile();
+
+    if (roomScene.popupItem != null) {
+      roomScene.popupItem.finished();
+    }
+
+    if (dataModel.options) {
+      dataModel.options.destroy();
+      dataModel.options = null;
+    }
+    dataModel.optionVisible = false;
+
+    Lua.finishRequestUI();
+    applyChange({});
+  }
+
+  function handleOnPopupReady(command, data, model) {
+    let component;
+    let prop = { dataModel: model };
+    if (!model) delete prop.dataModel;
+
+    const componentTable = {
+      [Command.AskForArrangeCards]: "ArrangeCardsBox",
+      [Command.AskForChoices]: "ChoicesBox",
+      [Command.AskForGeneral]: "ChooseGeneralBox",
+      [Command.AskForCardChosen]: "PlayerCardBox",
+      [Command.AskForPoxi]: "PoxiBox",
+      [Command.AskForMoveCardInBoard]: "MoveCardInBoardBox",
+      [Command.AskForCardsAndChoice]: "ChooseCardsAndChoiceBox",
+
+      [Command.GameOver]: "GameOverBox",
+    };
+
+    let needLoadData = null;
+    if (command == Command.CustomDialog) {
+      component = Lua.createComponent(data.component);
+      if (model) {
+        model?.initialize()
+      } else {
+        Object.assign(prop, data.component?.prop ?? {});
+      }
+    } else if (command == Command.MiniGame) {
+      if (data.model) {
+        component = Lua.createComponent(data.component);
+        // console.log(component.status, component.errorString());
+        Object.assign(prop, data.data?.prop ?? {});
+      } else { // 兼容旧版
+        component = Qt.createComponent(Cpp.path + "/" + data.component.url);
+        needLoadData = data.data;
+      }
+    } else {
+      component = Qt.createComponent("LunarLtk.Pages.Popups", componentTable[command]);
+    }
+
+    roomScene.showPopup(component, prop);
+    if (needLoadData) roomScene.popupItem.loadData(needLoadData); // 兼容旧版
+
+    if (roomScene.popupItem.timeout) {
+      roomScene.progress.visible = false;
     }
   }
 

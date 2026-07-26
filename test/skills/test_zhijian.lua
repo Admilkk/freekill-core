@@ -17,12 +17,7 @@ zhijian:addEffect("active", {
   min_target_num = 0,
   max_target_num = 1,
   prompt = "#test_zhijian",
-  interaction = function()
-    return UI.OptionBox {
-      options = { "test_zhijian_random", "test_zhijian_put" },
-      direct_send = true
-    }
-  end,
+  interaction = UI.OptionBox { options = { "test_zhijian_random", "test_zhijian_put" }, direct_send = true },
   refresh_interaction = function(self, player, selected_cards, selected_targets)
     if #selected_cards == 0 then return { "test_zhijian_random" } end
     return { "test_zhijian_put" }

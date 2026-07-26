@@ -16,12 +16,10 @@ change_hero:addEffect("active", {
     return #selected < 1
   end,
   target_num = 1,
-  interaction = function(self)
-    return UI.OptionBox {
-      options = { "mainGeneral",  "deputyGeneral", "removeDeputyGeneral", "Gender", "Kingdom" },
-      direct_send = true
-    }
-  end,
+  interaction = UI.OptionBox {
+    options = { "mainGeneral",  "deputyGeneral", "removeDeputyGeneral", "Gender", "Kingdom" },
+    direct_send = true
+  },
   refresh_interaction = function(self, player, selected_cards, selected_targets)
     if #selected_targets == 0 then return {} end
     local arr = { "mainGeneral",  "deputyGeneral", "Gender", "Kingdom" }

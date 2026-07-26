@@ -13,12 +13,7 @@ cheat:addEffect("active", {
   can_use = Util.TrueFunc,
   card_filter = Util.FalseFunc,
   target_num = 0,
-  interaction = function()
-    return UI.OptionBox {
-      options = { "basic", "trick", "equip" },
-      direct_send = true
-    }
-  end,
+  interaction = UI.OptionBox { options = { "basic", "trick", "equip" }, direct_send = true },
   on_use = function(self, room, effect)
     local from = effect.from
     local cardTypeName = effect.interaction_data

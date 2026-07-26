@@ -13,6 +13,7 @@ Item {
   property alias textFont: title.font
   property alias backgroundColor: bg.color
   property alias border: bg.border
+  property alias icon: icon
   property alias iconSource: icon.source
   property int padding: 0
   property bool hovered: false

@@ -4,6 +4,7 @@ import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
 import QtMultimedia
+import Qt5Compat.GraphicalEffects
 
 import Fk
 import Fk.Components.Common
@@ -19,6 +20,9 @@ RoomBase {
   property alias okCancel: okCancel
   property alias okButton: okButton
   property alias cancelButton: cancelButton
+
+  property alias menuButton: menuButton
+  signal menuButtonClicked()
 
   // required property 填写区
   roomArea: roomArea
@@ -360,11 +364,8 @@ RoomBase {
       spacing: 20
       visible: dataModel.okCancelVisible && !roomScene.dataModel.optionVisible
 
-      MetroButton {
+      OKCancelButton {
         id: skipNullificationButton
-        width: 120
-        height: 40
-        textFont.family: Config.fontLibianName
         text: Lua.tr("SkipNullification")
         visible: dataModel.canSkipNullification
         onClicked: {
@@ -476,10 +477,28 @@ RoomBase {
   MiscStatus {
     anchors.right: parent.right
     anchors.top: parent.top
-    anchors.rightMargin: 108
+    anchors.rightMargin: 68
     anchors.topMargin: 8
 
     dataModel: roomScene.dataModel
+  }
+
+  OKCancelButton {
+    id: menuButton
+    width: 64
+    height: 64
+    anchors.top: parent.top
+    anchors.topMargin: 4
+    anchors.right: parent.right
+    anchors.rightMargin: 4 
+    icon.sourceSize: Qt.size(32, 32)
+    icon.source: Cpp.path + "/image/symbolic/actions/open-menu-symbolic.svg"
+    icon.layer.enabled: true
+    icon.layer.effect: ColorOverlay {
+      color: menuButton.textColor
+    }
+    // text: Lua.tr("Menu")
+    onClicked: roomScene.menuButtonClicked();
   }
 
   PhotoElement.MarkArea {

@@ -161,6 +161,10 @@ function Package:install(engine)
     for _, s in ipairs(skill.related_skills) do
       s.package = self
     end
+    for _, sk in ipairs(skel:createAuxSkills()) do
+      sk.package = self
+      table.insert(self.related_skills, sk)
+    end
   end
 
   if self.type == Package.GeneralPack then

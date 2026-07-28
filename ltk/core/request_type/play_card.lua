@@ -159,6 +159,9 @@ end
 
 function ReqPlayCard:doCancelButton()
   self.scene:update("SpecialSkills", "1", { skills = {} })
+  if self.sub_selection_flag then
+    return ReqActiveSkill.doCancelButton(self)
+  end
   if self.skill_name then
     --ReqPlayCard时，点“取消”按钮自带notifyUI，而ReqUseCard、ReqResponseCard不会
     --self.scene:notifyUI()

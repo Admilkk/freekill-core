@@ -5,6 +5,9 @@ local SelectableItem = base.SelectableItem
 local CardItem = SelectableItem:subclass("CardItem")
 
 function CardItem:initialize(scene, id)
+  if type(id) == "table" then
+    id = Fk:currentRoom():getVirtCardId(id)
+  end
   SelectableItem.initialize(self, scene, id)
   Fk:filterCard(id, Fk:currentRoom():getCardOwner(id))
 end

@@ -481,11 +481,6 @@ W.PageBase {
       gameComponent: Qt.createComponent("Fk.Pages.Common", "WaitingRoom"),
     });
     App.setBusy(false);
-
-    // 快速启动模式下自动添加人机
-    if (Cpp.quickStartMode !== "") {
-      quickAddRobotTimer.start();
-    }
   }
 
   Timer {

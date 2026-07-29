@@ -630,6 +630,13 @@ W.PageBase {
     App.showToast(Lua.tr("$RoomConfigChanged"));
   }
 
+  function autoAddRobot() {
+    const robotNum = playerNum - 1
+    if (Cpp.quickStartMode !== "") {
+      for (let i = 0; i < robotNum; i++) Cpp.notifyServer("AddRobot", "");
+    }
+  }
+
   Component.onCompleted: {
     addCallback(Command.UpdateGameData, updateGameData);
     addCallback(Command.RoomOwner, setRoomOwner);
@@ -648,5 +655,6 @@ W.PageBase {
     playerNum = Config.roomCapacity;
     canChangeRoom = Config.serverFeatures.includes("ChangeRoom");
     resetPhotos();
+    autoAddRobot();
   }
 }

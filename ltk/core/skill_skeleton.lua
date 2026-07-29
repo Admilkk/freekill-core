@@ -243,6 +243,7 @@ function SkillSkeleton:createAuxSkills()
     attr = attr or Util.DummyTable
     local sk = Fk.skill_keys["active"][1](self, self, i, "active", attr, data)
     if sk then
+      Fk:loadTranslationTable({ [name] = Fk:translate(self.name) }, Config.language)
       sk.name = name
       sk.skeleton = self
       table.insert(skills, sk)

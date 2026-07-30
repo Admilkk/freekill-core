@@ -35,7 +35,6 @@ local baseEngine = require "core.engine"
 ---@field public choose_general_rule table<string, ChooseGeneralSpec> @ 选将框操作方法表
 ---@field public skin_packages table<string, SkinContent[]> @ Skins
 ---@field public personal_marks table<string, PersonalMarkSpec> @ PersonalMark
----@field public quickStartConfig table<string, string | number | table> @ 快速启动参数，用于调试
 local Engine = baseEngine:subclass("Engine")
 Engine:include(modManager)
 

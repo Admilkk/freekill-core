@@ -282,13 +282,13 @@ W.PageBase {
       ClientInstance.notifyServer("CreateRoom", [
         Lua.tr("Quick Start"),
         playerNum,
-        Config.preferredTimeout,
+        data.timeout ?? Config.preferredTimeout,
         {
           gameMode,
           roomName: Lua.tr("Quick Start"),
           password: "",
-          _game: boardgameConf,
-          _mode: gameModeConf,
+          _game: data.boardgameConf ?? boardgameConf,
+          _mode: data.gameModeConf ?? gameModeConf,
           disabledPack: boardgameName === "lunarltk" ? disabledPack : [],
           disabledGenerals: boardgameName === "lunarltk" ? disabledGenerals : [],
           _quickStart: Cpp.quickStartConfig,

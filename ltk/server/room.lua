@@ -4414,5 +4414,122 @@ function Room:getCardsFromPileByRule(pattern, num, fromPile)
   return cardPack
 end
 
+function Room:getIndexFromHuman(idx)
+  idx = idx or 1
+  local humanIdx = table.findIndex(self.players, function (p)
+    return p.id > 0
+  end)
+  if humanIdx and idx > 1 and idx < (#self.players + 1) then
+    local to
+    local distance = idx - 1
+    if humanIdx + distance > #self.players then
+      to = self.players[humanIdx + distance - #self.players]
+    else
+      to = self.players[humanIdx + distance]
+    end
+    return table.indexOf(self.players, to)
+  else
+    return humanIdx or -1
+  end
+end
+
+---@param roles string[]
+function Room:quickSetPlayerRole(roles)
+  if Fk.quickStartConfig then
+    local arr = {}
+    local _roles = table.simpleClone(roles)
+    local map = Fk.quickStartConfig["players"] or {} --[[@as table]]
+    for k, v in pairs(map) do
+      if v["role"] then
+        local idx = self:getIndexFromHuman(tonumber(k))
+        if idx == -1 then error("Index doesn't exist!") end
+        
+        if table.contains(_roles, v["role"]) then
+          arr[idx] = v["role"]
+          table.removeOne(_roles, v["role"])
+        end
+      end
+    end
+
+    for i = 1, #roles do
+      if not arr[i] and #_roles > 0 then
+        arr[i] = self:tableRandomPick(_roles)
+      end
+      roles[i] = arr[i]
+    end
+    return arr
+  end
+end
+
+---@return ServerPlayer[]
+function Room:quickSetPlayerGeneral()
+  local arr = {}
+  if Fk.quickStartConfig then
+    local map = Fk.quickStartConfig["players"] or {} --[[@as table]]
+    for k, v in pairs(map) do
+      local idx = self:getIndexFromHuman(tonumber(k))
+      if idx == -1 then error("Index doesn't exist!") end
+      local pl = self.players[idx]
+      if pl then
+        if v["general"] then
+          if v["deputyGeneral"] then
+            self:prepareGeneral(pl, v["general"], v["deputyGeneral"])
+          else
+            self:prepareGeneral(pl, v["general"], "", true)
+          end
+          pl.kingdom = v["kingdom"] or Fk.generals[v["general"]].kingdom or "wei"
+          self:notifyProperty(pl, pl, "kingdom")
+          table.insert(arr, pl)
+        end
+      end
+    end
+  end
+  return arr
+end
+
+function Room:handleQuickStart()
+  if not Fk.quickStartConfig then return end
+  local map = Fk.quickStartConfig["players"] or {} --[[@as table]]
+  local hadControlOther = false
+  for k, v in pairs(map) do
+    local idx = self:getIndexFromHuman(tonumber(k))
+    if idx == -1 then error("Index doesn't exist!") end
+    local pl = self.players[idx]
+    if pl then
+
+      -- 根据传入属性做不同操作
+      if v["maxHp"] then
+        self:changeMaxHp(pl, v["maxHp"] - pl.maxHp)
+      end
+      if v["hp"] then
+        self:changeHp(pl, v["hp"] - pl.hp, nil, "quick_debug")
+      end
+      if v["skills"] then
+        for _, skill in ipairs(v["skills"]) do
+          self:handleAddLoseSkills(pl, skill, nil, false, true)
+        end
+      end
+      if v["equips"] then
+        for _, e in ipairs(v["equips"]) do
+          local cards = table.filter(self.draw_pile, function (id)
+            return Fk:getCardById(id).name == e
+          end)
+          if #cards > 0 then
+            self:moveCardIntoEquip(pl, cards[1], "quick_debug", true)
+          end
+        end
+      end
+      if v["controlOther"] then
+        if hadControlOther then error("Already had another \"controlOther\" player!") end
+        for _, p in ipairs(self:getOtherPlayers(pl)) do
+          pl:control(p)
+        end
+        hadControlOther = true
+      end
+
+
+    end
+  end
+end
 
 return Room

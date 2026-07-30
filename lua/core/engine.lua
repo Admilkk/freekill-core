@@ -7,6 +7,7 @@
 ---@field public global_trigger TriggerSkill[] @ 所有的全局触发技
 ---@field public global_status_skill table<class, Skill[]> @ 所有的全局状态技
 ---@field public ui_packages table<string, UIPackage> @ UI
+---@field public quickStartConfig table<string, string | number | table> @ 快速启动参数，用于调试
 local Engine = class("Base.Engine")
 
 function Engine:initialize()

@@ -426,6 +426,10 @@ W.PageBase {
       }
     }
     roomScene.isAllReady = allReady;
+
+    if (roomScene.isAllReady && roomScene.isOwner && Cpp.quickStartMode) {
+      Cpp.notifyServer("StartGame", "");
+    }
   }
 
   function updateGameData(sender, data) {

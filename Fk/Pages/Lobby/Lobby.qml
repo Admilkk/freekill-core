@@ -470,7 +470,7 @@ W.PageBase {
     Config.roomCapacity = data[0];
     Config.roomTimeout = data[1] - 1;
     const roomSettings = data[2];
-    Config.heg = roomSettings.gameMode.includes('heg_mode');
+    Config.heg = String(roomSettings.gameMode || "").includes('heg_mode');
 
     let displayName = roomSettings.roomName;
     if (roomSettings.roomId !== undefined) {
@@ -481,6 +481,27 @@ W.PageBase {
       gameComponent: Qt.createComponent("Fk.Pages.Common", "WaitingRoom"),
     });
     App.setBusy(false);
+
+    // 快速启动模式下自动添加人机
+    if (Cpp.quickStartMode !== "") {
+      quickAddRobotTimer.start();
+    }
+  }
+
+  Timer {
+    id: quickAddRobotTimer
+    interval: 500
+    repeat: false
+    onTriggered: {
+      const num = Lua.call("GetCompNum") ?? {};
+      const cur = num.curComp ?? 0;
+      const needRobots = Math.max(1, num.minComp ?? 0) - cur;
+      if (needRobots > 0) {
+        for (let i = 0; i < needRobots; i++) {
+          Cpp.notifyServer("AddRobot", "");
+        }
+      }
+    }
   }
 
   function handleClickButton(data) {

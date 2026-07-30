@@ -121,7 +121,19 @@ ChooseGeneralModel {
   }
 
   function initialize() {
+    if (Cpp.quickStartMode !== "") {
+      generals.splice(0, 0, "mouxusheng");
+    }
+
     this.initGeneralModels();
+
+    if (Cpp.quickStartMode !== "") {
+      resultInt.push(0);
+      if (choiceNum === 2) {
+        resultInt.push(1)
+      }
+      accepted();
+    }
   }
 
 }

@@ -69,7 +69,7 @@ W.PageBase {
             Config.password = serverCfg?.password ?? "1234";
             App.setBusy(true);
             Config.addFavorite(Config.serverAddr, Config.serverPort, "",
-              Config.screenName, Config.password);
+            Config.screenName, Config.password);
             Backend.startServer(9527);
 
             Backend.joinServer("127.0.0.1", 9527);
@@ -236,7 +236,7 @@ W.PageBase {
   // 快速启动定时器：等待Lobby页面加载完毕后自动创建房间
   Timer {
     id: quickStartTimer
-    interval: 300
+    interval: 20
     repeat: false
     onTriggered: {
       const gameMode = Cpp.quickStartMode;
@@ -247,37 +247,41 @@ W.PageBase {
       const boardgameName = Lua.evaluate(`Fk:getBoardGame('${gameMode}').name`);
       const boardgameConf = Db.getModeSettings(boardgameName);
       const gameModeConf = Db.getModeSettings(boardgameName + ':' + gameMode);
-      let disabledPack = [];
+      let k, arr;
+
       let disabledGenerals = [];
-
-      // 仅在 lunarltk 桌游下处理禁将禁包
-      if (boardgameName === "lunarltk" && typeof Ltk !== "undefined") {
-        disabledPack = Config.curScheme?.banCardPkg?.slice() ?? [];
-
-        if (Config.curScheme?.banPkg) {
-          for (let k in Config.curScheme.banPkg) {
-            const arr = Config.curScheme.banPkg[k];
-            if (arr && arr.length !== 0) {
-              const generals = Ltk.getGenerals(k);
-              if (generals && generals.length !== 0) {
-                disabledGenerals.push(...generals.filter(g => !arr.includes(g)));
-              }
-            }
-          }
-        }
-        if (Config.curScheme?.normalPkg) {
-          for (let k in Config.curScheme.normalPkg) {
-            const arr = Config.curScheme.normalPkg[k] ?? [];
-            if (arr && arr.length !== 0) {
-              disabledGenerals.push(...arr);
-            }
+      for (k in Config.curScheme.banPkg) {
+        arr = Config.curScheme.banPkg[k];
+        if (arr.length !== 0) {
+          const generals = Ltk.getGenerals(k);
+          if (generals.length !== 0) {
+            disabledGenerals.push(...generals.filter(g => !arr.includes(g)));
           }
         }
       }
+      for (k in Config.curScheme.normalPkg) {
+        arr = Config.curScheme.normalPkg[k] ?? [];
+        if (arr.length !== 0)
+        disabledGenerals.push(...arr);
+      }
+
+      let disabledPack = Config.curScheme.banCardPkg.slice();
+      for (k in Config.curScheme.banPkg) {
+        if (Config.curScheme.banPkg[k].length === 0)
+        disabledPack.push(k);
+      }
+      Config.serverHiddenPacks.forEach(p => {
+        if (!disabledPack.includes(p)) {
+          disabledPack.push(p);
+        }
+      });
+
+      const data = Cpp.quickStartConfig;
+      let playerNum = data["playerNum"] ?? 2;
 
       ClientInstance.notifyServer("CreateRoom", [
         Lua.tr("Quick Start"),
-        2,
+        playerNum,
         Config.preferredTimeout,
         {
           gameMode,
@@ -285,8 +289,9 @@ W.PageBase {
           password: "",
           _game: boardgameConf,
           _mode: gameModeConf,
-          disabledPack: disabledPack,
-          disabledGenerals: disabledGenerals,
+          disabledPack: boardgameName === "lunarltk" ? disabledPack : [],
+          disabledGenerals: boardgameName === "lunarltk" ? disabledGenerals : [],
+          _quickStart: Cpp.quickStartConfig,
         }
       ]);
     }
@@ -324,7 +329,7 @@ W.PageBase {
       Config.password = serverCfg?.password ?? "1234";
       App.setBusy(true);
       Config.addFavorite(Config.serverAddr, Config.serverPort, "",
-        Config.screenName, Config.password);
+      Config.screenName, Config.password);
       Backend.startServer(9527);
       Backend.joinServer("127.0.0.1", 9527);
       ClientInstance.setLoginInfo(Config.screenName, Config.password);

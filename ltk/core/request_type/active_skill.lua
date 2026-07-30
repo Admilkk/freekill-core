@@ -717,7 +717,9 @@ function ReqActiveSkill:refreshInteraction()
       table.map(self.selected_targets,
       Util.Id2PlayerMapper),
       self.extra_data or {})
-    self.scene:update("Interaction", "1", { refresh_data = refresh_data })
+    if refresh_data ~= nil then
+      self.scene:update("Interaction", "1", { refresh_data = refresh_data })
+    end
   end
 end
 

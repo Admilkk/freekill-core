@@ -216,6 +216,7 @@ function Round:main()
   end
 
   if roundCount == 1 then
+    room:handleQuickStart()
     logic:trigger(fk.GameStart, room.current, data)
     room:actExtraTurn()
   end

@@ -67,6 +67,8 @@ local role_getlogic = function()
       roles[roomLordID], roles[roomRoleIndex] = roles[roomRoleIndex], roles[roomLordID]
     end
 
+    room:quickSetPlayerRole(roles)
+
     for i = 1, n do
       local p = room.players[i]
       p.role = roles[i]
@@ -86,6 +88,10 @@ local role_getlogic = function()
 
     if lord ~= nil then
       room:setCurrent(lord)
+
+      -- 快速设置
+      local quickSetPlayers = room:quickSetPlayerGeneral()
+
       local a1 = #room.general_pile
       local a2 = #room.players * generalNum
       if a1 < a2 then
@@ -102,11 +108,13 @@ local role_getlogic = function()
         return table.contains(Fk.lords, g)
       end, lord_num), room:getNGenerals(generalNum))
 
-      local dat, ext, _generals = room:askToChooseIniticalGeneral(lord, {
-        targets = lord,
-        generals = generals,
-        needDeputy = room:getSettings('enableDeputy'),
-      })
+      if not table.contains(quickSetPlayers, lord) then
+        room:askToChooseIniticalGeneral(lord, {
+          targets = lord,
+          generals = generals,
+          needDeputy = room:getSettings('enableDeputy'),
+        })
+      end
 
       room:broadcastProperty(lord, "kingdom")
 
@@ -165,16 +173,22 @@ local role_getlogic = function()
         room:setBanner("WangzhanFourEmblems", emblems)
         room:handleAddLoseSkills(lord, skill, nil, false, true)
       end
-    end
 
-    local nonlord = room:getOtherPlayers(lord, true)
-    room:askToChooseIniticalGeneral(lord, {
-        targets = nonlord,
-        num = generalNum,
-        needDeputy = room:getSettings('enableDeputy'),
-        lordGeneral = lord.general,
-        lordDeputy = lord.deputyGeneral,
-      })
+      local nonlord = table.filter(room:getOtherPlayers(lord, true), function (p)
+        return not table.contains(quickSetPlayers, p)
+      end)
+      if #nonlord > 0 then
+        room:askToChooseIniticalGeneral(lord, {
+          targets = nonlord,
+          num = generalNum,
+          needDeputy = room:getSettings('enableDeputy'),
+          lordGeneral = lord.general,
+          lordDeputy = lord.deputyGeneral,
+        })
+      end
+    else
+      room:gameOver("")
+    end
   end
 
   return role_logic

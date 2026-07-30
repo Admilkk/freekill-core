@@ -128,7 +128,9 @@ end
 -- 模拟一次UI交互，修改相关item的属性即可
 -- 同时修改自己parent的changeData
 function Scene:update(elemType, id, newData)
-  local item = self.items[elemType][id]
+  local tab = self.items[elemType]
+  if type(tab) ~= "table" then return end
+  local item = tab[id]
   if not item then return end
   local changed = item:setData(newData)
   -- changed = true

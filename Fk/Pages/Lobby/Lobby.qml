@@ -417,7 +417,7 @@ W.PageBase {
     Config.replaying = false;
     Config.observing = true;
     App.setBusy(true);
-    Cpp.notifyServer("PreObserveRoom", [roomId, pw]);
+    Cpp.notifyServer("ObserveRoom", [roomId, pw]);
   }
 
   Danmu {
@@ -473,7 +473,7 @@ W.PageBase {
   }
 
   function handleEnterRoom(sender, data) {
-    // jsonData: int capacity, int timeout
+    // jsonData: int capacity, int timeout, settings
     Config.roomCapacity = data[0];
     Config.roomTimeout = data[1] - 1;
     const roomSettings = data[2];

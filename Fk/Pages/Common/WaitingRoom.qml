@@ -428,6 +428,7 @@ W.PageBase {
 
   // 旁观者等待提示
   Text {
+    id: observerHint
     visible: roomScene.isRoomObserver
     anchors.centerIn: roomArea
     text: Lua.tr("Waiting for game to start as spectator...")
@@ -676,6 +677,19 @@ W.PageBase {
       model.run = d.run;
     }
 
+    const obdatalist = Lua.evaluate(`table.map(ClientInstance.observers, function(t)
+      local cp = t[2]
+      return {
+        id = cp:getId(),
+        name = cp:getScreenName(),
+        avatar = cp:getAvatar(),
+      }
+    end)`);
+
+    for (const d of datalist) {
+      addObserver(null, [d.id, d.name, d.avatar]);
+    }
+
     checkAllReady();
   }
 
@@ -739,7 +753,6 @@ W.PageBase {
   }
 
   function addObserver(sender, data) {
-    console.log(sender, data);
     const [id, name, avatar] = data;
     for (let i = 0; i < observerModel.count; i++) {
       if (observerModel.get(i).id === id) return;
@@ -757,6 +770,47 @@ W.PageBase {
     }
   }
 
+  function handleSwitchToPlayer(_, data) {
+    // TODO: 应该不能这么草率，下同，还没仔细思考
+    const uid = data[0];
+    const dat = { id: uid };
+    for (let i = 0; i < observerModel.count; i++) {
+      const model = observerModel.get(i);
+      if (model.id === uid) {
+        dat.screenName = model.screenName;
+        dat.avatar = model.avatar;
+        observerModel.remove(i);
+        break;
+      }
+    }
+
+    addPlayer(_, [ dat.id, dat.screenName, dat.avatar, false ]);
+
+    if (uid == Cpp.self.id) {
+      Config.observing = false;
+    }
+  }
+
+  function handleSwitchToObserver(_, data) {
+    const uid = data[0];
+    const model = getPhotoModel(uid);
+    if (typeof(model) !== "undefined") {
+      addObserver(_, [ model.id, model.screenName, model.avatar ]);
+
+      model.id = -1;
+      model.screenName = "";
+      model.avatar = "";
+      model.general = "";
+      model.isOwner = false;
+      roomScene.isFull = false;
+      roomScene.playersAltered = true;
+    }
+
+    if (uid == Cpp.self.id) {
+      Config.observing = true;
+    }
+  }
+
   Component.onCompleted: {
     addCallback(Command.UpdateGameData, updateGameData);
     addCallback(Command.RoomOwner, setRoomOwner);
@@ -770,8 +824,9 @@ W.PageBase {
     addCallback(Command.RestartGame, restartGame);
 
     addCallback(Command.ChangeRoom, changeRoomConfig);
-    addCallback("AddPreObserver", addObserver);
-    addCallback("RemoveObserver", removeObserver);
+
+    addCallback("SwitchToPlayer", handleSwitchToPlayer);
+    addCallback("SwitchToObserver", handleSwitchToObserver);
 
     playerNum = Config.roomCapacity;
     canChangeRoom = Config.serverFeatures.includes("ChangeRoom");

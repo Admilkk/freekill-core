@@ -573,8 +573,7 @@ Item {
   }
 
   function enterLobby(sender, data) {
-    // 弹出所有 RoomPage，直到露出 Lobby（Init + Lobby = depth 2）
-    while (mainStack.depth > 2) App.quitPage();
+    App.quitPage();
 
     App.setBusy(false);
     Cpp.notifyServer("RefreshRoomList", "");

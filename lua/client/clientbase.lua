@@ -24,8 +24,8 @@ function ClientBase:initialize(_client)
   self:addCallback("EnterLobby", self.quitRoom, true)
   self:addCallback("AddPlayer", self.addPlayer)
   self:addCallback("RemovePlayer", self.removePlayer)
-  self:addCallback("AddObserver", self.addObserver)
-  self:addCallback("RemoveObserver", self.removeObserver)
+  self:addCallback("AddObserver", self.addObserver, true)
+  self:addCallback("RemoveObserver", self.removeObserver, true)
   self:addCallback("UpdateGameData", self.updateGameData, true)
   self:addCallback("AddTotalGameTime", self.addTotalGameTime)
   self:addCallback("NetStateChanged", self.changeNetState, true)
@@ -356,18 +356,15 @@ function ClientBase:addObserver(data)
     getAvatar = function() return avatar end,
     getState = function() return fk.Player_Online end,
   }
-  local p = self.clientplayer_klass:new(player)
-  table.insert(self.observers, p)
-  self:notifyUI("AddObserver", data)
+  table.insert(self.observers, {0, player, id})
   -- self:notifyUI("ServerMessage", string.format(Fk:translate("$AddObserver"), name))
 end
 
 function ClientBase:removeObserver(data)
   local id = data[1]
-  for _, p in ipairs(self.observers) do
-    if p.player:getId() == id then
-      table.removeOne(self.observers, p)
-      self:notifyUI("RemoveObserver", data)
+  for i, p in ipairs(self.observers) do
+    if p[3] == id then
+      table.remove(self.observers, i)
       -- self:notifyUI("ServerMessage", string.format(Fk:translate("$RemoveObserver"), p.player:getScreenName()))
       break
     end
@@ -386,8 +383,8 @@ function ClientBase:chat(data)
   local p = self:getPlayerById(data.sender)
   if not p then
     for _, pl in ipairs(self.observers) do
-      if pl.id == data.sender then
-        p = pl; break
+      if pl[3] == data.sender then
+        p = pl[2]; break
       end
     end
     if not p then return end
@@ -398,7 +395,7 @@ function ClientBase:chat(data)
   if data.general == nil then
     data.general = ""
   end
-  if data.general == "" and self:getPlayerById(p.player:getId()) ~= nil then
+  if data.general == "" and self:getPlayerById(data.sender) ~= nil then
     data.general = p.player:getAvatar()
   end
   data.userName = p.player:getScreenName()
@@ -479,6 +476,11 @@ function ClientBase:loadRoomSummary(data)
     end
   end
 
+  local observers = data.observers
+  for _, t in ipairs(observers) do
+    self:addObserver(t)
+  end
+
   self:startGame()
 
   self:arrangeSeats(data.circle)
@@ -513,6 +515,9 @@ end
 
 function ClientBase:observe(data)
   local players = data.players
+
+  self:stopRecording("")
+  self:notifyUI("EnterLobby", "")
 
   if not self.replaying then
     self:startRecording()

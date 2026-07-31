@@ -143,6 +143,12 @@ function ServerRoomBase:run()
     table.insert(self.players, player)
   end
 
+  -- 尽可能早的将提前上树的人带到游戏界面
+  local all_observers = self.room:getObservers()
+  for _, p in fk.qlist(all_observers) do
+    self:tellRoomToObserver(p)
+  end
+
   local mode = Fk.game_modes[self:getSettings('gameMode')]
   local logic = (mode.logic and mode.logic() or self.logic_klass):new(self)
   self.logic = logic
@@ -341,9 +347,6 @@ function ServerRoomBase:gameOver(winner)
     self.logic:trigger(fk.GameFinished, nil, winner)
   end
 
-  self:doBroadcastNotify("GameOver", winner)
-  fk.qInfo(string.format("[GameOver] %d, %s, %s, in %ds", self.id, self:getSettings('gameMode'), winner, os.time() - self.start_time))
-
   self.game_started = false
   self.game_finished = true
 
@@ -362,6 +365,9 @@ function ServerRoomBase:gameOver(winner)
   end
 
   self.room:gameOver()
+
+  self:doBroadcastNotify("GameOver", winner)
+  fk.qInfo(string.format("[GameOver] %d, %s, %s, in %ds", self.id, self:getSettings('gameMode'), winner, os.time() - self.start_time))
 
   if table.contains(
     { "running", "normal" },
@@ -385,6 +391,7 @@ function ServerRoomBase:tellRoomToObserver(player)
   local observee = self.players[1]
   local start_time = os.getms()
   local summary = self:serialize(observee)
+  summary.settings.isObserver = true
   player:doNotify("Observe", cbor.encode(summary))
 
   fk.qInfo(string.format("[Observe] %d, %s, in %.3fms",
@@ -398,6 +405,7 @@ function ServerRoomBase:addObserver(id)
   for _, p in fk.qlist(all_observers) do
     if p:getId() == id then
       self:tellRoomToObserver(p)
+      -- TODO: (v0.6) 记得删除这个，0.6的时候旁观者添加和移除统一到cpp
       self:doBroadcastNotify("AddObserver", {
         p:getId(),
         p:getScreenName(),
@@ -409,10 +417,11 @@ function ServerRoomBase:addObserver(id)
 end
 
 function ServerRoomBase:removeObserver(id)
-  for _, t in ipairs(self.observers) do
+  for i, t in ipairs(self.observers) do
     local pid = t[3]
     if pid == id then
-      table.removeOne(self.observers, t)
+      table.remove(self.observers, i)
+      -- TODO: (v0.6) 记得删除这个，0.6的时候旁观者添加和移除统一到cpp
       self:doBroadcastNotify("RemoveObserver", { pid })
       break
     end

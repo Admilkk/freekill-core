@@ -159,16 +159,26 @@ function ReqActiveSkill:finish()
 end
 
 --- 更新主动技的提示（使用卡牌也会走这步）
----@param skill ActiveSkill
+---@param skill ActiveSkill | ViewAsSkill @ 技能对象
 ---@param selected_cards? integer[] @ 选择的牌
 function ReqActiveSkill:setSkillPrompt(skill, selected_cards)
   local default_prompt = ("#UseSkill:::" .. skill.name) -- 默认提示
   local prompt = ""
-  if type(skill.prompt) == "function" then
-    prompt = skill:prompt(self.player, selected_cards or self.pendings,
-      table.map(self.selected_targets, Util.Id2PlayerMapper), self.extra_data or {})
-  elseif type(skill.prompt) == "string" then
-    prompt = skill.prompt
+  if self.sub_selection_flag then
+    if type(skill.sub_prompt) == "function" then
+      prompt = skill:sub_prompt(self.player, self.selected_buffer.cards,
+        table.map(self.selected_targets, Util.Id2PlayerMapper), self.sub_pendings, self.extra_data or {})
+    elseif type(skill.sub_prompt) == "string" then
+      prompt = skill.sub_prompt
+    end
+  end
+  if prompt == "" then
+    if type(skill.prompt) == "function" then
+      prompt = skill:prompt(self.player, selected_cards or self.pendings,
+        table.map(self.selected_targets, Util.Id2PlayerMapper), self.extra_data or {})
+    elseif type(skill.prompt) == "string" then
+      prompt = skill.prompt
+    end
   end
 
   -- 被动询问使用主动技时，例如询问弃牌，求询问使用牌
@@ -414,15 +424,7 @@ function ReqActiveSkill:feasible()
     ret = skill:feasible(player, targets, self.pendings)
   elseif skill:isInstanceOf(ViewAsSkill) then
     ---@cast skill ViewAsSkill
-    local sub_data = type(skill.sub_data) == "function" and skill:sub_data(self.player, self.pendings) or skill.sub_data
-    if sub_data then
-      return skill:feasible(player, targets, self.pendings) -- 需要二级选择的技能，暂时将判断权限还给feasible
-    end
-    if self.sub_selection_flag then
-      card = skill:viewAs(self.player, self.selected_buffer.cards, self.sub_pendings)
-    else
-      card = skill:viewAs(self.player, self.pendings)
-    end
+    card = self:getUsingCard()
     if card then
       ret = card:getSkill(player):feasible(player, targets, { card.id }, card)
     else
@@ -434,6 +436,18 @@ end
 
 function ReqActiveSkill:isCancelable()
   return not not self.cancelable
+end
+
+--- 获得视为技所视为的虚拟牌
+---@return Card|nil
+function ReqActiveSkill:getUsingCard()
+  local skill = Fk.skills[self.skill_name] --[[@as ActiveSkill | ViewAsSkill]]
+  if not (skill and skill:isInstanceOf(ViewAsSkill)) then return nil end
+  if self.sub_selection_flag then
+    return skill:viewAs(self.player, self.selected_buffer.cards, self.sub_pendings)
+  else
+    return skill:viewAs(self.player, self.pendings)
+  end
 end
 
 --- 判断一张牌是否能被主动技或转化技点亮（注，使用实体牌不用此函数判断
@@ -459,17 +473,14 @@ function ReqActiveSkill:targetValidity(pid)
   local card -- 因为有多种情况，所以需要缓存
   if skill:isInstanceOf(ViewAsSkill) then
     ---@cast skill ViewAsSkill
-    local sub_data = type(skill.sub_data) == "function" and skill:sub_data(self.player, self.pendings) or skill.sub_data
-    if sub_data then
-      return false -- 需要二级选择的技能，暂时不考虑targetFilter
-    end
-    if self.sub_selection_flag then
-      card = skill:viewAs(self.player, self.selected_buffer.cards, self.sub_pendings)
-    else
-      card = skill:viewAs(self.player, self.pendings)
-    end
+    card = self:getUsingCard()
     if card then
       skill = card:getSkill(self.player)
+    else
+      local sub_data = type(skill.sub_data) == "function" and skill:sub_data(self.player, self.pendings) or skill.sub_data
+      if sub_data then
+        return false -- 需要二级选择的技能，暂时不考虑targetFilter
+      end
     end
   end
   local room = Fk:currentRoom()
@@ -552,6 +563,13 @@ function ReqActiveSkill:updateInteraction(data, ignoreSetup)
   end
 end
 
+---@class ReplyFormatActive: table
+---@field public card_objs? Card[] @ 选中的虚拟牌对象数组
+---@field public card { skill: string, subcards: integer[] } @ 选中的牌信息
+---@field public targets integer[] @ 选中的目标id数组
+---@field public interaction_data? any @ 选中的interaction数据
+---@field public special_skill? string @ 选中的技能名（如重铸）
+
 function ReqActiveSkill:doOKButton()
   local skill = Fk.skills[self.skill_name] --[[@as ActiveSkill | ViewAsSkill]]
   local cardstr = {
@@ -560,8 +578,9 @@ function ReqActiveSkill:doOKButton()
   }
   local reply
   if self.sub_selection_flag then
+    cardstr.subcards = self.selected_buffer.cards
     reply = {
-      cardObj = skill:viewAs(self.player, self.selected_buffer.cards, self.sub_pendings),
+      card_objs = self.sub_pendings,
       card = cardstr,
       targets = self.selected_targets or {},
       --special_skill = roomScene.getCurrentCardUseMethod(),

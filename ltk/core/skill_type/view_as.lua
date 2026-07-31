@@ -3,7 +3,7 @@
 ---@class ViewAsSkill : UsableSkill
 ---@field public pattern string @ cards that can be viewAs'ed by this skill
 ---@field public sub_data? string[] | fun(self: ViewAsSkill, player: Player, selected: integer[], interaction_data: any): ViewAsPattern? @ 用于泛转化技的二级选择
----@field public sub_prompt? string|fun(self: ViewAsSkill, player: Player, selected_cards: integer[], selected_targets: Player[], selected_sub_cards: Card[]): string @ 二级菜单提示信息
+---@field public sub_prompt? string|fun(self: ViewAsSkill, player: Player, selected_cards: integer[], selected_targets: Player[], selected_sub_cards: Card[], extradata?: UseExtraData|table): string @ 二级菜单提示信息
 ---@field public min_card_num integer
 ---@field public max_card_num integer
 ---@field public card_num integer

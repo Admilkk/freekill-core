@@ -60,8 +60,9 @@ function ReqResponseCard:expandPiles()
 end
 
 function ReqResponseCard:skillButtonValidity(name)
+  if self.sub_selection_flag then return false end -- 处于二级选择时不允许切换技能
   local player = self.player
-  local skill = Fk.skills[name]
+  local skill = Fk.skills[name] ---@cast skill ViewAsSkill
   return
     skill:isInstanceOf(ViewAsSkill) and
     skill:enabledAtResponse(player, true) and
@@ -70,16 +71,27 @@ function ReqResponseCard:skillButtonValidity(name)
     not table.contains(self.disabledSkillNames or {}, name)
 end
 
+--- 获得此时所返回的牌
+---@return Card|nil
+function ReqResponseCard:getUsingCard()
+  return self.selected_card or ReqActiveSkill.getUsingCard(self)
+end
+
 function ReqResponseCard:cardValidity(cid)
   if self.skill_name then return ReqActiveSkill.cardValidity(self, cid) end
-  local card = cid
+  local card = cid --- @type integer|Card
   if type(cid) == "number" then card = Fk:getCardById(cid) end
   return not not self:cardFeasible(card)
 end
 
 function ReqResponseCard:targetValidity(pid)
-  local skill = Fk.skills[self.skill_name]---@type ViewAsSkill
-  if skill and skill:viewAs(self.player, self.pendings) == nil then
+  local skill = Fk.skills[self.skill_name] ---@cast skill ViewAsSkill
+  local card = self:getUsingCard()
+  if skill and card == nil then
+    local sub_data = type(skill.sub_data) == "function" and skill:sub_data(self.player, self.pendings) or skill.sub_data
+    if sub_data then
+      return false -- 需要二级选择的技能，暂时不考虑targetFilter
+    end
     local p = Fk:currentRoom():getPlayerById(pid)
     local selected = table.map(self.selected_targets, Util.Id2PlayerMapper)
     return not not skill:targetFilter(self.player, p, selected, self.pendings, nil, self.extra_data)
@@ -96,7 +108,7 @@ function ReqResponseCard:cardFeasible(card)
     local skills = card.special_skills
     if not skills then return false end
     for _, skill in ipairs(skills) do
-      local s = Fk.skills[skill]  ---@type ViewAsSkill
+      local s = Fk.skills[skill]  ---@cast s ViewAsSkill
       if s:isInstanceOf(ViewAsSkill) and s:enabledAtResponse(player) then
         return true
       end
@@ -105,9 +117,9 @@ function ReqResponseCard:cardFeasible(card)
 end
 
 function ReqResponseCard:feasible()
-  local skill = Fk.skills[self.skill_name]---@type ViewAsSkill
-  local card = self.selected_card
-  if skill then
+  local skill = Fk.skills[self.skill_name]---@cast skill ViewAsSkill
+  local card = self:getUsingCard()
+  if skill and card == nil then
     card = skill:viewAs(self.player, self.pendings)
     if card == nil then
       local selected = table.map(self.selected_targets, Util.Id2PlayerMapper)
@@ -144,6 +156,9 @@ function ReqResponseCard:updateSkillButtons()
   end
 end
 
+---@class ReplyFormatResponseCard: ReplyFormatActive
+---@field public card { skill: string, subcards: integer[] }|integer @ 选中的牌信息
+
 function ReqResponseCard:doOKButton()
   self.scene:update("SpecialSkills", "1", { skills = {} })
   self.scene:notifyUI()
@@ -177,6 +192,10 @@ function ReqResponseCard:selectSkill(skill, data)
   local selected = data.selected
   scene:update("SkillButton", skill, data)
   scene:update("SpecialSkills", "1", { skills = {} })
+
+  if data.selected == false then
+    self.sub_selection_flag = false -- 提前重置二级选择状态
+  end
 
   if selected then
     for name, item in pairs(scene:getAllItems("SkillButton")) do

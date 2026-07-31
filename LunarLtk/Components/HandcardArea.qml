@@ -146,7 +146,7 @@ Item {
   function dragMovement() {
     if (!Config.enableSuperDrag) return;
     const card = draggingCard;
-    if (!card) return;
+    if ((card?.dataModel?.cardId || 0) === 0) return; // 直接禁止虚拟牌拖动
     const x = card.x + card.dragCenter.x;
     const y = card.y + card.dragCenter.y;
     if (y >= roomScene.dashboard.y && x <= roomScene.getPhoto(Cpp.self.id).x) {
@@ -240,20 +240,20 @@ Item {
   }
 
   function selectCard(card) {
-    if (card.selectable) cardSelected(card.dataModel.cardId, card.selected);
+    if (card.selectable) cardSelected(card.dataModel.uniqueId, card.selected);
     adjustCards();
   }
 
   function doubleClickCard(card) {
     if (Config.doubleClickUse) {
-      Lua.updateRequestUI("CardItem", card.dataModel.cardId, "doubleClick", { selected: card.selected, doubleClickUse: Config.doubleClickUse, autoTarget: Config.autoTarget } );
+      Lua.updateRequestUI("CardItem", card.dataModel.uniqueId, "doubleClick", { selected: card.selected, doubleClickUse: Config.doubleClickUse, autoTarget: Config.autoTarget } );
     }
   }
 
   function enableCards(cardIds) {
     let card, i;
     cards.forEach(card => {
-      card.dataModel.selectable = cardIds.includes(card.dataModel.cardId);
+      card.dataModel.selectable = cardIds.includes(card.dataModel.uniqueId);
       if (!card.dataModel.selectable) {
         card.selected = false;
       }

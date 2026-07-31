@@ -320,7 +320,7 @@ W.PageBase {
 
     let photo;
     if (isCardId === true) {
-      const modelFinder = v => v.cardId === id;
+      const modelFinder = v => v.uniqueId === id;
       const m = dataModel.processing.find(modelFinder) || dataModel.discard.find(modelFinder);
       if (m) photo = m.cardItem;
     } else {

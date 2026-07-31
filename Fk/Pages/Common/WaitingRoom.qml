@@ -23,6 +23,7 @@ W.PageBase {
   property bool isReady: false
   property bool canKickOwner: false
   property bool playersAltered: false // 有人加入或离开房间
+  readonly property bool isRoomObserver: Config.observing
 
   onPlayersAlteredChanged: {
     if (playersAltered) {
@@ -32,7 +33,7 @@ W.PageBase {
   }
 
   onIsOwnerChanged: {
-    if (isOwner && !isFull) {
+    if (isOwner && !isFull && !isRoomObserver) {
       addInitComputers();
     }
   }
@@ -132,6 +133,10 @@ W.PageBase {
 
   ListModel {
     id: photoModel
+  }
+
+  ListModel {
+    id: observerModel
   }
 
   W.PopupLoader {
@@ -328,12 +333,21 @@ W.PageBase {
       }
     }
 
+    W.ButtonContent {
+      text: Lua.tr("Spectate")
+      visible: !photoModel.count < 2 && !roomScene.isRoomObserver
+      enabled: true
+      onClicked: {
+        Cpp.notifyServer("SwitchToObserver", "");
+      }
+    }
+
     Item {
       Layout.preferredWidth: childrenRect.width
       Layout.preferredHeight: childrenRect.height
       W.ButtonContent {
         text: isReady ? Lua.tr("Cancel Ready") : Lua.tr("Ready")
-        visible: !isOwner
+        visible: !isOwner && !roomScene.isRoomObserver
         enabled: !opTimer.running
         onClicked: {
           opTimer.start();
@@ -365,6 +379,71 @@ W.PageBase {
         }
       }
     }
+  }
+
+  // 旁观者区域
+  Rectangle {
+    id: observerArea
+    visible: observerModel.count > 0
+    anchors.right: parent.right
+    anchors.rightMargin: 16
+    anchors.top: parent.top
+    anchors.topMargin: 40
+    anchors.bottom: parent.bottom
+    anchors.bottomMargin: 72
+    width: 180
+    color: "#DDF0F0F0"
+    radius: 8
+
+    Text {
+      anchors.horizontalCenter: parent.horizontalCenter
+      y: 8
+      text: Lua.tr("Spectators") + " (" + observerModel.count + ")"
+      font.pixelSize: 16
+      font.bold: true
+    }
+
+    ListView {
+      anchors.top: parent.top
+      anchors.topMargin: 36
+      anchors.left: parent.left
+      anchors.leftMargin: 8
+      anchors.right: parent.right
+      anchors.rightMargin: 8
+      anchors.bottom: parent.bottom
+      anchors.bottomMargin: 8
+      model: observerModel
+      clip: true
+      spacing: 4
+      delegate: Text {
+        required property var modelData
+        width: ListView.view.width
+        text: modelData.screenName + (modelData.isOwner ? "[房主]" :"")
+        font.pixelSize: 14
+        color: "#555"
+        elide: Text.ElideRight
+      }
+    }
+  }
+
+  // 旁观者等待提示
+  Text {
+    visible: roomScene.isRoomObserver
+    anchors.centerIn: roomArea
+    text: Lua.tr("Waiting for game to start as spectator...")
+    font.pixelSize: 20
+    color: "#888"
+  }
+
+  // 旁观者操作按钮
+  W.ButtonContent {
+    visible: roomScene.isRoomObserver && !isFull
+    anchors.top: observerHint.bottom
+    anchors.topMargin: 12
+    anchors.horizontalCenter: roomArea.horizontalCenter
+    text: Lua.tr("Take Seat")
+    enabled: !isFull
+    onClicked: Cpp.notifyServer("SwitchToPlayer", "")
   }
 
   // TODO 扬了这玩意
@@ -427,7 +506,7 @@ W.PageBase {
     }
     roomScene.isAllReady = allReady;
 
-    if (roomScene.isAllReady && roomScene.isOwner && Cpp.quickStartMode) {
+    if (roomScene.isAllReady && roomScene.isOwner && !isRoomObserver && Cpp.quickStartMode) {
       Cpp.notifyServer("StartGame", "");
     }
   }
@@ -489,6 +568,7 @@ W.PageBase {
         item.general = avatar;
         item.avatar = avatar;
         item.ready = ready;
+        item.sealed = false;
 
         checkAllReady();
 
@@ -521,20 +601,41 @@ W.PageBase {
 
   function resetPhotos() {
     photoModel.clear();
-    for (let i = 0; i < 10; i++) {
-      photoModel.append({
-        id: i ? -1 : Self.id,
-        avatar: i ? "" : Self.avatar,
-        screenName: i ? "" : Self.screenName,
-        seatNumber: i + 1,
-        kingdom: "unknown",
-        isOwner: false,
-        ready: false,
-        sealed: i >= playerNum,
-        win: 0,
-        run: 0,
-        total: 0,
-      });
+    if (roomScene.isRoomObserver) {
+      // 旁观者不占座位
+      for (let i = 0; i < 10; i++) {
+        photoModel.append({
+          id: -1,
+          avatar: "",
+          screenName: "",
+          seatNumber: i + 1,
+          kingdom: "unknown",
+          isOwner: false,
+          ready: false,
+          sealed: i > playerNum - 1,
+          win: 0,
+          run: 0,
+          total: 0,
+        });
+      }
+      // 把自己加入旁观列表
+      addObserver(null, [Self.id, Self.screenName, Self.avatar]);
+    } else {
+      for (let i = 0; i < 10; i++) {
+        photoModel.append({
+          id: i ? -1 : Self.id,
+          avatar: i ? "" : Self.avatar,
+          screenName: i ? "" : Self.screenName,
+          seatNumber: i + 1,
+          kingdom: "unknown",
+          isOwner: false,
+          ready: false,
+          sealed: i >= playerNum,
+          win: 0,
+          run: 0,
+          total: 0,
+        });
+      }
     }
 
     checkCanAddRobot();
@@ -637,6 +738,25 @@ W.PageBase {
     }
   }
 
+  function addObserver(sender, data) {
+    console.log(sender, data);
+    const [id, name, avatar] = data;
+    for (let i = 0; i < observerModel.count; i++) {
+      if (observerModel.get(i).id === id) return;
+    }
+    observerModel.append({ id, screenName: name, avatar });
+  }
+
+  function removeObserver(sender, data) {
+    const uid = data[0];
+    for (let i = 0; i < observerModel.count; i++) {
+      if (observerModel.get(i).id === uid) {
+        observerModel.remove(i);
+        return;
+      }
+    }
+  }
+
   Component.onCompleted: {
     addCallback(Command.UpdateGameData, updateGameData);
     addCallback(Command.RoomOwner, setRoomOwner);
@@ -650,11 +770,33 @@ W.PageBase {
     addCallback(Command.RestartGame, restartGame);
 
     addCallback(Command.ChangeRoom, changeRoomConfig);
+    addCallback("AddPreObserver", addObserver);
+    addCallback("RemoveObserver", removeObserver);
 
-    App.showToast(Lua.tr("$EnterRoom"));
     playerNum = Config.roomCapacity;
     canChangeRoom = Config.serverFeatures.includes("ChangeRoom");
     resetPhotos();
     autoAddRobot();
+
+    if (roomScene.isRoomObserver) {
+      App.showToast(Lua.tr("$EnterRoomObserve"));
+      // 从EnterRoom数据中读取已有玩家列表(必须在resetPhotos之后)
+      const playerList = Lua.client.settings._players;
+      if (playerList) {
+        for (const p of playerList) {
+          addPlayer(null, [p[0], p[1], p[2], !!p[3], p[4]]);
+          if (p[5]) setRoomOwner(null, [p[0]]);
+        }
+      }
+      // 从EnterRoom数据中同步已有旁观者列表
+      const observerList = Lua.client.settings._observers;
+      if (observerList) {
+        for (const o of observerList) {
+          addObserver(null, [o[0], o[1], o[2]]);
+        }
+      }
+    } else {
+      App.showToast(Lua.tr("$EnterRoom"));
+    }
   }
 }

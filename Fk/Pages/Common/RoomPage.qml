@@ -573,7 +573,8 @@ Item {
   }
 
   function enterLobby(sender, data) {
-    App.quitPage();
+    // 弹出所有 RoomPage，直到露出 Lobby（Init + Lobby = depth 2）
+    while (mainStack.depth > 2) App.quitPage();
 
     App.setBusy(false);
     Cpp.notifyServer("RefreshRoomList", "");
@@ -796,6 +797,15 @@ Item {
     });
     overlay.addCallback(Command.ReplayerSpeedChange, (_, j) => {
       root.replayerSpeed = parseFloat(j);
+    });
+
+    overlay.addCallback("AddObserver", (_, d) => {
+      const wr = gameLoader.item;
+      if (wr && wr.addObserver) wr.addObserver(null, d);
+    });
+    overlay.addCallback("RemoveObserver", (_, d) => {
+      const wr = gameLoader.item;
+      if (wr && wr.removeObserver) wr.removeObserver(null, d);
     });
   }
 }

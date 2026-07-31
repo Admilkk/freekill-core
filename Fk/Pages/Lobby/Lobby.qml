@@ -413,6 +413,13 @@ W.PageBase {
     }
   }
 
+  function observeRoomOnly(roomId, pw) {
+    Config.replaying = false;
+    Config.observing = true;
+    App.setBusy(true);
+    Cpp.notifyServer("PreObserveRoom", [roomId, pw]);
+  }
+
   Danmu {
     id: danmu
     width: parent.width
@@ -477,6 +484,7 @@ W.PageBase {
       displayName += "[{id}]".replace("{id}", roomSettings.roomId);
     }
     Config.headerName = Lua.tr("Current room: %1").arg(displayName);
+    Config.observing = !!roomSettings.isObserver;
     App.enterNewPage(Qt.createComponent("Fk.Pages.Common", "RoomPage"), {
       gameComponent: Qt.createComponent("Fk.Pages.Common", "WaitingRoom"),
     });

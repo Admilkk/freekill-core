@@ -358,6 +358,7 @@ function ClientBase:addObserver(data)
   }
   local p = self.clientplayer_klass:new(player)
   table.insert(self.observers, p)
+  self:notifyUI("AddObserver", data)
   -- self:notifyUI("ServerMessage", string.format(Fk:translate("$AddObserver"), name))
 end
 
@@ -366,6 +367,7 @@ function ClientBase:removeObserver(data)
   for _, p in ipairs(self.observers) do
     if p.player:getId() == id then
       table.removeOne(self.observers, p)
+      self:notifyUI("RemoveObserver", data)
       -- self:notifyUI("ServerMessage", string.format(Fk:translate("$RemoveObserver"), p.player:getScreenName()))
       break
     end

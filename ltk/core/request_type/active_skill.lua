@@ -115,13 +115,7 @@ function ReqActiveSkill:setup(ignoreInteraction, data)
   self:setPrompt(self.prompt)
 
   self:retractAllPiles()
-
-  -- 展开牌堆时分歧处理
-  if self.sub_selection_flag then
-    self:expandPile("_sub_selection", self.sub_cards)
-  else
-    self:expandPiles()
-  end
+  self:expandPiles()
 
   scene:unselectAllCards()
   scene:unselectAllTargets()
@@ -237,7 +231,8 @@ function ReqActiveSkill:expandPile(pile, extra_ids, extra_footnote)
     self.expanded_piles[pile] = self.expanded_piles[pile] or {}
     table.insertTable(self.expanded_piles[pile],ids)
   elseif pile == "_sub_selection" and extra_ids then
-    -- expand_pile必为实体卡牌表……
+    -- 二级菜单的expand_pile必为实体卡牌表……
+    self.expanded_piles["_sub_selection"] = table.map(extra_ids, function(c) return Fk:currentRoom():getVirtCardId(c) end)
     ids = extra_ids
     footnote = self.skill_name -- 只写一个技能名
   else
@@ -284,6 +279,12 @@ function ReqActiveSkill:expandPiles()
   local skill = Fk.skills[self.skill_name] --[[@as ActiveSkill | ViewAsSkill]]
   local player = self.player
   if not skill then return end
+
+  -- 二级菜单无视一切展开额外牌堆
+  if self.sub_selection_flag then
+    self:expandPile("_sub_selection", self.sub_cards)
+    return
+  end
 
   -- TODO: 为了缔盟的无奈之法，应该多次判定是否展开
   local expand_equip = skill.include_equip
@@ -418,7 +419,7 @@ function ReqActiveSkill:feasible()
       return skill:feasible(player, targets, self.pendings) -- 需要二级选择的技能，暂时将判断权限还给feasible
     end
     if self.sub_selection_flag then
-      card = skill:viewAs(self.player, self.selected_buffer.cards, self.pendings)
+      card = skill:viewAs(self.player, self.selected_buffer.cards, self.sub_pendings)
     else
       card = skill:viewAs(self.player, self.pendings)
     end
@@ -441,9 +442,11 @@ end
 function ReqActiveSkill:cardValidity(cid)
   local skill = Fk.skills[self.skill_name] --[[@as ActiveSkill | ViewAsSkill]]
   if not skill then return false end
-  if self.sub_selection_flag then
+  if self.sub_selection_flag then -- 二级选择时单独考虑
+    -- printf("sub_selection_flag: %d, %s", cid, getCardByVirtId(self.sub_cards, cid))
+    if not getCardByVirtId(self.sub_cards, cid) then return false end -- 只能选择二级选择的牌
     return not not skill:subCardFilter(self.player, getCardByVirtId(self.sub_cards, cid), self.sub_pendings, self.selected_buffer.cards, self.extra_data)
-  end -- 二级选择时不考虑cardValidity
+  end
   return not not skill:cardFilter(self.player, cid, self.pendings or {}, table.map(self.selected_targets or {}, Util.Id2PlayerMapper))
 end
 
@@ -461,7 +464,7 @@ function ReqActiveSkill:targetValidity(pid)
       return false -- 需要二级选择的技能，暂时不考虑targetFilter
     end
     if self.sub_selection_flag then
-      card = skill:viewAs(self.player, self.selected_buffer.cards, self.pendings)
+      card = skill:viewAs(self.player, self.selected_buffer.cards, self.sub_pendings)
     else
       card = skill:viewAs(self.player, self.pendings)
     end
@@ -725,9 +728,10 @@ end
 
 function ReqActiveSkill:update(elemType, id, action, data)
   if elemType == "Button" then
-    if id == "OK" then self:doOKButton()
-    elseif id == "Cancel" then self:doCancelButton() end
-    return true
+    local ret = false
+    if id == "OK" then ret = not not self:doOKButton()
+    elseif id == "Cancel" then ret = not not self:doCancelButton() end
+    return ret
   elseif elemType == "CardItem" then
     self:selectCard(id, data)
     self:initiateTargets()

@@ -413,6 +413,16 @@ QtObject {
     }
   }
 
+  // 获得牌的*唯一ID*，如果是虚拟牌则返回virtId，否则返回cardId
+  function getCardId(cardModel) {
+    let cardId = cardModel.cardId;
+    if (cardId === 0) {
+      // 虚拟牌
+      cardId = cardModel.virtId;
+    }
+    return cardId;
+  }
+
   function createCardModel(cardId, additionalProp) {
     const component = Qt.createComponent("LunarLtk.Models", "CardModel");
     const data = Ltk.getCardData(cardId);

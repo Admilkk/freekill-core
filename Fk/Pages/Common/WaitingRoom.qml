@@ -6,6 +6,7 @@ import QtQuick.Layouts
 
 import Fk
 import Fk.Components.WaitingRoom
+import Fk.Components.Common
 import Fk.Widgets as W
 
 import LunarLtk
@@ -24,6 +25,14 @@ W.PageBase {
   property bool canKickOwner: false
   property bool playersAltered: false // 有人加入或离开房间
   readonly property bool isRoomObserver: Config.observing
+
+  property string bgColor: '#e1ffffff'
+  property string borderColor: '#acbebc'
+
+  property alias photoModel: photoModel
+  property alias photos: photos
+  property alias menuButton: menuButton
+  signal menuButtonClicked()
 
   onPlayersAlteredChanged: {
     if (playersAltered) {
@@ -64,69 +73,101 @@ W.PageBase {
   Rectangle {
     id: roomSettings
 
-    x: 40
-    y: 40
+    x: 15
+    y: 20
 
-    color: "snow"
-    opacity: 0.8
+    color: roomScene.bgColor
     radius: 6
     width: 280
-    height: parent.height - 80
+    height: parent.height - 40
+    border.color: roomScene.borderColor
+    border.width: 2
+
+    Text {
+      id: roomSettingsTitle
+      width: parent.width
+      height: 30
+      y: 10
+      text: Lua.tr("Room Settings")
+      font.bold: true
+      font.pixelSize: 20
+      horizontalAlignment: Text.AlignHCenter
+    }
 
     Flickable {
       id: flickableContainer
       ScrollBar.vertical: ScrollBar {}
       anchors.horizontalCenter: parent.horizontalCenter
-      anchors.top: parent.top
+      anchors.top: roomSettingsTitle.bottom
       anchors.topMargin: 10
+      anchors.bottom: parent.bottom
+      anchors.bottomMargin: 10
       flickableDirection: Flickable.VerticalFlick
-      width: parent.width - 10
-      height: parent.height - 10
+      width: parent.width - 30
       contentHeight: roominfo.height
       clip: true
+      property var settings: []
 
-      Text {
-        id: roominfo
-        font.pixelSize: 16
-        width: parent.width
-        wrapMode: TextEdit.WordWrap
-        function refresh() {
-          const data = Lua.client.settings;
-          let cardpack = Ltk.getAllCardPack();
-          cardpack = cardpack.filter(p => !data.disabledPack.includes(p));
-          const gameMode = data.gameMode;
-          const boardgameSettingsData = Lua.getUIDataOfSettings(gameMode, data, true);
-          const gameSettingsData = Lua.getUIDataOfSettings(gameMode, data, false);
+      Component.onCompleted: setDataList();
 
-          let retText = Lua.tr("GameMode") + Lua.tr(gameMode) + "<br />"
-            + Lua.tr("ResponseTime") + "<b>" + Config.roomTimeout + "</b><br />";
+      function setDataList() {
+        let _settings = [];
+        const data = Lua.client.settings;
+        let cardpack = Ltk.getAllCardPack();
+        cardpack = cardpack.filter(p => !data.disabledPack.includes(p));
+        const gameMode = data.gameMode;
+        const boardgameSettingsData = Lua.getUIDataOfSettings(gameMode, data, true);
+        const gameSettingsData = Lua.getUIDataOfSettings(gameMode, data, false);
 
-          for (const group of boardgameSettingsData) {
-            for (const prop of group['_children']) {
-              retText += `${Lua.tr(prop.title)}:<b>
-              ${Lua.tr(data?.['_game']?.[prop['_settingsKey']])}</b><br />`
-            }
+        _settings.push([Lua.tr("GameMode"), Lua.tr(gameMode)]);
+        for (const group of boardgameSettingsData) {
+          for (const prop of group['_children']) {
+            _settings.push([Lua.tr(prop.title), Lua.tr(data?.['_game']?.[prop['_settingsKey']])])
           }
-          for (const group of gameSettingsData) {
-            for (const prop of group['_children']) {
-              retText += `${Lua.tr(prop.title)}:<b>
-              ${Lua.tr(data?.['_mode']?.[prop['_settingsKey']])}</b><br />`
-            }
+        }
+        for (const group of gameSettingsData) {
+          for (const prop of group['_children']) {
+            _settings.push([Lua.tr(prop.title), Lua.tr(data?.['_mode']?.[prop['_settingsKey']])])
           }
-
-          retText += Lua.tr('CardPackages') + cardpack.map(e => {
+        }
+        _settings.push([Lua.tr('CardPackages'), cardpack.map(e => {
             let ret = Lua.tr(e);
             // TODO: 这种东西最好还是变量名规范化= =
             if (ret.search(/特殊牌|衍生牌/) === -1) {
               ret = "<b>" + ret + "</b>";
             }
             return ret;
-          }).join('，');
+          }).join('，')]);
+        settings = _settings
+      }
 
-          text = retText;
+      Column {
+        id: roominfo
+        anchors.fill: parent
+        Repeater {
+          width: parent.width
+          model: flickableContainer.settings
+
+          Item {
+            width: parent.width
+            height: 30
+            required property var modelData
+
+            Text {
+              anchors.left: parent.left
+              text: parent.modelData[0]
+              color: '#5e5e5e'
+              font.pixelSize: 14
+            }
+
+            Text {
+              anchors.right: parent.right
+              text: parent.modelData[1]
+              color: '#222222'
+              font.pixelSize: 14
+            }
+          }
         }
-
-        Component.onCompleted: refresh();
       }
     }
   }
@@ -147,146 +188,230 @@ W.PageBase {
     anchors.centerIn: parent
   }
 
-  GridLayout {
+  Rectangle {
     id: roomArea
-
     anchors.left: roomSettings.right
-    anchors.leftMargin: 40
-    y: 40
-    width: roomScene.width - 120 - roomSettings.width
-    height: roomScene.height - 80
+    anchors.leftMargin: 10
+    anchors.right: observeArea.left
+    anchors.rightMargin: 10
+    y: 20
+    height: roomScene.height - 40
 
-    columns: 5
-    rowSpacing: -60
-    columnSpacing: -20
+    color: roomScene.bgColor
+    radius: 6
+    border.color: roomScene.borderColor
+    border.width: 2
 
-    Repeater {
-      id: photos
-      model: photoModel
-      WaitingPhoto {
-        playerid: model.id
-        general: model.avatar
-        avatar: model.avatar
-        screenName: model.screenName
-        kingdom: "unknown"
-        seatNumber: model.seatNumber
-        dead: false
-        surrendered: false
-        isOwner: model.isOwner
-        ready: model.ready
-        opacity: model.sealed ? 0 : 1
-        winGame: model.win
-        runGame: model.run
-        totalGame: model.total
+    Item {
+      id: topArea
+      width: parent.width
+      height: 72
+      Text {
+        id: topAreaTitle
+        text: Lua.tr(Lua.client.settings?.gameMode ?? "")
+        color: '#252928'
+        font.bold: true
+        font.pixelSize: 30
+        x: 12; y: 10
+      }
 
-        onClicked: {
-          if (photoMenu.visible){
-            photoMenu.close();
-          } else if (model.id !== -1) {
-            photoMenu.open();
+      Rectangle {
+        anchors.left: topAreaTitle.right
+        anchors.leftMargin: 20
+        y: 25
+        color: roomScene.bgColor
+        radius: 2
+        border.width: 1
+        border.color: roomScene.borderColor
+        width: 93
+        height: 20
+
+        Row {
+          height: parent.height
+          spacing: 10
+          x: 5
+          property int realPlayerNum: {
+            let ret = 0;
+            for (let i = 0; i < photoModel.count; i++) {
+              if (photos.itemAt(i).hasPlayer) ret += 1;
+            }
+            return ret
+          }
+          Text {
+            height: parent.height
+            verticalAlignment: Text.AlignVCenter
+            color: '#283030'
+            text: `<font color='#609622'>${parent.realPlayerNum.toString()}</font>/${roomScene.playerNum.toString()}`
+            textFormat: Text.RichText
+            font.letterSpacing: 3
+            font.bold: true
+          }
+          Text {
+            height: parent.height
+            verticalAlignment: Text.AlignVCenter
+            color: '#283030'
+            text: roomScene.playerNum - parent.realPlayerNum === 0 ? "     已满" : `${roomScene.playerNum - parent.realPlayerNum}个空位`
+            font.bold: true
           }
         }
+      }
 
-        onRightClicked: clicked(this);
+      WButton {
+        id: menuButton
+        anchors.right: parent.right
+        anchors.rightMargin: 20
+        y: 12
+        height: 35
+        width: 72
+        text: Lua.tr("Menu")
+        textFont.pixelSize: 20
 
-        Menu {
-          id: photoMenu
-          y: 64
-          width: parent.width * 0.8
+        onClicked: roomScene.menuButtonClicked()
+      }
 
-          onAboutToShow: {
-            flowerButton.enabled = true;
-            eggButton.enabled = true;
-            wineButton.enabled = Math.random() < 0.3;
-            shoeButton.enabled = Math.random() < 0.3;
-          }
+      Rectangle {
+        height: 2
+        width: parent.width
+        color: roomScene.borderColor
+        anchors.bottom: parent.bottom
+        anchors.bottomMargin: 10
+      }
+    }
 
-          W.ButtonContent {
-            id: flowerButton
-            text: Lua.tr("Give Flower")
-            icon.source: SkinBank.pixAnimDir + "/flower/egg3"
-            onClicked: {
-              enabled = false;
-              roomScene.givePresent("Flower", model.id);
+    Flow {
+      anchors {
+        fill: parent
+        leftMargin: 20
+        rightMargin: 20
+        topMargin: 80
+      }
+
+      spacing: 15
+
+      Repeater {
+        id: photos
+        model: photoModel
+
+        AvatarCardItem {
+          playerid: model.id
+          avatar: model.avatar
+          screenName: model.screenName
+          isOwner: model.isOwner
+          ready: model.ready
+          opacity: model.sealed ? 0 : 1
+          winGame: model.win
+          runGame: model.run
+          totalGame: model.total
+
+          onClicked: {
+            if (photoMenu.visible){
               photoMenu.close();
+            } else if (model.id !== -1) {
+              photoMenu.open();
             }
           }
 
-          W.ButtonContent {
-            id: eggButton
-            text: Lua.tr("Give Egg")
-            icon.source: SkinBank.pixAnimDir + "/egg/egg"
-            onClicked: {
-              enabled = false;
-              if (Math.random() < 0.03) {
-                roomScene.givePresent("GiantEgg", model.id);
-              } else {
-                roomScene.givePresent("Egg", model.id);
+          onRightClicked: clicked(this);
+
+          Menu {
+            id: photoMenu
+            y: 64
+            width: parent.width * 0.8
+
+            onAboutToShow: {
+              flowerButton.enabled = true;
+              eggButton.enabled = true;
+              wineButton.enabled = Math.random() < 0.3;
+              shoeButton.enabled = Math.random() < 0.3;
+            }
+
+            W.ButtonContent {
+              id: flowerButton
+              text: Lua.tr("Give Flower")
+              icon.source: SkinBank.pixAnimDir + "/flower/egg3"
+              onClicked: {
+                enabled = false;
+                roomScene.givePresent("Flower", model.id);
+                photoMenu.close();
               }
-              photoMenu.close();
             }
-          }
 
-          W.ButtonContent {
-            id: wineButton
-            text: Lua.tr("Give Wine")
-            icon.source: SkinBank.pixAnimDir + "/wine/shoe"
-            onClicked: {
-              enabled = false;
-              roomScene.givePresent("Wine", model.id);
-              photoMenu.close();
-            }
-          }
-
-          W.ButtonContent {
-            id: shoeButton
-            text: Lua.tr("Give Shoe")
-            icon.source: SkinBank.pixAnimDir + "/shoe/shoe"
-            onClicked: {
-              enabled = false;
-              roomScene.givePresent("Shoe", model.id);
-              photoMenu.close();
-            }
-          }
-
-          W.ButtonContent {
-            id: blockButton
-            text: {
-              const name = model.screenName;
-              const blocked = !Config.blockedUsers.includes(name);
-              return blocked ? Lua.tr("Block Chatter") : Lua.tr("Unblock Chatter");
-            }
-            enabled: model.id !== Self.id && model.id > 0 // 旁观屏蔽不了正在被旁观的人
-            onClicked: {
-              const name = model.screenName;
-              const idx = Config.blockedUsers.indexOf(name);
-              if (idx === -1) {
-                if (name === "") return;
-                Config.blockedUsers.push(name);
-              } else {
-                Config.blockedUsers.splice(idx, 1);
+            W.ButtonContent {
+              id: eggButton
+              text: Lua.tr("Give Egg")
+              icon.source: SkinBank.pixAnimDir + "/egg/egg"
+              onClicked: {
+                enabled = false;
+                if (Math.random() < 0.03) {
+                  roomScene.givePresent("GiantEgg", model.id);
+                } else {
+                  roomScene.givePresent("Egg", model.id);
+                }
+                photoMenu.close();
               }
-              Config.blockedUsersChanged();
             }
-          }
 
-          W.ButtonContent {
-            id: kickButton
-            text: Lua.tr("Kick From Room")
-            enabled: {
-              if (!roomScene.isOwner) return false;
-              if (model.id === Self.id) return false;
-              if (model.id < -1) {
-                const { minComp, curComp } = Lua.getCompNum();
-                return curComp > minComp;
+            W.ButtonContent {
+              id: wineButton
+              text: Lua.tr("Give Wine")
+              icon.source: SkinBank.pixAnimDir + "/wine/shoe"
+              onClicked: {
+                enabled = false;
+                roomScene.givePresent("Wine", model.id);
+                photoMenu.close();
               }
-              return true;
             }
-            onClicked: {
-              // 傻逼qml喜欢加1.0
-              // FIXME 留下image
-              Cpp.notifyServer("KickPlayer", Math.floor(model.id));
-              photoMenu.close();
+
+            W.ButtonContent {
+              id: shoeButton
+              text: Lua.tr("Give Shoe")
+              icon.source: SkinBank.pixAnimDir + "/shoe/shoe"
+              onClicked: {
+                enabled = false;
+                roomScene.givePresent("Shoe", model.id);
+                photoMenu.close();
+              }
+            }
+
+            W.ButtonContent {
+              id: blockButton
+              text: {
+                const name = model.screenName;
+                const blocked = !Config.blockedUsers.includes(name);
+                return blocked ? Lua.tr("Block Chatter") : Lua.tr("Unblock Chatter");
+              }
+              enabled: model.id !== Self.id && model.id > 0 // 旁观屏蔽不了正在被旁观的人
+              onClicked: {
+                const name = model.screenName;
+                const idx = Config.blockedUsers.indexOf(name);
+                if (idx === -1) {
+                  if (name === "") return;
+                  Config.blockedUsers.push(name);
+                } else {
+                  Config.blockedUsers.splice(idx, 1);
+                }
+                Config.blockedUsersChanged();
+              }
+            }
+
+            W.ButtonContent {
+              id: kickButton
+              text: Lua.tr("Kick From Room")
+              enabled: {
+                if (!roomScene.isOwner) return false;
+                if (model.id === Self.id) return false;
+                if (model.id < -1) {
+                  const { minComp, curComp } = Lua.getCompNum();
+                  return curComp > minComp;
+                }
+                return true;
+              }
+              onClicked: {
+                // 傻逼qml喜欢加1.0
+                // FIXME 留下image
+                Cpp.notifyServer("KickPlayer", Math.floor(model.id));
+                photoMenu.close();
+              }
             }
           }
         }
@@ -295,16 +420,24 @@ W.PageBase {
   }
 
   RowLayout {
-    anchors.right: parent.right
+    anchors.right: observeArea.left
     anchors.bottom: parent.bottom
-    anchors.margins: 40
+    anchors.rightMargin: 20
+    anchors.bottomMargin: 35
 
-    W.ButtonContent{
+    WButton{
       visible: isOwner && canChangeRoom
       text: Lua.tr("Change Room Config")
+      textFont.pixelSize: 20
+      width: 100
+      height: 35
+      title.color: '#e1f5f3'
+      bg.radius: 10
+      bg.color: '#8eb1ab'
+      border.width: 0
       onClicked: {
         room_drawer.sourceComponent =
-          Qt.createComponent("../Lobby/CreateRoom.qml");
+        Qt.createComponent("../Lobby/CreateRoom.qml");
         room_drawer.item.isChangeRoom = true;
         room_drawer.open();
         Config.observing = false;
@@ -312,15 +445,28 @@ W.PageBase {
       }
     }
 
-    W.ButtonContent {
+    WButton {
       text: Lua.tr("Chat")
-      font.pixelSize: 28
+      textFont.pixelSize: 20
+      width: 70
+      height: 35
+      title.color: '#e1f5f3'
+      bg.radius: 10
+      bg.color: '#8eb1ab'
+      border.width: 0
       onClicked: Mediator.notify(this, Command.IWantToChat);
     }
 
-    W.ButtonContent {
+    WButton {
       id: kickOwner
       text: Lua.tr("Kick Owner")
+      textFont.pixelSize: 20
+      width: 100
+      height: 35
+      title.color: '#e1f5f3'
+      bg.radius: 10
+      bg.color: '#8eb1ab'
+      border.width: 0
       visible: canKickOwner && isFull && !isOwner
       onClicked: {
         for (let i = 0; i < playerNum; i++) {
@@ -333,8 +479,14 @@ W.PageBase {
       }
     }
 
-    W.ButtonContent {
+    WButton {
       text: Lua.tr("Spectate")
+      textFont.pixelSize: 20
+      height: 35
+      title.color: '#e1f5f3'
+      bg.radius: 10
+      bg.color: '#8eb1ab'
+      border.width: 0
       visible: !photoModel.count < 2 && !roomScene.isRoomObserver
       enabled: true
       onClicked: {
@@ -345,8 +497,15 @@ W.PageBase {
     Item {
       Layout.preferredWidth: childrenRect.width
       Layout.preferredHeight: childrenRect.height
-      W.ButtonContent {
+      WButton {
         text: isReady ? Lua.tr("Cancel Ready") : Lua.tr("Ready")
+        textFont.pixelSize: 20
+        width: isReady ? 100 : 50
+        height: 35
+        title.color: '#e1f5f3'
+        bg.radius: 10
+        bg.color: '#8eb1ab'
+        border.width: 0
         visible: !isOwner && !roomScene.isRoomObserver
         enabled: !opTimer.running
         onClicked: {
@@ -355,14 +514,21 @@ W.PageBase {
         }
       }
 
-      W.ButtonContent {
+      WButton {
         text: Lua.tr("Add Robot")
+        textFont.pixelSize: 20
+        width: 120
+        height: 35
+        title.color: '#e1f5f3'
+        bg.radius: 10
+        bg.color: '#8eb1ab'
+        border.width: 0
         visible: isOwner && !isFull
         enabled: Config.serverFeatures.includes("AddRobot") && canAddRobot
         onClicked: {
           Cpp.notifyServer("AddRobot", "");
         }
-        onPressAndHold: { // 长按以机器人补全
+        onRightClicked: { // 长按以机器人补全
           for (let i = 0; i < playerNum; i++) {
             if (!canAddRobot) break;
             Cpp.notifyServer("AddRobot", "");
@@ -370,8 +536,15 @@ W.PageBase {
         }
       }
 
-      W.ButtonContent {
+      WButton {
         text: Lua.tr("Start Game")
+        textFont.pixelSize: 20
+        width: 100
+        height: 35
+        title.color: '#e1f5f3'
+        bg.radius: 10
+        bg.color: '#8eb1ab'
+        border.width: 0
         visible: isOwner && isFull
         enabled: isAllReady
         onClicked: {
@@ -381,47 +554,39 @@ W.PageBase {
     }
   }
 
-  // 旁观者区域
   Rectangle {
-    id: observerArea
-    visible: observerModel.count > 0
+    id: observeArea
+    width: 105
     anchors.right: parent.right
-    anchors.rightMargin: 16
-    anchors.top: parent.top
-    anchors.topMargin: 40
-    anchors.bottom: parent.bottom
-    anchors.bottomMargin: 72
-    width: 180
-    color: "#DDF0F0F0"
-    radius: 8
+    anchors.rightMargin: 15
+    y: 20
+    height: roomScene.height - 40
 
-    Text {
-      anchors.horizontalCenter: parent.horizontalCenter
-      y: 8
-      text: Lua.tr("Spectators") + " (" + observerModel.count + ")"
-      font.pixelSize: 16
-      font.bold: true
-    }
+    color: roomScene.bgColor
+    radius: 6
+    border.color: roomScene.borderColor
+    border.width: 2
 
-    ListView {
-      anchors.top: parent.top
-      anchors.topMargin: 36
-      anchors.left: parent.left
-      anchors.leftMargin: 8
-      anchors.right: parent.right
-      anchors.rightMargin: 8
-      anchors.bottom: parent.bottom
-      anchors.bottomMargin: 8
-      model: observerModel
-      clip: true
-      spacing: 4
-      delegate: Text {
-        required property var modelData
-        width: ListView.view.width
-        text: modelData.screenName + (modelData.isOwner ? "[房主]" :"")
-        font.pixelSize: 14
-        color: "#555"
-        elide: Text.ElideRight
+    Column {
+      anchors.fill:parent
+      anchors.topMargin: 5
+      spacing: 10
+      Text {
+        text: "旁观席"
+        color: '#8fa19f'
+        font.bold: true
+        font.pixelSize: 20
+        anchors.left: parent.left
+        anchors.leftMargin: 8
+        height: 23
+      }
+
+      Repeater {
+        model: observerModel
+
+        Avatar {
+
+        }
       }
     }
   }
@@ -450,14 +615,13 @@ W.PageBase {
   // TODO 扬了这玩意
   function givePresent(tp, pid) {
     ClientInstance.notifyServer(
-      "Chat",
-      {
-        type: 2,
-        msg: "$@" + tp + ":" + pid
-      }
+    "Chat",
+    {
+      type: 2,
+      msg: "$@" + tp + ":" + pid
+    }
     );
   }
-
 
   function getPhotoModel(id) {
     for (let i = 0; i < playerNum; i++) {
@@ -646,19 +810,19 @@ W.PageBase {
 
   function loadPlayerData(sender) {
     const datalist = Lua.evaluate(`table.map(ClientInstance.players, function(p)
-      local cp = p.player
-      local gameData = cp:getGameData()
-      return {
-        id = p.id,
-        name = cp:getScreenName(),
-        avatar = cp:getAvatar(),
-        ready = p.ready,
-        isOwner = p.owner,
-        gameTime = cp:getTotalGameTime(),
-        total = gameData:at(0),
-        win = gameData:at(1),
-        run = gameData:at(2),
-      }
+    local cp = p.player
+    local gameData = cp:getGameData()
+    return {
+      id = p.id,
+      name = cp:getScreenName(),
+      avatar = cp:getAvatar(),
+      ready = p.ready,
+      isOwner = p.owner,
+      gameTime = cp:getTotalGameTime(),
+      total = gameData:at(0),
+      win = gameData:at(1),
+      run = gameData:at(2),
+    }
     end)`);
 
     resetPhotos();
@@ -748,7 +912,7 @@ W.PageBase {
   function autoAddRobot() {
     const robotNum = playerNum - 1
     if (Cpp.quickStartMode !== "") {
-      for (let i = 0; i < robotNum; i++) Cpp.notifyServer("AddRobot", "");
+      for (let i = 1; i < robotNum; i++) Cpp.notifyServer("AddRobot", "");
     }
   }
 

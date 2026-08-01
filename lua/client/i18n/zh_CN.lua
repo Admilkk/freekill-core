@@ -104,6 +104,7 @@ Fk:loadTranslationTable {
   ["Ready"] = "准备",
   ["Cancel Ready"] = "取消准备",
   ["Kick Owner"] = "踢出房主",
+  ["Spectate"] = "旁观",
   ["Game Rule"] = "游戏规则",
   ["Game Mode"] = "游戏模式",
   ["Enable free assign"] = "自由选将",

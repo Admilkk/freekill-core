@@ -4,6 +4,7 @@
 ---@field public from ServerPlayer @ 使用者
 ---@field public tos ServerPlayer[] @ 角色目标
 ---@field public cards integer[] @ 选择卡牌
+---@field public sub_cards? Card[] @ 二级选择时所选择的对象数组
 ---@field public cost_data? CostData|table @ 发动技能时的消耗数据，请使用event:setCostData(skill)指定
 ---@field public interaction_data? any @ 选项框获取的数据
 ---@field public history_branch? string @ 技能发动历史分支

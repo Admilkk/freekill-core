@@ -690,6 +690,19 @@ function SkillSkeleton:createViewAsSkill(_skill, idx, key, attr, spec)
   if spec.feasible then skill.feasible = spec.feasible end
   if spec.on_use then skill.onUse = spec.on_use end
 
+  if spec.sub_cards then
+    skill.sub_data = spec.sub_cards
+    skill.sub_prompt = spec.sub_prompt or skill.prompt
+
+    if not spec.feasible then
+      -- 继承不了一点
+      skill.feasible = function(self, player, targets, selected_cards)
+        return self:getMinCardNum(player) <= #selected_cards and
+          self:getMaxCardNum(player) >= #selected_cards
+      end
+    end
+  end
+
   if type(spec.pattern) == "string" then
     skill.pattern = spec.pattern
   end

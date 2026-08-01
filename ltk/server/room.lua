@@ -2407,17 +2407,18 @@ end
 
 --- 将从Request获得的数据转化为UseCardData，或执行主动技的onUse部分
 --- 一般DIY用不到的内部函数
----@param player ServerPlayer
----@param data any
+---@param player ServerPlayer @ 使用者
+---@param data ReplyFormatResponseCard @ Request返回的数据
 ---@param params? handleUseCardParams
 ---@return UseCardDataSpec|string? @ 返回字符串则取消使用，若返回技能名，在当前询问中禁用此技能
 function Room:handleUseCardReply(player, data, params)
   local card = data.card
+  local cardObjs = data.card_objs and table.map(data.card_objs, function(e) return cbor.decode(e) end) or nil
   local targets = data.targets or {}
   local extra_data = (params or {}).extra_data or Util.DummyTable
   if type(card) == "table" then
     local card_data = card
-    local skill = Fk.skills[card_data.skill]
+    local skill = Fk.skills[card_data.skill] ---@cast skill ActiveSkill|ViewAsSkill
     local selected_cards = card_data.subcards
     if skill.interaction then skill.interaction.data = data.interaction_data end
     if skill:isInstanceOf(ActiveSkill) then
@@ -2435,6 +2436,7 @@ function Room:handleUseCardReply(player, data, params)
       local use_spec = {
         from = player,
         cards = selected_cards,
+        sub_cards = cardObjs,
         tos = tos,
         interaction_data = data.interaction_data,
       }
@@ -2448,7 +2450,7 @@ function Room:handleUseCardReply(player, data, params)
       ---@cast skill ViewAsSkill
       --Self = player
       local useResult
-      local c = skill:viewAs(player, selected_cards)
+      local c = skill:viewAs(player, selected_cards, cardObjs)
 
       local tos = {}
       if #targets > 0 then
@@ -2462,6 +2464,7 @@ function Room:handleUseCardReply(player, data, params)
       local use_spec = {
         from = player,
         cards = selected_cards,
+        sub_cards = cardObjs,
         tos = tos,
         interaction_data = data.interaction_data,
       }

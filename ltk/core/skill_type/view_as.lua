@@ -2,6 +2,11 @@
 
 ---@class ViewAsSkill : UsableSkill
 ---@field public pattern string @ cards that can be viewAs'ed by this skill
+---@field public sub_data? string[] | fun(self: ViewAsSkill, player: Player, selected: integer[], interaction_data: any): ViewAsPattern? @ 用于泛转化技的二级选择
+---@field public sub_prompt? string|fun(self: ViewAsSkill, player: Player, selected_cards: integer[], selected_targets: Player[], selected_sub_cards: Card[], extradata?: UseExtraData|table): string @ 二级菜单提示信息
+---@field public min_card_num integer
+---@field public max_card_num integer
+---@field public card_num integer
 ---@field public interaction any
 ---@field public refresh_interaction function
 ---@field public handly_pile boolean? @ 能否选择“如手牌般使用或打出”的牌
@@ -11,8 +16,24 @@
 local ViewAsSkill = UsableSkill:subclass("ViewAsSkill")
 
 function ViewAsSkill:initialize(name, frequency)
-  UsableSkill.initialize(self, name, frequency)
+  ActiveSkill.initialize(self, name, frequency)
+  self.min_card_num = 0
+  self.max_card_num = 999
   self.pattern = ""
+end
+
+-- 获得技能的最小卡牌数
+---@param player Player @ 使用者
+---@return number @ 最小卡牌数
+function ViewAsSkill:getMinCardNum(player)
+  return ActiveSkill.getMinCardNum(self, player)
+end
+
+-- 获得技能的最大卡牌数
+---@param player Player @ 使用者
+---@return number @ 最大卡牌数
+function ViewAsSkill:getMaxCardNum(player)
+  return ActiveSkill.getMaxCardNum(self, player)
 end
 
 ---@class ViewAsPattern
@@ -89,14 +110,27 @@ function ViewAsSkill:cardFilter(player, to_select, selected, selected_targets)
   return false
 end
 
----@param player Player @ the user
----@param cards integer[] @ ids of cards
+-- 该技能所实际使用/打出的虚拟牌
+---@param player Player @ 使用者
+---@param cards integer[] @ 实体牌ID数组
+---@param sub_cards? Card[] @ 已选择的虚拟牌对象数组
 ---@return Card?
-function ViewAsSkill:viewAs(player, cards)
+function ViewAsSkill:viewAs(player, cards, sub_cards)
   return nil
 end
 
--- 判断一名角色是否可被此转化技选中
+-- （二级菜单）判断一张二级菜单弹出的牌是否可被此技能选中
+---@param player Player @ 使用者
+---@param to_select Card @ 待选目标
+---@param selected Card[] @ 已选目标
+---@param selected_cards integer[] @ 进入二级菜单时的已选牌
+---@param extra_data? UseExtraData @ 额外数据
+---@return boolean?
+function ViewAsSkill:subCardFilter(player, to_select, selected, selected_cards, extra_data)
+  return true
+end
+
+-- 判断一名角色是否可被此转化技转化的牌选中
 ---@param player Player @ 使用者
 ---@param to_select Player @ 待选目标
 ---@param selected Player[] @ 已选目标
@@ -123,7 +157,7 @@ function ViewAsSkill:fixTargets(player, selected_cards, c, extra_data)
 end
 
 -- 判断一个转化技是否可发动（也就是确认键是否可点击）
--- 警告：没啥事别改
+-- 特别的，sub_data不为Nil的技能将屏蔽viewAs判断，并将此判断纳入考量。
 ---@param player Player @ 使用者
 ---@param targets Player[] @ 已选目标
 ---@param selected_cards integer[] @ 已选牌

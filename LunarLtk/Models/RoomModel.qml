@@ -201,7 +201,7 @@ QtObject {
   function setCardMark(_, data) {
     const [ id, mark, v ] = data;
     for (const cd of [...processing, ...dashboard.handcards]) {
-      if (cd.cardId === id) {
+      if (cd.uniqueId === id) {
         Ltk.setMark(cd.marks, mark, v);
         cd.refreshData();
         return;
@@ -256,7 +256,7 @@ QtObject {
     const models = move.ids.map(id => {
       let card;
       if (fromModel) {
-        const i = fromModel.findIndex(e => e.cardId === id);
+        const i = fromModel.findIndex(e => e.uniqueId === id);
         if (i !== -1) card = fromModel.splice(i, 1)[0];
       }
       return card || Ltk.createCardModel(id, { known: !!data[id.toString()] });

@@ -75,6 +75,8 @@ function Item:interact() end
   例如RoomScene中已经创建了表达卡牌和技能的Item，因此在Handler的逻辑编写中，
   应当避免再去使用getCards或者getSkills这样获取原始属性的函数，而是直接访问Item
   例如：
+
+    local cardItem = scene:getAllItems("CardItem")[cid]
 --]]
 ---@class Scene: Object
 ---@field public parent RequestHandler

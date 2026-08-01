@@ -385,6 +385,22 @@ function ReqActiveSkill:visualizePile()
   local skill = Fk.skills[self.skill_name] --[[@as ActiveSkill | ViewAsSkill]]
   if not skill then return end
   local player = self.player
+
+  -- 因为visible_pile是纯ui方案，与操作合法性无关，故不需要scene参与，直接改RequestHandler.change
+  self.change = self.change or {}
+
+  -- 直接在这里进行屏蔽手牌操作
+  if self.sub_selection_flag then
+    self.change["visible_cards"] = table.map(self.sub_cards, function(c)
+      if c.id == 0 then
+        return c.virt_id
+      else
+        return c.id
+      end
+    end) -- 二级选择时visible_pile改为全体手牌
+    return
+  end
+
   local pile = skill.visible_pile or {}
   local _pile
   if type(pile) == "function" then
@@ -404,9 +420,6 @@ function ReqActiveSkill:visualizePile()
     self.visible_pile = {}
   end
 
-  -- 因为visible_pile是纯ui方案，与操作合法性无关，故不需要scene参与，直接改RequestHandler.change
-  
-  self.change = self.change or {}
   self.change["visible_cards"] = self.visible_pile
 end
 

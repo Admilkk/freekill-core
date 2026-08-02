@@ -430,7 +430,7 @@ function ReqActiveSkill:feasible()
   local skill = Fk.skills[self.skill_name] --[[@as ActiveSkill | ViewAsSkill]]
   if not skill then return false end
   local card -- 因为有多种情况，所以需要缓存
-  local ret
+  local ret = false
   local targets = table.map(self.selected_targets, Util.Id2PlayerMapper)
   if skill:isInstanceOf(ActiveSkill) then
     ---@cast skill ActiveSkill
@@ -440,7 +440,7 @@ function ReqActiveSkill:feasible()
     card = self:getUsingCard()
     if card then
       ret = card:getSkill(player):feasible(player, targets, { card.id }, card)
-    else
+    elseif not self.sub_selection_flag then -- 如果是二级选择的场合就全权交给viewAs处理了
       ret = skill:feasible(player, targets, self.pendings)
     end
   end
@@ -470,7 +470,6 @@ function ReqActiveSkill:cardValidity(cid)
   local skill = Fk.skills[self.skill_name] --[[@as ActiveSkill | ViewAsSkill]]
   if not skill then return false end
   if self.sub_selection_flag then -- 二级选择时单独考虑
-    -- printf("sub_selection_flag: %d, %s", cid, getCardByVirtId(self.sub_cards, cid))
     if not getCardByVirtId(self.sub_cards, cid) then return false end -- 只能选择二级选择的牌
     return not not skill:subCardFilter(self.player, getCardByVirtId(self.sub_cards, cid), self.sub_pendings, self.selected_buffer.cards, self.extra_data)
   end
@@ -673,7 +672,7 @@ function ReqActiveSkill:selectCard(cardid, data)
       for _, cid in ipairs(old_pendings) do
         local ret = cid ~= cardid and self:cardValidity(cid)
         if ret then
-          table.insertIfNeed(self.sub_pendings, getCardByVirtId(self.sub_cards, cardid))
+          table.insertIfNeed(self.sub_pendings, getCardByVirtId(self.sub_cards, cid))
           table.insert(self.pendings, cid)
         end
         -- 因为这里而变成未选中的牌稍后将更新一次enable 但是存在着冗余的cardFilter调用

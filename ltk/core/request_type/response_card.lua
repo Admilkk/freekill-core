@@ -119,12 +119,9 @@ end
 function ReqResponseCard:feasible()
   local skill = Fk.skills[self.skill_name]---@cast skill ViewAsSkill
   local card = self:getUsingCard()
-  if skill and card == nil then
-    card = skill:viewAs(self.player, self.pendings)
-    if card == nil then
-      local selected = table.map(self.selected_targets, Util.Id2PlayerMapper)
-      return skill:feasible(self.player, selected, self.pendings)
-    end
+  if skill and card == nil and not self.sub_selection_flag then
+    local selected = table.map(self.selected_targets, Util.Id2PlayerMapper)
+    return skill:feasible(self.player, selected, self.pendings)
   end
   return (card ~= nil) and self:cardFeasible(card)
 end

@@ -105,7 +105,7 @@ function ReqPlayCard:feasible()
     else -- viewasskill
       ---@cast skill ViewAsSkill
       card = self:getUsingCard()
-      if card == nil then
+      if card == nil and not self.sub_selection_flag then
         return skill:feasible(player, table.map(self.selected_targets, Util.Id2PlayerMapper), self.pendings)
       end
     end

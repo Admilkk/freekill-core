@@ -98,7 +98,7 @@ end
 function ReqUseCard:feasible()
   local skill = Fk.skills[self.skill_name]---@cast skill ViewAsSkill
   local card = self:getUsingCard()
-  if skill and card == nil then
+  if skill and card == nil and not self.sub_selection_flag then
     local selected = table.map(self.selected_targets, Util.Id2PlayerMapper)
     return skill:feasible(self.player, selected, self.pendings)
   end

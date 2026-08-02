@@ -37,6 +37,13 @@ function ResetClientLua()
     return arr[1]:getId() > 0
   end)
 
+  -- 保留旁观者列表（结构为 {0, player, id}），供返回房间旁观区域使用
+  local observers = table.map(self.observers or {}, function(t)
+    return { t[3], t[2]:getScreenName(), t[2]:getAvatar() }
+  end)
+  p(cpp_players)
+  p(observers)
+
   local _data = self.enter_room_data
 
   self = client_klass:new(cpp_client) -- clear old client data
@@ -48,11 +55,31 @@ function ResetClientLua()
   end)
   Self = self:getPlayerById(Self.id)
 
+  -- 恢复旁观者列表
+  self.observers = table.map(observers, function(o)
+    local id, name, avatar = o[1], o[2], o[3]
+    local player = {
+      getId = function() return id end,
+      getScreenName = function() return name end,
+      getAvatar = function() return avatar end,
+      getState = function() return fk.Player_Online end,
+    }
+    return { 0, player, id }
+  end)
+
   self.enter_room_data = _data;
   local data = cbor.decode(_data)
   self.capacity = data[1]
   self.timeout = data[2]
   self.settings = data[3]
+
+  -- 刷新 _players / _observers，供等待界面初始化使用
+  local settings = self.settings
+  settings._players = table.map(cpp_players, function(p)
+    local cp = p[1]
+    return { cp:getId(), cp:getScreenName(), cp:getAvatar(),
+             p[2] == true, cp:getTotalGameTime(), p[3] == true }
+  end)
 
   -- FIXME 怎么混入三国杀要素了，非常坏
   self.disabled_packs = ClientInstance.disabled_packs
@@ -186,9 +213,8 @@ end
 
 function GetPlayersAndObservers()
   local self = ClientInstance
-  local players = table.connect(self.observers, self.players)
   local ret = {}
-  for _, p in ipairs(players) do
+  for _, p in ipairs(self.players) do
     local state = p.player:getState()
     if state == fk.Player_Run and p.dead then
       state = fk.Player_Offline
@@ -201,6 +227,18 @@ function GetPlayersAndObservers()
       observing = table.contains(self.observers, p),
       state = state,
       avatar = p.player:getAvatar(),
+    })
+  end
+  for _, p in ipairs(self.observers) do
+    table.insert(ret, {
+      id = p[2]:getId(),
+      general = "",
+      deputy = "",
+      name = p[2]:getScreenName(),
+      observing = true,
+      state = fk.Player_Online,
+      avatar = p[2]:getAvatar()
+
     })
   end
   return ret

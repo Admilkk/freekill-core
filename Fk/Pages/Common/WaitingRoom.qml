@@ -578,14 +578,24 @@ W.PageBase {
         font.pixelSize: 20
         anchors.left: parent.left
         anchors.leftMargin: 8
-        height: 23
+        height: 32
       }
 
       Repeater {
         model: observerModel
+        anchors.horizontalCenter: parent.horizontalCenter
+        width: childrenRect.width
 
-        Avatar {
+        WAvatar {
+          required property var modelData
+          x: 25; width: 54; height: 54
+          avatar: modelData.avatar
+          screenName: modelData.screenName
+          visible: modelData.screenName
 
+          Behavior on y {
+            NumberAnimation{ easing.type: Easing.OutCubic; duration: 300 }
+          }
         }
       }
     }
@@ -912,7 +922,7 @@ W.PageBase {
   function autoAddRobot() {
     const robotNum = playerNum - 1
     if (Cpp.quickStartMode !== "") {
-      for (let i = 1; i < robotNum; i++) Cpp.notifyServer("AddRobot", "");
+      for (let i = 0; i < robotNum; i++) Cpp.notifyServer("AddRobot", "");
     }
   }
 

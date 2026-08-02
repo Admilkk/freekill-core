@@ -7,6 +7,7 @@ Rectangle {
   color: '#f3ede5'
   radius: 2
   height: 0
+  clip: true
   property string text: ""
 
   Text {

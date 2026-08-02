@@ -174,6 +174,24 @@ function ClientBase:enterRoom(_data)
   self.capacity = _data[1]
   self.timeout = _data[2]
   self.settings = data
+
+  -- 旁观者进入时，从 EnterRoom 数据填充旁观者列表（含自己）
+  if data.isObserver then
+    self.observers = {}
+    local function fakeObs(id, name, avatar)
+      local player = {
+        getId = function() return id end,
+        getScreenName = function() return name end,
+        getAvatar = function() return avatar end,
+        getState = function() return fk.Player_Online end,
+      }
+      return {0, player, id}
+    end
+    for _, o in ipairs(data._observers or {}) do
+      table.insert(self.observers, fakeObs(o[1], o[2], o[3]))
+    end
+    table.insert(self.observers, fakeObs(Self.id, Self.player:getScreenName(), Self.player:getAvatar()))
+  end
 end
 
 function ClientBase:changeRoom(_data)
@@ -384,7 +402,7 @@ function ClientBase:chat(data)
   if not p then
     for _, pl in ipairs(self.observers) do
       if pl[3] == data.sender then
-        p = pl[2]; break
+        p = { player = pl[2] }; break
       end
     end
     if not p then return end

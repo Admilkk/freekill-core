@@ -553,6 +553,9 @@ function ReqActiveSkill:updateButtons()
   if isOk and not self.sub_selection_flag and self.sub_cards then
     local skill = Fk.skills[self.skill_name] --[[@as ActiveSkill | ViewAsSkill]]
     if skill and skill.immediate_sub then
+      self.change = self.change or {} -- 移除_new/_delete的状态，毕竟马上就要重新收牌堆了
+      self.change._new = nil
+      self.change._delete = nil
       self:doOKButton()
     end
   end

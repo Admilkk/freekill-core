@@ -5,7 +5,11 @@ local skill = fk.CreateSkill {
 
 skill:addEffect(fk.CardEffectCancelledOut, {
   can_trigger = function(self, event, target, player, data)
-    return player:hasSkill(skill.name) and data.from == player and data.card.trueName == "slash" and not data.to.dead
+    return player:hasSkill(skill.name) and
+      data.from == player and data.card.trueName == "slash" and not data.to.dead and
+      table.find(data.cardsResponded or {}, function (card)
+        return card.trueName == "jink"
+      end)
   end,
   on_cost = function(self, event, target, player, data)
     local room = player.room

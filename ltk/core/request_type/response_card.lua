@@ -77,9 +77,12 @@ function ReqResponseCard:getUsingCard()
   return self.selected_card or ReqActiveSkill.getUsingCard(self)
 end
 
+--- 一张牌能否被点亮（包括正在被点选的实体牌）
+---@param cid integer|Card
+---@return boolean
 function ReqResponseCard:cardValidity(cid)
   if self.skill_name then return ReqActiveSkill.cardValidity(self, cid) end
-  local card = cid --- @type integer|Card
+  local card = cid
   if type(cid) == "number" then card = Fk:getCardById(cid) end
   return not not self:cardFeasible(card)
 end
@@ -195,6 +198,7 @@ function ReqResponseCard:selectSkill(skill, data)
   end
 
   if selected then
+    ---@param item SelectableItem
     for name, item in pairs(scene:getAllItems("SkillButton")) do
       scene:update("SkillButton", name, { enabled = item.selected })
     end

@@ -169,7 +169,7 @@ function ReqPlayCard:doCancelButton()
     self:selectSkill(self.skill_name, { selected = false })
     return
   end
-  return ReqActiveSkill:doCancelButton()
+  return ReqActiveSkill.doCancelButton(self)
 end
 
 function ReqPlayCard:doEndButton()

@@ -127,7 +127,7 @@ end
 ---@param extra_data? UseExtraData @ 额外数据
 ---@return boolean?
 function ViewAsSkill:subCardFilter(player, to_select, selected, selected_cards, extra_data)
-  return true
+  return #selected < 1
 end
 
 -- 判断一名角色是否可被此转化技转化的牌选中

@@ -693,6 +693,8 @@ function SkillSkeleton:createViewAsSkill(_skill, idx, key, attr, spec)
   if spec.sub_cards then
     skill.sub_data = spec.sub_cards
     skill.sub_prompt = spec.sub_prompt or skill.prompt
+    skill.subCardFilter = spec.sub_card_filter
+    skill.immediate_sub = spec.immediate_sub
 
     if not spec.feasible then
       -- 继承不了一点

@@ -732,10 +732,21 @@ function ReqActiveSkill:selectTarget(playerid, data)
   -- 重新筛选原原卡合法性
   local old_pendings = table.simpleClone(self.pendings)
   self.pendings = {}
-  for _, cid in ipairs(old_pendings) do
-    local ret = self:cardValidity(cid)
-    if ret then table.insert(self.pendings, cid) end
-    scene:update("CardItem", cid, { selected = not not ret })
+  if self.sub_selection_flag then
+    self.sub_pendings = {}
+    for _, cid in ipairs(old_pendings) do
+        local ret = self:cardValidity(cid)
+        if ret then
+          table.insertIfNeed(self.sub_pendings, getCardByVirtId(self.sub_cards, cid))
+          table.insert(self.pendings, cid)
+        end
+    end
+  else
+    for _, cid in ipairs(old_pendings) do
+      local ret = self:cardValidity(cid)
+      if ret then table.insert(self.pendings, cid) end
+      scene:update("CardItem", cid, { selected = not not ret })
+    end
   end
   self:updateUnselectedCards()
   self:updateButtons()

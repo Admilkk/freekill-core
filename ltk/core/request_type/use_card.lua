@@ -28,11 +28,12 @@ function ReqUseCard:skillButtonValidity(name)
     not table.contains(self.disabledSkillNames or {}, name)
 end
 
---- 一张牌能否被点亮
----@param cid integer
+--- 一张牌能否被点亮（包括正在被点选的实体牌）
+---@param cid integer|Card
+---@return boolean
 function ReqUseCard:cardValidity(cid)
   if self.skill_name then return ReqActiveSkill.cardValidity(self, cid) end
-  local card = cid ---@type Card
+  local card = cid
   if type(cid) == "number" then card = Fk:getCardById(cid) end
   return not not self:cardFeasible(card)
 end

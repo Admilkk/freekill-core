@@ -525,6 +525,21 @@ end
 function ReqActiveSkill:checkExitSub()
   if not self.sub_selection_flag then return end
   if #self.pendings == 0 and #self.selected_targets == 0 then
+    local skill = Fk.skills[self.skill_name] --[[@as ActiveSkill | ViewAsSkill]]
+    if skill and skill.immediate_sub then
+      local old_pendings = table.simpleClone(self.selected_buffer.cards)
+      local old_targets = table.map(self.selected_buffer.targets, Util.Id2PlayerMapper)
+      local old_interaction = self.selected_buffer.interaction
+      local sub = skill.sub_data
+      if type(sub) == "function" then
+        sub = sub(skill, self.player,  old_pendings, old_targets, old_interaction)
+      end
+      if sub then
+        if skill:feasible(self.player, old_pendings, old_targets) then
+          return
+        end
+      end
+    end
     self:doCancelButton()
   end
 end

@@ -157,7 +157,7 @@ end
 ---@field public on_use? fun(self: ViewAsSkill, room: Room, skillUseEvent: SkillUseData, card: Card, params: handleUseCardParams?): UseCardDataSpec|string?
 ---@field public view_as fun(self: ViewAsSkill, player: Player, cards: integer[], sub_cards?: Card[]): Card? @ 判断转化为什么牌（二级菜单时sub_cards有值，否则无值）
 ---@field public sub_prompt? string|fun(self: ViewAsSkill, player: Player, selected_cards: integer[], selected_targets: Player[], selected_sub_cards: Card[], selected_sub_targets: Player[]): string @ 二级菜单提示信息
----@field public sub_cards? string[]|fun(self: ViewAsSkill, player: Player, selected: integer[], selected_targets: Player[]): Card[]? @ （二级菜单）判断此时点击确认后需要额外弹出的牌
+---@field public sub_cards? string[]|fun(self: ViewAsSkill, player: Player, selected: integer[], selected_targets: Player[], extra_data: UseExtraData|table): Card[]? @ （二级菜单）判断此时点击确认后需要额外弹出的牌
 ---@field public sub_card_filter? fun(self: ViewAsSkill, player: Player, to_select: Card, selected: Card[], selected_cards: integer[], extra_data: UseExtraData|table?): boolean? @ （二级菜单）判断此时是否能点击额外弹出的牌
 ---@field public on_cost? fun(self: ViewAsSkill, player: ServerPlayer, data: SkillUseData, extra_data?: UseExtraData|table):CostData|table? @ 自定义技能的消耗信息
 ---@field public history_branch? string|fun(self: ViewAsSkill, player: ServerPlayer, data: SkillUseData, extra_data?: UseExtraData|table):string? @ 发动技能时增加添加对应某处分支的次数

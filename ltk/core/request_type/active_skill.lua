@@ -36,7 +36,6 @@ function ReqActiveSkill:initialize(player, data)
   self.scene = RoomScene:new(self)
 
   self.expanded_piles = {}
-  self.sub_cards = {}
   self.sub_selection_flag = false
 
   if data then
@@ -103,7 +102,7 @@ function ReqActiveSkill:setup(ignoreInteraction, data)
   if self.sub_selection_flag then
     scene:removeItem("Interaction", "1") -- 这里不考虑interaction
   else
-    self.sub_cards = {}
+    self.sub_cards = nil
     self.sub_pendings = {}
     -- FIXME: 偷懒了，让修改interaction时的全局刷新功能复用setup 总之这里写的很垃圾
     if not ignoreInteraction then
@@ -166,8 +165,10 @@ function ReqActiveSkill:setSkillPrompt(skill, selected_cards)
   local prompt = ""
   if self.sub_selection_flag then
     if type(skill.sub_prompt) == "function" then
-      prompt = skill:sub_prompt(self.player, self.selected_buffer.cards,
-        table.map(self.selected_targets, Util.Id2PlayerMapper), self.sub_pendings, self.extra_data or {})
+      prompt = skill:sub_prompt(self.player,
+        self.selected_buffer.cards, table.map(self.selected_buffer.targets, Util.Id2PlayerMapper),
+        self.sub_pendings, table.map(self.selected_buffer.targets or {}, Util.Id2PlayerMapper),
+        self.extra_data or {})
     elseif type(skill.sub_prompt) == "string" then
       prompt = skill.sub_prompt
     end

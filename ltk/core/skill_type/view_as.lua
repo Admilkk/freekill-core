@@ -2,7 +2,7 @@
 
 ---@class ViewAsSkill : UsableSkill
 ---@field public pattern string @ cards that can be viewAs'ed by this skill
----@field public sub_data? string[] | fun(self: ViewAsSkill, player: Player, selected: integer[], interaction_data: any): ViewAsPattern? @ 用于泛转化技的二级选择
+---@field public sub_data? string[] | fun(self: ViewAsSkill, player: Player, selected: integer[], interaction_data: any): Card[]? @ 用于泛转化技的二级选择
 ---@field public sub_prompt? string|fun(self: ViewAsSkill, player: Player, selected_cards: integer[], selected_targets: Player[], selected_sub_cards: Card[], extradata?: UseExtraData|table): string @ 二级菜单提示信息
 ---@field public min_card_num integer
 ---@field public max_card_num integer
@@ -12,6 +12,7 @@
 ---@field public handly_pile boolean? @ 能否选择“如手牌般使用或打出”的牌
 ---@field public mute_card boolean? @ 是否不播放卡牌特效和语音
 ---@field public click_count? boolean @ 是否在点击按钮瞬间就计数并播放特效和语音
+---@field public immediate_sub? boolean @ 是否在确认是否可发动时自动检测并展开二级选择
 ---@field public include_equip? boolean @ 选牌时是否展开装备区
 local ViewAsSkill = UsableSkill:subclass("ViewAsSkill")
 

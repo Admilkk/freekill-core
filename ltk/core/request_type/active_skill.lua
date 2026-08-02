@@ -22,7 +22,7 @@ local CardItem = (require 'ui_emu.common').CardItem
 ---@field public extra_data UseExtraData|table 传入的额外信息
 ---@field public pendings integer[] 正在选择的卡牌id数组
 ---@field public selected_buffer? { cards: integer[], targets: integer[], interaction: any } 上次选择的缓存，用于二级选择时恢复
----@field public sub_cards Card[] 二级选择时的全体卡牌对象数组
+---@field public sub_cards? Card[] 二级选择时的全体卡牌对象数组
 ---@field public sub_pendings Card[] 二级选择时的卡牌**本体**数组
 ---@field public sub_selection_flag boolean 是否是子选择（例如泛印牌的二级选择）
 ---@field public selected_targets integer[] 选择的目标
@@ -441,14 +441,14 @@ function ReqActiveSkill:feasible()
     if card then
       ret = card:getSkill(player):feasible(player, targets, { card.id }, card)
     elseif not self.sub_selection_flag then -- 如果是二级选择的场合就全权交给viewAs处理了
-      ret = skill:feasible(player, targets, self.pendings)
+      ret = self.sub_cards and skill:feasible(player, targets, self.pendings) -- 因为生成函数，sub_cards可能为空，但若为数组则一定有元素
     end
   end
   return not not ret
 end
 
 function ReqActiveSkill:isCancelable()
-  return not not self.cancelable
+  return self.sub_selection_flag or not not self.cancelable
 end
 
 --- 获得视为技所视为的虚拟牌
@@ -501,9 +501,45 @@ function ReqActiveSkill:targetValidity(pid)
   return not not skill:targetFilter(self.player, p, selected, self.pendings, card, self.extra_data)
 end
 
+-- 获得二级选择的卡牌
+function ReqActiveSkill:makeSubCards()
+  self.sub_cards = nil
+  local skill = Fk.skills[self.skill_name] --[[@as ActiveSkill | ViewAsSkill]]
+  if not skill or not skill.sub_data then return end
+  local sub = skill.sub_data
+  if type(sub) == "function" then
+    self.sub_cards = sub(skill, self.player, self.pendings, skill.interaction and skill.interaction.data)
+  else
+    self.sub_cards = {}
+    for _, card_name in ipairs(sub) do
+      if Fk.all_card_types[card_name] ~= nil then
+        table.insertIfNeed(self.sub_cards, Fk:cloneCard(card_name))
+      end
+    end
+  end
+  if self.sub_cards == nil or not next(self.sub_cards) then return end
+end
+
+--- （取消专属）更新是否需要立刻退出二级菜单
+function ReqActiveSkill:checkExitSub()
+  if not self.sub_selection_flag then return end
+  if #self.pendings == 0 and #self.selected_targets == 0 then
+    self:doCancelButton()
+  end
+end
+
 --- 更新按钮的状态
 function ReqActiveSkill:updateButtons()
   local scene = self.scene
+
+  self:makeSubCards() -- 生成二级选择的卡牌
+  local isOk = self:feasible()
+  if isOk and not self.sub_selection_flag and self.sub_cards then
+    local skill = Fk.skills[self.skill_name] --[[@as ActiveSkill | ViewAsSkill]]
+    if skill and skill.immediate_sub then
+      self:doOKButton()
+    end
+  end
   scene:update("Button", "OK", { enabled = self:feasible() })
   scene:update("Button", "Cancel", { enabled = self:isCancelable() })
 end
@@ -778,6 +814,9 @@ function ReqActiveSkill:update(elemType, id, action, data)
     self:selectCard(id, data)
     self:initiateTargets()
     autoSelectOnlyFeasibleTarget(self, data)
+    if data and data.selected == false then
+      self:checkExitSub()
+    end
     -- 双击卡牌使用卡牌
     --[[
     if action == "doubleClick" and data.doubleClickUse then
@@ -801,6 +840,9 @@ function ReqActiveSkill:update(elemType, id, action, data)
     self:selectTarget(id, data)
     if #self.selected_targets == 0 then
       autoSelectOnlyFeasibleTarget(self, data)
+    end
+    if data and data.selected == false then
+      self:checkExitSub()
     end
     -- 双击目标使用卡牌
     --[[

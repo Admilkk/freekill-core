@@ -2,6 +2,7 @@
 ---@field public client fk.Client
 ---@field public clientplayer_klass any
 ---@field public observing boolean 客户端是否在旁观
+---@field public observer_setup_data any 我这个旁观者本人的实际setup信息
 ---@field public replaying boolean 客户端是否在重放
 ---@field public replaying_show boolean 重放时是否要看到全部牌
 ---@field public record any
@@ -125,7 +126,6 @@ function ClientBase:setup(data)
   self_player:setScreenName(name)
   self_player:setAvatar(avatar)
   Self = self:createPlayer(self_player)
-  self.players = { Self }
   if msec then
     self.client:setupServerLag(msec)
   end
@@ -140,6 +140,7 @@ function ClientBase:enterRoom(_data)
 
   -- FIXME: 需要改Qml
   local ob = self.observing
+  local obdata = self.observer_setup_data
   local replaying = self.replaying
   local showcards = self.replaying_show
   local recording = self.recording
@@ -152,6 +153,7 @@ function ClientBase:enterRoom(_data)
   Self = self:createPlayer(self.client:getSelf())
 
   self.observing = ob
+  self.observer_setup_data = obdata
   self.replaying = replaying
   self.replaying_show = showcards
   self.recording = recording -- 重连/旁观的录像后面那段EnterRoom会触发该函数
@@ -603,6 +605,11 @@ function ClientBase:observe(data)
     self:startRecording()
     self.record[6] = "reconnect"
     table.insert(self.record, {math.floor(os.getms() / 1000), false, "Observe", cbor.encode(data)})
+  end
+
+  if not self.observer_setup_data then
+    self.observer_setup_data = {
+      Self.id, Self.player:getScreenName(), Self.player:getAvatar() }
   end
 
   local setup_data = players[data.you].setup_data

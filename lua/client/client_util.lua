@@ -29,6 +29,15 @@ function ResetClientLua()
   local self = ClientInstance
   local client_klass = self.class --[[@as Client]]
   local cpp_client = self.client
+
+  -- 最优先处理自己是旁观者时的返回房间
+  if self.observing and self.observer_setup_data then
+    local t = self.observer_setup_data
+    local selfp = cpp_client:addPlayer(t[1], t[2], t[3])
+    cpp_client:changeSelf(t[1])
+    Self = self:createPlayer(selfp)
+    self.observer_setup_data = nil
+  end
   local cpp_players = table.map(self.players, function(p)
     return { p.player, p.ready, p.owner }
   end)
@@ -51,7 +60,8 @@ function ResetClientLua()
     cp.owner = p[3]
     return cp
   end)
-  Self = self:getPlayerById(Self.id)
+  -- 注意如果在开战前的ob的话会取不到Self
+  Self = self:getPlayerById(Self.id) or Self
 
   -- 恢复旁观者列表
   self.observers = table.map(observers, function(o)

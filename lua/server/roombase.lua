@@ -147,6 +147,14 @@ function ServerRoomBase:run()
   local all_observers = self.room:getObservers()
   for _, p in fk.qlist(all_observers) do
     self:tellRoomToObserver(p)
+    -- 由于代码机制，旁观者先被踢出房间了，这里只和旁观者同步
+    for _, p2 in fk.qlist(all_observers) do
+      p2:doNotify("AddObserver", cbor.encode {
+        p:getId(),
+        p:getScreenName(),
+        p:getAvatar()
+      })
+    end
   end
 
   local mode = Fk.game_modes[self:getSettings('gameMode')]
@@ -364,10 +372,10 @@ function ServerRoomBase:gameOver(winner)
     end
   end
 
-  self.room:gameOver()
-
   self:doBroadcastNotify("GameOver", winner)
   fk.qInfo(string.format("[GameOver] %d, %s, %s, in %ds", self.id, self:getSettings('gameMode'), winner, os.time() - self.start_time))
+
+  self.room:gameOver()
 
   if table.contains(
     { "running", "normal" },
@@ -393,6 +401,8 @@ function ServerRoomBase:tellRoomToObserver(player)
   local summary = self:serialize(observee)
   summary.settings.isObserver = true
   player:doNotify("Observe", cbor.encode(summary))
+  -- 由于开战前旁观的加入，旁观者能回到等待界面了，有必要知道谁是主
+  player:doNotify("RoomOwner", cbor.encode { self.room:getOwner():getId() })
 
   fk.qInfo(string.format("[Observe] %d, %s, in %.3fms",
     self.id, player:getScreenName(), (os.getms() - start_time) / 1000))

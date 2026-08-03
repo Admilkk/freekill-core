@@ -152,7 +152,9 @@ function ServerRoomBase:run()
       p2:doNotify("AddObserver", cbor.encode {
         p:getId(),
         p:getScreenName(),
-        p:getAvatar()
+        p:getAvatar(),
+        false,
+        p:getTotalGameTime(),
       })
     end
   end
@@ -419,7 +421,9 @@ function ServerRoomBase:addObserver(id)
       self:doBroadcastNotify("AddObserver", {
         p:getId(),
         p:getScreenName(),
-        p:getAvatar()
+        p:getAvatar(),
+        false,
+        p:getTotalGameTime(),
       })
       break
     end

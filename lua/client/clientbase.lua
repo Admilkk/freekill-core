@@ -126,6 +126,7 @@ function ClientBase:setup(data)
   self_player:setScreenName(name)
   self_player:setAvatar(avatar)
   Self = self:createPlayer(self_player)
+  self.players = { Self }
   if msec then
     self.client:setupServerLag(msec)
   end
@@ -199,17 +200,18 @@ function ClientBase:enterRoom(_data)
   -- 旁观者在游戏开始前进入时，从 EnterRoom 数据填充旁观者列表（含自己）
   if data.isObserver and data._observers then
     self.observers = {}
-    local function fakeObs(id, name, avatar)
+    local function fakeObs(id, name, avatar, gameTime)
       local player = {
         getId = function() return id end,
         getScreenName = function() return name end,
         getAvatar = function() return avatar end,
         getState = function() return fk.Player_Online end,
+        getTotalGameTime = function() return gameTime end,
       }
       return {0, player, id}
     end
     for _, o in ipairs(data._observers or {}) do
-      table.insert(self.observers, fakeObs(o[1], o[2], o[3]))
+      table.insert(self.observers, fakeObs(o[1], o[2], o[3], o[5]))
     end
   end
 end
@@ -387,12 +389,13 @@ function ClientBase:removePlayer(data)
 end
 
 function ClientBase:addObserver(data)
-  local id, name, avatar = data[1], data[2], data[3]
+  local id, name, avatar, gameTime = data[1], data[2], data[3], data[5]
   local player = {
     getId = function() return id end,
     getScreenName = function() return name end,
     getAvatar = function() return avatar end,
     getState = function() return fk.Player_Online end,
+    getTotalGameTime = function() return gameTime end,
   }
   table.insert(self.observers, {0, player, id})
   -- self:notifyUI("ServerMessage", string.format(Fk:translate("$AddObserver"), name))
@@ -414,12 +417,13 @@ function ClientBase:switchToObserver(data)
   local id = data[1]
   local lp = self:getPlayerById(id)
   local cp = lp.player
-  local _id, _name, _avatar = cp:getId(), cp:getScreenName(), cp:getAvatar()
+  local _id, _name, _avatar, _gameTime = cp:getId(), cp:getScreenName(), cp:getAvatar(), cp:getTotalGameTime()
   local player = {
     getId = function() return _id end,
     getScreenName = function() return _name end,
     getAvatar = function() return _avatar end,
     getState = function() return fk.Player_Online end,
+    getTotalGameTime = function() return _gameTime end,
   }
   table.removeOne(self.players, lp)
   -- FIXME: Self不能死 不是这哪来那么多乱七八糟的耦合
@@ -443,6 +447,7 @@ function ClientBase:switchToPlayer(data)
   if not p then return end
 
   local cp = self.client:addPlayer(p:getId(), p:getScreenName(), p:getAvatar())
+  cp:addTotalGameTime(p:getTotalGameTime())
   local lp = self:createPlayer(cp)
   -- FIXME: 呃，这都哪跟哪，client的c++代码急须重构啊
   -- v0.6 救救我们

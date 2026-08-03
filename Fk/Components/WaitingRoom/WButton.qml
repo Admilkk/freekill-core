@@ -15,7 +15,8 @@ BasicItem {
   property alias text: title.text
   property alias textFont: title.font
 
-  scale: pressed ? 0.95 : 1
+  scale: (enabled && pressed) ? 0.95 : 1
+  opacity: enabled ? 1 : 0.5
 
   Rectangle {
     id: bg
@@ -23,7 +24,7 @@ BasicItem {
     color: '#bcd1ca'
     radius: 4
     border.color: '#749491'
-    border.width: root.pressed ? 2 : 1
+    border.width: (root.enabled && root.pressed) ? 2 : 1
     clip: true
 
     Rectangle {

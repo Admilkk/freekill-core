@@ -31,6 +31,7 @@ W.PageBase {
 
   property alias photoModel: photoModel
   property alias photos: photos
+  property alias areaHandler: globalTapHandler
   property alias menuButton: menuButton
   signal menuButtonClicked()
 
@@ -92,6 +93,14 @@ W.PageBase {
       font.bold: true
       font.pixelSize: 20
       horizontalAlignment: Text.AlignHCenter
+    }
+
+    Rectangle {
+      height: 2
+      color: roomScene.borderColor
+      width: parent.width - 4
+      anchors.horizontalCenter: parent.horizontalCenter
+      anchors.top: roomSettingsTitle.bottom
     }
 
     Flickable {
@@ -162,7 +171,12 @@ W.PageBase {
 
             Text {
               anchors.right: parent.right
-              text: parent.modelData[1]
+              text: {
+                const str = parent.modelData[1];
+                if (str === "true") return "是";
+                if (str === "false") return "否";
+                return str
+              }
               color: '#222222'
               font.pixelSize: 14
             }
@@ -302,118 +316,8 @@ W.PageBase {
           winGame: model.win
           runGame: model.run
           totalGame: model.total
-
-          onClicked: {
-            if (photoMenu.visible){
-              photoMenu.close();
-            } else if (model.id !== -1) {
-              photoMenu.open();
-            }
-          }
-
-          onRightClicked: clicked(this);
-
-          Menu {
-            id: photoMenu
-            y: 64
-            width: parent.width * 0.8
-
-            onAboutToShow: {
-              flowerButton.enabled = true;
-              eggButton.enabled = true;
-              wineButton.enabled = Math.random() < 0.3;
-              shoeButton.enabled = Math.random() < 0.3;
-            }
-
-            W.ButtonContent {
-              id: flowerButton
-              text: Lua.tr("Give Flower")
-              icon.source: SkinBank.pixAnimDir + "/flower/egg3"
-              onClicked: {
-                enabled = false;
-                roomScene.givePresent("Flower", model.id);
-                photoMenu.close();
-              }
-            }
-
-            W.ButtonContent {
-              id: eggButton
-              text: Lua.tr("Give Egg")
-              icon.source: SkinBank.pixAnimDir + "/egg/egg"
-              onClicked: {
-                enabled = false;
-                if (Math.random() < 0.03) {
-                  roomScene.givePresent("GiantEgg", model.id);
-                } else {
-                  roomScene.givePresent("Egg", model.id);
-                }
-                photoMenu.close();
-              }
-            }
-
-            W.ButtonContent {
-              id: wineButton
-              text: Lua.tr("Give Wine")
-              icon.source: SkinBank.pixAnimDir + "/wine/shoe"
-              onClicked: {
-                enabled = false;
-                roomScene.givePresent("Wine", model.id);
-                photoMenu.close();
-              }
-            }
-
-            W.ButtonContent {
-              id: shoeButton
-              text: Lua.tr("Give Shoe")
-              icon.source: SkinBank.pixAnimDir + "/shoe/shoe"
-              onClicked: {
-                enabled = false;
-                roomScene.givePresent("Shoe", model.id);
-                photoMenu.close();
-              }
-            }
-
-            W.ButtonContent {
-              id: blockButton
-              text: {
-                const name = model.screenName;
-                const blocked = !Config.blockedUsers.includes(name);
-                return blocked ? Lua.tr("Block Chatter") : Lua.tr("Unblock Chatter");
-              }
-              enabled: model.id !== Self.id && model.id > 0 // 旁观屏蔽不了正在被旁观的人
-              onClicked: {
-                const name = model.screenName;
-                const idx = Config.blockedUsers.indexOf(name);
-                if (idx === -1) {
-                  if (name === "") return;
-                  Config.blockedUsers.push(name);
-                } else {
-                  Config.blockedUsers.splice(idx, 1);
-                }
-                Config.blockedUsersChanged();
-              }
-            }
-
-            W.ButtonContent {
-              id: kickButton
-              text: Lua.tr("Kick From Room")
-              enabled: {
-                if (!roomScene.isOwner) return false;
-                if (model.id === Self.id) return false;
-                if (model.id < -1) {
-                  const { minComp, curComp } = Lua.getCompNum();
-                  return curComp > minComp;
-                }
-                return true;
-              }
-              onClicked: {
-                // 傻逼qml喜欢加1.0
-                // FIXME 留下image
-                Cpp.notifyServer("KickPlayer", Math.floor(model.id));
-                photoMenu.close();
-              }
-            }
-          }
+          enabled: hasPlayer
+          // title: playerid > 0 ? "Notify" : ""
         }
       }
     }
@@ -424,6 +328,35 @@ W.PageBase {
     anchors.bottom: parent.bottom
     anchors.rightMargin: 20
     anchors.bottomMargin: 35
+
+    WButton {
+      text: "添加旁观者"
+      textFont.pixelSize: 20
+      width: 120
+      height: 35
+      title.color: '#e1f5f3'
+      bg.radius: 10
+      bg.color: '#8eb1ab'
+      border.width: 0
+      visible: Cpp.quickStartConfig !== ""
+      onClicked: {
+        roomScene.addObserver(null, [observerModel.count + 1, "test", "huanggai"]);
+      }
+    }
+
+    WButton {
+      visible: roomScene.isRoomObserver && !isFull
+      text: Lua.tr("Take Seat")
+      textFont.pixelSize: 20
+      width: 70
+      height: 35
+      title.color: '#e1f5f3'
+      bg.radius: 10
+      bg.color: '#8eb1ab'
+      border.width: 0
+      enabled: !isFull
+      onClicked: Cpp.notifyServer("SwitchToPlayer", "")
+    }
 
     WButton{
       visible: isOwner && canChangeRoom
@@ -476,21 +409,6 @@ W.PageBase {
             Cpp.notifyServer("KickPlayer", Math.floor(item.id));
           }
         }
-      }
-    }
-
-    WButton {
-      text: Lua.tr("Spectate")
-      textFont.pixelSize: 20
-      height: 35
-      title.color: '#e1f5f3'
-      bg.radius: 10
-      bg.color: '#8eb1ab'
-      border.width: 0
-      visible: !photoModel.count < 2 && !roomScene.isRoomObserver
-      enabled: true
-      onClicked: {
-        Cpp.notifyServer("SwitchToObserver", "");
       }
     }
 
@@ -568,9 +486,14 @@ W.PageBase {
     border.width: 2
 
     Column {
-      anchors.fill:parent
-      anchors.topMargin: 5
-      spacing: 10
+      id: observerCol
+      anchors {
+        left: parent.left
+        right: parent.right
+        top: parent.top
+        topMargin: 5
+      }
+      spacing: 8
       Text {
         text: "旁观席"
         color: '#8fa19f'
@@ -578,48 +501,147 @@ W.PageBase {
         font.pixelSize: 20
         anchors.left: parent.left
         anchors.leftMargin: 8
+        anchors.right: parent.right
         height: 32
+
+        Text {
+          text: observerModel.count.toString()
+          height: 26
+          font.bold: true
+          font.pixelSize: 21
+          color: '#798b89'
+          anchors.right: parent.right
+          anchors.rightMargin: 7
+          horizontalAlignment: Text.AlignRight
+          verticalAlignment: Text.AlignBottom
+        }
       }
 
-      Repeater {
-        model: observerModel
-        anchors.horizontalCenter: parent.horizontalCenter
-        width: childrenRect.width
+      Flickable {
+        id: observerFlickable
+        anchors.right: parent.right
+        width: 200
+        contentHeight: observerListView.height + 15
+        height: Math.min(observeArea.height - 98, contentHeight)
+        clip: true
+        ListView {
+          id: observerListView
+          model: observerModel
+          anchors.right: parent.right
+          anchors.rightMargin: 25
+          width: 54
+          y: 4
+          height: model.count * (54 + spacing) - 5
+          spacing: 15
 
-        WAvatar {
-          required property var modelData
-          x: 25; width: 54; height: 54
-          avatar: modelData.avatar
-          screenName: modelData.screenName
-          visible: modelData.screenName
+          delegate: WAvatar {
+            width: selected ? 64 : 54
+            height: selected ? 64 : 54
+            playerid: model.id
+            avatar: model.avatar
+            screenName: model.screenName
+            visible: model.screenName !== ""
+          }
 
-          Behavior on y {
-            NumberAnimation{ easing.type: Easing.OutCubic; duration: 300 }
+          add: Transition {
+            NumberAnimation { property: "opacity"; from: 0; to: 1; easing.type: Easing.OutCubic; duration: 200 }
+            NumberAnimation { property: "scale"; from: 0.5; to: 1; easing.type: Easing.OutBack; duration: 200 }
+          }
+
+          remove: Transition {
+            NumberAnimation { property: "opacity"; to: 0; easing.type: Easing.InCubic; duration: 200 }
+          }
+
+          move: Transition {
+            NumberAnimation { properties: "y"; easing.type: Easing.OutCubic; duration: 200 }
+          }
+
+          displaced: Transition {
+            NumberAnimation { properties: "y"; easing.type: Easing.OutCubic; duration: 200 }
           }
         }
+      }
+    }
+
+    ObserveButton {
+      id: observeBotton
+      width: 62; height: 34
+      anchors.horizontalCenter: parent.horizontalCenter
+      y: 60 + Math.min(observerListView.height, parent.height - 106)
+      visible: {
+        if (roomScene.isRoomObserver) return false;
+        let num = 0;
+        for (let i = 0; i < photoModel.count; i++) {
+          if (photos.itemAt(i).playerid > 0) {
+            num+=1;
+          }
+        }
+        return num > 1
+      }
+      onClicked: {
+        Cpp.notifyServer("SwitchToObserver", "");
       }
     }
   }
 
   // 旁观者等待提示
-  Text {
+  WBanner {
     id: observerHint
-    visible: roomScene.isRoomObserver
-    anchors.centerIn: roomArea
-    text: Lua.tr("Waiting for game to start as spectator...")
-    font.pixelSize: 20
-    color: "#888"
+    width: 235
+    anchors {
+      left: roomArea.left
+      bottom: roomArea.bottom
+      bottomMargin: roomScene.isRoomObserver ? 15 : -200
+    }
+    text: Lua.tr("Waiting for game to start")
+
+    Behavior on anchors.bottomMargin {
+      NumberAnimation{ easing.type: Easing.OutCubic; duration: 300 }
+    }
   }
 
-  // 旁观者操作按钮
-  W.ButtonContent {
-    visible: roomScene.isRoomObserver && !isFull
-    anchors.top: observerHint.bottom
-    anchors.topMargin: 12
-    anchors.horizontalCenter: roomArea.horizontalCenter
-    text: Lua.tr("Take Seat")
-    enabled: !isFull
-    onClicked: Cpp.notifyServer("SwitchToPlayer", "")
+  // 全局点击监视
+  MouseArea {
+    id: globalTapHandler
+    anchors.fill: parent
+    visible: false
+    z: 20
+    property var tmpItem
+    property var tmpZ
+    property var tmpParent
+    property var tmpX
+    property var tmpY
+    onClicked: closeItem()
+    function show(item) {
+      item?.show()
+      tmpItem = item;
+      tmpZ = item.z;
+      tmpParent = item.parent;
+      tmpX = item.x;
+      tmpY = item.y;
+      // 换 parent 前做坐标转换，保持屏幕位置不变
+      const newPos = item.parent.mapToItem(roomScene, item.x, item.y);
+      item.parent = roomScene;
+      item.x = newPos.x;
+      item.y = newPos.y;
+      item.z = z + 1;
+      visible = true;
+    }
+    function closeItem() {
+      if (tmpItem) {
+        tmpItem.parent = tmpParent;
+        tmpItem.x = tmpX;
+        tmpItem.y = tmpY;
+        tmpItem.z = tmpZ;
+        tmpItem?.close();
+        tmpItem = null;
+        tmpZ = null;
+        tmpParent = null;
+        tmpX = null;
+        tmpY = null;
+      }
+      visible = false
+    }
   }
 
   // TODO 扬了这玩意
@@ -852,12 +874,12 @@ W.PageBase {
     }
 
     const obdatalist = Lua.evaluate(`table.map(ClientInstance.observers, function(t)
-      local cp = t[2]
-      return {
-        id = cp:getId(),
-        name = cp:getScreenName(),
-        avatar = cp:getAvatar(),
-      }
+    local cp = t[2]
+    return {
+      id = cp:getId(),
+      name = cp:getScreenName(),
+      avatar = cp:getAvatar(),
+    }
     end)`);
 
     for (const d of datalist) {
@@ -1005,7 +1027,7 @@ W.PageBase {
     playerNum = Config.roomCapacity;
     canChangeRoom = Config.serverFeatures.includes("ChangeRoom");
     resetPhotos();
-    autoAddRobot();
+    // autoAddRobot();
 
     if (roomScene.isRoomObserver) {
       App.showToast(Lua.tr("$EnterRoomObserve"));

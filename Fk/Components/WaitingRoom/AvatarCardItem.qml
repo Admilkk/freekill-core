@@ -13,6 +13,7 @@ BasicItem {
 
   property string screenName: ""
   property string avatar: "caocao"
+  property string title: ""
   property bool ready: false
   property real winGame: 0
   property real runGame: 0
@@ -28,6 +29,7 @@ BasicItem {
   readonly property bool hasPlayer: screenName && playerid !== 0
 
   Rectangle {
+    id: backRotateRect
     anchors.fill: parent
     color: '#e8bad8c9'
     radius: 10
@@ -38,6 +40,7 @@ BasicItem {
   }
 
   Rectangle {
+    id: bg
     anchors.fill: parent
     color: '#efe9e9e6'
     border.width: root.hasPlayer ? 1 : 0
@@ -68,10 +71,19 @@ BasicItem {
 
   Rectangle {
     anchors.fill: avatarImg
-    anchors.margins: -2
-    color: '#7c918d'
+    anchors.margins: avatarImg.visible ? -2 : 0
+    color: avatarImg.visible ? '#7c918d' : '#ceddda'
     radius: 6
-    visible: avatarImg.visible
+    // visible: avatarImg.visible
+  }
+
+  Rectangle {
+    height: 15
+    width: parent.width
+    color: '#ceddda'
+    anchors.bottom: parent.bottom
+    anchors.bottomMargin: 15
+    visible: !root.hasPlayer
   }
 
   Rectangle {
@@ -100,6 +112,25 @@ BasicItem {
       anchors.fill: img
       source: img
       maskSource: parent
+    }
+
+    Rectangle {
+      height: 16
+      anchors.verticalCenter: parent.verticalCenter
+      width: parent.width + 3
+      anchors.horizontalCenter: parent.horizontalCenter
+      visible: (Config.blockedUsers ?? []).includes(root.screenName)
+      color: '#922b2b'
+      Text {
+        text: "已屏蔽"
+        font.bold: true
+        font.pixelSize: 11
+        font.letterSpacing: 3
+        color: '#e8eee5'
+        verticalAlignment: Text.AlignVCenter
+        horizontalAlignment: Text.AlignHCenter
+        anchors.fill: parent
+      }
     }
   }
 
@@ -168,6 +199,14 @@ BasicItem {
         font.pixelSize: 10
       }
     }
+
+    TitleItem {
+      id: playerTitle
+      anchors.horizontalCenter: parent.horizontalCenter
+      visible: root.hasPlayer && root.title
+      title: root.title
+      style: "orange"
+    }
   }
 
   Rectangle {
@@ -203,7 +242,7 @@ BasicItem {
           }
           Text {
             text: "逃跑率"
-            font.pixelSize: 13
+            font.pixelSize: 12
             font.bold: true
             color: '#585858'
             width: parent.width
@@ -224,7 +263,7 @@ BasicItem {
           }
           Text {
             text: "胜率"
-            font.pixelSize: 13
+            font.pixelSize: 12
             font.bold: true
             color: '#585858'
             width: parent.width
@@ -245,7 +284,7 @@ BasicItem {
           }
           Text {
             text: "游戏时长"
-            font.pixelSize: 13
+            font.pixelSize: 12
             font.bold: true
             color: '#585858'
             width: parent.width
@@ -255,6 +294,187 @@ BasicItem {
 
       }
     }
+  }
+
+  Rectangle {
+    id: panel
+    width: 100
+    height: 0
+    x: 70
+    color: '#e9e9e6'
+    border.width: root.hasPlayer ? 1 : 0
+    border.color: '#4e7963'
+    visible: height > 10 && root.hasPlayer
+    clip: true
+
+    Flow {
+      id: buttonFlow
+      width: parent.width
+
+      WButton {
+        id: flowerButton
+        width: parent.width/2
+        height: 50
+        text: Lua.tr("Give Flower")
+        title.anchors.topMargin: 20
+        bg.radius: 0
+        Image {
+          anchors.horizontalCenter: parent.title.horizontalCenter
+          y: 6
+          width: 24; height: 24
+          source: SkinBank.pixAnimDir + "/flower/egg3"
+        }
+        onClicked: {
+          if (!enabled) return;
+          enabled = false;
+          roomScene.givePresent("Flower", root.playerid);
+          roomScene.areaHandler.closeItem();
+        }
+      }
+
+      WButton {
+        id: eggButton
+        width: parent.width/2
+        height: 50
+        text: Lua.tr("Give Egg")
+        title.anchors.topMargin: 20
+        bg.radius: 0
+        Image {
+          anchors.horizontalCenter: parent.title.horizontalCenter
+          y: 6
+          width: 18; height: 22
+          source: SkinBank.pixAnimDir + "/egg/egg"
+        }
+        onClicked: {
+          if (!enabled) return;
+          enabled = false;
+          if (Math.random() < 0.03) {
+            roomScene.givePresent("GiantEgg", root.playerid);
+          } else {
+            roomScene.givePresent("Egg", root.playerid);
+          }
+          roomScene.areaHandler.closeItem();
+        }
+      }
+
+      WButton {
+        id: wineButton
+        width: parent.width/2
+        height: 50
+        text: Lua.tr("Give Wine")
+        title.anchors.topMargin: 20
+        bg.radius: 0
+        Image {
+          anchors.horizontalCenter: parent.title.horizontalCenter
+          y: 6
+          width: 21; height: 21
+          source: SkinBank.pixAnimDir + "/wine/shoe"
+        }
+        onClicked: {
+          if (!enabled) return;
+          enabled = false;
+          roomScene.givePresent("Wine", root.playerid);
+          roomScene.areaHandler.closeItem();
+        }
+      }
+
+      WButton {
+        id: shoeButton
+        width: parent.width/2
+        height: 50
+        text: Lua.tr("Give Shoe")
+        title.anchors.topMargin: 20
+        bg.radius: 0
+        Image {
+          anchors.horizontalCenter: parent.title.horizontalCenter
+          y: 6
+          width: 17; height: 23
+          source: SkinBank.pixAnimDir + "/shoe/shoe"
+        }
+        onClicked: {
+          if (!enabled) return;
+          enabled = false;
+          roomScene.givePresent("Shoe", root.playerid);
+          roomScene.areaHandler.closeItem();
+        }
+      }
+
+      WButton {
+        text: {
+          const name = root.screenName;
+          const blocked = !Config.blockedUsers.includes(name);
+          return blocked ? Lua.tr("Block Chatter") : Lua.tr("Unblock Chatter");
+        }
+        enabled: root.playerid !== Self.id && root.playerid > 0
+        width: parent.width
+        textFont.pixelSize: 18
+        height: 35
+        bg.radius: 0
+        onClicked: {
+          if (!enabled) return;
+          const name = root.screenName;
+          const idx = Config.blockedUsers.indexOf(name);
+          if (idx === -1) {
+            if (name === "") return;
+            Config.blockedUsers.push(name);
+          } else {
+            Config.blockedUsers.splice(idx, 1);
+          }
+          Config.blockedUsersChanged();
+          roomScene.areaHandler.closeItem();
+        }
+      }
+
+      WButton {
+        text: Lua.tr("Kick From Room")
+        visible: {
+          if (!roomScene.isOwner) return false;
+          if (root.playerid === Self.id) return false;
+          if (root.playerid < -1) {
+            const { minComp, curComp } = Lua.getCompNum();
+            return curComp > minComp;
+          }
+          return true;
+        }
+        width: parent.width
+        title.color: 'snow'
+        textFont.pixelSize: 18
+        height: 35
+        bg.color: "#a40000"
+        bg.radius: 0
+        border.color: '#800c0c'
+        onClicked: {
+          if (!enabled) return;
+          Cpp.notifyServer("KickPlayer", Math.floor(root.playerid));
+          roomScene.areaHandler.closeItem();
+        }
+      }
+    }
+
+    function show() {
+      flowerButton.enabled = true;
+      eggButton.enabled = true;
+      wineButton.enabled = Math.random() < 0.3;
+      shoeButton.enabled = Math.random() < 0.3;
+      height = buttonFlow.height;
+    }
+
+    function close() {
+      height = 0;
+    }
+
+    Behavior on height {
+      NumberAnimation{ easing.type: Easing.OutCubic; duration: 200 }
+    }
+  }
+
+  onClicked: {
+    if (enabled) roomScene.areaHandler.show(panel);
+  }
+
+  onRightClicked: {
+    roomScene.areaHandler.closeItem();
+    if (enabled) roomScene.areaHandler.show(panel);
   }
 
   function chat(msg) {

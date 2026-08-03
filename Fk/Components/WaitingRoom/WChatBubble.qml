@@ -26,7 +26,7 @@ Rectangle {
       target: root
       property: "height"
       to: 40
-      duration: 200
+      duration: 100
     }
     NumberAnimation {
       duration: 2500

@@ -857,6 +857,17 @@ W.PageBase {
     }
     end)`);
 
+    const obdatalist = Lua.evaluate(`table.map(ClientInstance.observers, function(t)
+    local cp = t[2]
+    return {
+      id = cp:getId(),
+      name = cp:getScreenName(),
+      avatar = cp:getAvatar(),
+    }
+    end)`);
+
+    console.log(JSON.stringify(datalist), JSON.stringify(obdatalist), Self.id)
+
     resetPhotos();
 
     for (const d of datalist) {
@@ -872,15 +883,6 @@ W.PageBase {
       model.win = d.win;
       model.run = d.run;
     }
-
-    const obdatalist = Lua.evaluate(`table.map(ClientInstance.observers, function(t)
-    local cp = t[2]
-    return {
-      id = cp:getId(),
-      name = cp:getScreenName(),
-      avatar = cp:getAvatar(),
-    }
-    end)`);
 
     for (const d of obdatalist) {
       addObserver(null, [d.id, d.name, d.avatar]);

@@ -227,6 +227,7 @@ function ClientBase:changeRoom(_data)
 
   -- FIXME: 需要改Qml
   local ob = self.observing
+  local obdata = self.observer_setup_data
   local replaying = self.replaying
   local showcards = self.replaying_show
   local recording = self.recording
@@ -240,6 +241,7 @@ function ClientBase:changeRoom(_data)
   self = ClientInstance
 
   self.observing = ob
+  self.observer_setup_data = obdata
   self.replaying = replaying
   self.replaying_show = showcards
   self.recording = recording -- 重连/旁观的录像后面那段EnterRoom会触发该函数

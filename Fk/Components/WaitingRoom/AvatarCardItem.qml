@@ -122,7 +122,7 @@ BasicItem {
       color: '#dfc324'
       border.width: 1
       border.color: '#c2a216'
-      visible: Self.id === root.playerid
+      visible: Self?.id === root.playerid
       Text {
         text: "自己"
         color: '#fffadf'
@@ -426,7 +426,7 @@ BasicItem {
           const blocked = !Config.blockedUsers.includes(name);
           return blocked ? Lua.tr("Block Chatter") : Lua.tr("Unblock Chatter");
         }
-        enabled: root.playerid !== Self.id && root.playerid > 0
+        enabled: root.playerid !== Self?.id && root.playerid > 0
         width: parent.width
         textFont.pixelSize: 18
         height: 35

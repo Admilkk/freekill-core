@@ -26,6 +26,8 @@ function ClientBase:initialize(_client)
   self:addCallback("RemovePlayer", self.removePlayer)
   self:addCallback("AddObserver", self.addObserver, true)
   self:addCallback("RemoveObserver", self.removeObserver, true)
+  self:addCallback("SwitchToObserver", self.switchToObserver, true)
+  self:addCallback("SwitchToPlayer", self.switchToPlayer, true)
   self:addCallback("UpdateGameData", self.updateGameData, true)
   self:addCallback("AddTotalGameTime", self.addTotalGameTime)
   self:addCallback("NetStateChanged", self.changeNetState, true)
@@ -122,7 +124,7 @@ function ClientBase:setup(data)
   self_player:setId(id)
   self_player:setScreenName(name)
   self_player:setAvatar(avatar)
-  Self = self.clientplayer_klass:new(self_player)
+  Self = self:createPlayer(self_player)
   self.players = { Self }
   if msec then
     self.client:setupServerLag(msec)
@@ -147,7 +149,7 @@ function ClientBase:enterRoom(_data)
   local client_klass = Fk:getBoardGame(data.gameMode).client_klass
   ClientInstance = client_klass:new(self.client)
   self = ClientInstance
-  Self = self.clientplayer_klass:new(self.client:getSelf())
+  Self = self:createPlayer(self.client:getSelf())
 
   self.observing = ob
   self.replaying = replaying
@@ -157,14 +159,29 @@ function ClientBase:enterRoom(_data)
 
   -- FIXME: 应该在C++中修改，这种改法错大发了
   -- FIXME: C++中加入房间时需要把Self也纳入players列表
+  -- FIXME: 经典甩锅v0.6
+  -- FIXME: 这几句是不是有内存泄漏啊
   local sp = Self.player
   local new_sp = self.client:addPlayer(sp:getId(), sp:getScreenName(), sp:getAvatar())
   new_sp:addTotalGameTime(sp:getTotalGameTime())
   local gameData = sp:getGameData()
   new_sp:setGameData(gameData:at(0), gameData:at(1), gameData:at(2))
   Self.player = new_sp
-  self.players = {Self}
-  self.alive_players = {Self}
+  if not data.isObserver then
+    self.players = {Self}
+    self.alive_players = {Self}
+  else
+    local players = {}
+    for _, tab in ipairs(data._players or {}) do
+      local id, name, avatar, ready, gameTime, owner = table.unpack(tab)
+      local cp = self.client:addPlayer(id, name, avatar)
+      cp:addTotalGameTime(gameTime)
+      local lp = self:createPlayer(cp)
+      table.insert(players, lp)
+    end
+    self.players = players
+    self.alive_players = table.simpleClone(players)
+  end
 
   self.enter_room_data = cbor.encode(_data);
   -- 补一个，防止爆炸
@@ -190,7 +207,6 @@ function ClientBase:enterRoom(_data)
     for _, o in ipairs(data._observers or {}) do
       table.insert(self.observers, fakeObs(o[1], o[2], o[3]))
     end
-    table.insert(self.observers, fakeObs(Self.id, Self.player:getScreenName(), Self.player:getAvatar()))
   end
 end
 
@@ -224,7 +240,7 @@ function ClientBase:changeRoom(_data)
   self.record = record
 
   local new_players = table.map(old_players, function(p)
-    local pl = self.clientplayer_klass:new(p.player)
+    local pl = self:createPlayer(p.player)
     pl.owner = p.owner
     pl.ready = p.ready
     return pl
@@ -387,6 +403,47 @@ function ClientBase:removeObserver(data)
       break
     end
   end
+end
+
+function ClientBase:switchToObserver(data)
+  -- 将玩家和旁观数据也修改一下再给qml
+  local id = data[1]
+  local lp = self:getPlayerById(id)
+  local cp = lp.player
+  local _id, _name, _avatar = cp:getId(), cp:getScreenName(), cp:getAvatar()
+  local player = {
+    getId = function() return _id end,
+    getScreenName = function() return _name end,
+    getAvatar = function() return _avatar end,
+    getState = function() return fk.Player_Online end,
+  }
+  table.removeOne(self.players, lp)
+  self.client:removePlayer(id)
+  table.insert(self.observers, {0, player, id})
+end
+
+function ClientBase:switchToPlayer(data)
+  local id = data[1]
+  local p
+  for i, t in ipairs(self.observers) do
+    if t[3] == id then
+      p = t[2]
+      table.remove(self.observers, i)
+      break
+    end
+  end
+
+  if not p then return end
+
+  local cp = self.client:addPlayer(p:getId(), p:getScreenName(), p:getAvatar())
+  local lp = self:createPlayer(cp)
+  -- FIXME: 呃，这都哪跟哪，client的c++代码急须重构啊
+  -- v0.6 救救我们
+  if p:getId() == Self.id then
+    self.client:changeSelf(p:getId())
+    Self = lp
+  end
+  table.insert(self.players, lp)
 end
 
 function ClientBase:chat(data)

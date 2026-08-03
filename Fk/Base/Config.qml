@@ -79,11 +79,7 @@ QtObject {
   property list<string> blockedUsers: []
   property int totalTime: 0 // FIXME: only for notifying
 
-  onObservingChanged: {
-    console.log("Config.observing = ", observing)
-    console.trace()
-    Lua.setObserving(observing);
-  }
+  onObservingChanged: Lua.setObserving(observing);
   onReplayingChanged: Lua.setReplaying(replaying);
   onReplayingShowCardsChanged: Lua.setReplayingShowCards(replayingShowCards);
 

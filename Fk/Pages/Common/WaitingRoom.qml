@@ -882,7 +882,7 @@ W.PageBase {
     }
     end)`);
 
-    for (const d of datalist) {
+    for (const d of obdatalist) {
       addObserver(null, [d.id, d.name, d.avatar]);
     }
 

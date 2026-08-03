@@ -41,8 +41,6 @@ function ResetClientLua()
   local observers = table.map(self.observers or {}, function(t)
     return { t[3], t[2]:getScreenName(), t[2]:getAvatar() }
   end)
-  p(cpp_players)
-  p(observers)
 
   local _data = self.enter_room_data
 

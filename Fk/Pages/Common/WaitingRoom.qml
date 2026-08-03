@@ -338,7 +338,7 @@ W.PageBase {
       bg.radius: 10
       bg.color: '#8eb1ab'
       border.width: 0
-      visible: Cpp.quickStartConfig !== ""
+      visible: Cpp.quickStartMode !== ""
       onClicked: {
         roomScene.addObserver(null, [observerModel.count + 1, "test", "huanggai"]);
       }

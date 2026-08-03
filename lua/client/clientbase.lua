@@ -167,10 +167,9 @@ function ClientBase:enterRoom(_data)
   local gameData = sp:getGameData()
   new_sp:setGameData(gameData:at(0), gameData:at(1), gameData:at(2))
   Self.player = new_sp
-  if not data.isObserver then
-    self.players = {Self}
-    self.alive_players = {Self}
-  else
+
+  -- 旁观者在游戏开始前进入
+  if data.isObserver and data._players then
     local players = {}
     for _, tab in ipairs(data._players or {}) do
       local id, name, avatar, ready, gameTime, owner = table.unpack(tab)
@@ -181,6 +180,9 @@ function ClientBase:enterRoom(_data)
     end
     self.players = players
     self.alive_players = table.simpleClone(players)
+  else
+    self.players = {Self}
+    self.alive_players = {Self}
   end
 
   self.enter_room_data = cbor.encode(_data);
@@ -192,8 +194,8 @@ function ClientBase:enterRoom(_data)
   self.timeout = _data[2]
   self.settings = data
 
-  -- 旁观者进入时，从 EnterRoom 数据填充旁观者列表（含自己）
-  if data.isObserver then
+  -- 旁观者在游戏开始前进入时，从 EnterRoom 数据填充旁观者列表（含自己）
+  if data.isObserver and data._observers then
     self.observers = {}
     local function fakeObs(id, name, avatar)
       local player = {
@@ -418,7 +420,10 @@ function ClientBase:switchToObserver(data)
     getState = function() return fk.Player_Online end,
   }
   table.removeOne(self.players, lp)
-  self.client:removePlayer(id)
+  -- FIXME: Self不能死 不是这哪来那么多乱七八糟的耦合
+  if id ~= Self.id then
+    self.client:removePlayer(id)
+  end
   table.insert(self.observers, {0, player, id})
 end
 

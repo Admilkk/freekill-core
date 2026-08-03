@@ -115,6 +115,27 @@ BasicItem {
     }
 
     Rectangle {
+      width: 28
+      height: 14
+      radius: 1
+      x: 1; y: 1
+      color: '#dfc324'
+      border.width: 1
+      border.color: '#c2a216'
+      visible: Self.id === root.playerid
+      Text {
+        text: "自己"
+        color: '#fffadf'
+        font.bold: true
+        font.pixelSize: 11
+        verticalAlignment: Text.AlignVCenter
+        horizontalAlignment: Text.AlignHCenter
+        anchors.fill: parent
+      }
+    }
+    
+
+    Rectangle {
       height: 16
       anchors.verticalCenter: parent.verticalCenter
       width: parent.width + 3

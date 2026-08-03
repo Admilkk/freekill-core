@@ -340,7 +340,7 @@ W.PageBase {
       border.width: 0
       visible: Cpp.quickStartMode !== ""
       onClicked: {
-        roomScene.addObserver(null, [observerModel.count + 1, "test", "huanggai"]);
+        roomScene.addObserver(null, [-observerModel.count - 11, "test", "huanggai"]);
       }
     }
 

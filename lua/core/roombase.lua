@@ -100,7 +100,7 @@ function RoomBase:serialize()
   local observers = {}
   for _, t in ipairs(self.observers) do
     local p = t[2]
-    table.insert(observers, { p:getId(), p:getScreenName(), p:getAvatar() })
+    table.insert(observers, { p:getId(), p:getScreenName(), p:getAvatar(), false, p:getTotalGameTime() })
   end
 
   return {

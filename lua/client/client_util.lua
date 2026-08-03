@@ -34,6 +34,7 @@ function ResetClientLua()
   if self.observing and self.observer_setup_data then
     local t = self.observer_setup_data
     local selfp = cpp_client:addPlayer(t[1], t[2], t[3])
+    selfp:addTotalGameTime(Self.player:getTotalGameTime())
     cpp_client:changeSelf(t[1])
     Self = self:createPlayer(selfp)
     self.observer_setup_data = nil
@@ -48,7 +49,7 @@ function ResetClientLua()
 
   -- 保留旁观者列表（结构为 {0, player, id}），供返回房间旁观区域使用
   local observers = table.map(self.observers or {}, function(t)
-    return { t[3], t[2]:getScreenName(), t[2]:getAvatar() }
+    return { t[3], t[2]:getScreenName(), t[2]:getAvatar(), false, t[2]:getTotalGameTime() }
   end)
 
   local _data = self.enter_room_data
@@ -65,12 +66,13 @@ function ResetClientLua()
 
   -- 恢复旁观者列表
   self.observers = table.map(observers, function(o)
-    local id, name, avatar = o[1], o[2], o[3]
+    local id, name, avatar, gameTime = o[1], o[2], o[3], o[5]
     local player = {
       getId = function() return id end,
       getScreenName = function() return name end,
       getAvatar = function() return avatar end,
       getState = function() return fk.Player_Online end,
+      getTotalGameTime = function() return gameTime end,
     }
     return { 0, player, id }
   end)

@@ -175,10 +175,10 @@ BasicItem {
           border.color: '#800c0c'
           clip: true
           z: panel.z
+          enabled: roomScene.isOwner
           onClicked: {
             if (!enabled) return;
-            Cpp.notifyServer("KickPlayer", Math.floor(model.id));
-            roomScene.removeObserver(null, [root.playerid])
+            Cpp.notifyServer("KickPlayer", Math.floor(root.playerid));
             roomScene.areaHandler.closeItem()
           }
         }

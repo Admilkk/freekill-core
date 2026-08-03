@@ -400,7 +400,7 @@ W.PageBase {
       bg.radius: 10
       bg.color: '#8eb1ab'
       border.width: 0
-      visible: canKickOwner && isFull && !isOwner
+      visible: canKickOwner && isFull && !isOwner && !roomScene.isRoomObserver
       onClicked: {
         for (let i = 0; i < playerNum; i++) {
           let item = photoModel.get(i);

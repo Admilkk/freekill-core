@@ -138,10 +138,11 @@ BasicItem {
     Rectangle {
       height: 16
       anchors.verticalCenter: parent.verticalCenter
-      width: parent.width + 3
-      anchors.horizontalCenter: parent.horizontalCenter
-      visible: (Config.blockedUsers ?? []).includes(root.screenName)
+      width: (Config.blockedUsers ?? []).includes(root.screenName) ? parent.width + 2 : 0
+      x: -1
+      visible: width !== 0
       color: '#922b2b'
+      clip: true
       Text {
         text: "已屏蔽"
         font.bold: true
@@ -151,6 +152,9 @@ BasicItem {
         verticalAlignment: Text.AlignVCenter
         horizontalAlignment: Text.AlignHCenter
         anchors.fill: parent
+      }
+      Behavior on width {
+        NumberAnimation{ easing.type: Easing.OutCubic; duration: 100 }
       }
     }
   }

@@ -1,5 +1,5 @@
 import QtQuick
-// import Qt.labs.qmlmodels
+import Qt.labs.qmlmodels
 
 import LunarLtk
 import Fk
@@ -19,33 +19,33 @@ QtObject {
   readonly property bool canSaveReplay: Config.observing && !Config.replaying
   readonly property bool canBookmarkReplay: !Config.observing && !Config.replaying
 
-  // property TableModel tableModel: TableModel {
-  //   TableModelColumn { display: "general" }
-  //   TableModelColumn { display: "scname" }
-  //   TableModelColumn { display: "win" }
-  //   TableModelColumn { display: "role" }
-  //   TableModelColumn { display: "turn" }
-  //   TableModelColumn { display: "recover" }
-  //   TableModelColumn { display: "damage" }
-  //   TableModelColumn { display: "damaged" }
-  //   TableModelColumn { display: "kill" }
-  //   TableModelColumn { display: "honor" }
+  property TableModel tableModel: TableModel {
+    TableModelColumn { display: "general" }
+    TableModelColumn { display: "scname" }
+    TableModelColumn { display: "win" }
+    TableModelColumn { display: "role" }
+    TableModelColumn { display: "turn" }
+    TableModelColumn { display: "recover" }
+    TableModelColumn { display: "damage" }
+    TableModelColumn { display: "damaged" }
+    TableModelColumn { display: "kill" }
+    TableModelColumn { display: "honor" }
 
-  //   rows: [
-  //     {
-  //       general: `<b>${Lua.tr("General")}</b>`,
-  //       scname: `<b>${Lua.tr("Name")}</b>`,
-  //       win: `<b>${Lua.tr("Victory or Defeat")}</b>`,
-  //       role: `<b>${Lua.tr("Role")}</b>`,
-  //       turn: `<b>${Lua.tr("Turn")}</b>`,
-  //       recover: `<b>${Lua.tr("Recover")}</b>`,
-  //       damage: `<b>${Lua.tr("Damage")}</b>`,
-  //       damaged: `<b>${Lua.tr("Damaged")}</b>`,
-  //       kill: `<b>${Lua.tr("Kill")}</b>`,
-  //       honor: `<b>${Lua.tr("Honor")}</b>`
-  //     }
-  //   ]
-  // }
+    rows: [
+      {
+        general: `<b>${Lua.tr("General")}</b>`,
+        scname: `<b>${Lua.tr("Name")}</b>`,
+        win: `<b>${Lua.tr("Victory or Defeat")}</b>`,
+        role: `<b>${Lua.tr("Role")}</b>`,
+        turn: `<b>${Lua.tr("Turn")}</b>`,
+        recover: `<b>${Lua.tr("Recover")}</b>`,
+        damage: `<b>${Lua.tr("Damage")}</b>`,
+        damaged: `<b>${Lua.tr("Damaged")}</b>`,
+        kill: `<b>${Lua.tr("Kill")}</b>`,
+        honor: `<b>${Lua.tr("Honor")}</b>`
+      }
+    ]
+  }
 
   signal finished()
   signal summaryReady()
@@ -79,23 +79,23 @@ QtObject {
     Ltk.findMosts();
 
     summaryData.forEach((s, index) => {
-      // let _s = Ltk.entitle(s, index, winner);
+      let _s = Ltk.entitle(s, index, winner);
 
-      // _s.turn = s.turn.toString();
-      // _s.recover = s.recover.toString();
-      // _s.damage = s.damage.toString();
-      // _s.damaged = s.damaged.toString();
-      // _s.kill = s.kill.toString();
+      _s.turn = s.turn.toString();
+      _s.recover = s.recover.toString();
+      _s.damage = s.damage.toString();
+      _s.damaged = s.damaged.toString();
+      _s.kill = s.kill.toString();
 
-      // _s.scname = s.scname;
-      // _s.win = victoryResult(winner, _s.role, true);
-      // _s.role = Lua.tr(_s.role);
-      // _s.general = Lua.tr(_s.general) || "----";
+      _s.scname = s.scname;
+      _s.win = victoryResult(winner, _s.role, true);
+      _s.role = Lua.tr(_s.role);
+      _s.general = Lua.tr(_s.general) || "----";
 
-      // if (_s.deputy)
-      //   _s.general += "/" + Lua.tr(_s.deputy);
+      if (_s.deputy)
+        _s.general += "/" + Lua.tr(_s.deputy);
 
-      // tableModel.appendRow(_s);
+      tableModel.appendRow(_s);
     });
 
     summaryReady();

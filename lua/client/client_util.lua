@@ -30,6 +30,8 @@ function ResetClientLua()
   local client_klass = self.class --[[@as Client]]
   local cpp_client = self.client
 
+  print(self.observing, json.encode(self.observer_setup_data))
+
   -- 最优先处理自己是旁观者时的返回房间
   if self.observing and self.observer_setup_data then
     local t = self.observer_setup_data

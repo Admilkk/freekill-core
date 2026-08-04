@@ -1036,7 +1036,7 @@ W.PageBase {
     playerNum = Config.roomCapacity;
     canChangeRoom = Config.serverFeatures.includes("ChangeRoom");
     resetPhotos();
-    // autoAddRobot();
+    autoAddRobot();
 
     if (roomScene.isRoomObserver) {
       App.showToast(Lua.tr("$EnterRoomObserve"));

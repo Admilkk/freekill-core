@@ -36,6 +36,7 @@ function M:getGeneralDetail(name)
     headnote = general.headnote,
     endnote = general.endnote,
   }
+  local skill_names = general:getSkillNameList(true, false)
   for _, s in ipairs(general.all_skills) do
     local s_name = s[1]
     table.insert(ret.skill, {
@@ -46,11 +47,13 @@ function M:getGeneralDetail(name)
     for _ = 1, 2 do -- 最多两层相关技能
       for _, rs in ipairs(Fk.skill_skels[s_name].related_skills) do
         s_name = rs
-        table.insert(ret.skill, {
-          name = s_name,
-          description = Fk:getDescription(s_name),
-          is_related_skill = true,
-        })
+        if not table.contains(skill_names, s_name) then -- 如果不存在，插入
+          table.insert(ret.skill, {
+            name = s_name,
+            description = Fk:getDescription(s_name),
+            is_related_skill = true,
+          })
+        end
       end
     end
   end

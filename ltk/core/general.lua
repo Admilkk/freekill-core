@@ -172,9 +172,9 @@ function General:getSkillNameList(include_lord, include_related)
   local skills = table.connect(self.skills, other_skills)
   for _, skill in ipairs(skills) do
     if include_lord or not skill:hasTag(Skill.Lord) then
-      table.insert(ret, skill.name)
+      table.insertIfNeed(ret, skill.name)
       if include_related then
-        table.insertTable(ret, skill.skeleton.related_skills)
+        table.insertTableIfNeed(ret, skill.skeleton.related_skills)
         for _, rs in ipairs(skill.skeleton.related_skills) do -- 最多两层相关技能
           table.insertTableIfNeed(ret, Fk.skill_skels[rs].related_skills)
         end
@@ -183,7 +183,7 @@ function General:getSkillNameList(include_lord, include_related)
   end
   if include_related then
     for _, skill in ipairs(self.related_other_skills) do
-      table.insert(ret, skill)
+      table.insertIfNeed(ret, skill)
     end
   end
   return ret

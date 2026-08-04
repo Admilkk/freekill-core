@@ -872,8 +872,6 @@ W.PageBase {
     }
     end)`);
 
-    console.log(JSON.stringify(datalist), JSON.stringify(obdatalist), Self.id)
-
     resetPhotos();
 
     for (const d of datalist) {

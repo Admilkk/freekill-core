@@ -254,83 +254,86 @@ BasicItem {
       }
 
       Grid {
-        width: parent.width
+        width: 75 * 2 + 4
+        anchors.horizontalCenter: parent.horizontalCenter
         columns: 2
         columnSpacing: 4
-        RowLayout {
-          width: 77
-          Text {
-            text: "逃跑率"
-            font.pixelSize: 10
-            font.bold: true
-            color: '#585858'
-            horizontalAlignment: Text.AlignLeft
-          }
-          Text {
-            text: root.escapeRate.toString() + "%"
-            font.pixelSize: 10
-            font.bold: true
-            color: root.escapeRate > 30 ? "#a40000" : '#212627'
-            horizontalAlignment: Text.AlignRight
-          }
-        }
+        rowSpacing: -2
 
         RowLayout {
-          width: 79
+          width: 73
           Text {
-            text: "对局数"
-            font.pixelSize: 10
+            text: "胜:"
+            font.pixelSize: 12
             font.bold: true
             color: '#585858'
-            horizontalAlignment: Text.AlignLeft
-          }
-          Text {
-            text: root.totalGame.toString()
-            font.pixelSize: 10
-            font.bold: true
-            color: '#212627'
-            horizontalAlignment: Text.AlignRight
-          }
-        }
-
-        RowLayout {
-          width: 77
-          Text {
-            text: "胜率"
-            font.pixelSize: 10
-            font.bold: true
-            color: '#585858'
-            horizontalAlignment: Text.AlignLeft
           }
           Text {
             text: root.winRate.toString() + "%"
-            font.pixelSize: 10
+            font.pixelSize: 12
             font.bold: true
             color: '#212627'
-            horizontalAlignment: Text.AlignRight
           }
         }
 
         RowLayout {
-          width: 79
+          width: 77
           Text {
-            text: "游戏时长"
-            font.pixelSize: 10
+            text: "局:"
+            font.pixelSize: 12
             font.bold: true
             color: '#585858'
-            horizontalAlignment: Text.AlignLeft
+          }
+          Text {
+            text: root.totalGame.toString()
+            font.pixelSize: 12
+            font.bold: true
+            color: '#212627'
+          }
+        }
+
+        RowLayout {
+          width: 73
+          Text {
+            text: "逃:"
+            font.pixelSize: 12
+            font.bold: true
+            color: '#585858'
+          }
+          Text {
+            text: root.escapeRate.toString() + "%"
+            font.pixelSize: 12
+            font.bold: true
+            color: root.escapeRate > 30 ? "#a40000" : '#212627'
+          }
+        }
+
+
+        RowLayout {
+          width: 77
+          Text {
+            text: "时:"
+            font.pixelSize: 12
+            font.bold: true
+            color: '#585858'
           }
           Text {
             text: {
-              const gameTime = root.gameTime / 3600
-              if (gameTime > 10000) return "1万+ h"
-              if (gameTime > 1000) return gameTime.toFixed(0).toString() + "h"
-              return (root.gameTime / 3600).toFixed(1).toString() + "h"
+              const gameTime = root.gameTime;
+              // if (gameTime > 10000) return "1万+ h"
+              // if (gameTime > 1000) return gameTime.toFixed(0).toString() + "h"
+              // return (root.gameTime / 3600).toFixed(1).toString() + "h"
+              const h = (gameTime / 3600).toFixed(2);
+              const m = Math.floor(gameTime / 60);
+              if (m < 100) {
+                return ("%1 min").arg(m);
+              } else {
+                return ("%1 h").arg(h);
+              }
             }
-            font.pixelSize: 10
+            font.pixelSize: 12
             font.bold: true
             color: '#212627'
-            horizontalAlignment: Text.AlignRight
           }
         }
 

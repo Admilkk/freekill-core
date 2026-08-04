@@ -606,7 +606,15 @@ function ClientBase:observe(data)
   local players = data.players
 
   self:stopRecording("")
-  self:notifyUI("EnterLobby", "")
+  -- 若我此时处于房间中则发送一下进大厅刷页面
+  if table.find(self.observers, function(t)
+    -- 在开战前的房间，observers里面有Self.id
+    return t[3] == Self.id or
+    -- 在开战后的房间，Self.id换个法子寻找
+      t[3] == (self.observer_setup_data or {})[1]
+  end) then
+    self:notifyUI("EnterLobby", "")
+  end
 
   if not self.replaying then
     self:startRecording()

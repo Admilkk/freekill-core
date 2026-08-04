@@ -316,6 +316,7 @@ W.PageBase {
           winGame: model.win
           runGame: model.run
           totalGame: model.total
+          gameTime: model.gameTime ?? 0
           enabled: hasPlayer
           // title: playerid > 0 ? "Notify" : ""
         }
@@ -759,6 +760,7 @@ W.PageBase {
         const name = data[1];
         const avatar = data[2];
         const ready = data[3];
+        const gameTime = data[4];
 
         item.id = uid;
         item.screenName = name;
@@ -766,6 +768,7 @@ W.PageBase {
         item.avatar = avatar;
         item.ready = ready;
         item.sealed = false;
+        item.gameTime = gameTime;
 
         checkAllReady();
 
@@ -813,6 +816,7 @@ W.PageBase {
           win: 0,
           run: 0,
           total: 0,
+          gameTime: 0
         });
       }
       // 把自己加入旁观列表
@@ -831,6 +835,7 @@ W.PageBase {
           win: 0,
           run: 0,
           total: 0,
+          gameTime: 0
         });
       }
     }
@@ -882,6 +887,7 @@ W.PageBase {
       model.total = d.total;
       model.win = d.win;
       model.run = d.run;
+      model.gameTime = d.gameTime
     }
 
     for (const d of obdatalist) {

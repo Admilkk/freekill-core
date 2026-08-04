@@ -546,9 +546,9 @@ GraphicsBox {
     NumberAnimation on value {
       id: progressAnim
       running: progress.visible
-      from: 100.0
+      from: (roomScene.dataModel.requestDuration / roomScene.dataModel.requestTotal) * 100.0;
       to: 0.0
-      duration: Config.roomTimeout * 1000
+      duration: roomScene.dataModel.requestDuration
     }
   }
 

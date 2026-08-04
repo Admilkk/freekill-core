@@ -60,6 +60,7 @@ ChooseGeneralModel {
   }
 
   function refreshHegemonyData() {
+    if (!hegemony) return;
     const selectedModels = resultInt.map(e => generalDict[e])
     for (let i = 0; i < generalDict.length; i++) {
       const model = generalDict[i]

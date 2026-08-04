@@ -51,7 +51,6 @@ W.PageBase {
       root.toggleOverlay();
     }
   }
-  onGameContentChanged: console.log(gameContent)
 
   function toggleOverlay() {
     if (root.overlayOpened){

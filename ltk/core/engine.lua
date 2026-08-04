@@ -615,8 +615,8 @@ function Engine:canMatchInHegemony(general, deputy, enabled_kingdoms)
   local g = self.generals[general]
   local d = self.generals[deputy]
   if g and d and general ~= deputy then
-    if g.kingdom == "wild" then return true end
     if d.kingdom == "wild" then return false end
+    if g.kingdom == "wild" then return true end
     local arr = {g.kingdom, g.subkingdom or ""}
     return (table.contains(arr, d.kingdom) and table.contains(enabled_kingdoms, d.kingdom))
     or (table.contains(arr, d.subkingdom or " ") and table.contains(enabled_kingdoms, d.subkingdom or " "))

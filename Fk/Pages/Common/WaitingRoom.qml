@@ -316,7 +316,7 @@ W.PageBase {
           winGame: model.win
           runGame: model.run
           totalGame: model.total
-          gameTime: model.gameTime ?? 0
+          gameTime: model.gameTime
           enabled: hasPlayer
           // title: playerid > 0 ? "Notify" : ""
         }
@@ -822,6 +822,7 @@ W.PageBase {
       // 把自己加入旁观列表
       addObserver(null, [Self.id, Self.screenName, Self.avatar]);
     } else {
+      const gt = Lua.evaluate(`Self.player:getTotalGameTime()`);
       for (let i = 0; i < 10; i++) {
         photoModel.append({
           id: i ? -1 : Self.id,
@@ -835,7 +836,7 @@ W.PageBase {
           win: 0,
           run: 0,
           total: 0,
-          gameTime: 0
+          gameTime: i ? 0 : gt
         });
       }
     }

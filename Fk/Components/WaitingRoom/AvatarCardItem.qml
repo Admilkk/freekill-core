@@ -1,4 +1,5 @@
 import QtQuick
+import QtQuick.Layouts
 import Qt5Compat.GraphicalEffects
 
 import Fk
@@ -238,7 +239,7 @@ BasicItem {
     anchors.horizontalCenter: parent.horizontalCenter
     anchors.bottom: parent.bottom
     anchors.bottomMargin: 1
-    width: parent.width - 20
+    width: parent.width - 10
     height: 40
     clip: true
     color: "transparent"
@@ -252,68 +253,84 @@ BasicItem {
         z: 9
       }
 
-      Row {
-        width: implicitWidth
-        Column {
-          anchors.bottom: parent.bottom
-          width: 50
-          Text {
-            text: root.escapeRate.toString() + "%"
-            font.pixelSize: 14
-            font.bold: true
-            color: '#212627'
-            width: parent.width
-            horizontalAlignment: Text.AlignHCenter
-          }
+      Grid {
+        width: parent.width
+        columns: 2
+        columnSpacing: 4
+        RowLayout {
+          width: 77
           Text {
             text: "逃跑率"
-            font.pixelSize: 12
+            font.pixelSize: 10
             font.bold: true
             color: '#585858'
-            width: parent.width
-            horizontalAlignment: Text.AlignHCenter
+            horizontalAlignment: Text.AlignLeft
+          }
+          Text {
+            text: root.escapeRate.toString() + "%"
+            font.pixelSize: 10
+            font.bold: true
+            color: root.escapeRate > 30 ? "#a40000" : '#212627'
+            horizontalAlignment: Text.AlignRight
           }
         }
 
-        Column {
-          anchors.bottom: parent.bottom
-          width: 50
+        RowLayout {
+          width: 79
           Text {
-            text: root.winRate.toString() + "%"
-            font.pixelSize: 14
+            text: "对局数"
+            font.pixelSize: 10
+            font.bold: true
+            color: '#585858'
+            horizontalAlignment: Text.AlignLeft
+          }
+          Text {
+            text: root.totalGame.toString()
+            font.pixelSize: 10
             font.bold: true
             color: '#212627'
-            width: parent.width
-            horizontalAlignment: Text.AlignHCenter
+            horizontalAlignment: Text.AlignRight
           }
+        }
+
+        RowLayout {
+          width: 77
           Text {
             text: "胜率"
-            font.pixelSize: 12
+            font.pixelSize: 10
             font.bold: true
             color: '#585858'
-            width: parent.width
-            horizontalAlignment: Text.AlignHCenter
+            horizontalAlignment: Text.AlignLeft
+          }
+          Text {
+            text: root.winRate.toString() + "%"
+            font.pixelSize: 10
+            font.bold: true
+            color: '#212627'
+            horizontalAlignment: Text.AlignRight
           }
         }
 
-        Column {
-          anchors.bottom: parent.bottom
-          width: 50
-          Text {
-            text: (root.gameTime / 3600).toFixed(1).toString() + "h"
-            font.pixelSize: 14
-            font.bold: true
-            color: '#212627'
-            width: parent.width
-            horizontalAlignment: Text.AlignHCenter
-          }
+        RowLayout {
+          width: 79
           Text {
             text: "游戏时长"
-            font.pixelSize: 12
+            font.pixelSize: 10
             font.bold: true
             color: '#585858'
-            width: parent.width
-            horizontalAlignment: Text.AlignHCenter
+            horizontalAlignment: Text.AlignLeft
+          }
+          Text {
+            text: {
+              const gameTime = root.gameTime / 3600
+              if (gameTime > 10000) return "1万+ h"
+              if (gameTime > 1000) return gameTime.toFixed(0).toString() + "h"
+              return (root.gameTime / 3600).toFixed(1).toString() + "h"
+            }
+            font.pixelSize: 10
+            font.bold: true
+            color: '#212627'
+            horizontalAlignment: Text.AlignRight
           }
         }
 

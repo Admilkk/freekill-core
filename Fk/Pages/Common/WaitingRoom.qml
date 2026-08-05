@@ -402,7 +402,7 @@ W.PageBase {
       bg.color: '#8eb1ab'
       border.width: 0
       enabled: !isFull
-      onClicked: Cpp.notifyServer("SwitchToPlayer", "")
+      onClicked: if (enabled) Cpp.notifyServer("SwitchToPlayer", "")
     }
 
     WButton{
@@ -473,7 +473,7 @@ W.PageBase {
         border.width: 0
         visible: !isOwner && !roomScene.isRoomObserver
         enabled: !opTimer.running
-        onClicked: {
+        onClicked: if (enabled) {
           opTimer.start();
           Cpp.notifyServer("Ready", "");
         }
@@ -490,7 +490,7 @@ W.PageBase {
         border.width: 0
         visible: isOwner && !isFull
         enabled: Config.serverFeatures.includes("AddRobot") && canAddRobot
-        onClicked: {
+        onClicked: if (enabled) {
           Cpp.notifyServer("AddRobot", "");
         }
         onRightClicked: { // 长按以机器人补全
@@ -512,7 +512,7 @@ W.PageBase {
         border.width: 0
         visible: isOwner && isFull
         enabled: isAllReady
-        onClicked: {
+        onClicked: if (enabled) {
           Cpp.notifyServer("StartGame", "");
         }
       }

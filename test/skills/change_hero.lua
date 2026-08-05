@@ -54,7 +54,16 @@ change_hero:addEffect("active", {
           table.insertIfNeed(kingdoms, g.kingdom)
         end
       end
-      room:setPlayerProperty(target, "kingdom", room:askToChoice(from, {choices = kingdoms, skill_name = "change_hero"}))
+      choice = room:askToChoice(from, {
+        choices = kingdoms,
+        skill_name = "change_hero",
+      })
+      if target.kingdom == "wild" then
+        target.role = choice
+        room:broadcastProperty(target, "role")
+      else
+        room:setPlayerProperty(target, "kingdom", choice)
+      end
     end
   end,
 })

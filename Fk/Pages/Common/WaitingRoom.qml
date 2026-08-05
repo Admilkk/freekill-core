@@ -106,7 +106,7 @@ W.PageBase {
     }
 
     Flickable {
-      id: flickableContainer
+      id: infoContainer
       ScrollBar.vertical: ScrollBar {}
       anchors.horizontalCenter: parent.horizontalCenter
       anchors.top: roomSettingsTitle.bottom
@@ -142,6 +142,7 @@ W.PageBase {
             _settings.push([Lua.tr(prop.title), Lua.tr(data?.['_mode']?.[prop['_settingsKey']])])
           }
         }
+        _settings.push([Lua.tr("General Pool"), "1"]);
         _settings.push([Lua.tr('CardPackages'), cardpack.map(e => {
           let ret = Lua.tr(e);
           // TODO: 这种东西最好还是变量名规范化= =
@@ -158,7 +159,7 @@ W.PageBase {
         anchors.fill: parent
         Repeater {
           width: parent.width
-          model: flickableContainer.settings
+          model: infoContainer.settings
 
           Item {
             width: parent.width
@@ -183,6 +184,7 @@ W.PageBase {
               anchors.left: titleText.right
               anchors.leftMargin: 2
               horizontalAlignment: Text.AlignRight
+              visible: parent.modelData[0] !== Lua.tr("General Pool")
               text: {
                 const str = parent.modelData[1];
                 if (str === "true") return Lua.tr("True");
@@ -192,6 +194,26 @@ W.PageBase {
               color: '#222222'
               font.pixelSize: 14
               wrapMode: Text.WordWrap
+            }
+
+            WButton {
+              id: generalButton
+              visible: parent.modelData[0] === Lua.tr("General Pool")
+              anchors.right: parent.right
+              height: 20
+              width: 40
+              text: Lua.tr("View General Pool")
+              textFont.pixelSize: 14
+              title.color: '#e1f5f3'
+              bg.radius: 10
+              bg.color: '#8eb1ab'
+              border.width: 0
+
+              onClicked: {
+                overviewLoader.overviewSource = "LunarLtk.Pages";
+                overviewLoader.overviewType = "GeneralPool";
+                overviewDialog.open();
+              }
             }
           }
         }
@@ -625,6 +647,30 @@ W.PageBase {
     }
   }
 
+  // 将池
+  W.PopupLoader {
+    id: overviewDialog
+    width: Config.winWidth * 0.8
+    height: Config.winHeight * 0.9
+    anchors.centerIn: parent
+    background: Rectangle {
+      color: "#EEEEEEEE"
+      radius: 5
+      border.color: "#A6967A"
+      border.width: 1
+    }
+    Loader {
+      id: overviewLoader
+      property string overviewSource: "LunarLtk.Pages"
+      property string overviewType: "GeneralPool"
+      anchors.centerIn: parent
+      width: parent.width / Config.winScale
+      height: parent.height / Config.winScale
+      scale: Config.winScale
+      sourceComponent: Qt.createComponent(overviewSource, overviewType + "Overview")
+    }
+  }
+
   // 全局点击监视
   MouseArea {
     id: globalTapHandler
@@ -959,7 +1005,7 @@ W.PageBase {
     for (let i = 0; i < 10; i++) {
       photoModel.get(i).sealed = i >= playerNum;
     }
-    roominfo.refresh();
+    infoContainer.setDataList();
 
     checkAllReady();
     checkCanAddRobot();

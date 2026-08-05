@@ -63,29 +63,52 @@ ChooseGeneralModel {
     if (!hegemony) return;
     const selectedModels = resultInt.map(e => generalDict[e])
     for (let i = 0; i < generalDict.length; i++) {
-      const model = generalDict[i]
-      if (resultInt.includes(i)) {
-        model.inPosition = resultInt.indexOf(i) === 0 ? 1 : -1
+      const model = generalDict[i];
+      const idx = resultInt.indexOf(i);
+
+      // 加减血
+      if (idx !== -1) {
+        if (idx === 0) { // 主将
+          if (model.mainMaxHp !== 0) {
+            model.inPosition = 1;
+          } else if (model.deputyMaxHp !== 0) {
+            model.inPosition = -1;
+          }
+        } else { // 副将
+          if (model.mainMaxHp !== 0) {
+            model.inPosition = -1;
+          } else if (model.deputyMaxHp !== 0) {
+            model.inPosition = 1;
+          }
+        }
       } else {
-        model.inPosition = 0
+        model.inPosition = 0;
       }
-      
-      const companions = hasCompanionInGenerals(i)
+
+      // 珠联璧合
       if (resultInt.length === 0) {
-        model.hasCompanion = companions.length > 0
-      } else{
-        model.hasCompanion = companions.includes(resultInt[0]) || (i === resultInt[0] && companions.length > 0)
+        const companions = hasCompanionInGenerals(i);
+        model.hasCompanion = companions.length > 0; // 对用函数的只判断一端的，只显示一端（如贾南风）
+      } else {
+        const selectedGeneral = selectedModels[0].name
+        if (idx === 0) {
+          const companions = hasCompanionInGenerals(i);
+          model.hasCompanion = companions.length > 0;
+        } else {
+          model.hasCompanion = Ltk.isCompanionWith(model.name, selectedGeneral) ||
+            Ltk.isCompanionWith(selectedGeneral, model.name); // 只判断和主将
+        }
       }
     }
   }
 
   function hasCompanionInGenerals(idx) {
     let arr = [];
-    const general = generals[idx];
+    const general = generalDict[idx].name;
     for (let i = 0; i < generalDict.length; i++) {
-      const model = generalDict[i]
-      if (Ltk.isCompanionWith(model.name, general)) {
-        arr.push(i)
+      const model = generalDict[i];
+      if (Ltk.isCompanionWith(general, model.name)) {
+        arr.push(i); // 现在来看没有用，后面再说
       }
     }
     return arr

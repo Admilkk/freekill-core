@@ -84,6 +84,8 @@ W.PageBase {
     border.color: roomScene.borderColor
     border.width: 2
 
+    property bool viewFalse: false
+
     Text {
       id: roomSettingsTitle
       width: parent.width
@@ -141,13 +143,13 @@ W.PageBase {
           }
         }
         _settings.push([Lua.tr('CardPackages'), cardpack.map(e => {
-            let ret = Lua.tr(e);
-            // TODO: 这种东西最好还是变量名规范化= =
-            if (ret.search(/特殊牌|衍生牌/) === -1) {
-              ret = "<b>" + ret + "</b>";
-            }
-            return ret;
-          }).join('，')]);
+          let ret = Lua.tr(e);
+          // TODO: 这种东西最好还是变量名规范化= =
+          if (ret.search(/特殊牌|衍生牌/) === -1) {
+            ret = "<b>" + ret + "</b>";
+          }
+          return ret;
+        }).join('，')]);
         settings = _settings
       }
 
@@ -162,6 +164,11 @@ W.PageBase {
             width: parent.width
             height: 30
             required property var modelData
+            visible: {
+              if (roomSettings.viewFalse) return true;
+              const value = modelData[1];
+              return value !== "false" && value !== "" && value !== "否"; // 选项框出来直接是翻译过的
+            }
 
             Text {
               id: titleText
@@ -185,12 +192,21 @@ W.PageBase {
               color: '#222222'
               font.pixelSize: 14
               wrapMode: Text.WordWrap
-              lineHeight: 19
-              lineHeightMode: Text.FixedHeight
             }
           }
         }
       }
+    }
+
+    W.SwitchRow {
+      anchors.bottom: parent.bottom
+      anchors.right: parent.right
+      anchors.left: parent.left
+
+      title: Lua.tr("View False Settings")
+
+      checked: parent.viewFalse
+      onCheckedChanged: parent.viewFalse = checked;
     }
   }
 

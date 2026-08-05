@@ -63,7 +63,7 @@ local role_getlogic = function()
     local roomLordID = table.findIndex(room.players, function(p) return p.id > 0 end)
     local roomRole = room:getSettings("LordIsWhat")
     local roomRoleIndex = table.indexOf(roles, roomRole)
-    if roomRole ~= "LordIsWhat_Null" and math.min(roomLordID, roomRoleIndex) ~= -1 then
+    if roomRole ~= "False" and math.min(roomLordID, roomRoleIndex) ~= -1 then
       roles[roomLordID], roles[roomRoleIndex] = roles[roomRoleIndex], roles[roomLordID]
     end
 
@@ -313,7 +313,7 @@ role_mode.ui_settings = {
     W.ComboRow {
       _settingsKey = "LordIsWhat",
       title = "LordIsWhat",
-      model = { "LordIsWhat_Null", "lord", "loyalist", "rebel", "renegade" }
+      model = { "False", "lord", "loyalist", "rebel", "renegade" }
     },
   },
 
@@ -380,7 +380,6 @@ Fk:loadTranslationTable{
   ["role_misc_change"] = "身份小改动",
   ["LordIsWhat"] = "真人特定身份",
   ["help: LordIsWhat"] = "最早加入房间的真人始终是特定身份（调试用）",
-  ["LordIsWhat_Null"] = "不设置",
   ["role_double_renegade"] = "双内模式相关",
   ["help: role_double_renegade"] = "仅在游戏人数<b>不小于6</b>时有效",
   ["MakeCivilian"] = "置入平民",

@@ -102,6 +102,7 @@ Fk:loadTranslationTable {
   ["Room Capacity"] = "人数上限",
   ["Room Settings"] = "房间设置",
   ["Change Room Config"] = "房间配置",
+  ["View False Settings"] = "查看为“否”的设置项",
   ["Add Robot"] = "添加机器人",
   ["Start Game"] = "开始游戏",
   ["Ready"] = "准备",
@@ -340,6 +341,7 @@ FreeKill使用的是libgit2的C API，与此同时使用Git完成拓展包的下
 
   -- Room
   ["$EnterRoom"] = "成功加入房间",
+  ["$EnterRoomObserve"] = "成功旁观房间",
   ["$RoomConfigChanged"] = "房间配置已经修改，请重新准备！",
   ["#currentRoundNum"] = "第 %1 轮",
   ["$Choice"] = "%1：请选择",

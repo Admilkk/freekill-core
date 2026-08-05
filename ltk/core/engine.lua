@@ -35,6 +35,7 @@ local baseEngine = require "core.engine"
 ---@field public choose_general_rule table<string, ChooseGeneralSpec> @ 选将框操作方法表
 ---@field public skin_packages table<string, SkinContent[]> @ Skins
 ---@field public personal_marks table<string, PersonalMarkSpec> @ PersonalMark
+---@field public gamemode_whitelist_map table<string, table>
 local Engine = baseEngine:subclass("Engine")
 Engine:include(modManager)
 
@@ -89,6 +90,7 @@ function Engine:initialize()
   self.choose_general_rule = {}
   self.skin_packages = {}
   self.personal_marks = {}
+  self.gamemode_whitelist_map = {}
 
   self.Ltk = {
     AIStrategy = require 'ltk.server.ai.strategy',
@@ -126,6 +128,14 @@ function Engine:postLoad()
 
   self:setLords()
   self:loadCardNames()
+
+  -- 处理一下模式白名单，然后再loadDisabled
+  for k, v in pairs(self.gamemode_whitelist_map) do
+    if self.game_modes[k] and type(self.game_modes[k].whitelist) == "table" then
+      table.insertTableIfNeed(self.game_modes[k].whitelist, v)
+    end
+  end
+
   self:loadDisabled()
 
   local generalCount = 0
@@ -779,6 +789,20 @@ end
 ---@param skillName string
 function Engine:testMe(skillName)
   self.generals["mouxusheng"]:addSkill(skillName)
+end
+
+---将package添加到某个模式的白名单中
+---@param gamemode string @ 游戏模式
+---@param packName string | string[] @ 需要添加的包名
+function Engine:addWhiteListPack(gamemode, packName)
+  if not self.gamemode_whitelist_map[gamemode] then
+    self.gamemode_whitelist_map[gamemode] = {}
+  end
+  if type(packName) == "table" then
+    table.insertTableIfNeed(self.gamemode_whitelist_map[gamemode], packName)
+  elseif type(packName) == "string" then
+    table.insertIfNeed(self.gamemode_whitelist_map[gamemode], packName)
+  end
 end
 
 

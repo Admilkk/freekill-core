@@ -129,6 +129,7 @@ W.PageBase {
         const gameSettingsData = Lua.getUIDataOfSettings(gameMode, data, false);
 
         _settings.push([Lua.tr("GameMode"), Lua.tr(gameMode)]);
+        _settings.push([Lua.tr("ResponseTime"), Config.roomTimeout]);
         for (const group of boardgameSettingsData) {
           for (const prop of group['_children']) {
             _settings.push([Lua.tr(prop.title), Lua.tr(data?.['_game']?.[prop['_settingsKey']])])
@@ -163,6 +164,7 @@ W.PageBase {
             required property var modelData
 
             Text {
+              id: titleText
               anchors.left: parent.left
               text: parent.modelData[0]
               color: '#5e5e5e'
@@ -171,14 +173,20 @@ W.PageBase {
 
             Text {
               anchors.right: parent.right
+              anchors.left: titleText.right
+              anchors.leftMargin: 2
+              horizontalAlignment: Text.AlignRight
               text: {
                 const str = parent.modelData[1];
-                if (str === "true") return "是";
-                if (str === "false") return "否";
+                if (str === "true") return Lua.tr("True");
+                if (str === "false") return Lua.tr("False");
                 return str
               }
               color: '#222222'
               font.pixelSize: 14
+              wrapMode: Text.WordWrap
+              lineHeight: 19
+              lineHeightMode: Text.FixedHeight
             }
           }
         }

@@ -197,11 +197,11 @@ Fk:loadTranslationTable({
   -- ["Copy Audio Text"] = "复制语音文本",
 
   ["$WelcomeToLobby"] = "Welcome to FreeKill lobby!",
-  ["GameMode"] = "Game mode: ",
-  ["LuckCardNum"] = "Luck card count: ",
-  ["ResponseTime"] = "Operation time (sec): ",
-  ["GeneralBoxNum"] = "Character selection count: ",
-  ["CardPackages"] = "Enabled card pacakges: ",
+  ["GameMode"] = "Game mode",
+  ["LuckCardNum"] = "Luck card count",
+  ["ResponseTime"] = "Operation time (sec)",
+  ["GeneralBoxNum"] = "Character selection count",
+  ["CardPackages"] = "Enabled card pacakges",
   ["IncludeFreeAssign"] = "<font color=\"red\">Free assign enabled</font>",
   ["IncludeDeputy"] = "<font color=\"red\">Deputy character enabled</font>",
 

@@ -256,11 +256,11 @@ Trang chủ: https://libgit2.org
   ["Copy Audio Text"] = "Sao chép văn bản âm thanh",
 
   ["$WelcomeToLobby"] = "Chào mừng đến với sảnh chờ của Tân Nguyệt Sát!",
-  ["GameMode"] = "Chế độ chơi: ",
-  ["LuckCardNum"] = "Số lần đổi bài: ",
-  ["ResponseTime"] = "Thời gian tương tác (giây): ",
-  ["GeneralBoxNum"] = "Số lượng tướng: ",
-  ["CardPackages"] = "Các gói mở rộng đã bật: ",
+  ["GameMode"] = "Chế độ chơi",
+  ["LuckCardNum"] = "Số lần đổi bài",
+  ["ResponseTime"] = "Thời gian tương tác (giây)",
+  ["GeneralBoxNum"] = "Số lượng tướng",
+  ["CardPackages"] = "Các gói mở rộng đã bật",
   ["IncludeFreeAssign"] = "<font color=\"red\">Bật chế độ tự do chọn</font>",
   ["IncludeDeputy"] = "<font color=\"red\">Bật phó tướng</font>",
 

@@ -309,7 +309,7 @@ W.PageBase {
         AvatarCardItem {
           playerid: model.id
           avatar: model.avatar
-          screenName: model.screenName
+          screenName: Config.hideScreenName ? (model.screenName ? Lua.tr("Player") + (index + 1) : null) : model.screenName
           isOwner: model.isOwner
           ready: model.ready
           opacity: model.sealed ? 0 : 1

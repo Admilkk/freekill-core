@@ -237,6 +237,7 @@ function GetPlayersAndObservers()
       observing = table.contains(self.observers, p),
       state = state,
       avatar = p.player:getAvatar(),
+      seat = p.seat,
     })
   end
   for _, p in ipairs(self.observers) do
@@ -247,8 +248,8 @@ function GetPlayersAndObservers()
       name = p[2]:getScreenName(),
       observing = true,
       state = fk.Player_Online,
-      avatar = p[2]:getAvatar()
-
+      avatar = p[2]:getAvatar(),
+      seat = -1,
     })
   end
   return ret

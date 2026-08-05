@@ -106,6 +106,7 @@ end
 function Room:makeGeneralPile()
   local trueNames = {}
   local ret = {}
+  -- true禁止同名替换，即同名武将视为不同武将；false同名武将只留一张
   local enableSameName = self:getSettings("disableSameConvert")
   if self.game_started and not enableSameName then
     for _, player in ipairs(self.players) do
@@ -1297,7 +1298,7 @@ function Room:askToChooseIniticalGeneral(player, params)
     -- 国战的话就整理一下武将顺序
     if params.isHeg then
       local g_map = {}
-      local default_order = { "wei", "shu", "wu", "qun", "jin" }
+      local default_order = { "wei", "shu", "wu", "qun", "jin", "wild" }
       for _, g in ipairs(arg) do
         local gdata = Fk.generals[g]
         if g_map[gdata.kingdom] then

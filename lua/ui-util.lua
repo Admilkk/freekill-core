@@ -72,10 +72,9 @@ end
 ---@field options string[]
 ---@field all_options? string[]
 ---@field single? boolean
----@field direct_send? boolean 危险参数，按下一个选项会直接返回值，并且强制启用single，建议配合fresh_interacion一起使用
+---@field direct_send? boolean 危险参数，按下一个选项会直接返回值，并且强制启用single，建议配合refresh_interaction一起使用
 ---@field min_num? integer
 ---@field max_num? integer
----@field type? string
 -- * options: string[] 类型，保存可选项
 -- * all_options: string[] 类型，保存所有选项
 -- * cancelable: bool 是否可取消

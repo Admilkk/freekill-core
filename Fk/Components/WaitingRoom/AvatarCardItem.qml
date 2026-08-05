@@ -163,6 +163,7 @@ BasicItem {
   Text {
     id: screenNameText
     text: root.screenName
+    // visible: !Config.hideScreenName
     font.pixelSize: 14
     font.family: "Arial"
     horizontalAlignment: Text.AlignHCenter

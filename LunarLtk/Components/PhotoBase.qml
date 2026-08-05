@@ -202,6 +202,7 @@ Game.BasicItem {
       ret = Lua.tr("<Blocked> ") + ret;
       return ret;
     }
+    visible: !Config.hideScreenName
     elide: root.playerid === Cpp.self.id ? Text.ElideNone : Text.ElideMiddle
     horizontalAlignment: Qt.AlignHCenter
     glow.radius: 6

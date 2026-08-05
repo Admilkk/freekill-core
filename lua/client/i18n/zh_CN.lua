@@ -57,6 +57,8 @@ Fk:loadTranslationTable {
   ["help: Do not use nullification to own one-target trick"] = "不对自己使用的单目标锦囊询问使用【无懈可击】",
   ["Enable Super Drag"] = "启用拖动出牌",
   ["help: Enable Super Drag"] = "将牌拖出手牌区使用，拖入目标即可选择目标或取消选择目标",
+  ["Hide Screen Name"] = "隐藏玩家名",
+  ["help: Hide Screen Name"] = "在大厅和游戏中隐藏所有玩家名",
 
   ["Ban General Settings"] = "禁将",
   ["Set as Avatar"] = "设为头像",
@@ -333,6 +335,8 @@ FreeKill使用的是libgit2的C API，与此同时使用Git完成拓展包的下
   ["CardPackages"] = "使用牌堆：",
   ["IncludeFreeAssign"] = "<font color=\"red\">可自由点将</font>",
   ["IncludeDeputy"] = "<font color=\"red\">启用副将机制</font>",
+  ["true"] = "是",
+  ["false"] = "否",
 
   -- Room
   ["$EnterRoom"] = "成功加入房间",
@@ -449,6 +453,7 @@ FreeKill使用的是libgit2的C API，与此同时使用Git完成拓展包的下
   ["Chat"] = "聊天",
   ["Log"] = "战报",
   ["PlayerList"] = "玩家列表",
+  ["Player"] = "玩家",
   ["Return to Bottom"] = "回到底部",
   ["Trusting ..."] = "托管中 ...",
   ["Observing ..."] = "旁观中 ...",

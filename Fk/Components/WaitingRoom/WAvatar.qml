@@ -110,6 +110,7 @@ BasicItem {
 
   Text {
     text: root.screenName
+    visible: !Config.hideScreenName
     color: "white"
     width: root.width
     anchors.bottom: parent.bottom

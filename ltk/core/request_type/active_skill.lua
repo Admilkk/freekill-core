@@ -548,15 +548,17 @@ end
 function ReqActiveSkill:updateButtons()
   local scene = self.scene
 
-  self:makeSubCards() -- 生成二级选择的卡牌
   local isOk = self:feasible()
-  if isOk and not self.sub_selection_flag and self.sub_cards then
-    local skill = Fk.skills[self.skill_name] --[[@as ActiveSkill | ViewAsSkill]]
-    if skill and skill.immediate_sub then
-      self.change = self.change or {} -- 移除_new/_delete的状态，毕竟马上就要重新收牌堆了
-      self.change._new = nil
-      self.change._delete = nil
-      self:doOKButton()
+  if isOk and not self.sub_selection_flag then
+    self:makeSubCards() -- 生成二级选择的卡牌
+    if self.sub_cards then
+      local skill = Fk.skills[self.skill_name] --[[@as ActiveSkill | ViewAsSkill]]
+      if skill and skill.immediate_sub then
+        self.change = self.change or {} -- 移除_new/_delete的状态，毕竟马上就要重新收牌堆了
+        self.change._new = nil
+        self.change._delete = nil
+        self:doOKButton()
+      end
     end
   end
   scene:update("Button", "OK", { enabled = self:feasible() })

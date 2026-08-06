@@ -521,29 +521,6 @@ function ReqActiveSkill:makeSubCards()
   if self.sub_cards == nil or not next(self.sub_cards) then return end
 end
 
---- （取消专属）更新是否需要立刻退出二级菜单
-function ReqActiveSkill:checkExitSub()
-  if not self.sub_selection_flag then return end
-  if #self.pendings == 0 and #self.selected_targets == 0 then
-    local skill = Fk.skills[self.skill_name] --[[@as ActiveSkill | ViewAsSkill]]
-    if skill and skill.immediate_sub then
-      local old_pendings = table.simpleClone(self.selected_buffer.cards)
-      local old_targets = table.map(self.selected_buffer.targets, Util.Id2PlayerMapper)
-      local old_interaction = self.selected_buffer.interaction
-      local sub = skill.sub_data
-      if type(sub) == "function" then
-        sub = sub(skill, self.player,  old_pendings, old_targets, old_interaction)
-      end
-      if sub then
-        if skill:feasible(self.player, old_pendings, old_targets) then
-          return
-        end
-      end
-    end
-    self:doCancelButton()
-  end
-end
-
 --- 更新按钮的状态
 function ReqActiveSkill:updateButtons()
   local scene = self.scene
@@ -835,9 +812,6 @@ function ReqActiveSkill:update(elemType, id, action, data)
     self:selectCard(id, data)
     self:initiateTargets()
     autoSelectOnlyFeasibleTarget(self, data)
-    if data and data.selected == false then
-      self:checkExitSub()
-    end
     -- 双击卡牌使用卡牌
     --[[
     if action == "doubleClick" and data.doubleClickUse then
@@ -861,9 +835,6 @@ function ReqActiveSkill:update(elemType, id, action, data)
     self:selectTarget(id, data)
     if #self.selected_targets == 0 then
       autoSelectOnlyFeasibleTarget(self, data)
-    end
-    if data and data.selected == false then
-      self:checkExitSub()
     end
     -- 双击目标使用卡牌
     --[[

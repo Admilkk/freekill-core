@@ -74,7 +74,16 @@ end
 --- 获得此时所返回的牌
 ---@return Card|nil
 function ReqResponseCard:getUsingCard()
-  return self.selected_card or ReqActiveSkill.getUsingCard(self)
+  if self.selected_card then
+    local skill = Fk.skills[self.skill_name] ---@cast skill ViewAsSkill
+    if skill and skill:isInstanceOf(ViewAsSkill) then
+      return skill:viewAs(self.player, { self.selected_card.id })
+    else
+      return self.selected_card
+    end
+  else
+    return ReqActiveSkill.getUsingCard(self)
+  end
 end
 
 --- 一张牌能否被点亮（包括正在被点选的实体牌）

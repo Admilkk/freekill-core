@@ -417,6 +417,30 @@ function M:getCardName(cardId, filterCard)
   return card:getDynamicName(Self) or ""
 end
 
+--- 获取牌在UI上显示的名字（+1-1马默认+1-1）
+---@param cardId integer
+---@param filterCard? boolean @ 是否应用锁视效果，默认否
+---@return string
+function M:getCardUIName(cardId, filterCard)
+  local card = Fk:getCardById(cardId, not filterCard)
+  if not card then return "" end
+  -- 应用虚拟装备
+  if filterCard then
+    local owner = ClientInstance:getCardOwner(cardId)
+    if owner then
+      local vcard = owner:getVirtualEquip(cardId)
+      card = vcard or card
+    end
+  end
+  if card.ui_name then return Fk:translate(card.ui_name) end
+  if card.sub_type == Card.SubtypeDefensiveRide then
+    return "+1"
+  elseif card.sub_type == Card.SubtypeOffensiveRide then
+    return "-1"
+  end
+  return card:getDynamicName(Self) or ""
+end
+
 function M:getEnableKingdoms(general)
   return Fk:getKingdomsNeedToChoose(general)
 end

@@ -148,6 +148,10 @@ QtObject {
     return _L.getCardName(id, filterCard);
   }
 
+  function getCardUIName(id, filterCard) {
+    return _L.getCardUIName(id, filterCard);
+  }
+
   function getEnableKingdoms(general) {
     return _L.getEnableKingdoms(general)
   }

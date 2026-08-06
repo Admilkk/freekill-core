@@ -32,6 +32,7 @@
 ---@field public virt_id integer @ 虚拟牌的特殊id，默认为0
 ---@field public dynamicDesc? fun(self: Card, player: Player?, lang?: string): string: string? @ 动态描述
 ---@field public dynamicName? fun(self: Card, player: Player?, lang?: string): string: string? @ 动态牌名
+---@field public ui_name string? @ UI上显示的名称
 ---@field public extra_data? table @ 保存其他信息的键值表，如“合纵”、“应变”、“赠予”等
 local Card = class("Card")
 
@@ -294,6 +295,7 @@ function Card:clone(suit, number)
   newCard.is_derived = self.is_derived
   newCard.dynamicDesc = self.dynamicDesc
   newCard.dynamicName = self.dynamicName
+  newCard.ui_name = self.ui_name
   return newCard
 end
 

@@ -274,6 +274,7 @@ function fk.readCardSpecToCard(card, spec)
   card.extra_data = spec.extra_data
   card.dynamicDesc = spec.dynamic_desc
   card.dynamicName = spec.dynamic_name
+  card.ui_name = spec.ui_name
 end
 
 ---@class EquipCardSpec: CardSpec

@@ -7,6 +7,7 @@
 ---@field public attack_range? integer
 ---@field public dynamic_desc? fun(self: Card, player: Player, lang?: string): string? @ 动态描述
 ---@field public dynamic_name? fun(self: Card, player: Player, lang?: string): string? @ 动态牌名
+---@field public ui_name string? @ UI上显示的名称
 
 ---@class CardSkeleton : Object
 ---@field public spec CardSkelSpec

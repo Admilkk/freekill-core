@@ -100,13 +100,7 @@ Item {
         return "";
       }
 
-      if (subtype === "defensive_ride") {
-        return "+1";
-      } else if (subtype === "offensive_ride") {
-        return "-1";
-      } else {
-        return Ltk.getCardName(model.cardId, true);
-      }
+      return Ltk.getCardUIName(model.cardId, true);
     }
   }
 

@@ -121,6 +121,21 @@ W.PageBase {
 
       Component.onCompleted: setDataList();
 
+      function getSettingKey(prop, mainKey) {
+        const data = Lua.client.settings;
+        const value = data?.[mainKey]?.[prop['_settingsKey']];
+        const key = prop.title;
+        if (typeof value === "boolean") {
+          const tr = Lua.hasTranslate("#" + key);
+          const trNega = Lua.hasTranslate("#!" + key);
+          if (tr) {
+            return value ? [tr]: (trNega ? [trNega] : [Lua.tr(prop.title), Lua.tr(value)]);
+          }
+        }
+
+        return [Lua.tr(prop.title), Lua.tr(value)];
+      }
+
       function setDataList() {
         let _settings = [];
         const data = Lua.client.settings;
@@ -134,12 +149,12 @@ W.PageBase {
         _settings.push([Lua.tr("ResponseTime"), Config.roomTimeout]);
         for (const group of boardgameSettingsData) {
           for (const prop of group['_children']) {
-            _settings.push([Lua.tr(prop.title), Lua.tr(data?.['_game']?.[prop['_settingsKey']])])
+            _settings.push(getSettingKey(prop, "_game"))
           }
         }
         for (const group of gameSettingsData) {
           for (const prop of group['_children']) {
-            _settings.push([Lua.tr(prop.title), Lua.tr(data?.['_mode']?.[prop['_settingsKey']])])
+            _settings.push(getSettingKey(prop, "_mode"))
           }
         }
         _settings.push([Lua.tr("General Pool"), "1"]);

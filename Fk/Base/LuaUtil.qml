@@ -37,7 +37,6 @@ QtObject {
 
   function hasTranslate(src) {
     const tr = backend.translate(src);
-    console.log(`hasTranslate: ${src} => ${tr}`);
     return src !== tr ? tr : null;
   }
 

@@ -66,35 +66,38 @@ function Judge:main()
     arg = data.card,
   }
 
-  cid = data.card:getEffectiveId()
+  cid = data.card:getEffectiveId()  ---@cast cid integer
   if cid and room:getCardArea(cid) == Card.Processing then
     room:sendFootnote({ cid }, {
       type = "##JudgeCard",
       arg = data.reason,
     })
+    room:delay(300)
+  end
 
-    room:delay(400);
-    local results = data.results
-    -- 对现有的string做分歧处理
-    if not next(results) then
-      for pattern, result in pairs(data.pattern) do
-        if data.card:matchPattern(pattern) then
-          table.insertTableIfNeed(results,
-          type(result) == "table" and result or { result })
-        end
-      end
-      if not next(results) then
-        local result = data.pattern["else"]
+  local results = data.results  ---@cast results table
+  -- 对现有的string做分歧处理
+  if not next(results) then
+    for pattern, result in pairs(data.pattern) do
+      if data.card:matchPattern(pattern) then
         table.insertTableIfNeed(results,
-          type(result) == "table" and result or { result })
+        type(result) == "table" and result or { result })
       end
     end
+    if not next(results) then
+      local result = data.pattern["else"]
+      table.insertTableIfNeed(results,
+        type(result) == "table" and result or { result })
+    end
+  end
+
+  if cid and room:getCardArea(cid) == Card.Processing then
     if table.contains(results, "good") then
       room:setCardEmotion(cid, "judgegood")
     elseif table.contains(results, "bad") then
       room:setCardEmotion(cid, "judgebad")
     end
-    room:delay(900);
+    room:delay(900)
   end
 
   if logic:trigger(fk.FinishJudge, who, data) then

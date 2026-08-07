@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 import QtQuick
-
+pragma ComponentBehavior: Bound
 Item {
   property string source: ""
   property int currentFrame: 0
@@ -11,6 +11,8 @@ Item {
   property bool loop: false
   property bool keepAtStop: false
   property alias running: timer.running
+  property real sourceWidth
+  property real sourceHeight
 
   signal loaded()
   signal started()
@@ -28,8 +30,11 @@ Item {
     model: fileModel
 
     Image {
+      required property int index
       source: root.source + "/" + index
       visible: false
+      width: root.sourceWidth ?? null
+      height: root.sourceHeight ?? null
       onStatusChanged: {
         if (status == Image.Ready) {
           loadedFrameCount++;

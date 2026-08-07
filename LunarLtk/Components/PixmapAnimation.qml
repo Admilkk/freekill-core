@@ -11,8 +11,8 @@ Item {
   property bool loop: false
   property bool keepAtStop: false
   property alias running: timer.running
-  property real sourceWidth
-  property real sourceHeight
+  property var sourceWidth
+  property var sourceHeight
 
   signal loaded()
   signal started()
@@ -33,8 +33,8 @@ Item {
       required property int index
       source: root.source + "/" + index
       visible: false
-      width: root.sourceWidth ?? null
-      height: root.sourceHeight ?? null
+      width: root.sourceWidth ?? implicitWidth
+      height: root.sourceHeight ?? implicitHeight
       onStatusChanged: {
         if (status == Image.Ready) {
           loadedFrameCount++;

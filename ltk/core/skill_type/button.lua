@@ -16,8 +16,8 @@
 ---@field public interaction any
 ---@field public refresh_interaction function
 ---@field public prompt string | function? @ 技能提示
----@field public expand_pile? string | integer[] | fun(self: UsableSkill, player: Player): integer[]|string? @ 额外牌堆，牌堆名称或卡牌id表
----@field public visible_pile? integer[] | string | fun(self: ActiveSkill | ViewAsSkill, player: Player): integer[] | string @ 可见的手牌id，同时筛选手牌和expand_pile
+---@field public expand_pile? string | integer[] | fun(self: ButtonSkill, player: Player): integer[]|string? @ 额外牌堆，牌堆名称或卡牌id表
+---@field public visible_pile? integer[] | string | fun(self: ButtonSkill, player: Player): integer[] | string @ 可见的手牌id，同时筛选手牌和expand_pile
 ---@field public handly_pile boolean?  @ 是否能够选择“如手牌使用或打出”的牌
 ---@field public click_count? boolean @ 是否在点击按钮瞬间就计数并播放特效和语音
 ---@field public include_equip? boolean @ 选牌时是否展开装备区

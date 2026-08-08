@@ -158,7 +158,7 @@ function ReqActiveSkill:finish()
 end
 
 --- 更新主动技的提示（使用卡牌也会走这步）
----@param skill ActiveSkill | ViewAsSkill @ 技能对象
+---@param skill ButtonSkill @ 技能对象
 ---@param selected_cards? integer[] @ 选择的牌
 function ReqActiveSkill:setSkillPrompt(skill, selected_cards)
   local default_prompt = ("#UseSkill:::" .. skill.name) -- 默认提示
@@ -194,7 +194,7 @@ function ReqActiveSkill:setSkillPrompt(skill, selected_cards)
 end
 
 function ReqActiveSkill:updatePrompt()
-  local skill = Fk.skills[self.skill_name] --[[@as ActiveSkill | ViewAsSkill]]
+  local skill = Fk.skills[self.skill_name] --[[@as ButtonSkill]]
   if skill then
     self:setSkillPrompt(skill)
   else
@@ -204,7 +204,7 @@ end
 
 --- 初始化Interaction
 function ReqActiveSkill:setupInteraction()
-  local skill = Fk.skills[self.skill_name] --[[@as ActiveSkill | ViewAsSkill]]
+  local skill = Fk.skills[self.skill_name] --[[@as ButtonSkill]]
   if skill and skill.interaction then
     skill.interaction.data = nil
     local interaction = skill:interaction(self.player)
@@ -287,7 +287,7 @@ end
 
 -- 展开额外牌堆（即将所有不在手牌区的牌在手牌区域展开）
 function ReqActiveSkill:expandPiles()
-  local skill = Fk.skills[self.skill_name] --[[@as ActiveSkill | ViewAsSkill]]
+  local skill = Fk.skills[self.skill_name] --[[@as ButtonSkill]]
   local player = self.player
   if not skill then return end
 
@@ -383,7 +383,7 @@ end
 
 --- 刷新一下当前可见牌
 function ReqActiveSkill:visualizePile()
-  local skill = Fk.skills[self.skill_name] --[[@as ActiveSkill | ViewAsSkill]]
+  local skill = Fk.skills[self.skill_name] --[[@as ButtonSkill]]
   if not skill then return end
   local player = self.player
 
@@ -422,7 +422,7 @@ end
 ---@return boolean
 function ReqActiveSkill:feasible()
   local player = self.player
-  local skill = Fk.skills[self.skill_name] --[[@as ActiveSkill | ViewAsSkill]]
+  local skill = Fk.skills[self.skill_name] --[[@as ButtonSkill]]
   if not skill then return false end
   local card -- 因为有多种情况，所以需要缓存
   local ret = false
@@ -449,7 +449,7 @@ end
 --- 获得视为技所视为的虚拟牌
 ---@return Card|nil
 function ReqActiveSkill:getUsingCard()
-  local skill = Fk.skills[self.skill_name] --[[@as ActiveSkill | ViewAsSkill]]
+  local skill = Fk.skills[self.skill_name] --[[@as ButtonSkill]]
   if not (skill and skill:isInstanceOf(ViewAsSkill)) then return nil end
   if self.sub_selection_flag then
     return skill:viewAs(self.player, self.selected_buffer.cards, self.sub_pendings)
@@ -462,7 +462,7 @@ end
 ---@param cid integer @ 待选卡牌id
 ---@return boolean
 function ReqActiveSkill:cardValidity(cid)
-  local skill = Fk.skills[self.skill_name] --[[@as ActiveSkill | ViewAsSkill]]
+  local skill = Fk.skills[self.skill_name] --[[@as ButtonSkill]]
   if not skill then return false end
   if self.sub_selection_flag then -- 二级选择时单独考虑
     if not getCardByVirtId(self.sub_cards, cid) then return false end -- 只能选择二级选择的牌
@@ -475,7 +475,7 @@ end
 ---@param pid integer @ 待选角色id
 ---@return boolean
 function ReqActiveSkill:targetValidity(pid)
-  local skill = Fk.skills[self.skill_name] --[[@as ActiveSkill | ViewAsSkill]]
+  local skill = Fk.skills[self.skill_name] --[[@as ButtonSkill]]
   if not skill then return false end
   local card -- 因为有多种情况，所以需要缓存
   if skill:isInstanceOf(ViewAsSkill) then
@@ -499,7 +499,7 @@ end
 -- 获得二级选择的卡牌
 function ReqActiveSkill:makeSubCards()
   self.sub_cards = nil
-  local skill = Fk.skills[self.skill_name] --[[@as ActiveSkill | ViewAsSkill]]
+  local skill = Fk.skills[self.skill_name] --[[@as ButtonSkill]]
   if not skill or not skill.sub_data then return end
   local sub = skill.sub_data
   if type(sub) == "function" then
@@ -523,7 +523,7 @@ function ReqActiveSkill:updateButtons()
   if isOk and not self.sub_selection_flag then
     self:makeSubCards() -- 生成二级选择的卡牌
     if self.sub_cards then
-      local skill = Fk.skills[self.skill_name] --[[@as ActiveSkill | ViewAsSkill]]
+      local skill = Fk.skills[self.skill_name] --[[@as ButtonSkill]]
       if skill and skill.immediate_sub then
         self.change = self.change or {} -- 移除_new/_delete的状态，毕竟马上就要重新收牌堆了
         self.change._new = nil
@@ -561,7 +561,7 @@ function ReqActiveSkill:updateUnselectedTargets()
   local target_fixed = true
 
   if self.skill_name then
-    local skill = Fk.skills[self.skill_name] --[[@as ActiveSkill | ViewAsSkill]]
+    local skill = Fk.skills[self.skill_name] --[[@as ButtonSkill]]
     target_fixed = not not skill:fixTargets(player, self.pendings, nil, self.extra_data)
   end
 
@@ -593,7 +593,7 @@ end
 
 --- 更新interaction数据
 function ReqActiveSkill:updateInteraction(data, ignoreSetup)
-  local skill = Fk.skills[self.skill_name] --[[@as ActiveSkill | ViewAsSkill]]
+  local skill = Fk.skills[self.skill_name] --[[@as ButtonSkill]]
   if skill and skill.interaction then
     skill.interaction.data = data
     self.scene:update("Interaction", "1", { data = data })
@@ -611,7 +611,7 @@ end
 ---@field public special_skill? string @ 选中的技能名（如重铸）
 
 function ReqActiveSkill:doOKButton()
-  local skill = Fk.skills[self.skill_name] --[[@as ActiveSkill | ViewAsSkill]]
+  local skill = Fk.skills[self.skill_name] --[[@as ButtonSkill]]
   local cardstr = {
     skill = self.skill_name,
     subcards = self.pendings
@@ -782,7 +782,7 @@ end
 
 -- 刷新interaction（不是重新加载，区别于updateInteraction）
 function ReqActiveSkill:refreshInteraction()
-  local skill = Fk.skills[self.skill_name] --[[@as ActiveSkill|ViewAsSkill]]
+  local skill = Fk.skills[self.skill_name] --[[@as ButtonSkill]]
   if not skill or not skill.refresh_interaction then return end
   if skill and skill.interaction then
     local refresh_data = skill:refresh_interaction(

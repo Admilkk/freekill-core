@@ -22,6 +22,7 @@ W.PageBase {
   property alias dataModel: dataModel
   property alias bigAnim: bigAnim
   property alias bgm: bgm
+  property alias infoPopup: infoPopup
 
   property alias photoModel: photoModel
 
@@ -117,7 +118,7 @@ W.PageBase {
 
   Shortcut {
     sequence: "Return"
-    enabled: dataModel.okEnabled
+    enabled: dataModel.okEnabled && !dataModel.optionVisible
     onActivated: Lua.updateRequestUI("Button", "OK");
   }
 

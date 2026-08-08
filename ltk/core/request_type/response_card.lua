@@ -121,7 +121,7 @@ function ReqResponseCard:cardFeasible(card)
     if not skills then return false end
     for _, skill in ipairs(skills) do
       local s = Fk.skills[skill]  ---@cast s ViewAsSkill
-      if s:isInstanceOf(ViewAsSkill) and s:enabledAtResponse(player) then
+      if s:isInstanceOf(ViewAsSkill) and s:enabledAtResponse(player, true) then
         return true
       end
     end

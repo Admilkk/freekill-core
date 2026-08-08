@@ -85,7 +85,7 @@ function ReqUseCard:cardFeasible(card)
     for _, skill in ipairs(card.special_skills or Util.DummyTable) do
       local s = Fk.skills[skill]  ---@type ViewAsSkill
       if s:isInstanceOf(ViewAsSkill) and s:enabledAtResponse(player) then
-        local new_card = self:getUsingCard()
+        local new_card = s:viewAs(player, { card.id })
         if new_card and
           ((new_card.is_passive and not (self.extra_data or Util.DummyTable).not_passive) or player:canUse(new_card, self.extra_data)) then
           return true

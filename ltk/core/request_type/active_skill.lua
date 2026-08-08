@@ -392,7 +392,8 @@ function ReqActiveSkill:visualizePile()
 
   -- 直接在这里进行屏蔽手牌操作
   if self.sub_selection_flag then
-    self.change["visible_cards"] = "_sub_selection" -- 二级选择时visible_pile改为二级选择牌堆
+    local room = Fk:currentRoom();
+    self.change["visible_cards"] = table.map(self.sub_cards, function(c) return room:getVirtCardId(c) end) -- 二级选择时visible_pile改为二级选择牌堆
     return
   end
 

@@ -1646,6 +1646,7 @@ end
 ---@param toChoose? boolean @ 是否将用于选牌判断
 ---@return boolean
 function Player:cardVisible(cardId, move, toChoose)
+  if not Fk:getCardById(cardId) then return true end
   local room = Fk:currentRoom()
   if room.replaying and room.replaying_show then return true end
 

@@ -20,7 +20,7 @@
 ---@field public main_skill Skill @ 仅用作添加技能和提示信息
 ---@field public is_delay_effect boolean @ 是否是延时效果
 ---@field public audio_index integer|table @ 发动此技能时播放的语音序号，可为int或int表
----@field public cardSkill boolean @ 是否为卡牌效果对应的技能（仅用于ActiveSkill）
+---@field public cardSkill boolean @deprecated 是否为卡牌效果对应的技能（仅用于ActiveSkill）
 ---@field public skeleton SkillSkeleton @ 获取技能骨架
 local Skill = class("Skill")
 
@@ -160,7 +160,7 @@ end
 ---@param player Player @ 玩家
 ---@return boolean
 function Skill:isEffectable(player)
-  if self.cardSkill or self:hasTag(Skill.Permanent) then
+  if self:isInstanceOf(CardSkill) or self:hasTag(Skill.Permanent) then
     return true
   end
 
@@ -211,7 +211,7 @@ function Skill:isPlayerSkill(player, includeModeSkill)
   if skel == nil then return false end
   return
     not (
-      self.cardSkill or
+      self:isInstanceOf(CardSkill) or
       self:isEquipmentSkill(player) or
       self.name:endsWith("&") or self.name == "recast" or
       (not includeModeSkill and skel.mode_skill)

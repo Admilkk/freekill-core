@@ -267,12 +267,13 @@ end
 ---@param card Card
 ---@param spec CardSkelSpec
 function fk.readCardSpecToCard(card, spec)
+  local skill
   if type(spec.skill) == "string" then
-    spec.skill = Fk.skills[spec.skill]
+    skill = Fk.skills[spec.skill]
   end
-  card.skill = spec.skill or (card.type == Card.TypeEquip and
+  assert(skill == nil or skill:isInstanceOf(CardSkill))
+  card.skill = skill or (card.type == Card.TypeEquip and
     Fk.skills["default_equip_skill"] or Fk.skills["default_card_skill"])
-  card.skill.cardSkill = true
   card.special_skills = spec.special_skills
   card.is_damage_card = spec.is_damage_card
   card.damage_type = spec.damage_type

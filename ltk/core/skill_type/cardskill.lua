@@ -6,11 +6,7 @@
 local CardSkill = ActiveSkill:subclass("CardSkill")
 
 function CardSkill:initialize(name, frequency)
-  UsableSkill.initialize(self, name, frequency)
-  self.min_target_num = 0
-  self.max_target_num = 999
-  self.min_card_num = 0
-  self.max_card_num = 999
+  ActiveSkill.initialize(self, name, frequency)
   self.cardSkill = true
 end
 
@@ -39,19 +35,7 @@ function CardSkill:cardFilter(player, to_select, selected, selected_cards, card,
   return false
 end
 
--- 判断一名角色是否可被此技能选中
----@param player Player @ 使用者
----@param to_select Player @ 待选目标
----@param selected Player[] @ 已选目标
----@param selected_cards integer[] @ 已选牌
----@param card? Card @ 牌
----@param extra_data? UseExtraData @ 额外数据
----@return boolean?
-function CardSkill:targetFilter(player, to_select, selected, selected_cards, card, extra_data)
-  return false
-end
-
--- 判断一名角色是否可成为此技能的目标
+-- 判断一名角色是否可成为此技能的额外目标
 ---@param player Player @ 使用者
 ---@param to_select Player @ 待选目标
 ---@param selected Player[] @ 已选目标
@@ -106,46 +90,6 @@ function CardSkill:getMaxTargetNum(player, card)
     ret = ret + correct
   end
   return ret
-end
-
--- 获得技能的最小卡牌数
----@param player Player @ 使用者
----@return number @ 最小卡牌数
-function CardSkill:getMinCardNum(player)
-  local ret
-  if self.card_num then ret = self.card_num
-  else ret = self.min_card_num end
-
-  if type(ret) == "function" then
-    ret = ret(self, player)
-  end
-  return ret
-end
-
--- 获得技能的最大卡牌数
----@param player Player @ 使用者
----@return number @ 最大卡牌数
-function CardSkill:getMaxCardNum(player)
-  local ret
-  if self.card_num then ret = self.card_num
-  else ret = self.max_card_num end
-
-  if type(ret) == "function" then
-    ret = ret(self, player)
-  end
-  return ret
-end
-
--- 判断一个技能是否可发动（也就是确认键是否可点击）。默认值为选择卡牌数和选择目标数均在允许范围内
--- 警告：没啥事别改
----@param player Player @ 使用者
----@param selected Player[] @ 已选目标
----@param selected_cards integer[] @ 已选牌
----@param card Card @ 牌
----@return boolean
-function CardSkill:feasible(player, selected, selected_cards, card)
-  return #selected >= self:getMinTargetNum(player) and #selected <= self:getMaxTargetNum(player, card)
-    and #selected_cards >= self:getMinCardNum(player) and #selected_cards <= self:getMaxCardNum(player)
 end
 
 -- 获得此牌技能的距离限制

@@ -235,6 +235,9 @@ function ClientBase:changeRoom(_data)
   local record = self.record
 
   local old_players = self.players
+  local old_observers = self.observers or {}
+  local old_self = Self
+  local old_self_id = old_self and old_self.id
 
   local client_klass = Fk:getBoardGame(data.gameMode).client_klass
   ClientInstance = client_klass:new(self.client)
@@ -254,8 +257,26 @@ function ClientBase:changeRoom(_data)
     return pl
   end)
   self.players = new_players
-  self.alive_players = new_players
-  Self = self:getPlayerById(Self.id)
+  self.alive_players = table.simpleClone(new_players)
+  self.observers = old_observers
+  if old_self_id then
+    -- A pre-game observer is intentionally absent from players. Keep its
+    -- client identity when rebuilding the room for a settings change.
+    Self = self:getPlayerById(old_self_id) or old_self
+  end
+
+  data.isObserver = self.observing == true
+  data._players = table.map(self.players, function(p)
+    local cp = p.player
+    return {
+      cp:getId(), cp:getScreenName(), cp:getAvatar(),
+      p.ready == true, cp:getTotalGameTime(), p.owner == true,
+    }
+  end)
+  data._observers = table.map(self.observers, function(t)
+    local p = t[2]
+    return { t[3], p:getScreenName(), p:getAvatar(), false, p:getTotalGameTime() }
+  end)
 
   self.enter_room_data = cbor.encode(_data);
 

@@ -88,7 +88,7 @@ QtObject {
       _s.kill = s.kill.toString();
 
       _s.scname = s.scname;
-      _s.win = victoryResult(winner, _s.role, true);
+      _s.win = Lua.tr(s.win);
       _s.role = Lua.tr(_s.role);
       _s.general = Lua.tr(_s.general) || "----";
 

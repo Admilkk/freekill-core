@@ -3641,9 +3641,17 @@ function Room:syncDrawPile()
 end
 
 --- 结束一局游戏。
----@param winner string @ 获胜的身份，空字符串表示平局
-function Room:gameOver(winner)
-  self:setBanner("GameSummary", self:getGameSummary())
+---@param winners ServerPlayer[] | Player[] | number[] | string @ 获胜的玩家id表，空字符串表示平局
+function Room:gameOver(winners)
+  if type(winners) == "table" then
+    local ret = ""
+    if type(p) == "number" then
+      ret = table.concat(winners, "+")
+    else
+      ret = table.concat(table.map(winners, Util.IdMapper), "+")
+    end
+    winners = ret
+  end
 
   for _, p in ipairs(self.players) do
     self:setPlayerProperty(p, "role_shown", true)
@@ -3657,11 +3665,11 @@ function Room:gameOver(winner)
   if self:shouldUpdateWinRate() then
     local record = self:getBanner("InitialGeneral")
     for _, p in ipairs(self.players) do
-      local mode = self:getSettings('gameMode')
+      local mode = self:getSettings("gameMode")
       local result
 
       if p.id > 0 then
-        result = self:victoryResult(winner, p.role)
+        result = self:victoryResult(winners, tostring(p.id))
 
         local general, deputyGeneral = p.general, p.deputyGeneral
         if record then
@@ -3681,12 +3689,14 @@ function Room:gameOver(winner)
     end
   end
 
-  ServerRoomBase.gameOver(self, winner)
+  self:setBanner("GameSummary", self:getGameSummary(winners))
+  ServerRoomBase.gameOver(self, winners)
 end
 
 --- 获取一局游戏的总结，包括每个玩家的回合数、回血、伤害、受伤、击杀
+---@param winners string @ 获胜的玩家id字符串，空字符串表示平局
 ---@return table<integer, integer[]> @ 玩家id到总结的映射
-function Room:getGameSummary()
+function Room:getGameSummary(winners)
   local summary = {}
   for _, p in ipairs(self.players) do
     -- 选将阶段直接房间解散的智慧 有点意思
@@ -3695,6 +3705,14 @@ function Room:getGameSummary()
       damage = 0, damaged = 0, kill = 0, killList = {}, draw = 0,
       control = 0, scname = p._splayer:getScreenName()}
       -- 回合，回血，给人回血，伤害，受伤，击杀，击杀列表，获得牌，控制
+    if winners == "" then
+      summary[p.seat].win = "Game Draw"
+    elseif table.contains(winners:split("+"), tostring(p.id)) then
+      summary[p.seat].win = "Game Win"
+    else
+      summary[p.seat].win = "Game Lose"
+    end
+    print(p, summary[p.seat].win)
   end
 
   local function incrementSummary(seat, key, value)

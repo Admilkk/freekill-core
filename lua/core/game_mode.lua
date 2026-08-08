@@ -35,42 +35,9 @@ end
 
 -- 判断胜利者的函数，若不为""，则游戏存在胜利者（一般会结束游戏）
 ---@param victim ServerPlayer @ 死者
----@return string @ 胜者阵营
+---@return ServerPlayer[] | string @ 胜者
 function GameMode:getWinner(victim)
-  if not victim.surrendered and victim.rest > 0 then
-    return ""
-  end
-
-  local room = victim.room
-  local winner = ""
-  local alive = table.filter(room.players, function(p)
-    return not p.surrendered and not (p.dead and p.rest == 0) and p.role ~= "civilian"
-  end)
-
-  if victim.role == "lord" then
-    if #alive == 1 and alive[1].role == "renegade" then
-      winner = "renegade"
-    else
-      winner = "rebel+rebel_chief"
-    end
-  elseif victim.role ~= "loyalist" then
-    local lord_win = true
-    for _, p in ipairs(alive) do
-      if p.role == "rebel" or p.role == "rebel_chief" or p.role == "renegade" then
-        lord_win = false
-        break
-      end
-    end
-    if lord_win then
-      winner = "lord+loyalist"
-    end
-  end
-
-  if winner ~= "" then
-    winner = winner.. "+civilian"
-  end
-
-  return winner
+  return ""
 end
 
 -- 判断什么时候可以投降的函数

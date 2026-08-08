@@ -246,7 +246,9 @@ local role_mode = fk.CreateGameMode{
       winner = winner.. "+civilian"
     end
 
-    return winner
+    return table.filter(room.players, function (p)
+      return table.contains(winner:split("+"), p.role)
+    end)
   end,
   surrender_func = function(self, playedTime, player)
     local roleCheck = false

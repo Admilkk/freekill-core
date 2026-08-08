@@ -331,14 +331,14 @@ end
 
 --- 获取一名角色一局游戏的胜负结果。
 --- 胜利1；失败2；平局3。
----@param winner string @ 获胜的身份，空字符串表示平局
----@param role string @ 角色的身份
+---@param winner string @ 获胜的玩家id字符串，空字符串表示平局
+---@param pid string | number @ 角色的id
 ---@return integer @ 胜负结果
-function ServerRoomBase:victoryResult(winner, role)
+function ServerRoomBase:victoryResult(winner, pid)
   local ret
   if winner == "" then
     ret = 3
-  elseif table.contains(winner:split("+"), role) then
+  elseif table.contains(winner:split("+"), tostring(pid)) then
     ret = 1
   else
     ret = 2
@@ -346,7 +346,7 @@ function ServerRoomBase:victoryResult(winner, role)
   return ret
 end
 
-function ServerRoomBase:gameOver(winner)
+function ServerRoomBase:gameOver(winners)
   if not self.game_started then return end
   self.room:destroyRequestTimer()
 
@@ -354,7 +354,7 @@ function ServerRoomBase:gameOver(winner)
     { "running", "normal" },
     coroutine.status(self.main_co)
   ) then
-    self.logic:trigger(fk.GameFinished, nil, winner)
+    self.logic:trigger(fk.GameFinished, nil, winners)
   end
 
   self.game_started = false
@@ -368,14 +368,14 @@ function ServerRoomBase:gameOver(winner)
       local result
 
       if p.id > 0 then
-        result = self:victoryResult(winner, p.role)
-        self.room:updatePlayerWinRate(id, mode, p.role, result)
+        result = self:victoryResult(winners, tostring(p.id))
+        self.room:updatePlayerWinRate(id, mode, p.id, result)
       end
     end
   end
 
-  self:doBroadcastNotify("GameOver", winner)
-  fk.qInfo(string.format("[GameOver] %d, %s, %s, in %ds", self.id, self:getSettings('gameMode'), winner, os.time() - self.start_time))
+  self:doBroadcastNotify("GameOver", winners)
+  fk.qInfo(string.format("[GameOver] %d, %s, %s, in %ds", self.id, self:getSettings('gameMode'), winners, os.time() - self.start_time))
 
   self.room:gameOver()
 

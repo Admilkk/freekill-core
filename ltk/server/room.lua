@@ -3712,7 +3712,6 @@ function Room:getGameSummary(winners)
     else
       summary[p.seat].win = "Game Lose"
     end
-    print(p, summary[p.seat].win)
   end
 
   local function incrementSummary(seat, key, value)

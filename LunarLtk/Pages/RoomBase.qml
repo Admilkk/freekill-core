@@ -373,7 +373,7 @@ W.PageBase {
       return;
     }
 
-    const animation = component.createObject(photo, { skillName, skillType });
+    const animation = component.createObject(photo, { skillName: Lua.tr(skillName), skillType: skillType });
     animation.anchors.centerIn = photo;
     animation.finished.connect(animation.destroy);
   }
@@ -412,7 +412,7 @@ W.PageBase {
         break;
       }
       case "InvokeSkill": {
-        notifySkillInvoked(data.player, Lua.tr(data.name), data.skill_type || "special");
+        notifySkillInvoked(data.player, data.name, data.skill_type || "special",);
         break;
       }
       case "InvokeUltSkill": {

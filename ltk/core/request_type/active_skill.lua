@@ -599,7 +599,7 @@ function ReqActiveSkill:updateInteraction(data, ignoreSetup)
     skill.interaction.data = data
     self.scene:update("Interaction", "1", { data = data })
     if not ignoreSetup then
-      ReqActiveSkill.setup(self, true) -- interaction变动后需复原
+      self:setup(true) -- interaction变动后需复原
     end
   end
 end
@@ -650,7 +650,7 @@ function ReqActiveSkill:doOKButton()
       end
       table.forEach(self.sub_cards, function(c) Fk:currentRoom():getVirtCardId(c) end)
       self.sub_selection_flag = true
-      ReqActiveSkill.setup(self, true) -- 需复原
+      self:setup(true) -- 需复原
     else
       reply = {
         card = cardstr,
@@ -673,7 +673,7 @@ end
 function ReqActiveSkill:doCancelButton()
   if self.sub_selection_flag then
     self.sub_selection_flag = false
-    ReqActiveSkill.setup(self, true) -- 需复原
+    self:setup(true) -- 需复原
     return
   end
   if ClientInstance then

@@ -294,7 +294,7 @@ end
 function SkillSkeleton:createTriggerSkill(_skill, idx, key, attr, spec)
   local new_name = string.format("#%s_%d_trig", _skill.name, idx)
   local sk = TriggerSkill:new(new_name, #_skill.tags > 0 and _skill.tags[1] or Skill.NotFrequent)
-  if attr.is_delay_effect then spec.is_delay_effect = true end
+  if attr.is_delay_effect or spec.is_delay_effect then sk.is_delay_effect = true end
   fk.readUsableSpecToSkill(sk, spec)
   Fk:loadTranslationTable({ [new_name] = Fk:translate(_skill.name) }, Config.language)
   sk.event = key

@@ -667,7 +667,7 @@ function Room:askToUseActiveSkill(player, params)
   params.no_indicate = (params.no_indicate == nil) and true or params.no_indicate
   params.extra_data = params.extra_data or Util.DummyTable
   ---@diagnostic disable-next-line assign-type-mismatch
-  local skill = Fk.skills[params.skill_name] ---@type ActiveSkill | ViewAsSkill
+  local skill = Fk.skills[params.skill_name] ---@type ButtonSkill
   if not (skill and (skill:isInstanceOf(ActiveSkill) or skill:isInstanceOf(ViewAsSkill))) then
     print("Attempt ask for use non-active skill: " .. params.skill_name)
     return false
@@ -2419,7 +2419,7 @@ function Room:handleUseCardReply(player, data, params)
   local extra_data = (params or {}).extra_data or Util.DummyTable
   if type(card) == "table" then
     local card_data = card
-    local skill = Fk.skills[card_data.skill] ---@cast skill ActiveSkill|ViewAsSkill
+    local skill = Fk.skills[card_data.skill] ---@cast skill ButtonSkill
     local selected_cards = card_data.subcards
     if skill.interaction then skill.interaction.data = data.interaction_data end
     if skill:isInstanceOf(ActiveSkill) then

@@ -67,6 +67,7 @@ Player.HistoryPhase = 1
 Player.HistoryTurn = 2
 Player.HistoryRound = 3
 Player.HistoryGame = 4
+Player.HistoryTable = {1, 2, 3, 4}
 
 Player.WeaponSlot = 'WeaponSlot'
 Player.ArmorSlot = 'ArmorSlot'

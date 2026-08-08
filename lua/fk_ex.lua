@@ -12,6 +12,7 @@ dofile "ltk/server/system_enum.lua"
 dofile "ltk/server/mark_enum.lua"
 TriggerSkill = require "ltk.core.skill_type.trigger"
 -- LegacyTriggerSkill = require "compat.trigger_legacy"
+ButtonSkill = require "ltk.core.skill_type.button"
 ActiveSkill = require "ltk.core.skill_type.active"
 CardSkill = require "ltk.core.skill_type.cardskill"
 ViewAsSkill = require "ltk.core.skill_type.view_as"
@@ -30,8 +31,9 @@ TrickCard, DelayedTrickCard = table.unpack(Trick)
 local Equip = require "ltk.core.card_type.equip"
 _, Weapon, Armor, DefensiveRide, OffensiveRide, Treasure = table.unpack(Equip)
 
+-- 通用组装之基本技能（包括技能本体）
 ---@param skill SkillSkeleton|Skill
----@param spec table
+---@param spec SkillSkeletonSpec|SkillSpec
 function fk.readCommonSpecToSkill(skill, spec)
   skill.mute = spec.mute
   skill.no_indicate = spec.no_indicate
@@ -49,38 +51,42 @@ function fk.readCommonSpecToSkill(skill, spec)
   end
 end
 
+-- 通用组装之UsableSkill
+---@param skill UsableSkill
+---@param spec UsableSkillSpec
 function fk.readUsableSpecToSkill(skill, spec)
   fk.readCommonSpecToSkill(skill, spec)
   assert(spec.main_skill == nil or spec.main_skill:isInstanceOf(UsableSkill))
-  if type(spec.derived_piles) == "string" then
-    skill.derived_piles = {spec.derived_piles}
-  else
-    skill.derived_piles = spec.derived_piles or {}
-  end
   skill.main_skill = spec.main_skill
-  skill.attached_skill_name = spec.attached_skill_name
-  skill.target_num = spec.target_num or skill.target_num
-  skill.min_target_num = spec.min_target_num or skill.min_target_num
-  skill.max_target_num = spec.max_target_num or skill.max_target_num
-  skill.card_num = spec.card_num or skill.card_num
-  skill.min_card_num = spec.min_card_num or skill.min_card_num
-  skill.max_card_num = spec.max_card_num or skill.max_card_num
   skill.max_use_time = {
     spec.max_phase_use_time,
     spec.max_turn_use_time,
     spec.max_round_use_time,
     spec.max_game_use_time,
   }
-  skill.distance_limit = spec.distance_limit or skill.distance_limit
+  skill.times = spec.times or skill.times
+  skill.history_branch = spec.history_branch
+end
+
+-- 通用组装之ButtonSkill
+---@param skill ButtonSkill
+---@param spec ButtonSkillSpec
+function fk.readButtonSpecToSkill(skill, spec)
+  fk.readUsableSpecToSkill(skill, spec)
+  assert(spec.main_skill == nil or spec.main_skill:isInstanceOf(ButtonSkill))
+  skill.target_num = spec.target_num or skill.target_num
+  skill.min_target_num = spec.min_target_num or skill.min_target_num
+  skill.max_target_num = spec.max_target_num or skill.max_target_num
+  skill.card_num = spec.card_num or skill.card_num
+  skill.min_card_num = spec.min_card_num or skill.min_card_num
+  skill.max_card_num = spec.max_card_num or skill.max_card_num
   skill.expand_pile = spec.expand_pile
   skill.visible_pile = spec.visible_pile
-  skill.times = spec.times or skill.times
-  skill.is_delay_effect = not not spec.is_delay_effect
-  skill.late_refresh = not not spec.late_refresh
   skill.click_count = not not spec.click_count
-  skill.history_branch = spec.history_branch
   skill.include_equip = spec.include_equip
 
+  if spec.target_filter then skill.targetFilter = spec.target_filter end
+  if spec.on_cost then skill.onCost = spec.on_cost end
   if spec.on_cost then skill.onCost = spec.on_cost end
 end
 
@@ -98,40 +104,42 @@ end
 ---@field public max_round_use_time? integer|fun(self: SkillSkeleton, player: Player): integer? @ 该技能效果的最大使用次数——轮次
 ---@field public max_game_use_time? integer|fun(self: SkillSkeleton, player: Player): integer? @ 该技能效果的最大使用次数——本局游戏
 ---@field public history_branch? string|fun(self: UsableSkill, player: ServerPlayer, data: SkillUseData):string? @ 发动技能时增加添加对应某处分支的次数
----@field public expand_pile? string | integer[] | fun(self: UsableSkill, player: ServerPlayer): integer[]|string? @ 额外牌堆，牌堆名称或卡牌id表
 ---@field public derived_piles? string | string[] @ 与某效果联系起来的私人牌堆名，失去该效果时将之置入弃牌堆(@deprecated)
 ---@field public times? integer | fun(self: UsableSkill, player: Player): integer @ 显示在技能按钮上的发动次数数字，负数不显示
----@field public min_target_num? integer
----@field public max_target_num? integer
----@field public target_num? integer
----@field public min_card_num? integer
----@field public max_card_num? integer
----@field public card_num? integer
----@field public distance_limit? integer @ 目标距离限制，与目标距离小于等于此值方可使用
 
----@class StatusSkillSpec: SkillSpec
-
----@class ActiveSkillSpec: UsableSkillSpec
----@field public can_use? fun(self: ActiveSkill, player: Player): any @ 判断主动技能否发动
----@field public card_filter? fun(self: ActiveSkill, player: Player, to_select: integer, selected: integer[], selected_targets: Player[]): any @ 判断卡牌能否选择
----@field public target_filter? fun(self: ActiveSkill, player: Player?, to_select: Player, selected: Player[], selected_cards: integer[], card: Card?, extra_data: UseExtraData|table?): any @ 判定目标能否选择
----@field public feasible? fun(self: ActiveSkill, player: Player, selected: Player[], selected_cards: integer[], card: Card): any @ 判断卡牌和目标是否符合技能限制
----@field public on_cost? fun(self: ActiveSkill, player: ServerPlayer, data: SkillUseData, extra_data?: UseExtraData|table):CostData|table? @ 自定义技能的消耗信息
----@field public history_branch? string|fun(self: ActiveSkill, player: ServerPlayer, data: SkillUseData):string? @ 发动技能时增加添加对应某处分支的次数
----@field public on_use? fun(self: ActiveSkill, room: Room, skillUseEvent: SkillUseData): any
----@field public prompt? string|fun(self: ActiveSkill, player: Player, selected_cards: integer[], selected_targets: Player[]): string @ 提示信息
----@field public interaction? fun(self: ActiveSkill, player: Player): table? @ 选项框
----@field public refresh_interaction? fun(self: ActiveSkill, player: Player, selected_cards: integer[], selected_targets: Player[], extra_data: any): table? @ 用于给interaction传递额外信息，例如按钮亮暗
----@field public card_tip? fun(self: ActiveSkill, player: Player, to_select: integer, selected: integer[], selected_targets: Player[], card?: Card, selectable: boolean, extra_data: any): string|CardTipDataSpec? @ 显示在牌上的提示
----@field public target_tip? fun(self: ActiveSkill, player: Player, to_select: Player, selected: Player[], selected_cards: integer[], card?: Card, selectable: boolean, extra_data: any): string|TargetTipDataSpec? @ 显示在目标武将牌脸上的提示
+---@class ButtonSkillSpec: UsableSkillSpec
+---@field public expand_pile? string | integer[] | fun(self: ButtonSkill, player: ServerPlayer): integer[]|string? @ 额外牌堆，牌堆名称或卡牌id表
+---@field public min_target_num? integer @ 最小目标数
+---@field public max_target_num? integer @ 最大目标数
+---@field public target_num? integer @ 额定目标数
+---@field public min_card_num? integer @ 最小卡牌数
+---@field public max_card_num? integer @ 最大卡牌数
+---@field public card_num? integer @ 额定卡牌数
 ---@field public handly_pile? boolean @ 是否能够选择“如手牌使用或打出”的牌
 ---@field public click_count? boolean @ 是否在点击按钮瞬间就计数并播放特效和语音
 ---@field public include_equip? boolean @ 选牌时是否展开装备区
----@field public fix_targets? fun(self: ActiveSkill, player: Player, selected_cards: integer[], card: Card, extra_data: any): Player[]? @ 设置固定目标
 ---@field public visible_pile? integer[] | string | fun(self: ActiveSkill, player: Player): integer[] | string @ 可见的手牌id，同时筛选手牌和expand_pile。如果返回值为字符串，当返回"_expand_pile"时会转为expand_pile，为其他字符串时则转为对应name的私人牌堆。注意：这是纯ui方案，不要用这种方式来做合法牌的筛选
+---@field public interaction? fun(self: ButtonSkill, player: Player): table? @ 选项框
+---@field public refresh_interaction? fun(self: ButtonSkill, player: Player, selected_cards: integer[], selected_targets: Player[], extra_data: any): table? @ 用于给interaction传递额外信息，例如按钮亮暗
+---@field public card_filter? fun(self: ButtonSkill, player: Player, to_select: integer, selected: integer[], selected_targets: Player[]): any @ 判断卡牌能否选择
+---@field public target_filter? fun(self: ButtonSkill, player: Player?, to_select: Player, selected: Player[], selected_cards: integer[], card: Card?, extra_data: UseExtraData|table?): any @ 判定目标能否选择
+---@field public feasible? fun(self: ButtonSkill, player: Player, selected: Player[], selected_cards: integer[], card: Card): any @ 判断卡牌和目标是否符合技能要求（或者是否能按确定键）
+---@field public on_cost? fun(self: ButtonSkill, player: ServerPlayer, data: SkillUseData, extra_data?: UseExtraData|table):CostData|table? @ 自定义技能的消耗信息
+---@field public on_use? fun(self: ButtonSkill, room: Room, skillUseEvent: SkillUseData): any @ 实际使用的函数
+---@field public prompt? string|fun(self: ButtonSkill, player: Player, selected_cards: integer[], selected_targets: Player[]): string @ 思考时的提示信息
 
----@class CardSkillSpec: UsableSkillSpec
----@field public mod_target_filter? fun(self: ActiveSkill, player: Player, to_select: Player, selected: Player[], card: Card, extra_data: any): any @ 判定目标是否合法（例如不能杀自己，火攻无手牌目标）
+---@class StatusSkillSpec: SkillSpec
+
+---@class ActiveSkillSpec: ButtonSkillSpec
+---@field public can_use? fun(self: ActiveSkill, player: Player): any @ 判断主动技能否发动
+---@field public history_branch? string|fun(self: ActiveSkill, player: ServerPlayer, data: SkillUseData):string? @ 发动技能时增加添加对应某处分支的次数
+---@field public card_tip? fun(self: ActiveSkill, player: Player, to_select: integer, selected: integer[], selected_targets: Player[], card?: Card, selectable: boolean, extra_data: any): string|CardTipDataSpec? @ 显示在牌上的提示
+---@field public target_tip? fun(self: ActiveSkill, player: Player, to_select: Player, selected: Player[], selected_cards: integer[], card?: Card, selectable: boolean, extra_data: any): string|TargetTipDataSpec? @ 显示在目标武将牌脸上的提示
+---@field public fix_targets? fun(self: ActiveSkill, player: Player, selected_cards: integer[], card: Card, extra_data: any): Player[]? @ 设置固定目标
+
+---@class CardSkillSpec: ActiveSkillSpec
+---@field public distance_limit? integer @ 目标距离限制，与目标距离小于等于此值方可使用
+---@field public mod_target_filter? fun(self: ActiveSkill, player: Player, to_select: Player, selected: Player[], card: Card, extra_data: any): any @ 更宽松地判定目标是否合法（例如不能杀自己，火攻无手牌目标），常用于额外目标判断
 ---@field public target_filter? fun(self: CardSkill, player: Player?, to_select: Player, selected: Player[], selected_cards: integer[], card?: Card, extra_data: any): any @ 判定目标能否选择
 ---@field public feasible? fun(self: CardSkill, player: Player, selected: Player[], selected_cards: integer[]): any @ 判断卡牌和目标是否符合技能限制
 ---@field public can_use? fun(self: CardSkill, player: Player, card: Card, extra_data: any): any @ 判断卡牌技能否发动
@@ -149,7 +157,7 @@ end
 ---@field public card_tip? fun(self: ActiveSkill, player: Player, to_select: integer, selected: integer[], selected_targets: Player[], card?: Card, selectable: boolean, extra_data: any): string|CardTipDataSpec? @ 显示在牌上的提示
 ---@field public target_tip? fun(self: CardSkill, player: Player, to_select: Player, selected: Player[], selected_cards: integer[], card?: Card, selectable: boolean, extra_data: any): string|TargetTipDataSpec? @ 显示在目标武将牌脸上的提示
 
----@class ViewAsSkillSpec: UsableSkillSpec
+---@class ViewAsSkillSpec: ButtonSkillSpec
 ---@field public filter_pattern? ViewAsPattern|fun(self: ViewAsSkill, player: Player, card_name: string?, selected: integer[]?): ViewAsPattern?
 ---@field public card_filter? fun(self: ViewAsSkill, player: Player, to_select: integer, selected: integer[], selected_targets: Player[]): any @ 判断卡牌能否选择
 ---@field public target_filter? fun(self: ViewAsSkill, player: Player?, to_select: Player, selected: Player[], selected_cards: integer[], card: Card?, extra_data: UseExtraData|table?): any @ 判定目标能否选择

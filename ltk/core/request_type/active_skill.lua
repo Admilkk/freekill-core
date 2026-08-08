@@ -392,13 +392,7 @@ function ReqActiveSkill:visualizePile()
 
   -- 直接在这里进行屏蔽手牌操作
   if self.sub_selection_flag then
-    self.change["visible_cards"] = table.map(self.sub_cards, function(c)
-      if c.id == 0 then
-        return c.virt_id
-      else
-        return c.id
-      end
-    end) -- 二级选择时visible_pile改为全体手牌
+    self.change["visible_cards"] = "_sub_selection" -- 二级选择时visible_pile改为二级选择牌堆
     return
   end
 

@@ -9,9 +9,6 @@
 ---@class UsableSkill : Skill
 ---@field public max_use_time table<integer, integer?> @ 一个效果的最大可用次数
 ---@field public history_branch? string | fun(self: UsableSkill, player: ServerPlayer, data: SkillUseData, extra_data?: UseExtraData|table):string? @ 发动时是否将技能发动历史归类到某个分支
----@field public expand_pile? string | integer[] | fun(self: UsableSkill, player: Player): integer[]|string? @ 额外牌堆，牌堆名称或卡牌id表
----@field public visible_pile? integer[] | string | fun(self: ActiveSkill | ViewAsSkill, player: Player): integer[] | string @ 可见的手牌id，同时筛选手牌和expand_pile
----@field public derived_piles? string | string[] @deprecated @ 与某效果联系起来的私人牌堆名，失去该效果时将之置入弃牌堆
 ---@field public times? fun(self: UsableSkill, player: Player): integer
 local UsableSkill = Skill:subclass("UsableSkill")
 
@@ -86,65 +83,6 @@ function UsableSkill:withinTimesLimit(player, scope, card, card_name, to)
   (card and not not card:hasMark(MarkEnum.BypassTimesLimit)) or
   not not player:hasMark(MarkEnum.BypassTimesLimit) or
   (to and not not to:hasMark(MarkEnum.BypassTimesLimitTo))
-end
-
--- 获得技能的额外牌堆卡牌id表
----@param player Player @ 使用者
----@return integer[]
-function UsableSkill:getPile(player)
-  if player == nil or self.expand_pile == nil then return {} end
-  local pile = self.expand_pile
-  if type(pile) == "function" then
-    pile = pile(self, player)
-  end
-  if type(pile) == "string" then
-    pile = player:getPile(pile)
-  end
-  return pile
-end
-
---- 发动技能前确定cost_data的函数
----@param player ServerPlayer @ 使用者
----@param skillData SkillUseDataSpec @ 技能使用数据
----@param extra_data? UseExtraData|table @ 额外数据，请注意这不是skillData的extra_data
----@return CostData|table? @ cost_data，默认为空表，其中的from/cards/tos/extra_data会同步到skillData上。
-function UsableSkill:onCost(player, skillData, extra_data)
-  return nil
-end
-
--- 处理技能的发动信息（仅限服务端）
----@param player ServerPlayer @ 使用者
----@param use_spec SkillUseDataSpec @ 技能使用数据
----@param extra_data? UseExtraData|table @ 额外数据，请注意这不是use_data的extra_data
----@return SkillUseData @ 技能发动数据
-function UsableSkill:handleCostData(player, use_spec, extra_data)
-  local use_data = SkillUseData:new(use_spec)
-  use_data.cost_data = self:onCost(player, use_spec, extra_data) or {}
-  if use_data.cost_data.from then
-    use_data.from = use_data.cost_data.from
-  end
-  if use_data.cost_data.cards then
-    use_data.cards = use_data.cost_data.cards
-  end
-  if use_data.cost_data.tos then
-    use_data.tos = use_data.cost_data.tos
-  end
-  if use_data.cost_data.interaction_data then
-    use_data.interaction_data = use_data.cost_data.interaction_data
-  end
-  if use_data.cost_data.extra_data then
-    use_data.extra_data = use_data.cost_data.extra_data
-  end
-  if not use_data.cost_data.history_branch then
-    local branch = self.history_branch
-    if type(branch) == "function" then
-      branch = self:history_branch(player, use_data, extra_data)
-    end
-    if type(branch) == "string" then
-      use_data.cost_data.history_branch = branch
-    end
-  end
-  return use_data
 end
 
 return UsableSkill

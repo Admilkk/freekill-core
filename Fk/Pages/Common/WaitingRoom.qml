@@ -6,7 +6,6 @@ import QtQuick.Layouts
 
 import Fk
 import Fk.Components.WaitingRoom
-import Fk.Components.Common
 import Fk.Widgets as W
 
 import LunarLtk
@@ -169,11 +168,10 @@ W.PageBase {
         settings = _settings
       }
 
-      Column {
+      ColumnLayout {
         id: roominfo
         anchors.fill: parent
         Repeater {
-          width: parent.width
           model: infoContainer.settings
 
           Item {
@@ -202,6 +200,7 @@ W.PageBase {
               visible: parent.modelData[0] !== Lua.tr("General Pool")
               text: {
                 const str = parent.modelData[1];
+                if (typeof str !== "string") return "";
                 if (str === "true") return Lua.tr("True");
                 if (str === "false") return Lua.tr("False");
                 return str

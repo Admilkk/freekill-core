@@ -10,6 +10,7 @@
 ---@field public derived_piles? string|string[]  @deprecated @ 与某效果联系起来的私人牌堆名，失去该效果时将之置入弃牌堆
 ---@field public audio_index? table|integer @ 此技能效果播放的语音序号，可为int或int表，为0时不播放语音
 ---@field public extra? table @ 塞进技能里的各种数据
+---@field public relate_to_place? string| "m" | "d" @ 主将技("m")/副将技("d")
 
 ---@class SkillSkeletonSpec
 ---@field public name? string @ 骨架名，即此技能集合的外在名称
@@ -345,6 +346,7 @@ function SkillSkeleton:createTriggerSkill(_skill, idx, key, attr, spec)
 
   if spec.can_refresh then sk.canRefresh = spec.can_refresh end
   if spec.on_refresh then sk.refresh = spec.on_refresh end
+  if spec.late_refresh then sk.late_refresh = spec.late_refresh end
 
   if spec.can_refresh and not (spec.can_trigger or spec.can_wake or spec.on_trigger
     or spec.on_cost or spec.on_use) then
@@ -567,7 +569,7 @@ function SkillSkeleton:createActiveSkill(_skill, idx, key, attr, spec)
   Fk:loadTranslationTable({ [new_name] = Fk:translate(_skill.name) }, Config.language)
 
   local skill = ActiveSkill:new(new_name, #_skill.tags > 0 and _skill.tags[1] or Skill.NotFrequent)
-  fk.readUsableSpecToSkill(skill, spec)
+  fk.readButtonSpecToSkill(skill, spec)
 
   local spec_can_use = spec.can_use
   if not spec_can_use then
@@ -634,12 +636,12 @@ function SkillSkeleton:createCardSkill(_skill, idx, key, attr, spec)
   Fk:loadTranslationTable({ [new_name] = Fk:translate(_skill.name) }, Config.language)
 
   local skill = CardSkill:new(new_name, #_skill.tags > 0 and _skill.tags[1] or Skill.NotFrequent)
-  fk.readUsableSpecToSkill(skill, spec)
+  fk.readButtonSpecToSkill(skill, spec)
+
+  if spec.distance_limit then skill.distance_limit = spec.distance_limit end
 
   if spec.can_use then skill.canUse = spec.can_use end
-  if spec.target_filter then skill.targetFilter = spec.target_filter end
   if spec.mod_target_filter then skill.modTargetFilter = spec.mod_target_filter end
-  if spec.feasible then skill.feasible = spec.feasible end
   if spec.on_use then skill.onUse = spec.on_use end
   if spec.on_action then skill.onAction = spec.on_action end
   if spec.about_to_effect then skill.aboutToEffect = spec.about_to_effect end
@@ -665,7 +667,7 @@ function SkillSkeleton:createViewAsSkill(_skill, idx, key, attr, spec)
   Fk:loadTranslationTable({ [new_name] = Fk:translate(_skill.name) }, Config.language)
 
   local skill = ViewAsSkill:new(new_name, #_skill.tags > 0 and _skill.tags[1] or Skill.NotFrequent)
-  fk.readUsableSpecToSkill(skill, spec)
+  fk.readButtonSpecToSkill(skill, spec)
 
   skill.viewAs = spec.view_as
   if spec.card_filter then

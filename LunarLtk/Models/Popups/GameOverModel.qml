@@ -8,9 +8,9 @@ QtObject {
   id: root
 
   property string winner: ""
-  property string myRole: ""
+  property string myId: ""
 
-  readonly property string titleText: victoryResult(winner, myRole, true)
+  readonly property string titleText: victoryResult(winner, true)
 
   readonly property bool canContinue:
     !Config.observing && !Config.replaying && Config.roomCapacity === 1
@@ -50,14 +50,10 @@ QtObject {
   signal finished()
   signal summaryReady()
 
-  function victoryResult(winner, role, cap) {
-    let ret = "";
-    if (winner === "") {
-      ret = 3;
-    } else if (winner.split("+").includes(role)) {
-      ret = 1;
-    } else {
-      ret = 2;
+  function victoryResult(winner, cap) {
+    let ret = 3;
+    if (winner !== "") {
+      ret = winner.split("+").includes(myId)? 1: 2;
     }
 
     if (cap) {
@@ -126,13 +122,13 @@ QtObject {
   onWinnerChanged: {
     if (!Config.disableGameOverAudio) {
       Backend.playSound("./audio/system/" +
-        victoryResult(winner, myRole, false));
+        victoryResult(winner, false));
     }
 
     loadSummary();
   }
 
   Component.onCompleted: {
-    myRole = Lua.selfPlayer.role;
+    myId = Lua.selfPlayer.id.toString();
   }
 }

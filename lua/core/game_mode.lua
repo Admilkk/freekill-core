@@ -37,10 +37,20 @@ end
 ---@param victim ServerPlayer @ 死者
 ---@return ServerPlayer[] | string @ 胜者
 function GameMode:getWinner(victim)
-  if #victim:getFriends(false) == 0 then
-    return victim:getEnemies(true)
-  end
-  return ""
+    if not victim.surrendered and victim.rest > 0 then
+      return ""
+    end
+    local room = victim.room
+    local alive = table.filter(room.players, function(p) ---@type Player[]
+      return not p.surrendered and not (p.dead and p.rest == 0)
+    end)
+    local winner = alive[1].role
+    for _, p in ipairs(alive) do
+      if p.role ~= winner then
+        return ""
+      end
+    end
+    return alive[1]:getFriends(true, true)
 end
 
 -- 判断什么时候可以投降的函数

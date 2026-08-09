@@ -59,13 +59,6 @@ function GameLogic:run()
   self:action()
 end
 
----@return boolean
-local function execGameEvent(tp, ...)
-  local event = tp:create(...)
-  local _, ret = event:exec()
-  return ret
-end
-
 --- 分配身份
 function GameLogic:assignRoles()
   local room = self.room
@@ -310,10 +303,10 @@ function GameLogic:action()
   self:trigger(fk.GamePrepared)
   local room = self.room
 
-  execGameEvent(GameEvent.DrawInitial)
+  GameEvent.DrawInitial:create(DrawInitialData:new({ who = room.players })):exec()
 
   while true do
-    execGameEvent(GameEvent.Round)
+    GameEvent.Round:create():exec()
     if room.game_finished then break end
     if table.every(room.players, function(p) return p.dead and p.rest == 0 end) then room:gameOver("") end
     room:setCurrent(room.players[1])

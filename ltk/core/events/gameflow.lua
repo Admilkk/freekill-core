@@ -1,6 +1,8 @@
 
 --- DrawInitialData 关于摸起始手牌的数据
 ---@class DrawInitialDataSpec
+---@field public who ServerPlayer[] @ 摸牌的玩家
+---@field public disable_luck boolean? @ 是否允许手气卡，默认跟随房间设置
 ---@field public num integer @ 摸牌数
 ---@field public fix_ids integer[]? @ 起始手牌固定牌池，若数量不足则从牌堆补至num
 ---@field public cards integer[] @ 摸到的起始手牌

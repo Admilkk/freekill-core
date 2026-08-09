@@ -97,20 +97,23 @@ end
 
 function DrawInitial:main()
   local room = self.room
+  local data = self.data
+
+  data.who = data.who or room.alive_players
 
   local luck_data = {
     drawInit = drawInit,
     discardInit = discardInit,
-    playerList = table.map(room.alive_players, Util.IdMapper),
+    playerList = table.map(data.who, Util.IdMapper),
     cards = {},
   }
 
-  for _, player in ipairs(room.alive_players) do
+  for _, player in ipairs(data.who) do
     local draw_data = DrawInitialData:new{ num = 4 }
     room.logic:trigger(fk.DrawInitialCards, player, draw_data)
     luck_data[player.id] = draw_data
     luck_data[player.id].luckTime = room:getSettings('luckTime')
-    if player.id < 0 then -- Robot
+    if player.id < 0 or data.disable_luck then -- Robot
       luck_data[player.id].luckTime = 0
     end
     if draw_data.num > 0 then
@@ -121,38 +124,26 @@ function DrawInitial:main()
     luck_data[player.id].cards = draw_data.cards
   end
 
-  if room:getSettings('luckTime') <= 0 then
-    room:shuffleTable(room.draw_pile)
-    for _, id in ipairs(room.draw_pile) do
-      room:setCardArea(id, Card.DrawPile, nil)
+  if room:getSettings("luckTime") > 0 and not data.disable_luck then
+    local request = Request:new(data.who, "AskForSkillInvoke")
+    for _, p in ipairs(data.who) do
+      request:setData(p, { "AskForLuckCard", "#AskForLuckCard:::" .. room:getSettings('luckTime') })
     end
-    room:syncDrawPile()
-    for _, player in ipairs(room.alive_players) do
-      local draw_data = luck_data[player.id]
-      draw_data.luckTime = nil
-      draw_data.cards = luck_data[player.id].cards
-      room.logic:trigger(fk.AfterDrawInitialCards, player, draw_data)
-    end
-    return
+    request.focus_text = "AskForLuckCard"
+    request.luck_data = luck_data
+    request.accept_cancel = true
+    request:ask()
   end
-
-  local request = Request:new(room.alive_players, "AskForSkillInvoke")
-  for _, p in ipairs(room.alive_players) do
-    request:setData(p, { "AskForLuckCard", "#AskForLuckCard:::" .. room:getSettings('luckTime') })
-  end
-  request.focus_text = "AskForLuckCard"
-  request.luck_data = luck_data
-  request.accept_cancel = true
-  request:ask()
 
   room:shuffleTable(room.draw_pile)
   for _, id in ipairs(room.draw_pile) do
     room:setCardArea(id, Card.DrawPile, nil)
   end
   room:syncDrawPile()
-  for _, player in ipairs(room.alive_players) do
+  for _, player in ipairs(data.who) do
     local draw_data = luck_data[player.id]
     draw_data.luckTime = nil
+    draw_data.cards = luck_data[player.id].cards
     room.logic:trigger(fk.AfterDrawInitialCards, player, draw_data)
   end
 end

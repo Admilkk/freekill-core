@@ -11,7 +11,7 @@ Fk:loadTranslationTable{
       "忠臣储君死亡时，主公失去1点体力；储君杀死主公弃置所有牌。（出牌阶段或每个回合结束询问）",
 
   ["#lord_designating_heir&"] = "立储：你可以将一名其他角色立为储君",
-  ["@@heir_of_throne-noclear"] = "储君",
+  ["@@heir_of_throne-noclear"] = "<font color='goldenrod'>储君</font>",
   ["#lord_designating_heir&-xingshang"] = "立储：获得%src区域内至多两张牌",
   ["heir_usurpation"] = "储君夺位",
   ["heir_succession"] = "储君继位",

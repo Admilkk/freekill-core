@@ -247,15 +247,18 @@ local role_mode = fk.CreateGameMode{
         winner = ""
       elseif room:getSettings("RenegadeTogether") and table.every(alive, function(p) return p.role == "renegade" end) then
         winner = "renegade"
-      elseif #alive == 1 and alive[1].role == "renegade" then
-        winner = "renegade"
+      elseif #alive == 1 then
+        local role = alive[1].role
+        if table.contains({"renegade", "wild"}, role) then
+          winner = role
+        end
       else
         winner = "rebel+rebel_chief"
       end
     elseif victim.role ~= "loyalist" then
       local lord_win = true
       for _, p in ipairs(alive) do
-        if p.role == "rebel" or p.role == "rebel_chief" or p.role == "renegade" then
+        if p.role == "rebel" or p.role == "rebel_chief" or p.role == "renegade" or p.role == "wild" then
           lord_win = false
           break
         end

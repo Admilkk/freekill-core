@@ -401,6 +401,7 @@ function ServerRoomBase:tellRoomToObserver(player)
   local observee = self.players[1]
   local start_time = os.getms()
   local summary = self:serialize(observee)
+  summary.settings = table.clone(summary.settings)
   summary.settings.isObserver = true
   player:doNotify("Observe", cbor.encode(summary))
   -- 由于开战前旁观的加入，旁观者能回到等待界面了，有必要知道谁是主

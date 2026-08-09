@@ -174,6 +174,10 @@ local role_getlogic = function()
         room:handleAddLoseSkills(lord, skill, nil, false, true)
       end
 
+      if room:getSettings("DesignateHeir") then
+        room:handleAddLoseSkills(lord, "lord_designating_heir&", nil, false, true)
+      end
+
       local nonlord = table.filter(room:getOtherPlayers(lord, true), function (p)
         return not table.contains(quickSetPlayers, p)
       end)
@@ -185,6 +189,22 @@ local role_getlogic = function()
           lordGeneral = lord.general,
           lordDeputy = lord.deputyGeneral,
         })
+      end
+
+      local renegade_loyalty, renegade_wild = room:getSettings("RenegadeLoyalty"), room:getSettings("RenegadeWild")
+      local renegade_skills = {} ---@type string[]
+      if renegade_loyalty then table.insert(renegade_skills, "renegade_loyalty&") end
+      if renegade_wild then table.insert(renegade_skills, "renegade_wild&") end
+      if next(renegade_skills) then
+        local addFakeSkill = function(player, skill)
+          player:addFakeSkill(skill)
+          player:prelightSkill(skill, true)
+        end
+        for _, p in ipairs(nonlord) do
+          if p.role == "renegade" then
+            table.forEach(renegade_skills, function(s) addFakeSkill(p, Fk.skills[s]) end)
+          end
+        end
       end
     else
       room:gameOver("")
@@ -208,6 +228,7 @@ local role_mode = fk.CreateGameMode{
     if targetOne.role == "renegade" and targetTwo.role == "renegade" then
       return Fk:currentRoom():getSettings("RenegadeTogether") -- 内奸是否需要内讧
     end
+    if targetOne.role == "wild" or targetTwo.role == "wild" then return false end
     return GameMode.friendEnemyJudge(self, targetOne, targetTwo)
   end,
   winner_getter = function(self, victim)
@@ -222,7 +243,9 @@ local role_mode = fk.CreateGameMode{
     end)
 
     if victim.role == "lord" then
-      if room:getSettings("RenegadeTogether") and table.every(alive, function(p) return p.role == "renegade" end) then
+      if table.find(alive, function(p) return p.role == "lord" end) then
+        winner = ""
+      elseif room:getSettings("RenegadeTogether") and table.every(alive, function(p) return p.role == "renegade" end) then
         winner = "renegade"
       elseif #alive == 1 and alive[1].role == "renegade" then
         winner = "renegade"
@@ -334,6 +357,34 @@ role_mode.ui_settings = {
   },
 
   W.PreferenceGroup {
+    title = "mobile_role_change",
+
+    W.SwitchRow {
+      _settingsKey = "DesignateHeir",
+      title = "DesignateHeir",
+      enabled = function(settings)
+        return (settings.playerNum or 0) >= 8
+      end,
+    },
+
+    W.SwitchRow {
+      _settingsKey = "RenegadeLoyalty",
+      title = "RenegadeLoyalty",
+      enabled = function(settings)
+        return (settings.playerNum or 0) >= 8
+      end,
+    },
+
+    W.SwitchRow {
+      _settingsKey = "RenegadeWild",
+      title = "RenegadeWild",
+      enabled = function(settings)
+        return (settings.playerNum or 0) >= 8
+      end,
+    },
+  },
+
+  W.PreferenceGroup {
     title = "role_double_renegade",
 
     W.SwitchRow {
@@ -371,6 +422,10 @@ Fk:loadTranslationTable{
   ["loyalist never surrender"] = "忠臣永不投降！",
   ["civilian never surrender"] = "平民坚持就是成功！",
 
+  ["role_misc_change"] = "身份小改动",
+  ["LordIsWhat"] = "真人特定身份",
+  ["help: LordIsWhat"] = "最早加入房间的真人始终是特定身份（调试用）",
+
   ["m_wangzhan_enhance"] = "王战比赛规则",
   ["WangzhanBattleRoyal"] = "鏖战",
   ["help: WangzhanBattleRoyal"] = "8人/6人局第3/4轮结束时进入鏖战，回合结束时需弃牌或失去体力",
@@ -379,9 +434,18 @@ Fk:loadTranslationTable{
   ["@[:]WangzhanBattleRoyal"] = "",
   [":WangzhanBattleRoyal"] = "每回合所有行动结束后，当前回合角色须选择一项：1.将两张牌置入弃牌堆；2.失去1点体力。结算中当前回合角色不触发任何武将技能。",
 
-  ["role_misc_change"] = "身份小改动",
-  ["LordIsWhat"] = "真人特定身份",
-  ["help: LordIsWhat"] = "最早加入房间的真人始终是特定身份（调试用）",
+  ["mobile_role_change"] = "手杀身份规则",
+  ["help: mobile_role_change"] = "仅在游戏人数8时有效",
+  ["DesignateHeir"] = "主公立储",
+  ["help: DesignateHeir"] = "第一轮限一次，主公可以对一名其他角色立储：" ..
+      "主公死亡时，若储君为忠臣，获得主公区域内至多两张牌，增加1点体力上限，回复1点体力，变为主公；" ..
+      "忠臣储君死亡时，主公失去1点体力；储君杀死主公弃置所有牌。",
+  ["RenegadeLoyalty"] = "内奸侍奉明主",
+  ["help: RenegadeLoyalty"] = "场上人数＞4且有忠臣死亡时，内奸可以变为忠臣。",
+  ["RenegadeWild"] = "内奸自立",
+  ["help: RenegadeWild"] = "内奸可以成为野心家：获得野心家标记（出牌阶段，弃置以摸两张牌或回复1点体力）" ..
+      "和〖飞扬〗〖跋扈〗，杀死角色摸三张牌。",
+
   ["role_double_renegade"] = "双内模式相关",
   ["help: role_double_renegade"] = "仅在游戏人数<b>不小于6</b>时有效",
   ["MakeCivilian"] = "置入平民",

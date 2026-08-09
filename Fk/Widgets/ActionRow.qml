@@ -9,9 +9,16 @@ AbstractButton {
   property string subTitle
   property Component suffixComponent: null
   property alias suffixLoader: suffixLoader
+  property real suffixMaximumWidth: width * 0.4
+  implicitHeight: Math.max(60, contentItem ? contentItem.implicitHeight : 0)
 
   contentItem: Item {
+    id: contentRoot
+
     property real txtPadding: 8
+    property real textWidth: Math.max(20, width - titleLayout.x - txtPadding * 4 - suffixContainer.width)
+    implicitHeight: titleLayout.implicitHeight + txtPadding * 2
+
     ColumnLayout {
       id: titleLayout
       x: parent.txtPadding * 2; y: parent.txtPadding
@@ -22,9 +29,10 @@ AbstractButton {
           family: root.font.family
           pixelSize: 18
         }
+        Layout.preferredWidth: contentRoot.textWidth
         Layout.preferredHeight: 18
         opacity: enabled ? 1.0 : 0.3
-        horizontalAlignment: Text.AlignHCenter
+        horizontalAlignment: Text.AlignLeft
         verticalAlignment: Text.AlignVCenter
         elide: Text.ElideRight
       }
@@ -37,16 +45,23 @@ AbstractButton {
           pixelSize: 16
         }
         color: "grey"
-        Layout.preferredHeight: 16
         opacity: enabled ? 1.0 : 0.3
-        horizontalAlignment: Text.AlignHCenter
+        horizontalAlignment: Text.AlignLeft
         verticalAlignment: Text.AlignVCenter
-        elide: Text.ElideRight
+        wrapMode: Text.WordWrap
+        lineHeight: 0.95
+        Layout.preferredWidth: contentRoot.textWidth
+        Layout.preferredHeight: implicitHeight
+        Layout.alignment: Qt.AlignLeft
       }
     }
 
     Item {
-      width: parent.width - anchors.rightMargin - parent.txtPadding - titleLayout.width
+      id: suffixContainer
+
+      property real naturalWidth: suffixLoader.item ? suffixLoader.item.implicitWidth : 0
+
+      width: Math.min(naturalWidth, root.suffixMaximumWidth)
       anchors.right: parent.right
       anchors.rightMargin: parent.txtPadding * 2
       anchors.verticalCenter: parent.verticalCenter
@@ -54,6 +69,8 @@ AbstractButton {
       Loader {
         id: suffixLoader
         anchors.right: parent.right
+        anchors.verticalCenter: parent.verticalCenter
+        width: parent.width
 
         sourceComponent: root.suffixComponent
       }
@@ -61,7 +78,7 @@ AbstractButton {
   }
 
   background: Rectangle {
-    implicitHeight: 60
+    implicitHeight: root.implicitHeight
     //radius: 12
     color: root.down ? "#EFEFEF" : "#FEFFFE"
     Behavior on color {

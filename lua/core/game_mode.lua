@@ -111,7 +111,7 @@ end
 ---@param killer? ServerPlayer @ 击杀者，可能没有
 function GameMode:deathRewardAndPunish (victim, killer)
   if not killer or killer.dead then return end
-  if victim.role == "rebel" or victim.role == "rebel_chief" then
+  if victim.role == "rebel" or victim.role == "rebel_chief" or killer.role == "wild" then
     killer:drawCards(3, "kill")
   elseif victim.role == "loyalist" and killer.role == "lord" then
     killer:throwAllCards("he")

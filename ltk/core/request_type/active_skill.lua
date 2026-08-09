@@ -599,7 +599,7 @@ function ReqActiveSkill:updateInteraction(data, ignoreSetup)
     skill.interaction.data = data
     self.scene:update("Interaction", "1", { data = data })
     if not ignoreSetup then
-      self:setup(true) -- interaction变动后需复原
+      ReqActiveSkill.setup(self, true) -- interaction变动后需复原
     end
   end
 end

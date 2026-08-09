@@ -369,7 +369,7 @@ function ServerRoomBase:gameOver(winners)
 
       if p.id > 0 then
         result = self:victoryResult(winners, tostring(p.id))
-        self.room:updatePlayerWinRate(id, mode, p.id, result)
+        self.room:updatePlayerWinRate(id, mode, p.role or "", result)
       end
     end
   end

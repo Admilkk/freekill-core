@@ -37,12 +37,12 @@ Flickable {
     //columns: 2
 
     GridLayout {
-      columns: 2
+      columns: 4
 
       // name
       RowLayout {
         anchors.rightMargin: 8
-        spacing: 16
+        spacing: 8
         Text {
           text: Lua.tr("Name")
           font.bold: true
@@ -61,7 +61,7 @@ Flickable {
       // title
       RowLayout {
         anchors.rightMargin: 8
-        spacing: 16
+        spacing: 8
         Text {
           text: Lua.tr("Title")
           font.bold: true
@@ -69,6 +69,44 @@ Flickable {
         }
         TextField {
           id: title
+          maximumLength: 64
+          font.pixelSize: 18
+          Layout.rightMargin: 16
+          Layout.fillWidth: true
+          text: Config.preferredFilter.id
+        }
+      }
+
+      // headnote
+      RowLayout {
+        anchors.rightMargin: 8
+        spacing: 8
+        Text {
+          text: Lua.tr("Headnote")
+          font.bold: true
+          font.pixelSize: 14
+        }
+        TextField {
+          id: headnote
+          maximumLength: 64
+          font.pixelSize: 18
+          Layout.rightMargin: 16
+          Layout.fillWidth: true
+          text: Config.preferredFilter.id
+        }
+      }
+
+      // endnote
+      RowLayout {
+        anchors.rightMargin: 8
+        spacing: 8
+        Text {
+          text: Lua.tr("Endnote")
+          font.bold: true
+          font.pixelSize: 14
+        }
+        TextField {
+          id: endnote
           maximumLength: 64
           font.pixelSize: 18
           Layout.rightMargin: 16
@@ -510,6 +548,10 @@ Flickable {
     f.name = name.text;
     // title
     f.title = title.text;
+    // headnote
+    f.headnote = headnote.text;
+    // endnote
+    f.endnote = endnote.text;
     // kingdom
     f.kingdoms = getCheck(parentKingdomBox, kingdomStates);
     // maxHp

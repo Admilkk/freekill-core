@@ -242,7 +242,7 @@ ColumnLayout {
         highlight: Rectangle { color: "#535046"; radius: 8; border.width: 1; border.color: "gray" }
         Layout.alignment: Qt.AlignHCenter
         model: [
-          Lua.tr("Skill Description"),
+          Lua.tr("skill"),
           Lua.tr("$Equip"),
           Lua.tr("$Judge"),
           Lua.tr("$Hand"),

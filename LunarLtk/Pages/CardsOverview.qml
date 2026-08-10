@@ -195,7 +195,6 @@ W.PageBase {
     property var cards
     function updateCard() {
       const data = Ltk.createCardModel(cid);
-      data.selectable = true; // 卡牌变亮
       detailFlickable.contentY = 0; // 重置滚动条
       const suitTable = {
         spade: "♠", heart: '<font color="red">♥</font>',
@@ -256,6 +255,7 @@ W.PageBase {
           dataModel: Ltk.createCardModel(1)
           known: false
           showDetail: false
+          selectable: true // 卡牌变亮
 
           property int dupCount: 0
           Text {

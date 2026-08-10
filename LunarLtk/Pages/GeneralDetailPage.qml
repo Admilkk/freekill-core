@@ -994,7 +994,7 @@ Item {
       id: drawerBar
       Layout.alignment: Qt.AlignHCenter
       model: [
-        Lua.tr("Skill Description"),
+        Lua.tr("skill"),
         Lua.tr("Audio Text"),
         Lua.tr("General Statistics Overview"),
         Lua.tr("Other Same Name Generals"),

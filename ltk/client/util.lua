@@ -272,6 +272,8 @@ local function filterGeneral(general, filter)
 
   local name = filter.name ---@type string
   local title = filter.title ---@type string
+  local headnote = filter.headnote ---@type string
+  local endnote = filter.endnote ---@type string
   local kingdoms = filter.kingdoms ---@type string[]
   local maxHps = filter.maxHps ---@type string[]
   local hps = filter.hps ---@type string[]
@@ -286,6 +288,8 @@ local function filterGeneral(general, filter)
   return not (
     (name ~= "" and not find_with_escape(Fk:translate(general.name), name)) or
     (title ~= "" and not find_with_escape(translateInfo("#" .. general.name), title)) or
+    (headnote ~= "" and not find_with_escape(Fk:translate(general.headnote), headnote)) or
+    (endnote ~= "" and not find_with_escape(Fk:translate(general.endnote), endnote)) or
     (#kingdoms > 0 and not table.contains(kingdoms, Fk:translate(general.kingdom)) and
       not table.contains(kingdoms, Fk:translate(general.subkingdom))) or
     (#maxHps > 0 and not table.contains(maxHps, tostring(general.maxHp))) or

@@ -471,7 +471,7 @@ end
 
 --- 将一张或多张牌移动到某处
 ---@param card integer | integer[] | Card | Card[] @ 要移动的牌
----@param to_place integer @ 移动的目标位置
+---@param toArea integer @ 移动的目标位置
 ---@param target? ServerPlayer @ 移动的目标角色
 ---@param reason? integer @ 移动时使用的移牌原因
 ---@param skill_name? string @ 技能名
@@ -480,7 +480,7 @@ end
 ---@param proposer? ServerPlayer @ 移动操作者
 ---@param moveMark? table|string @ 移动后自动赋予标记，格式：{标记名(支持-inarea后缀，移出值代表区域后清除), 值}
 ---@param visiblePlayers? ServerPlayer|ServerPlayer[] @ 控制移动对特定角色可见（在moveVisible为false时生效）
-function MoveEventWrappers:moveCardTo(card, to_place, target, reason, skill_name, special_name, visible, proposer, moveMark, visiblePlayers)
+function MoveEventWrappers:moveCardTo(card, toArea, target, reason, skill_name, special_name, visible, proposer, moveMark, visiblePlayers)
   ---@cast self Room
   reason = reason or fk.ReasonJustMove
   skill_name = skill_name or ""
@@ -490,7 +490,7 @@ function MoveEventWrappers:moveCardTo(card, to_place, target, reason, skill_name
   local to
   if table.contains(
     {Card.PlayerEquip, Card.PlayerHand,
-      Card.PlayerJudge, Card.PlayerSpecial}, to_place) then
+      Card.PlayerJudge, Card.PlayerSpecial}, toArea) then
     assert(target)
     if type(target) == "number" then
       to = self:getPlayerById(target)
@@ -512,7 +512,7 @@ function MoveEventWrappers:moveCardTo(card, to_place, target, reason, skill_name
         ids = { cardId },
         from = self:getCardOwner(cardId),
         to = to,
-        toArea = to_place,
+        toArea = toArea,
         moveReason = reason,
         skillName = skill_name,
         specialName = special_name,

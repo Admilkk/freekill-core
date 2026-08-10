@@ -633,7 +633,7 @@ function M:entitle(data, seat, winner)
   seat = seat + 1
   local player = ClientInstance:getPlayerBySeat(seat)
   local result -- 1: 胜, 2: 败, 3: 平局
-  if table.contains(winner:split("+"), player.role) then
+  if table.contains(winner:split("+"), tostring(player.id)) then
     result = 1
   elseif winner == "" then
     result = 3

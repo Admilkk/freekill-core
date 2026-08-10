@@ -595,7 +595,7 @@ function SmartAI:askToChooseCards(params)
     local tmp_id, tmp_benefit = -1, -100000
     for _, id in ipairs(cards) do
       local v = self:getBenefitOfEvents(function(logic)
-        logic:moveCardTo(id, data.to_place, data.target, data.reason, skill_name, nil, false, data.proposer)
+        logic:moveCardTo(id, data.toArea, data.target, data.reason, skill_name, nil, false, data.proposer)
       end)
       if v > tmp_benefit then
         tmp_id, tmp_benefit = id, v

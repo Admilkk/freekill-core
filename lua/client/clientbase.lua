@@ -721,7 +721,7 @@ function ClientBase:gameOver(jsonData)
     if not self.observing and not self.replaying then
       local result
       local winner = jsonData
-      if table.contains(winner:split("+"), Self.role) then
+      if table.contains(winner:split("+"), tostring(Self.id)) then
         result = 1
       elseif winner == "" then
         result = 3

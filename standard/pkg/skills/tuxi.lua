@@ -58,7 +58,7 @@ tuxi:addAI(Fk.Ltk.AI.newChoosePlayersStrategy{
           cards = p:getCardIds("h"),
           skill_name = tuxi.name,
           data = {
-            to_place = Card.PlayerHand,
+            toArea = Card.PlayerHand,
             target = ai.player,
             reason = fk.ReasonPrey,
             proposer = ai.player,

@@ -32,7 +32,7 @@ skill:addAI(Fk.Ltk.AI.newCardSkillStrategy {
       cards = effect.to:getCardIds("hej"),
       skill_name = skill.name,
       data = {
-        to_place = Card.DiscardPile,
+        toArea = Card.DiscardPile,
         reason = fk.ReasonDiscard,
         proposer = effect.from,
       },

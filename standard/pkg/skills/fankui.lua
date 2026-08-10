@@ -34,7 +34,7 @@ fankui:addAI(Fk.Ltk.AI.newInvokeStrategy{
       cards = data.from:getCardIds("he"),
       skill_name = fankui.name,
       data = {
-        to_place = Card.PlayerHand,
+        toArea = Card.PlayerHand,
         target = player,
         reason = fk.ReasonPrey,
         proposer = player,

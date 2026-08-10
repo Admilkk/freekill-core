@@ -35,7 +35,7 @@ skill:addAI(Fk.Ltk.AI.newCardSkillStrategy {
       cards = effect.to:getCardIds("hej"),
       skill_name = skill.name,
       data = {
-        to_place = Card.PlayerHand,
+        toArea = Card.PlayerHand,
         target = effect.from,
         reason = fk.ReasonPrey,
         proposer = effect.from,

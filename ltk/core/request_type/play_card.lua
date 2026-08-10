@@ -114,7 +114,7 @@ function ReqPlayCard:feasible()
   end
   if card then
     local skill = card:getSkill(player)
-    ret = skill:feasible(player, table.map(self.selected_targets, Util.Id2PlayerMapper), { card.id }, card) 
+    ret = skill:feasible(player, table.map(self.selected_targets, Util.Id2PlayerMapper), { card.id }, card)
     and skill:canUse(player, card, self.extra_data)
     and not player:prohibitUse(card)
   end

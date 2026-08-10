@@ -20,7 +20,7 @@ end
 ---@param scope integer @ 考察时间段
 ---@param card? Card @ 使用牌时的牌
 ---@param to? Player @ 目标
----@return number?
+---@return integer?
 function TargetModSkill:getResidueNum(player, card_skill, scope, card, to)
   return 0
 end
@@ -31,7 +31,7 @@ end
 ---@param scope integer @ 考察时间段
 ---@param card? Card @ 使用牌时的牌
 ---@param to? Player @ 目标
----@return number?
+---@return integer?
 function TargetModSkill:getFixedNum(player, card_skill, scope, card, to)
   return nil
 end
@@ -62,7 +62,7 @@ end
 ---@param card_skill ActiveSkill @ 目标技能
 ---@param card? Card @ 使用牌时的牌
 ---@param to? Player @ 目标
----@return number?
+---@return integer?
 function TargetModSkill:getDistanceLimit(player, card_skill, card, to)
   return 0
 end
@@ -71,7 +71,7 @@ end
 ---@param player Player @ 使用者
 ---@param card_skill ActiveSkill @ 目标技能
 ---@param card? Card @ 使用牌时的牌
----@return number?
+---@return integer?
 function TargetModSkill:getExtraTargetNum(player, card_skill, card)
   return 0
 end

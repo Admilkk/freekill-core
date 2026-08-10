@@ -30,8 +30,11 @@ wildDraw:addEffect("active", {
 })
 Fk:loadTranslationTable {
   ["m_role_wild_draw&"] = "野心家",
-  ["#m_role_wild_draw&"] = "你可弃一枚“野心家”，摸两张牌或回复1点体力",
-  [":m_role_wild_draw&"] = "出牌阶段，你可弃一枚“珠联璧合”，摸两张牌或回复1点体力。",
+  ["#m_role_wild_draw&"] = "你可弃一枚“野心家”标记，摸两张牌或回复1点体力",
+  [":m_role_wild_draw&"] = "出牌阶段，你可弃一枚“野心家”标记，摸两张牌或回复1点体力。",
+
+  ["@!!m_role_wild"] = "野心家",
+  [":@!!m_role_wild"] = "出牌阶段，你可弃一枚“野心家”标记，摸两张牌或回复1点体力。",
 }
 
 return wildDraw

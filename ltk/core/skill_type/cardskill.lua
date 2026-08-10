@@ -58,7 +58,7 @@ end
 
 -- 获得技能的最小目标数
 ---@param player Player @ 使用者
----@return number @ 最小目标数
+---@return integer @ 最小目标数
 function CardSkill:getMinTargetNum(player)
   local ret
   if self.target_num then ret = self.target_num
@@ -73,7 +73,7 @@ end
 -- 获得技能的最大目标数
 ---@param player Player @ 使用者
 ---@param card Card @ 牌
----@return number @ 最大目标数
+---@return integer @ 最大目标数
 function CardSkill:getMaxTargetNum(player, card)
   local ret
   if self.target_num then ret = self.target_num
@@ -83,20 +83,33 @@ function CardSkill:getMaxTargetNum(player, card)
     ret = ret(self, player, card)
   end
 
-  local status_skills = Fk:currentRoom().status_skills[TargetModSkill] or Util.DummyTable
+  local status_skills = Fk:currentRoom().status_skills[TargetModSkill] or Util.DummyTable ---@type TargetModSkill[]
   for _, skill in ipairs(status_skills) do
     local correct = skill:getExtraTargetNum(player, self, card)
-    if correct == nil then correct = 0 end
-    ret = ret + correct
+    if correct then
+      ret = ret + correct
+    end
   end
   return ret
+end
+
+-- 判断一个技能是否可发动（也就是确认键是否可点击）。默认值为选择卡牌数和选择目标数均在允许范围内
+-- 警告：没啥事别改
+---@param player Player @ 使用者
+---@param selected Player[] @ 已选目标
+---@param selected_cards integer[] @ 已选牌
+---@param card Card @ 牌
+---@return boolean
+function CardSkill:feasible(player, selected, selected_cards, card)
+  return #selected >= self:getMinTargetNum(player) and #selected <= self:getMaxTargetNum(player, card)
+    and #selected_cards >= self:getMinCardNum(player) and #selected_cards <= self:getMaxCardNum(player)
 end
 
 -- 获得此牌技能的距离限制
 ---@param player Player @ 使用者
 ---@param card Card @ 使用卡牌
 ---@param to Player @ 目标
----@return number? @ 距离限制，nil则无限制
+---@return integer? @ 距离限制，nil则无限制
 function CardSkill:getDistanceLimit(player, card, to)
   local ret = self.distance_limit or 0
   local status_skills = Fk:currentRoom().status_skills[TargetModSkill] or Util.DummyTable
@@ -113,7 +126,7 @@ end
 ---@param scope? integer @ 查询历史范围（默认为回合）
 ---@param card? Card @ 卡牌
 ---@param to? Player @ 目标
----@return number? @ 最大使用次数，nil就是无限
+---@return integer? @ 最大使用次数，nil就是无限
 function CardSkill:getMaxUseTime(player, scope, card, to)
   scope = scope or Player.HistoryTurn
   local ret = self.max_use_time[scope]

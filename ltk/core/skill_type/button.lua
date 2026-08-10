@@ -59,7 +59,7 @@ end
 
 -- 获得技能的最小目标数
 ---@param player Player @ 使用者
----@return number @ 最小目标数
+---@return integer @ 最小目标数
 function ButtonSkill:getMinTargetNum(player)
   local ret
   if self.target_num then ret = self.target_num
@@ -73,7 +73,7 @@ end
 
 -- 获得技能的最大目标数
 ---@param player? Player @ 使用者
----@return number @ 最大目标数
+---@return integer @ 最大目标数
 function ButtonSkill:getMaxTargetNum(player)
   local ret
   if self.target_num then ret = self.target_num
@@ -87,7 +87,7 @@ end
 
 -- 获得技能的最小卡牌数
 ---@param player Player @ 使用者
----@return number @ 最小卡牌数
+---@return integer @ 最小卡牌数
 function ButtonSkill:getMinCardNum(player)
   local ret
   if self.card_num then ret = self.card_num
@@ -105,7 +105,7 @@ end
 
 -- 获得技能的最大卡牌数
 ---@param player Player @ 使用者
----@return number @ 最大卡牌数
+---@return integer @ 最大卡牌数
 function ButtonSkill:getMaxCardNum(player)
   local ret
   if self.card_num then ret = self.card_num

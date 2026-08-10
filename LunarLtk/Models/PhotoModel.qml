@@ -31,6 +31,7 @@ QtObject {
   property bool faceup: true
   property bool chained: false
   property list<string> sealedSlots: []
+  property list<string> equipSlots: [ "WeaponSlot", "ArmorSlot", "OffensiveRideSlot", "DefensiveRideSlot", "TreasureSlot" ]
   property int seatNumber: 1
   property int drank: 0
   property int phase: Ltk.Player.NotActive

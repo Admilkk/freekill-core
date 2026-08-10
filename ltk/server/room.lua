@@ -4517,13 +4517,15 @@ function Room:handleQuickStart()
     if idx == -1 then error("Index doesn't exist!") end
     local pl = self.players[idx]
     if pl then
-
       -- 根据传入属性做不同操作
       if v["maxHp"] then
         self:changeMaxHp(pl, v["maxHp"] - pl.maxHp)
       end
       if v["hp"] then
         self:changeHp(pl, v["hp"] - pl.hp, nil, "quick_debug")
+      end
+      if v["shield"] then
+        self:changeShield(pl, v["shield"] - pl.shield)
       end
       if v["skills"] then
         for _, skill in ipairs(v["skills"]) do
@@ -4539,7 +4541,7 @@ function Room:handleQuickStart()
           if #cards > 0 then
             cid = cards[1]
           else
-            local c = self:printCard(e)
+            local c = self:printCard(e, Card.Diamond, 1)
             if c then cid = c.id end
           end
           if cid ~= 0 then
@@ -4556,11 +4558,40 @@ function Room:handleQuickStart()
           if #cards > 0 then
             cid = cards[1]
           else
-            local c = self:printCard(e)
+            local c = self:printCard(e, Card.Diamond, 1)
             if c then cid = c.id end
           end
           if cid ~= 0 then
             self:moveCardIntoEquip(pl, cid, "quick_debug", true)
+          end
+        end
+      end
+      if v["useCard"] then
+        for _, _list in ipairs(v["useCard"]) do
+          local e = _list["card"]
+          local cid = 0
+          local cards = table.filter(self.draw_pile, function (id)
+            return Fk:getCardById(id).name == e
+          end)
+          if #cards > 0 then
+            cid = cards[1]
+          else
+            local c = self:printCard(e, Card.Diamond, 1)
+            if c then cid = c.id end
+          end
+          if cid ~= 0 then
+            local targets = {pl}
+            if _list["targets"] then
+              targets = table.map(_list["targets"], function(str)
+                return self:getIndexFromHuman(tonumber(str))
+              end)
+              self:sortByAction(targets, pl)
+            end
+            self:useCard{
+              from = pl,
+              card = Fk:getCardById(cid),
+              tos = targets
+            }
           end
         end
       end

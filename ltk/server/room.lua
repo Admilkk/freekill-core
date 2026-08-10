@@ -4530,15 +4530,52 @@ function Room:handleQuickStart()
           self:handleAddLoseSkills(pl, skill, nil, false, true)
         end
       end
-      if v["equips"] then
-        for _, e in ipairs(v["equips"]) do
+      if v["cards"] then
+        for _, e in ipairs(v["cards"]) do
+          local cid = 0
           local cards = table.filter(self.draw_pile, function (id)
             return Fk:getCardById(id).name == e
           end)
           if #cards > 0 then
-            self:moveCardIntoEquip(pl, cards[1], "quick_debug", true)
+            cid = cards[1]
+          else
+            local c = self:printCard(e)
+            if c then cid = c.id end
+          end
+          if cid ~= 0 then
+            self:obtainCard(pl, cid, false, fk.ReasonJustMove, nil, "quick_debug")
           end
         end
+      end
+      if v["equips"] then
+        for _, e in ipairs(v["equips"]) do
+          local cid = 0
+          local cards = table.filter(self.draw_pile, function (id)
+            return Fk:getCardById(id).name == e
+          end)
+          if #cards > 0 then
+            cid = cards[1]
+          else
+            local c = self:printCard(e)
+            if c then cid = c.id end
+          end
+          if cid ~= 0 then
+            self:moveCardIntoEquip(pl, cid, "quick_debug", true)
+          end
+        end
+      end
+      if v["chained"] then
+        pl:setChainState(true)
+      end
+      if v["drank"] then
+        if type(v["drank"]) == "boolean" then
+          pl.drank = 1
+        elseif type(v["drank"]) == "number" then
+          pl.drank = v["drank"]
+        end
+      end
+      if v["turnOver"] then
+        pl:turnOver()
       end
       if v["controlOther"] then
         if hadControlOther then error("Already had another \"controlOther\" player!") end
@@ -4547,8 +4584,6 @@ function Room:handleQuickStart()
         end
         hadControlOther = true
       end
-
-
     end
   end
 end

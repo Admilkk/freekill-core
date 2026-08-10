@@ -242,16 +242,15 @@ local role_mode = fk.CreateGameMode{
       return not p.surrendered and not (p.dead and p.rest == 0) and p.role ~= "civilian"
     end)
 
+    if #alive == 1 then
+      return alive[1]:getFriends(true, true)
+    end
+
     if victim.role == "lord" then
       if table.find(alive, function(p) return p.role == "lord" end) then
         winner = ""
       elseif room:getSettings("RenegadeTogether") and table.every(alive, function(p) return p.role == "renegade" end) then
         winner = "renegade"
-      elseif #alive == 1 then
-        local role = alive[1].role
-        if table.contains({"renegade", "wild"}, role) then
-          winner = role
-        end
       else
         winner = "rebel+rebel_chief"
       end

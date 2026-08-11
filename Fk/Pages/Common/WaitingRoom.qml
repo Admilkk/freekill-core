@@ -106,12 +106,20 @@ W.PageBase {
 
     Flickable {
       id: infoContainer
-      ScrollBar.vertical: ScrollBar {}
+      ScrollBar.vertical: ScrollBar {
+        parent: roomSettings
+        anchors.top: infoContainer.top
+        anchors.right: infoContainer.right
+        anchors.rightMargin: -12
+        anchors.bottom: infoContainer.bottom
+        width: 8
+      }
       anchors.horizontalCenter: parent.horizontalCenter
       anchors.top: roomSettingsTitle.bottom
       anchors.topMargin: 10
-      anchors.bottom: parent.bottom
-      anchors.bottomMargin: 10
+      anchors.bottom: viewFalseCheck.top
+      anchors.bottomMargin: 2
+      height: parent.height - 20 - roomSettingsTitle.height - viewFalseCheck.height - 20
       flickableDirection: Flickable.VerticalFlick
       width: parent.width - 30
       contentHeight: roominfo.height
@@ -170,13 +178,13 @@ W.PageBase {
 
       ColumnLayout {
         id: roominfo
-        anchors.fill: parent
+        width: parent.width
         Repeater {
           model: infoContainer.settings
 
           Item {
             width: parent.width
-            height: 30
+            height: Math.max(30, ketText.height)
             required property var modelData
             visible: {
               if (roomSettings.viewFalse) return true;
@@ -193,6 +201,7 @@ W.PageBase {
             }
 
             Text {
+              id: ketText
               anchors.right: parent.right
               anchors.left: titleText.right
               anchors.leftMargin: 2
@@ -235,9 +244,13 @@ W.PageBase {
     }
 
     W.SwitchRow {
+      id: viewFalseCheck
       anchors.bottom: parent.bottom
       anchors.right: parent.right
       anchors.left: parent.left
+
+      backgroundColor: roomScene.bgColor
+      borderColor: roomScene.bgColor
 
       title: Lua.tr("View False Settings")
 

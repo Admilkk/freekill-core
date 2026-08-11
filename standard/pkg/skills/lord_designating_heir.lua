@@ -20,7 +20,7 @@ Fk:loadTranslationTable{
 designating:addEffect("active", {
   prompt = "#lord_designating_heir&",
   can_use = function (self, player)
-    return player:usedEffectTimes(designating.name, Player.HistoryGame) == 0
+    return player:usedEffectTimes(designating.name, Player.HistoryGame) == 0 and player.role == "lord"
   end,
   target_num = 1,
   card_num = 0,

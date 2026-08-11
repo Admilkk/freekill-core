@@ -130,7 +130,7 @@ function M:getCardData(id, filterCard)
     ret.name = orig.name
     ret.virt_name = card.name
   end
-  if card.sub_type == Card.SubtypeWeapon then
+  if card.sub_type == Card.SubtypeWeapon then ---@cast card Weapon
     local owner = ClientInstance:getCardOwner(card) or Self
     ret.attack_range = card:getAttackRange(owner)
   end

@@ -104,7 +104,7 @@ Fk:loadTranslationTable {
   ["Change Room Config"] = "房间配置",
   ["General Pool"] = "将池",
   ["View General Pool"] = "查看",
-  ["View False Settings"] = "查看为“否”的设置项",
+  ["View False Settings"] = "查看为“否”的项",
   ["Add Robot"] = "添加机器人",
   ["Start Game"] = "开始游戏",
   ["Ready"] = "准备",

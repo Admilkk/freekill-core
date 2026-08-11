@@ -10,6 +10,8 @@ AbstractButton {
   property Component suffixComponent: null
   property alias suffixLoader: suffixLoader
   property real suffixMaximumWidth: width * 0.4
+  property alias backgroundColor: bg.color
+  property alias borderColor: bg.border.color
   implicitHeight: Math.max(60, contentItem ? contentItem.implicitHeight : 0)
 
   contentItem: Item {
@@ -78,6 +80,7 @@ AbstractButton {
   }
 
   background: Rectangle {
+    id: bg
     implicitHeight: root.implicitHeight
     //radius: 12
     color: root.down ? "#EFEFEF" : "#FEFFFE"

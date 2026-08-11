@@ -9,8 +9,6 @@ Fk:loadTranslationTable{
   [":renegade_wild&"] = "内奸可以成为野心家：获得野心家标记（出牌阶段，弃置以摸两张牌或回复1点体力）" ..
       "和〖飞扬〗〖跋扈〗，杀死角色摸三张牌。（出牌阶段或每个回合结束时结算）" ..
       "<br/><font color='gray'><small>操作提示：需预亮以发动；出牌阶段空闲时从不预亮点为预亮需等待至下个空闲时发动</small></font>",
-
-  ["#renegade_wild&"] = "侍奉明主：你可以变为忠臣",
 }
 
 ---@type TrigSkelSpec<TurnFunc|>

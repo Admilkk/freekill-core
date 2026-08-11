@@ -23,6 +23,7 @@ cheat:addEffect("active", {
     local allCardIds = Fk:getAllCardIds()
     local allCardMapper = {} ---@type table<string, integer[]>
     local allCardNames = {}
+    local myHand = from.player_cards[Player.Hand]
     for _, id in ipairs(allCardIds) do
       local card = Fk:getCardById(id)
       if card.type == cardType then
@@ -30,7 +31,7 @@ cheat:addEffect("active", {
           allCardMapper[card.name] = {}
           table.insert(allCardNames, card.name)
         end
-        if room:getCardOwner(id) ~= from then
+        if not table.contains(myHand, id) then
           table.insert(allCardMapper[card.name], id)
         end
       end

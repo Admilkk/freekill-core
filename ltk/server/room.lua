@@ -4614,6 +4614,11 @@ function Room:handleQuickStart()
       if v["turnOver"] then
         pl:turnOver()
       end
+      if v["marks"] then
+        for name, value in pairs(v["marks"]) do
+          self:setPlayerMark(pl, name, value)
+        end
+      end
       if v["controlOther"] then
         if hadControlOther then error("Already had another \"controlOther\" player!") end
         for _, p in ipairs(self:getOtherPlayers(pl)) do

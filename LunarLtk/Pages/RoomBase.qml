@@ -137,16 +137,7 @@ W.PageBase {
     interval: 200
     running: true
     repeat: true
-    onTriggered: {
-      //ai说游戏结束别刷了
-      if (!Lua.client.gameStarted) {
-        return;
-      }
-      dataModel.refreshData();
-      Ltk.refreshStatusSkills();
-      // 刷托管按钮
-      trustBtn.enabled = true;
-    }
+    onTriggered: roomScene.handleRefreshData()
   }
 
   // ==== function 区 ====
@@ -220,6 +211,17 @@ W.PageBase {
 
     Lua.finishRequestUI();
     applyChange({});
+  }
+
+  function handleRefreshData() {
+    //ai说游戏结束别刷了
+    if (!Lua.client.gameStarted) {
+      return;
+    }
+    dataModel.refreshData();
+    Ltk.refreshStatusSkills();
+    // 刷托管按钮
+    trustBtn.enabled = true;
   }
 
   function handleOnPopupReady(command, data, model) {

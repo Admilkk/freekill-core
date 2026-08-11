@@ -30,6 +30,8 @@ QtObject {
   property int type: 0
   property string subtype: ""
 
+  property int attackRange: 0
+
   property bool known: true // 是否已知
 
   property list<var> marks: [] // 标记，详见PhotoModel
@@ -52,6 +54,7 @@ QtObject {
       name, extension, number, suit, color, type, subtype,
       virtName: data.virt_name ?? "",
       picName: data.pic_name ?? "",
+      attackRange: data.attack_range ?? 0
     })
     known = Lua.selfPlayer.cardVisible(cardId);
   }

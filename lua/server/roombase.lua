@@ -346,15 +346,17 @@ function ServerRoomBase:victoryResult(winner, pid)
   return ret
 end
 
+---@param winners string @ 获胜玩家的id字符串
 function ServerRoomBase:gameOver(winners)
   if not self.game_started then return end
   self.room:destroyRequestTimer()
 
+  local winPlayers = table.map(winners:split("+"), function(id) return self:getPlayerById(tonumber(id)) end)
   if table.contains(
     { "running", "normal" },
     coroutine.status(self.main_co)
   ) then
-    self.logic:trigger(fk.GameFinished, nil, winners)
+    self.logic:trigger(fk.GameFinished, nil, { players = winPlayers })
   end
 
   self.game_started = false
@@ -374,8 +376,14 @@ function ServerRoomBase:gameOver(winners)
     end
   end
 
+  local winRoles = {}
+  for _, p in ipairs(winPlayers) do
+    table.insertIfNeed(winRoles, p.role)
+  end
   self:doBroadcastNotify("GameOver", winners)
-  fk.qInfo(string.format("[GameOver] %d, %s, %s, in %ds", self.id, self:getSettings('gameMode'), winners, os.time() - self.start_time))
+  fk.qInfo(string.format("[GameOver] %d, %s, %s, in %ds", self.id, self:getSettings('gameMode'),
+  table.concat(winRoles, "+"),
+  os.time() - self.start_time))
 
   self.room:gameOver()
 

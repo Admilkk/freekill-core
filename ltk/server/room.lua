@@ -3641,17 +3641,23 @@ function Room:syncDrawPile()
 end
 
 --- 结束一局游戏。
----@param winners ServerPlayer[] | Player[] | number[] | string @ 获胜的玩家id表，空字符串表示平局
+---@param winners ServerPlayer[] | Player[] | string @ 获胜的玩家列表，或身份字符串，空字符串表示平局
 function Room:gameOver(winners)
+  --- 把winners转化为获胜玩家id的字符串
   if type(winners) == "table" then
-    local ret = ""
-    if type(p) == "number" then
-      ret = table.concat(winners, "+")
-    else
-      ret = table.concat(table.map(winners, Util.IdMapper), "+")
-    end
-    winners = ret
+    winners = table.concat(table.map(winners, function (p)
+      return p.id
+    end), "+")
+  elseif type(winners) == "string" then
+    local roles = winners:split("+")
+    local players = table.filter(self.players, function (p)
+      return table.contains(roles, p.role)
+    end)
+    winners = table.concat(table.map(players, Util.IdMapper), "+")
+  else
+    assert(false, "Invalid winners type")
   end
+  ---@cast winners string
 
   for _, p in ipairs(self.players) do
     self:setPlayerProperty(p, "role_shown", true)

@@ -157,8 +157,22 @@ fk.GeneralHidden = StringEvent:subclass("fk.GeneralHidden")
 
 ---@class fk.GamePrepared: NilEvent
 fk.GamePrepared = NilEvent:subclass("fk.GamePrepared")
----@class fk.GameFinished : StringEvent
-fk.GameFinished = StringEvent:subclass("fk.GameFinished")
+
+--- GameFinish 的数据
+---@class GameFinishSpec
+---@field public players ServerPlayer[] @ 胜利玩家
+
+--- 游戏结束的数据
+---@class GameFinishData: GameFinishSpec, TriggerData
+GameFinishData = TriggerData:subclass("GameFinishData")
+
+---@class GameFinishEvent : TriggerEvent
+---@field data GameFinishData
+local GameFinishEvent = TriggerEvent:subclass("GameFinishEvent")
+
+---@class fk.GameFinished : GameFinishEvent
+fk.GameFinished = GameFinishEvent:subclass("fk.GameFinished")
+
 
 ---@class AskForCardData
 ---@field user ServerPlayer
@@ -208,6 +222,8 @@ fk.AfterAskForNullification = AskForCardEvent:subclass("fk.AfterAskForNullificat
 ---  target: ServerPlayer, player: ServerPlayer, data: ShowGeneralData): any
 ---@alias AskForCardFunc fun(self: TriggerSkill, event: AskForCardEvent,
 ---  target: ServerPlayer, player: ServerPlayer, data: AskForCardData): any
+---@alias GameFinishFunc fun(self: TriggerSkill, event: GameFinishEvent,
+---  target: ServerPlayer, player: ServerPlayer, data: GameFinishData): any
 
 ---@class SkillSkeleton
 ---@field public addEffect fun(self: SkillSkeleton, key: PrepareGeneralEvent,
@@ -230,3 +246,5 @@ fk.AfterAskForNullification = AskForCardEvent:subclass("fk.AfterAskForNullificat
 ---  data: TrigSkelSpec<ShowGeneralFunc>, attr: TrigSkelAttribute?): SkillSkeleton
 ---@field public addEffect fun(self: SkillSkeleton, key: AskForCardEvent,
 ---  data: TrigSkelSpec<AskForCardFunc>, attr: TrigSkelAttribute?): SkillSkeleton
+---@field public addEffect fun(self: SkillSkeleton, key: GameFinishEvent,
+---  data: TrigSkelSpec<GameFinishFunc>, attr: TrigSkelAttribute?): SkillSkeleton

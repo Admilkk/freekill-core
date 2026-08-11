@@ -34,8 +34,8 @@ function GameMode:initialize(name, min, max)
 end
 
 -- 判断胜利者的函数，若不返回""，则游戏存在胜利者。默认游戏模式为两阵营对抗，如果是多阵营（如有内奸的身份局），则需重写winner_getter
----@param victim ServerPlayer @ 死者
----@return ServerPlayer[] | string @ 胜者
+---@param victim ServerPlayer @ 死者或投降者
+---@return ServerPlayer[] | string @ 胜者的玩家表，或胜利阵营字符串
 function GameMode:getWinner(victim)
     if not victim.surrendered and victim.rest > 0 then
       return ""

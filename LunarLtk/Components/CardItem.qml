@@ -110,7 +110,7 @@ Game.PokerCard {
         color: "#ddf0ebd1"
         radius: 2 * root.cardScale
         border.color: "snow"
-        border.width: Math.floor(1 * root.cardScale)
+        border.width: Math.ceil(1 * root.cardScale)
       }
       Text {
         id: markText

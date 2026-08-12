@@ -124,18 +124,105 @@ BasicItem {
     Rectangle {
       id: panelRect
       width: 0
-      height: 96
+      height: 200
       radius: 4
       color: "white"
       border.color: "#acbebc"
       x: -width - 5
       visible: width !== 0
 
-      Column {
+      Flow {
         width: Math.max(parent.width - 6, 0)
         x: (parent.width - width)/2
         y: 5
-        spacing: 3
+        // spacing: 3
+        WButton {
+          id: flowerButton
+          width: parent.width/2
+          height: 52
+          text: Lua.tr("Give Flower")
+          title.anchors.topMargin: 20
+          bg.radius: 0
+          Image {
+            anchors.horizontalCenter: parent.title.horizontalCenter
+            y: 6
+            width: 24; height: 24
+            source: SkinBank.pixAnimDir + "/flower/egg3"
+          }
+          onClicked: {
+            if (!enabled) return;
+            enabled = false;
+            roomScene.givePresent("Flower", root.playerid);
+            roomScene.areaHandler.closeItem();
+          }
+        }
+
+        WButton {
+          id: eggButton
+          width: parent.width/2
+          height: 52
+          text: Lua.tr("Give Egg")
+          title.anchors.topMargin: 20
+          bg.radius: 0
+          Image {
+            anchors.horizontalCenter: parent.title.horizontalCenter
+            y: 6
+            width: 18; height: 22
+            source: SkinBank.pixAnimDir + "/egg/egg"
+          }
+          onClicked: {
+            if (!enabled) return;
+            enabled = false;
+            if (Math.random() < 0.03) {
+              roomScene.givePresent("GiantEgg", root.playerid);
+            } else {
+              roomScene.givePresent("Egg", root.playerid);
+            }
+            roomScene.areaHandler.closeItem();
+          }
+        }
+
+        WButton {
+          id: wineButton
+          width: parent.width/2
+          height: 52
+          text: Lua.tr("Give Wine")
+          title.anchors.topMargin: 20
+          bg.radius: 0
+          Image {
+            anchors.horizontalCenter: parent.title.horizontalCenter
+            y: 6
+            width: 21; height: 21
+            source: SkinBank.pixAnimDir + "/wine/shoe"
+          }
+          onClicked: {
+            if (!enabled) return;
+            enabled = false;
+            roomScene.givePresent("Wine", root.playerid);
+            roomScene.areaHandler.closeItem();
+          }
+        }
+
+        WButton {
+          id: shoeButton
+          width: parent.width/2
+          height: 52
+          text: Lua.tr("Give Shoe")
+          title.anchors.topMargin: 20
+          bg.radius: 0
+          Image {
+            anchors.horizontalCenter: parent.title.horizontalCenter
+            y: 6
+            width: 17; height: 23
+            source: SkinBank.pixAnimDir + "/shoe/shoe"
+          }
+          onClicked: {
+            if (!enabled) return;
+            enabled = false;
+            roomScene.givePresent("Shoe", root.playerid);
+            roomScene.areaHandler.closeItem();
+          }
+        }
         WButton {
           width: parent.width
           height: 42
@@ -192,6 +279,10 @@ BasicItem {
     }
     function show() {
       root.selected = true;
+      flowerButton.enabled = true;
+      eggButton.enabled = true;
+      wineButton.enabled = Math.random() < 0.3;
+      shoeButton.enabled = Math.random() < 0.3;
       panelRect.width = 150;
     }
 

@@ -793,6 +793,21 @@ W.PageBase {
     return undefined;
   }
 
+  function getPhotoOrObserver(id) {
+    for (let i = 0; i < playerNum; i++) {
+      const item = photoModel.get(i);
+      if (item.id === id) {
+        return photos.itemAt(i);
+      }
+    }
+    for (let i = 0; i < observerModel.count; i++) {
+      if (observerModel.get(i).id === id) {
+        return observerListView.contentItem.children[i];
+      }
+    }
+    return undefined;
+  }
+
   function checkCanAddRobot() {
     if (Config.serverFeatures.includes("AddRobot")) {
       const num = Lua.getCompNum();
@@ -821,7 +836,7 @@ W.PageBase {
     }
     roomScene.isAllReady = allReady;
 
-    if (roomScene.isAllReady && roomScene.isOwner && !isRoomObserver && Cpp.quickStartMode) {
+    if (allReady && roomScene.isOwner && !isRoomObserver && Cpp.quickStartMode) {
       Cpp.notifyServer("StartGame", "");
     }
   }

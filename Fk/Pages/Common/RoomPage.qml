@@ -514,11 +514,47 @@ Item {
               return ret;
             }
 
-            onClicked: {
-              if (!Config.observing) return;
-              if (observing) return;
-              if (screenName == Self.screenName) return;
-              Lua.client.changeSelf(pid);
+            W.ButtonContent {
+              id: viewButton
+              text: Lua.tr("Observe")
+              visible: Config.observing && !observing
+              enabled: screenName != Self.screenName
+              font.pixelSize: 16
+              anchors.top: parent.top
+              anchors.topMargin: 3
+              anchors.right: blockButton.left
+              anchors.rightMargin: 5
+              width: 80
+              height: parent.height - 6
+              onClicked: {
+                Lua.client.changeSelf(pid);
+              }
+            }
+            W.ButtonContent {
+              id: blockButton
+              text: {
+                const blocked = !Config.blockedUsers.includes(screenName);
+                return blocked ? Lua.tr("Block Chatter") : Lua.tr("Unblock Chatter");
+              }
+              visible: !Config.replaying
+              enabled: pid > 0 && pid != Self.id
+              font.pixelSize: 16
+              anchors.top: parent.top
+              anchors.topMargin: 3
+              anchors.right: parent.right
+              anchors.rightMargin: 2
+              width: 80
+              height: parent.height - 6
+              onClicked: {
+                const idx = Config.blockedUsers.indexOf(screenName);
+                if (idx === -1) {
+                  if (screenName === "") return;
+                  Config.blockedUsers.push(screenName);
+                } else {
+                  Config.blockedUsers.splice(idx, 1);
+                }
+                Config.blockedUsersChanged();
+              }
             }
           }
         }
@@ -614,8 +650,8 @@ Item {
             return false;
           }
 
-          const fromGetter = room.getPhotoOrDashboard || room.getPhoto || null;
-          const toGetter = room.getPhoto || null;
+          const fromGetter = room.getPhotoOrDashboard || room.getPhotoOrObserver || room.getPhoto || null;
+          const toGetter = room.getPhotoOrObserver || room.getPhoto || null;
           if (!fromGetter || !toGetter) return false;
           const fromItem = fromGetter(fromId);
           const fromPos = mapFromItem(fromItem, fromItem.width / 2,

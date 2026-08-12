@@ -97,45 +97,38 @@ Game.PokerCard {
     Item {
       required property var modelData
       visible: root.known || modelData.origName.includes("-public")
-      width: root.width / 2 * root.cardScale
-      height: 16 * root.cardScale
+      width: root.width * root.cardScale
+      height: {
+        let markLength = root.dataModel.marks.length ?? 0;
+        if (markLength <= 4) return 16 * root.cardScale;
+        else return Math.floor(70 / markLength * root.cardScale);
+      }
       Rectangle {
-        width: markText.width + 12
-        height: 16 * root.cardScale
-        // color: "#A50330"
-        radius: 4 * root.cardScale
-        // border.color: "snow"
-        // border.width: 1
-        gradient: Gradient {
-          orientation: Gradient.Horizontal
-          GradientStop { position: 0.7; color: "#A50330" }
-          GradientStop { position: 1.0; color: "transparent" }
-        }
+        width: parent.width
+        height: parent.height
+        color: "#ddf0ebd1"
+        radius: 2 * root.cardScale
+        border.color: "snow"
+        border.width: Math.floor(1 * root.cardScale)
       }
       Text {
         id: markText
-        x: 2
-        font.pixelSize: Math.floor(16 * root.cardScale)
-        font.family: Config.libianName
+        anchors.centerIn: parent
+        font.pixelSize: Math.floor(12 * root.cardScale)
         font.letterSpacing: -0.6
         text: {
           const data = parent.modelData;
           if (!data) return "";
           return `${data.name} ${data.value}`.trim();
         }
-        color: "white"
-        style: Text.Outline
-        styleColor: "purple"
+        color: "#554B3F"
       }
     }
   }
 
-  GridLayout {
+  Column {
     width: root.width
     y: 60 * root.cardScale
-    columns: 2
-    rowSpacing: root.cardScale
-    columnSpacing: 0
     visible: root.known && root.markVisible
     Repeater {
       model: root.dataModel.marks

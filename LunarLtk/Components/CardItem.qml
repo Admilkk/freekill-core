@@ -97,7 +97,8 @@ Game.PokerCard {
     Item {
       required property var modelData
       visible: root.known || modelData.origName.includes("-public")
-      width: root.width * root.cardScale
+      width: root.width - 2
+      x: 1
       height: {
         let markLength = root.dataModel.marks.length ?? 0;
         if (markLength <= 4) return 16 * root.cardScale;

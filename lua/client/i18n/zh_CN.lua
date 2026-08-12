@@ -336,6 +336,8 @@ FreeKill使用的是libgit2的C API，与此同时使用Git完成拓展包的下
 
   ["$WelcomeToLobby"] = "欢迎进入新月杀游戏大厅！",
   ["Current room: %1"] = "当前房间：%1",
+  ["Owner %1 Kicked by %2"] = "房主 %1 被玩家 %2 踢出房间",
+  ["Player %1 Kicked by %2"] = "玩家 %1 被房主 %2 踢出房间",
   ["GameMode"] = "游戏模式",
   ["LuckCardNum"] = "手气卡次数",
   ["ResponseTime"] = "出手时间(秒)",
@@ -351,6 +353,7 @@ FreeKill使用的是libgit2的C API，与此同时使用Git完成拓展包的下
   ["$EnterRoom"] = "成功加入房间",
   ["$EnterRoomObserve"] = "成功旁观房间",
   ["$RoomConfigChanged"] = "房间配置已经修改，请重新准备！",
+  ["$CanKickOwner"] = "长时间未开始游戏，房主可被其他玩家踢出",
   ["#currentRoundNum"] = "第 %1 轮",
   ["$Choice"] = "%1：请选择",
   ["$ChooseGeneral"] = "请选择 %1 名武将",

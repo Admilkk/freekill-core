@@ -492,6 +492,7 @@ BasicItem {
         onClicked: {
           if (!enabled) return;
           Cpp.notifyServer("KickPlayer", Math.floor(root.playerid));
+          roomScene.sendDanmu(Lua.tr("Player %1 Kicked by %2").arg(root.screenName).arg(Self.screenName));
           roomScene.areaHandler.closeItem();
         }
       }

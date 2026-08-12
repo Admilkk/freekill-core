@@ -5,6 +5,7 @@ import QtQuick.Controls
 import QtQuick.Layouts
 
 import Fk
+import Fk.Components.Common
 import Fk.Components.WaitingRoom
 import Fk.Widgets as W
 
@@ -66,6 +67,7 @@ W.PageBase {
     id: kickOwnerTimer
     interval: 15000
     onTriggered: {
+      App.showToast(Lua.tr("$CanKickOwner"));
       canKickOwner = true;
     }
   }
@@ -479,6 +481,7 @@ W.PageBase {
         for (let i = 0; i < playerNum; i++) {
           let item = photoModel.get(i);
           if (item.isOwner) {
+            sendDanmu(Lua.tr("Owner %1 Kicked by %2").arg(item.screenName).arg(Self.screenName));
             // 傻逼qml喜欢加1.0
             Cpp.notifyServer("KickPlayer", Math.floor(item.id));
           }
@@ -740,6 +743,23 @@ W.PageBase {
       }
       visible = false
     }
+  }
+
+  // 弹幕
+  Danmu {
+    id: danmu
+    width: parent.width
+  }
+
+  function sendDanmu(msg) {
+    danmu.sendLog(msg);
+    ClientInstance.notifyServer(
+      "Chat",
+      {
+        type: 2,
+        msg: msg,
+      }
+    );
   }
 
   // TODO 扬了这玩意

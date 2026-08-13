@@ -301,9 +301,7 @@ function SmartAI:handlePlayCard()
     verbose(1, "======== %s: 开始计算出牌阶段 ========", tostring(self))
   end
 
-  local cancel_val = math.min(90 * (self.player:getMaxCards() - self.player:getHandcardNum()), -1)
-
-  local best_ret, best_val = "", cancel_val
+  local best_ret, best_val = "", -1
   if self._debug then
     verbose(1, "目前的决策：直接取消(收益%g)", best_val)
   end
@@ -328,7 +326,7 @@ function SmartAI:handlePlayCard()
     self:unSelectAll()
 
     -- FIXME: 为了实现按优先级出牌，干脆只要收益为正就出
-    if best_val > 0 and best_val > cancel_val then
+    if best_val >= 0 then
       if self._debug then
         verbose(1, "懒得推测了，得出决策%s", json.encode(best_ret))
       end
@@ -350,6 +348,7 @@ end
 
 function SmartAI:handleAskForCardChosen(data)
   local target, card_data, prompt = table.unpack(data)
+  local reason = prompt:split(":")[4]
   local ai = self:findStrategyOfSkill(AI.CardChosenStrategy, reason)
   if ai then
     if self._debug then
@@ -396,32 +395,53 @@ function SmartAI:handleAskForChoice(data)
     return choices[1]
   end
 end
---[==[
+
 function SmartAI:handleAskForUseCard(data)
   local card_ids = self:getEnabledCards()
-  local pattern = data[2]
-  local prompt = data[3]
+  local skill_name, pattern, prompt = data[1], data[2], data[3]
   if pattern == "jink" then
-    for _, cd in ipairs(card_ids) do
-      self:selectCard(cd, true) -- 默认按下卡牌后直接可确定 懒得管了
+    for _, id in ipairs(card_ids) do
+      self:selectCard(id, true) -- 默认按下卡牌后直接可确定 懒得管了
       return self:doOKButton()
     end
   elseif pattern == "nullification" then
-    if data[5] and data[5].effectFrom and self:isFriend(self.room:getPlayerById(data[5].effectFrom)) then
-      return ""
+    local from, to, card
+    if data[5] and data[5].effectFrom then
+      if data[5].effectFrom then
+        from = self.room:getPlayerById(data[5].effectFrom)
+      end
+      if data[5].effectCardId then
+        card = Fk:getCardById(data[5].effectCardId)
+      end
     end
-    local to = prompt:startsWith("#AskForNullificationWithoutTo") and prompt:split(":")[2] or prompt:split(":")[3]
+    to = prompt:startsWith("#AskForNullificationWithoutTo") and prompt:split(":")[2] or prompt:split(":")[3]
     if to then
       to = self.room:getPlayerById(tonumber(to))
-      if prompt:startsWith("#AskForNullificationWithoutTo") and self:isEnemy(to) or self:isFriend(to) then
-        for _, cd in ipairs(card_ids) do
-          self:selectCard(cd, true)
+    end
+    if from and to and card then
+      local benefit = self:getBenefitOfEvents(function(logic)
+        logic:useCard{
+          from = from,
+          tos = { to },
+          card = card,
+        }
+      end)
+      if benefit < 0 then
+        for _, id in ipairs(card_ids) do
+          self:selectCard(id, true)
+          return self:doOKButton()
+        end
+      end
+    else
+      if to and self:isFriend(to) then
+        for _, id in ipairs(card_ids) do
+          self:selectCard(id, true)
           return self:doOKButton()
         end
       end
     end
     return ""
-  elseif pattern == "peach" or pattern == "peach,analeptic" then
+  elseif pattern:startsWith("peach") then
     local to = prompt:startsWith("#AskForPeachesSelf") and self.player.id or prompt:split(":")[2]
     if to then
       to = self.room:getPlayerById(tonumber(to))
@@ -486,7 +506,6 @@ function SmartAI:handleAskForUseCard(data)
   if best_ret and best_ret ~= "" then return best_ret end
   return ""
 end
---]==]
 
 -- 敌友判断相关。
 -- 目前才开始，做个明身份打牌的就行了。

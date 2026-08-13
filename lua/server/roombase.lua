@@ -313,6 +313,21 @@ function ServerRoomBase:hasSkill(skill)
   return false
 end
 
+--- 将某个技能作为预亮技能添加给一名角色，并（将触发技）加入房间
+---@param player ServerPlayer
+---@param skill string
+function ServerRoomBase:addFakeSkill(player, skill)
+  player:addFakeSkill(skill)
+  local toget = {table.unpack(Fk.skill_skels[skill].effects)}
+  for _, s in ipairs(toget) do
+    if s:isInstanceOf(TriggerSkill) then
+      ---@cast s TriggerSkill
+      self.logic:addTriggerSkill(s)
+    end
+    --self:addSkill
+  end
+end
+
 function ServerRoomBase:shouldUpdateWinRate()
   if self:getSettings("enableFreeAssign") then
     return false

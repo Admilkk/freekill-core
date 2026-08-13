@@ -82,7 +82,6 @@ local role_getlogic = function()
   function role_logic:chooseGenerals()
     local room = self.room ---@class Room
     local generalNum = room:getSettings('generalNum')
-    local n = room:getSettings('enableDeputy') and 2 or 1
     local lord = room:getLord()
     local lord_num = 3
 
@@ -112,7 +111,7 @@ local role_getlogic = function()
         room:askToChooseIniticalGeneral(lord, {
           targets = lord,
           generals = generals,
-          needDeputy = room:getSettings('enableDeputy'),
+          needDeputy = room:getSettings("enableDeputy"),
         })
       end
 
@@ -175,7 +174,11 @@ local role_getlogic = function()
       end
 
       if room:getSettings("DesignateHeir") then
-        room:handleAddLoseSkills(lord, "lord_designating_heir&", nil, false, true)
+        room:sendLog{ -- 鉴于操作方式改变，放几天
+          type = "#LordDesignatingHeirNotice",
+          toast = true,
+        }
+        room:addFakeSkill(lord, "lord_designating_heir&")
       end
 
       local nonlord = table.filter(room:getOtherPlayers(lord, true), function (p)
@@ -185,24 +188,19 @@ local role_getlogic = function()
         room:askToChooseIniticalGeneral(lord, {
           targets = nonlord,
           num = generalNum,
-          needDeputy = room:getSettings('enableDeputy'),
+          needDeputy = room:getSettings("enableDeputy"),
           lordGeneral = lord.general,
           lordDeputy = lord.deputyGeneral,
         })
       end
 
-      local renegade_loyalty, renegade_wild = room:getSettings("RenegadeLoyalty"), room:getSettings("RenegadeWild")
       local renegade_skills = {} ---@type string[]
-      if renegade_loyalty then table.insert(renegade_skills, "renegade_loyalty&") end
-      if renegade_wild then table.insert(renegade_skills, "renegade_wild&") end
+      if room:getSettings("RenegadeLoyalty") then table.insert(renegade_skills, "renegade_loyalty&") end
+      if room:getSettings("RenegadeWild") then table.insert(renegade_skills, "renegade_wild&") end
       if next(renegade_skills) then
-        local addFakeSkill = function(player, skill)
-          player:addFakeSkill(skill)
-          player:prelightSkill(skill, true)
-        end
         for _, p in ipairs(nonlord) do
           if p.role == "renegade" then
-            table.forEach(renegade_skills, function(s) addFakeSkill(p, Fk.skills[s]) end)
+            table.forEach(renegade_skills, function(s) room:addFakeSkill(p, s) end)
           end
         end
       end

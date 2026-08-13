@@ -46,7 +46,8 @@ change_hero:addEffect("active", {
       room:changeHero(target, general, false, choice == "deputyGeneral", true)
     elseif choice == "Gender" then
       local genders = { "male", "female", "bigender", "agender" }
-      room:setPlayerProperty(target, "gender", room:askToChoice(from, {choices = genders, skill_name = "change_hero"}))
+      local gender = room:askToChoice(from, {choices = genders, skill_name = "change_hero"})
+      room:changeGender(target, table.indexOf(genders, gender), true)
     elseif choice == "Kingdom" then
       local kingdoms = { "wei", "shu", "wu", "qun" }
       for _, g in pairs(Fk.generals) do
@@ -59,10 +60,9 @@ change_hero:addEffect("active", {
         skill_name = "change_hero",
       })
       if target.kingdom == "wild" then
-        target.role = choice
-        room:broadcastProperty(target, "role")
+        room:changeRole(target, choice, true)
       else
-        room:setPlayerProperty(target, "kingdom", choice)
+        room:changeKingdom(target, choice, true)
       end
     end
   end,

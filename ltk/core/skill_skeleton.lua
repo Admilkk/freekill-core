@@ -91,9 +91,9 @@ function SkillSkeleton:initialize(spec)
   self.dynamicDesc = spec.dynamic_desc
 
   if type(spec.derived_piles) == "string" then
-    self.derived_piles = { spec.derived_piles }
+    self.derived_piles = { spec.derived_piles --[[@as string]] }
   else
-    self.derived_piles = spec.derived_piles
+    self.derived_piles = spec.derived_piles --[[@as string[] ]]
   end
   self.mode_skill = spec.mode_skill
 
@@ -980,7 +980,7 @@ function SkillSkeleton:withinBranchTimesLimit(player, branch, scope)
     times_table = self.max_branches_use_time
   end
   if not times_table then return true end
-
+  ---@cast times_table table<string, table<integer, integer?>?>
   if branch then
     local limit = (times_table[branch] or {})[scope]
     return not (limit and player:usedSkillTimes(self.name, scope, branch) >= limit)

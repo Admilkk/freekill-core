@@ -34,17 +34,18 @@ local PrepareGeneralEvent = TriggerEvent:subclass("PrepareGeneralEvent")
 ---@class fk.PreparingGeneral: PrepareGeneralEvent
 fk.PreparingGeneral = PrepareGeneralEvent:subclass("fk.PreparingGeneral")
 
---- PropertyChangeData 武将牌属性变化的数据
+--- PropertyChangeData 角色属性变化的数据
 ---@class PropertyChangeDataSpec
 ---@field public from ServerPlayer @ 要变动的角色
 ---@field public general? string @ 要变更的主武将
 ---@field public deputyGeneral? string @ 要变更的副武将
 ---@field public gender? integer @ 要变更的性别
 ---@field public kingdom? string @ 要变更的势力
+---@field public role? string @ 要变更的身份
 ---@field public sendLog? boolean @ 是否发Log
----@field public results? table @ 这次改变的结果
+---@field public results table @ 这次改变的结果
 
---- 武将牌属性变化的数据
+--- 角色属性变化的数据
 ---@class PropertyChangeData: PropertyChangeDataSpec, TriggerData
 PropertyChangeData = TriggerData:subclass("PropertyChangeData")
 

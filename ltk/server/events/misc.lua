@@ -24,6 +24,20 @@ function ChangeProperty:main()
     logic:breakEvent()
   end
 
+  if data.role and data.role ~= player.role then
+    if data.sendLog then
+      room:sendLog{
+        type = "#ChangeRole",
+        from = player.id,
+        arg = player.role,
+        arg2 = data.role,
+      }
+    end
+    data.results["roleChange"] = {player.role, data.role}
+    p(data.results["roleChange"])
+    room:setPlayerProperty(player, "role", data.role)
+  end
+
   local isLord = (player.role == "lord" and player.role_shown) and room:isGameMode("role_mode")
   if data.general and data.general ~= "" and data.general ~= player.general then
     local originalGeneral = Fk.generals[player.general] or Fk.generals["blank_shibing"]
@@ -91,6 +105,14 @@ function ChangeProperty:main()
   end
 
   if data.gender and data.gender ~= player.gender then
+    if data.sendLog then
+      room:sendLog{
+        type = "#ChangeGender",
+        from = player.id,
+        arg = player.gender,
+        arg2 = data.gender,
+      }
+    end
     data.results["genderChange"] = {player.gender, data.gender}
     room:setPlayerProperty(player, "gender", data.gender)
   end
@@ -156,7 +178,7 @@ local function resetPlayerHp(player, full, maxHpChange)
 end
 
 --- 改变角色的武将
----@param player ServerPlayer @ 要换将的玩家
+---@param player ServerPlayer @ 要换将的角色
 ---@param new_general string @ 要变更的武将，若不存在则变身为孙策，孙策不存在变身为士兵
 ---@param full? boolean @ 是否血量满状态变身，默认否
 ---@param isDeputy? boolean @ 是否变的是副将
@@ -192,8 +214,23 @@ function MiscEventWrappers:changeHero(player, new_general, full, isDeputy, sendL
   resetPlayerHp(player, full, maxHpChange)
 end
 
+--- 变更角色的性别
+---@param player ServerPlayer @ 要变更性别的角色
+---@param gender integer @ 要变更的性别
+---@param sendLog? boolean @ 是否发Log
+function MiscEventWrappers:changeGender(player, gender, sendLog)
+  if gender == player.gender then return end
+  sendLog = sendLog or false
+
+  ChangeProperty:create(PropertyChangeData:new{
+    from = player,
+    gender = gender,
+    sendLog = sendLog,
+  }):exec()
+end
+
 --- 变更角色的势力
----@param player ServerPlayer @ 要变更势力的玩家
+---@param player ServerPlayer @ 要变更势力的角色
 ---@param kingdom string @ 要变更的势力
 ---@param sendLog? boolean @ 是否发Log
 function MiscEventWrappers:changeKingdom(player, kingdom, sendLog)
@@ -207,13 +244,28 @@ function MiscEventWrappers:changeKingdom(player, kingdom, sendLog)
   }):exec()
 end
 
+--- 变更角色的身份
+---@param player ServerPlayer @ 要变更身份的角色
+---@param role string @ 要变更的身份
+---@param sendLog? boolean @ 是否发Log。需考虑亮明，默认用```player.role_shown```判断
+function MiscEventWrappers:changeRole(player, role, sendLog)
+  if role == player.role then return end
+  sendLog = sendLog or player.role_shown or false
+
+  ChangeProperty:create(PropertyChangeData:new{
+    from = player,
+    role = role,
+    sendLog = sendLog,
+  }):exec()
+end
+
 ---@class RemoveDeputyParams
 ---@field change_max_hp? boolean @ 是否改变体力上限，默认改变
 ---@field recover? boolean @ 是否回复至体力上限，默认否
 ---@field send_log? boolean @ 是否发Log
 
 --- 移除角色的副将
----@param player ServerPlayer @ 要移除副将的玩家
+---@param player ServerPlayer @ 要移除副将的角色
 ---@param params RemoveDeputyParams
 function MiscEventWrappers:removeDeputy(player, params)
   if player.deputyGeneral == "" then return end

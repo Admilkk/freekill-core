@@ -272,6 +272,8 @@ function Room:getOtherPlayers(player, sortBySeat, include_dead)
   return players
 end
 
+--- FIXME: 立储会产生多个主公，先前多个主公结算会错误，现调用该函数有可能出现bug
+---
 --- 获得当前房间中的主公。
 ---
 --- 由于某些游戏模式没有主公，该函数可能返回nil。

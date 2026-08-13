@@ -122,7 +122,7 @@ fk.TurnStart = TurnEvent:subclass("fk.TurnStart")
 fk.TurnEnd = TurnEvent:subclass("fk.TurnEnd")
 
 --- PhaseData 阶段的数据
----@class PhaseDataSpec -- TODO: 发挥想象力，填写这个Spec吧
+---@class PhaseDataSpec
 ---@field who ServerPlayer @ 本阶段的执行者
 ---@field reason string @ 当前额外阶段的原因，不为额外阶段则为game_rule
 ---@field phase Phase

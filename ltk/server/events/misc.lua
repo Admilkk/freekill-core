@@ -34,7 +34,6 @@ function ChangeProperty:main()
       }
     end
     data.results["roleChange"] = {player.role, data.role}
-    p(data.results["roleChange"])
     room:setPlayerProperty(player, "role", data.role)
   end
 
@@ -106,11 +105,12 @@ function ChangeProperty:main()
 
   if data.gender and data.gender ~= player.gender then
     if data.sendLog then
+      local genderMapper = { "male", "female", "bigender", "agender" }
       room:sendLog{
         type = "#ChangeGender",
         from = player.id,
-        arg = player.gender,
-        arg2 = data.gender,
+        arg = genderMapper[player.gender],
+        arg2 = genderMapper[data.gender],
       }
     end
     data.results["genderChange"] = {player.gender, data.gender}

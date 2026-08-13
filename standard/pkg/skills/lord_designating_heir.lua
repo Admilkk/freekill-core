@@ -134,10 +134,4 @@ designating:addEffect(fk.AfterPropertyChange, {
   end
 })
 
-designating:addEffect("distance", {
-  correct_func = function (self, from, to, card)
-    return to:getMark("@@heir_of_throne-noclear") ~= 0 and -99 or nil
-  end
-})
-
 return designating

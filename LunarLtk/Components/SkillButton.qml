@@ -182,7 +182,7 @@ Item {
     visible: false
 
     contentItem: Text{
-      text: "<b>" + Lua.tr(root.dataModel.origName) + "</b>: " + Lua.tr(":" + root.dataModel.origName)
+      text: "<b>" + Lua.tr(root.dataModel.origName) + "</b>: " + Lua.evaluate(`Fk:getDescription('${root.dataModel.origName}', nil, Self)`)
       font.pixelSize: 20
       wrapMode: Text.WordWrap
       textFormat: TextEdit.RichText

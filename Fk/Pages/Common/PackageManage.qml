@@ -10,6 +10,8 @@ import Fk.Widgets as W
 W.PageBase {
   id: root
 
+  property var fullPackageList: []
+
   ToolBar {
     id: bar
     width: parent.width
@@ -23,6 +25,13 @@ W.PageBase {
         text: qsTr("Package Manager")
         horizontalAlignment: Qt.AlignHCenter
         Layout.fillWidth: true
+      }
+      TextField {
+        id: searchField
+        placeholderText: qsTr("Search package...")
+        Layout.preferredWidth: 220
+        clip: true
+        onTextChanged: filterPackageList()
       }
       ToolButton {
         icon.source: AppPath + "/image/modmaker/menu"
@@ -188,7 +197,18 @@ W.PageBase {
   function updatePackageList() {
     packageModel.clear();
     const data = JSON.parse(Pacman.listPackages());
-    data.forEach(e => packageModel.append({
+    fullPackageList = data;
+    filterPackageList();
+  }
+
+  function filterPackageList() {
+    packageModel.clear();
+    const keyword = searchField.text.trim().toLowerCase();
+    const list = keyword === "" ? fullPackageList : fullPackageList.filter(e => {
+      return e.name.toLowerCase().includes(keyword) ||
+             (e.url && e.url.toLowerCase().includes(keyword));
+    });
+    list.forEach(e => packageModel.append({
       pkgName: e.name,
       pkgURL: e.url,
       pkgVersion: e.hash.substring(0, 8),

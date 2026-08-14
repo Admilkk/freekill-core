@@ -12,9 +12,82 @@ W.PageBase {
   id: root
 
   property var currentEnabled: []
+  property var fullAvailableList: []
+  property var fullEnabledList: []
 
   ListModel { id: availablePackModel }
   ListModel { id: enabledPackModel }
+
+  function rebuildListModels() {
+    let keyword = searchField.text.trim().toLowerCase();
+    availablePackModel.clear();
+    enabledPackModel.clear();
+    const availList = keyword === "" ? fullAvailableList :
+      fullAvailableList.filter(n => n.toLowerCase().includes(keyword));
+    const enableList = keyword === "" ? fullEnabledList :
+      fullEnabledList.filter(n => n.toLowerCase().includes(keyword));
+    availList.forEach(p => availablePackModel.append({ name: p }));
+    enableList.forEach(p => enabledPackModel.append({ name: p }));
+  }
+
+  function applyFilter() { rebuildListModels(); }
+
+  // 将可用包移动到已启用列表（头部）
+  function enablePack(name) {
+    const idx = fullAvailableList.indexOf(name);
+    if (idx !== -1) fullAvailableList.splice(idx, 1);
+    if (fullEnabledList.indexOf(name) === -1)
+      fullEnabledList.unshift(name);
+    applyFilter();
+  }
+
+  // 将已启用包移动到可用列表（头部）
+  function disablePack(name) {
+    const idx = fullEnabledList.indexOf(name);
+    if (idx !== -1) fullEnabledList.splice(idx, 1);
+    if (fullAvailableList.indexOf(name) === -1)
+      fullAvailableList.unshift(name);
+    applyFilter();
+  }
+
+  // 在已启用列表中上移一条（根据名称在 full 列表里的位置操作）
+  function moveEnabledUp(name) {
+    const fi = fullEnabledList.indexOf(name);
+    if (fi > 0) {
+      const tmp = fullEnabledList[fi - 1];
+      fullEnabledList[fi - 1] = name;
+      fullEnabledList[fi] = tmp;
+      applyFilter();
+    }
+  }
+
+  function moveEnabledToTop(name) {
+    const fi = fullEnabledList.indexOf(name);
+    if (fi > 0) {
+      fullEnabledList.splice(fi, 1);
+      fullEnabledList.unshift(name);
+      applyFilter();
+    }
+  }
+
+  function moveEnabledDown(name) {
+    const fi = fullEnabledList.indexOf(name);
+    if (fi !== -1 && fi < fullEnabledList.length - 1) {
+      const tmp = fullEnabledList[fi + 1];
+      fullEnabledList[fi + 1] = name;
+      fullEnabledList[fi] = tmp;
+      applyFilter();
+    }
+  }
+
+  function moveEnabledToBottom(name) {
+    const fi = fullEnabledList.indexOf(name);
+    if (fi !== -1 && fi < fullEnabledList.length - 1) {
+      fullEnabledList.splice(fi, 1);
+      fullEnabledList.push(name);
+      applyFilter();
+    }
+  }
 
   Component.onCompleted: {
     availablePackModel.clear();
@@ -26,8 +99,9 @@ W.PageBase {
     currentEnabled = Config.enabledResourcePacks || [];
     let enabledSet = new Set(currentEnabled.filter(p => allPacks.indexOf(p) !== -1));
     let available = allPacks.filter(p => !enabledSet.has(p));
-    currentEnabled.forEach(p => { if (allPacks.indexOf(p) !== -1) enabledPackModel.append({ name: p }); });
-    available.forEach(p => availablePackModel.append({ name: p }));
+    fullEnabledList = currentEnabled.filter(p => allPacks.indexOf(p) !== -1);
+    fullAvailableList = available;
+    applyFilter();
   }
 
   ToolBar {
@@ -42,6 +116,11 @@ W.PageBase {
           for (let i = 0; i < enabledPackModel.count; ++i) {
             enabledList.push(enabledPackModel.get(i).name);
           }
+          // 过滤状态下已启用列表被筛掉的部分也要合并回来
+          for (let i = 0; i < fullEnabledList.length; ++i) {
+            if (enabledList.indexOf(fullEnabledList[i]) === -1)
+              enabledList.push(fullEnabledList[i]);
+          }
           let isSame = enabledList.length === currentEnabled.length &&
           enabledList.every((v, i) => v === currentEnabled[i]);
           if (isSame) {
@@ -55,6 +134,13 @@ W.PageBase {
         text: "新月杀资源包管理器" // TODO: qsTr
         horizontalAlignment: Qt.AlignHCenter
         Layout.fillWidth: true
+      }
+      TextField {
+        id: searchField
+        placeholderText: "搜索资源包..."
+        Layout.preferredWidth: 220
+        clip: true
+        onTextChanged: applyFilter()
       }
       ToolButton {
         text: "撤销更改";
@@ -132,8 +218,7 @@ W.PageBase {
               Text { text: name; font.bold: true; font.pixelSize: 16 }
             }
             onClicked: {
-              enabledPackModel.insert(0, { name: name });
-              availablePackModel.remove(index);
+              root.enablePack(name);
             }
 
           }
@@ -204,10 +289,10 @@ W.PageBase {
                 text: "↑"
                 enabled: index > 0
                 onClicked: {
-                  enabledPackModel.move(index, index - 1, 1);
+                  root.moveEnabledUp(name);
                 }
                 onPressAndHold: { // 长按置首
-                  enabledPackModel.move(index, 0, 1);
+                  root.moveEnabledToTop(name);
                 }
               }
 
@@ -217,10 +302,10 @@ W.PageBase {
                 text: "↓"
                 enabled: index < enabledPackModel.count - 1
                 onClicked: {
-                  enabledPackModel.move(index, index + 1, 1);
+                  root.moveEnabledDown(name);
                 }
                 onPressAndHold: { // 长按置尾
-                  enabledPackModel.move(index, enabledPackModel.count - 1, 1);
+                  root.moveEnabledToBottom(name);
                 }
               }
 
@@ -229,8 +314,7 @@ W.PageBase {
                 id: unloadButton
                 text: "×"
                 onClicked: {
-                  availablePackModel.insert(0, { name: name });
-                  enabledPackModel.remove(index);
+                  root.disablePack(name);
                 }
               }
             }
@@ -262,11 +346,8 @@ W.PageBase {
       width: 150
       text: "保存"
       onClicked: {
-        let enabledList = [];
-        for (let i = 0; i < enabledPackModel.count; ++i) {
-          enabledList.push(enabledPackModel.get(i).name);
-        }
-        Config.enabledResourcePacks = enabledList;
+        // 使用完整列表保存，确保搜索筛选掉的条目也被保留
+        Config.enabledResourcePacks = root.fullEnabledList.slice();
         Config.saveConf();
         App.quitPage();
       }

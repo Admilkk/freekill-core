@@ -189,6 +189,9 @@ end
 function Package:addSkinPackage(skinPak)
   skinPak.path = skinPak.path or "/image/skins"
   local pkg_path = "packages/" .. self.extensionName .. skinPak.path .. "/"
+  if skinPak.url then
+    pkg_path = skinPak.url
+  end
   for _, arr in ipairs(skinPak.content) do
     for _, g in ipairs(arr.enabled_generals) do
       if g ~= "" then

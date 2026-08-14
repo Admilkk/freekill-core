@@ -8,7 +8,8 @@
 ---@field skins table
 
 ---@class SkinPackageSpec
----@field path string?
+---@field path? string
+---@field url? string -- 网络链接
 ---@field content SkinPackageContent[]
 
 ---@class SkinPackage : SkinPackageSpec, Object

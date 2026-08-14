@@ -495,9 +495,14 @@ QtObject {
     return component.createObject(null, prop);
   }
 
-  function getFullSkinPath(genral, name) {
-    let skin = getSkinByName(genral, name)
-    if (!skin) return SkinBank.getGeneralPicture(genral);
+  function getFullSkinPath(general, name) {
+    console.log(general, name)
+    let skin = getSkinByName(general, name)
+    if (!skin) return SkinBank.getGeneralPicture(general);
+    console.log(general, name, skin.path, skin.name)
+    if (skin.path.startsWith("http")) {
+      return skin.path + skin.name
+    }
     return Cpp.path + "/" + skin.path + skin.name
   }
 }

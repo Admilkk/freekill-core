@@ -90,7 +90,7 @@ Game.BasicItem {
 
     SkinArea {
       id: skin
-      source: root.skinSource.name ? (Cpp.path + "/" + root.skinSource.path + root.skinSource.name) : ""
+      source: root.skinSource.name ? Ltk.getFullSkinPath(root.general, root.skinSource.name) : ""
       width: generalImage.width
       Behavior on width { NumberAnimation { duration: 100 } }
       height: parent.height
@@ -121,7 +121,7 @@ Game.BasicItem {
 
     SkinArea {
       id: deputySkin
-      source: root.deputySkinSource.name ? (Cpp.path + "/" + root.deputySkinSource.path + root.deputySkinSource.name) : ""
+      source: root.deputySkinSource.name ? Ltk.getFullSkinPath(root.deputyGeneral ?? "", root.deputySkinSource.name) : ""
       anchors.left: generalImage.right
       width: parent.width / 2
       height: parent.height

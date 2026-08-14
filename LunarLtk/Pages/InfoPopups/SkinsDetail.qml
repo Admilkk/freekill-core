@@ -123,7 +123,7 @@ Item {
             } else {
               const skinData = Ltk.getSkinByName(root.orig_general, modelData)
               if (skinData) {
-                return Cpp.path + "/" + skinData.url
+                return Ltk.getFullSkinPath(root.orig_general, modelData)
               }
               return SkinBank.getGeneralPicture("unknown")
             }
@@ -205,7 +205,7 @@ Item {
             } else {
               const skinData = Ltk.getSkinByName(root.orig_deputy, modelData)
               if (skinData) {
-                return Cpp.path + "/" + skinData.url
+                return Ltk.getFullSkinPath(root.orig_deputy, modelData)
               }
               return SkinBank.getGeneralPicture("unknown")
             }

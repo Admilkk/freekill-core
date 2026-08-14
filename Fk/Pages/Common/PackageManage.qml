@@ -118,12 +118,11 @@ W.PageBase {
           onClicked: {
             if (pkgEnabled === "0") {
               Pacman.enablePack(pkgName);
-              pkgEnabled = "1";
+              syncPackStatus(pkgName, "1");
             } else {
               Pacman.disablePack(pkgName);
-              pkgEnabled = "0";
+              syncPackStatus(pkgName, "0");
             }
-            // updatePackageList();
           }
         }
 
@@ -133,16 +132,7 @@ W.PageBase {
           anchors.right: delBtn.left
           anchors.rightMargin: 8
           onClicked: {
-            Pacman.upgradePack(pkgName);
-            // updatePackageList();
-            const data = JSON.parse(Pacman.listPackages());
-            const e = data[index];
-            packageModel.set(index, {
-              pkgName: e.name,
-              pkgURL: e.url,
-              pkgVersion: e.hash.substring(0, 8),
-              pkgEnabled: e.enabled
-            });
+            upgradePackByName(pkgName);
           }
         }
 
@@ -153,8 +143,7 @@ W.PageBase {
           anchors.rightMargin: 8
           onClicked: {
             Pacman.removePack(pkgName);
-            // updatePackageList();
-            packageModel.remove(index);
+            removeFromFullList(pkgName);
           }
         }
 
@@ -214,6 +203,44 @@ W.PageBase {
       pkgVersion: e.hash.substring(0, 8),
       pkgEnabled: e.enabled
     }));
+  }
+
+  // 同步单个包的启用状态到 fullPackageList 并刷新显示
+  function syncPackStatus(name, enabled) {
+    for (let i = 0; i < fullPackageList.length; i++) {
+      if (fullPackageList[i].name === name) {
+        fullPackageList[i].enabled = enabled;
+        break;
+      }
+    }
+    filterPackageList();
+  }
+
+  // 从 fullPackageList 移除并刷新显示
+  function removeFromFullList(name) {
+    for (let i = 0; i < fullPackageList.length; i++) {
+      if (fullPackageList[i].name === name) {
+        fullPackageList.splice(i, 1);
+        break;
+      }
+    }
+    filterPackageList();
+  }
+
+  // 升级单个包并刷新显示
+  function upgradePackByName(name) {
+    Pacman.upgradePack(name);
+    const data = JSON.parse(Pacman.listPackages());
+    const e = data.find(d => d.name === name);
+    if (e) {
+      for (let i = 0; i < fullPackageList.length; i++) {
+        if (fullPackageList[i].name === name) {
+          fullPackageList[i] = e;
+          break;
+        }
+      }
+      filterPackageList();
+    }
   }
 
   function downloadComplete() {

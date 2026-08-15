@@ -123,6 +123,11 @@ Game.PokerCard {
           return `${data.name} ${data.value}`.trim();
         }
         color: "#554B3F"
+        transform: Scale {
+          origin.x: markText.width / 2
+          origin.y: markText.height / 2
+          xScale: markText.width > (root.width-4) ? ((root.width-4) / markText.width) : 1
+        }
       }
     }
   }

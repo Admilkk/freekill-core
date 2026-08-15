@@ -247,9 +247,9 @@ QtObject {
   // 以下为QML常用函数
   function convertNumber(number) {
     if (number === 1)
-      return "A";
+    return "A";
     if (number >= 2 && number <= 10)
-      return number.toString();
+    return number.toString();
     if (number >= 11 && number <= 13) {
       const strs = ["J", "Q", "K"];
       return strs[number - 11];
@@ -273,14 +273,14 @@ QtObject {
       }
     }
     const hasSameName = Lua.fn(`function(player)
-      local ret = false
-      for _, p2 in ipairs(Fk:currentRoom().players) do
-        if p2 ~= player and p2.general == player.general and p2.deputyGeneral == player.deputyGeneral then
-          ret = true
-          break
-        end
-      end
-      return ret
+    local ret = false
+    for _, p2 in ipairs(Fk:currentRoom().players) do
+    if p2 ~= player and p2.general == player.general and p2.deputyGeneral == player.deputyGeneral then
+    ret = true
+    break
+    end
+    end
+    return ret
     end`)(player);
     if (hasSameName) {
       ret = ret + ("[") + player.seat + ("]");
@@ -385,15 +385,15 @@ QtObject {
       }
     } else {
       textValue = value instanceof Array
-           ? value.map((markText) => Lua.tr(markText)).join(' ')
-           : Lua.tr(value);
+      ? value.map((markText) => Lua.tr(markText)).join(' ')
+      : Lua.tr(value);
     }
 
     // @!! 追加翻译标记名和描述
     let desc;
     if (mark.startsWith('@!!')) {
       desc = `<b>${Lua.tr(mark)}</b><br>` +
-        `${Lua.tr(":" + mark)}${textValue && "<br>" + textValue}`;
+      `${Lua.tr(":" + mark)}${textValue && "<br>" + textValue}`;
     }
 
     if (!("name" in qmlComponentSpec || "url" in qmlComponentSpec)) {
@@ -439,11 +439,11 @@ QtObject {
   function createCardModelFromName(cardName, additionalProp) {
     const component = Qt.createComponent("LunarLtk.Models", "CardModel");
     const dataGetter = Lua.fn(`function(name)
-      local cd = Fk.all_card_types[name]
-      return {
-        name = cd.name,
-        extension = cd.package.extensionName,
-      }
+    local cd = Fk.all_card_types[name]
+    return {
+      name = cd.name,
+      extension = cd.package.extensionName,
+    }
     end`)
 
     const data = dataGetter(cardName);
@@ -495,14 +495,43 @@ QtObject {
     return component.createObject(null, prop);
   }
 
+  // 获得完整的皮肤地址，如果为远程链接则下载到assets文件夹
   function getFullSkinPath(general, name) {
-    console.log(general, name)
     let skin = getSkinByName(general, name)
     if (!skin) return SkinBank.getGeneralPicture(general);
-    console.log(general, name, skin.path, skin.name)
+
     if (skin.path.startsWith("http")) {
+      const hash = urlToBase62(skin.path)
+      if (Fs.resolveFile(`${Cpp.path}/assets/lunarltk/skins/${hash}/${skin.name}`)) {
+        return `${Cpp.path}/assets/lunarltk/skins/${hash}/${skin.name}`
+      }
+      Fs.downloadFileToAssets(
+      skin.path + skin.name,
+      `lunarltk/skins/${hash}/${skin.name}`
+      )
       return skin.path + skin.name
     }
+
     return Cpp.path + "/" + skin.path + skin.name
+  }
+
+  // 将某一地址的资源根据地址hash值统一存放
+  function urlToBase62(url) {
+    // 先生成 32 位十六进制哈希（FNV-1a）
+    let h = 0x811c9dc5;
+    for (let i = 0; i < url.length; i++) {
+      h ^= url.charCodeAt(i);
+      h = (h * 0x01000193) >>> 0;  // 32 位溢出
+    }
+
+    // 再转 base62
+    const chars = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    let result = "";
+    let n = h;
+    do {
+      result = chars[n % 62] + result;
+      n = Math.floor(n / 62);
+    } while (n > 0);
+    return result;
   }
 }

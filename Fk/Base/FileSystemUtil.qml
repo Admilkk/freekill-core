@@ -24,5 +24,33 @@ QtObject {
   function isDir(path) {
     return Backend.isDir(path);
   }
+
+  // 解析文件路径（模拟 Image.source 的后缀匹配）：
+  // - 目录：返回空串
+  // - 带后缀：精确匹配，命中返回原路径，否则返回空串
+  // - 不带后缀的非目录：先精确匹配，再依次尝试常见图片后缀
+  function resolveFile(path) {
+    if (!path) return "";
+
+    if (isDir(path)) return "";
+
+    const slash = Math.max(path.lastIndexOf("/"), path.lastIndexOf("\\"));
+    const dot = path.lastIndexOf(".");
+    if (dot > slash + 1) {
+      return exists(path) ? path : "";
+    }
+
+    if (exists(path)) return path;
+
+    const exts = [".png", ".jpg", ".jpeg", ".gif", ".bmp", ".svg", ".webp", ".avif", ".ico"];
+    for (const ext of exts) {
+      if (exists(path + ext)) return path + ext;
+    }
+    return "";
+  }
+
+  function downloadFileToAssets(url, path) {
+    Backend.downloadFileToAssets(url, path)
+  }
 }
 

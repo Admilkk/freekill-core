@@ -1,5 +1,4 @@
 import QtQuick
-import Qt5Compat.GraphicalEffects
 
 import Fk
 import Fk.Components.GameCommon
@@ -16,24 +15,18 @@ BasicItem {
   SkinArea {
     id: skinImg
     source: root.source
-    width: 120
-    height: 170
-    visible: false
+    anchors.centerIn: border
+    width: 114
+    height: 164
   }
 
   Rectangle {
-    id: skinMask
-    anchors.fill: skinImg
-    radius: 8
-    color: "white"
-    visible: false
-  }
-  
-
-  OpacityMask {
-    anchors.fill: skinImg
-    source: skinImg
-    maskSource: skinMask
+    id: border
+    width: 120
+    height: 170
+    color: "transparent"
+    border.width: 3
+    border.color: "black"
   }
 
   Text {

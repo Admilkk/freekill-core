@@ -96,7 +96,7 @@ W.PageBase {
 
         Button {
           Layout.fillWidth: true
-          text: qsTr("管理资源包")
+          text: qsTr("ResourcePackManage")
           onClicked: {
             App.enterNewPage(Qt.createComponent("Fk.Pages.Common", "ResourcePackManage"));
           }

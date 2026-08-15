@@ -131,19 +131,19 @@ W.PageBase {
         }
       }
       Label {
-        text: "新月杀资源包管理器" // TODO: qsTr
+        text: qs.Tr("Resource Package Manager")
         horizontalAlignment: Qt.AlignHCenter
         Layout.fillWidth: true
       }
       TextField {
         id: searchField
-        placeholderText: "搜索资源包..."
+        placeholderText: qs.Tr("Search Resource Packs")
         Layout.preferredWidth: 220
         clip: true
         onTextChanged: applyFilter()
       }
       ToolButton {
-        text: "撤销更改";
+        text:  qs.Tr("Undo Changes");
         onClicked: root.Component.onCompleted()
       }
     }
@@ -152,7 +152,7 @@ W.PageBase {
   MessageDialog {
     id: quitDialog
     title: qsTr("Quit")
-    informativeText: "你还有未保存的设置，确定退出吗？"
+    informativeText: qs.Tr("Unsaved settings. Are you sure to exit?")
     buttons: MessageDialog.Ok | MessageDialog.Cancel
     onButtonClicked: function (button) {
       switch (button) {
@@ -189,7 +189,7 @@ W.PageBase {
         anchors.margins: 32
         spacing: 24
         Label {
-          text: "可用资源包"
+          text: qsTr("Available Resource Packs")
           font.bold: true
           font.pixelSize: 20
           horizontalAlignment: Text.AlignHCenter
@@ -223,7 +223,7 @@ W.PageBase {
 
           }
           footer: Label {
-            text: "共 " + availablePackModel.count + " 个可用资源包"
+            text: qsTr("%1 Resource Packs Available").arg(availablePackModel.count)
             horizontalAlignment: Text.AlignHCenter
             Layout.alignment: Qt.AlignHCenter
           }
@@ -246,7 +246,7 @@ W.PageBase {
         anchors.margins: 32
         spacing: 24
         Label {
-          text: "已启用资源包（优先级高在上）"
+          text: qsTr("Enabled Resource Packs (Highest Priority at Top)")
           font.bold: true
           font.pixelSize: 20
           horizontalAlignment: Text.AlignHCenter
@@ -328,7 +328,7 @@ W.PageBase {
             } */
           }
           footer: Label {
-            text: "共 " + enabledPackModel.count + " 个已启用资源包"
+            text: qsTr("%1 Resource Packs Enabled").arg(enabledPackModel.count)
             horizontalAlignment: Text.AlignHCenter
             Layout.alignment: Qt.AlignHCenter
           }
@@ -344,7 +344,7 @@ W.PageBase {
     spacing: 20
     Button {
       width: 150
-      text: "保存"
+      text: qsTr("Save")
       onClicked: {
         // 使用完整列表保存，确保搜索筛选掉的条目也被保留
         Config.enabledResourcePacks = root.fullEnabledList.slice();

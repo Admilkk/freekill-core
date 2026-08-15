@@ -16,8 +16,6 @@ Fk:loadTranslationTable{
   ["#lord_designating_heir&-xingshang"] = "立储：获得%src区域内至多两张牌",
   ["heir_usurpation"] = "储君夺位",
   ["heir_succession"] = "储君继位",
-
-  ["#LordDesignatingHeirNotice"] = "注意：<b>主公立储改为预亮</b>技，需预亮在下个空闲时发动",
 }
 
 ---@type TrigSkelSpec<TurnFunc|PhaseFunc>

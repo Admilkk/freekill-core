@@ -174,10 +174,6 @@ local role_getlogic = function()
       end
 
       if room:getSettings("DesignateHeir") then
-        room:sendLog{ -- 鉴于操作方式改变，放几天
-          type = "#LordDesignatingHeirNotice",
-          toast = true,
-        }
         room:addFakeSkill(lord, "lord_designating_heir&")
       end
 

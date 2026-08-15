@@ -35,6 +35,7 @@ QtObject {
   property bool known: true // 是否已知
 
   property list<var> marks: [] // 标记，详见PhotoModel
+  property bool markVisible: false
 
   property string footnote: ""  // footnote, e.g. "A use card to B"
   property bool footnoteVisible: false

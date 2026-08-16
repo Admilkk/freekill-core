@@ -53,21 +53,67 @@ Item {
 
   function addMiscExpand(inputs) {
     miscExpandArea.add(inputs);
-    const myPos = roomScene.mapFromItem(miscExpandArea, 0, 0);
+    const myPos = Ltk.roomScene.mapFromItem(miscExpandArea, 0, 0);
     for (const item of inputs) {
+      item.draggable = true;
       item.x = myPos.x;
       item.y = myPos.y;
     }
-    miscExpandArea.updatePosition(true);
+    updateMiscExpandPosition(true);
   }
 
   function clearMiscExpand() {
-    const myPos = roomScene.mapFromItem(miscExpandArea, 0, 0);
+    const myPos = Ltk.roomScene.mapFromItem(miscExpandArea, 0, 0);
     for (const item of miscExpandArea.remove([...miscExpandArea.items])) {
       item.origY = myPos.y + 200;
       item.destroyOnStop();
       item.goBack(true);
     }
+  }
+
+  function updateMiscExpandPosition(animated) {
+    miscExpandArea.updatePosition(false);
+
+    miscExpandArea.items.forEach(card => {
+      // 新增关键一行：如果卡牌正在返回动画，立刻停止动画，才能生效新origX
+      if(card.goBackAnim.running){
+        card.goBackAnim.stop();
+      }
+      if (card.selected) {
+        card.origY -= 20;
+      }
+      if (!card.selectable && Config.hideUseless) {
+        card.origY += 60;
+      }
+    });
+
+    if (animated) {
+      miscExpandArea.items.forEach(card => {
+        if (!card.dragging) card.goBack(true);
+      });
+    }
+
+    // 让被折叠的手牌全部处于不可用状态！
+    if (folded)
+      enableCards([]);
+  }
+
+  function updateMiscExpand(enabled_ids, pendings) {
+    let card, i;
+    if (pendings) {
+      miscExpandArea.items.forEach(card => {
+        card.selected = pendings.includes(card.dataModel.miscExpandId);
+      });
+    }
+    if (enabled_ids) {
+      miscExpandArea.items.forEach(card => {
+        card.selectable = enabled_ids.includes(card.dataModel.miscExpandId);
+        if (!card.selectable) {
+          card.selected = false;
+        }
+      });
+    }
+    updateMiscExpandPosition(true);
   }
 
   function add(inputs) {
@@ -112,9 +158,15 @@ Item {
   }
 
   function updateCardPosition(animated) {
+    let card, i;
     cardArea.updateCardPosition(false);
 
     cards.forEach(card => {
+      // 新增关键一行：如果卡牌正在返回动画，立刻停止动画，才能生效新origX
+      if(card.goBackAnim.running){
+        card.goBackAnim.stop();
+      }
+
       if (card.selected) {
         card.origY -= 20;
       }

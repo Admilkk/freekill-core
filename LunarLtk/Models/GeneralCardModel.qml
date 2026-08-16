@@ -20,6 +20,8 @@ QtObject {
   property int shieldNum: 0 // 武将初始护甲值
   property string skin: "" // 皮肤名，默认为空，表示使用默认皮肤
 
+  property int miscExpandId   // miscExpand专用
+
   // 武将牌额外信息（子扩展名等）
   property string prefix: "" // 武将子扩展包名缩写，用于简略显示
 

@@ -128,32 +128,6 @@ Game.BasicItem {
       height: parent.height
       hasDeputy: !!deputyGeneral
     }
-
-    Image {
-      id: deputySplit
-      source: SkinBank.photoDir + "deputy-split"
-      opacity: deputyGeneral ? 1 : 0
-      scale: 0.75
-      anchors.centerIn: parent
-    }
-
-    Text {
-      id: deputyGeneralName
-      anchors.left: generalImage.right
-      anchors.leftMargin: -10
-      y: 21
-      font.family: Config.libianName
-      font.pixelSize: 16
-      opacity: 0.9
-      horizontalAlignment: Text.AlignHCenter
-      lineHeight: 14
-      lineHeightMode: Text.FixedHeight
-      color: "white"
-      width: 18
-      wrapMode: Text.WrapAnywhere
-      text: Lua.tr(root.deputyGeneral)
-      style: Text.Outline
-    }
   }
 
   Rectangle {
@@ -171,6 +145,32 @@ Game.BasicItem {
     anchors.fill: photoMask
     source: generalImgItem
     maskSource: photoMask
+  }
+
+  Image {
+    id: deputySplit
+    source: SkinBank.photoDir + "deputy-split"
+    opacity: root.deputyGeneral ? 1 : 0
+    height: photoMask.height
+    width: photoMask.width
+    anchors.centerIn: photoMask
+  }
+
+  Text {
+    id: deputyGeneralName
+    anchors.horizontalCenter: deputySplit.horizontalCenter
+    y: 21
+    font.family: Config.libianName
+    font.pixelSize: 16
+    opacity: 0.9
+    horizontalAlignment: Text.AlignHCenter
+    lineHeight: 14
+    lineHeightMode: Text.FixedHeight
+    color: "white"
+    width: 18
+    wrapMode: Text.WrapAnywhere
+    text: Lua.tr(root.deputyGeneral)
+    style: Text.Outline
   }
 
   Colorize {

@@ -289,6 +289,7 @@ local function filterGeneral(general, filter)
   local illustrator = filter.illustrator ---@type string
   local audioText = filter.audioText ---@type string
   local enabledStates = filter.enabledStates ---@type string[]
+  local skinStates = filter.skinStates ---@type string[]
   return not (
     (name ~= "" and not find_with_escape(Fk:translate(general.name), name)) or
     (title ~= "" and not find_with_escape(translateInfo("#" .. general.name), title)) or
@@ -312,8 +313,9 @@ local function filterGeneral(general, filter)
     (designer ~= "" and not find_with_escape(translateInfo("designer:" .. general.name), designer)) or
     (voiceActor ~= "" and not find_with_escape(translateInfo("cv:" .. general.name), voiceActor)) or
     (illustrator ~= "" and not find_with_escape(translateInfo("illustrator:" .. general.name), illustrator)) or
-    (audioText ~= "" and not findAudioText(general, audioText))
-    or (#enabledStates > 0 and not table.contains(enabledStates, Fk:canUseGeneral(general.name) and Fk:translate("Enable") or Fk:translate("Disabled")))
+    (audioText ~= "" and not findAudioText(general, audioText)) or
+    (#enabledStates > 0 and not table.contains(enabledStates, Fk:canUseGeneral(general.name) and Fk:translate("Enable") or Fk:translate("Disabled"))) or
+    (#skinStates > 0 and not table.contains(skinStates, #Fk:getSkinNamesByGeneral(general.name) > 0 and Fk:translate("Available") or Fk:translate("Unavailable")))
   )
 end
 

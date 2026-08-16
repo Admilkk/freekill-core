@@ -888,9 +888,10 @@ function SkillSkeleton:getDynamicName(player, lang)
   return self.dynamicName and self:dynamicName(player, lang)
 end
 
+--- 获取技能动态描述
 ---@param player Player
 ---@param lang? string
----@return string?
+---@return string? @ 无动态描述返回nil
 function SkillSkeleton:getDynamicDescription(player, lang)
   if table.contains(self.tags, Skill.Switch) or table.contains(self.tags, Skill.Rhyme) then
     local skill_name = self.name

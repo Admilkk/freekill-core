@@ -59,8 +59,9 @@ Game.BasicItem {
   }
 
   Item {
-    width: photoMask.width
-    height: photoMask.height
+    // 由于直接使用photoMask宽高会导致内容物真的以该分辨率进行重渲染导致糊图，所以这里要额外增加渲染分辨率，直接翻倍
+    width: photoMask.width * 2
+    height: photoMask.height * 2
     visible: false
     id: generalImgItem
 

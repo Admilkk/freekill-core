@@ -51,6 +51,7 @@ QtObject {
   property bool selected: false // 这个反过来被绑定
 
   // 皮肤
+  property bool pause: true // 动皮专用，防止太多一起播放卡死
   property bool showSkin: false
   property string skinName: (Config.enabledSkins[name] && showSkin) ? Config.enabledSkins[name] : "" //当前使用的皮肤
 

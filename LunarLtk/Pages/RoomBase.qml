@@ -746,7 +746,6 @@ W.PageBase {
         case "ToBeDecided": {
           const handArea = Ltk.roomScene.dashboard.handcardArea;
           if (refresh_data.expandItems) {
-            handArea.clearMiscExpand();
             const expandItems = [];
             const cardComponent = Qt.createComponent("LunarLtk.Components", "CardItem");
             for (const spec of refresh_data.expandItems) {

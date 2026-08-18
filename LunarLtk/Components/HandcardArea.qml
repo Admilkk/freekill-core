@@ -52,8 +52,13 @@ Item {
   }
 
   function addMiscExpand(inputs) {
-    miscExpandArea.add(inputs);
     const myPos = Ltk.roomScene.mapFromItem(miscExpandArea, 0, 0);
+    for (const item of miscExpandArea.remove([...miscExpandArea.items])) {
+      item.origY = myPos.y + 200;
+      item.destroyOnStop();
+      item.goBack(true);
+    }
+    miscExpandArea.add(inputs);
     for (const item of inputs) {
       item.draggable = true;
       item.x = myPos.x;
@@ -69,6 +74,7 @@ Item {
       item.destroyOnStop();
       item.goBack(true);
     }
+    syncCards();
   }
 
   function updateMiscExpandPosition(animated) {
@@ -93,9 +99,12 @@ Item {
       });
     }
 
-    // 让被折叠的手牌全部处于不可用状态！
-    if (folded)
-      enableCards([]);
+    if (folded) {
+      cards.forEach(card => {
+        card.selected = false;
+      });
+    }
+    syncCards();
   }
 
   function updateMiscExpand(enabled_ids, pendings) {
@@ -132,6 +141,7 @@ Item {
     card.autoBack = true;
     // 只有会被频繁刷新的手牌才能拖动
     card.draggable = Ltk.canSortHandcards(Cpp.self.id);
+    card.selectable = Qt.binding(function() { return !folded && this.dataModel.selectable });
     card.dataModel.selectable = false;
     card.clicked.connect(selectCard);
     card.clicked.connect(adjustCards);
@@ -144,6 +154,7 @@ Item {
     const result = cardArea.remove(outputs);
     for (const card of result) {
       card.draggable = false;
+      card.selectable = Qt.binding(function() { return this.dataModel.selectable });
       card.dataModel.selectable = false;
       card.clicked.disconnect(selectCard);
       card.selectedChanged.disconnect(adjustCards);
@@ -324,7 +335,7 @@ Item {
   function syncCards() {
     // sync expandedCards
     const visibleIds = dataModel.visible_ids ?? [];
-    let allCards = [...dataModel.handcards, ...dataModel.expandedCards]
+    let allCards = folded ? dataModel.handcards : [...dataModel.handcards, ...dataModel.expandedCards];
     if (visibleIds.length > 0) {
       allCards = allCards.filter(model => visibleIds.includes(model.uniqueId));
     }

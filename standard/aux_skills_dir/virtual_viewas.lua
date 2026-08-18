@@ -131,7 +131,7 @@ virtual_viewas:addEffect("viewas", {
     return refresh_data
   end,
   view_as = function(self, player, cards)
-    local name = (#self.all_choices == 1 and self.all_choices[1]) or self.interaction.data
+    local name = (#self.all_choices == 1 and not self.namebox and self.all_choices[1]) or self.interaction.data
     if Fk.all_card_types[name] == nil then return nil end
     local card = Fk:cloneCard(name)
     if self.skillName then

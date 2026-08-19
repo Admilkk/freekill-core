@@ -23,21 +23,17 @@ virtual_viewas:addEffect("viewas", {
     end
   end,
   interaction = UI.ToBeDecided {},
-  visible_pile = function(self, player)
-    -- FIXME(邪道实现): 通过设置visible_pile，使得点取消键触发的setup重置手牌！
-    local req = self.interaction.spec.UIrequest or {}
-    -- FIXME: 先随便传点值（正经的话，要考虑expandpile啥的，因为马上就是正常选牌了……）
-    if req.elemType == "OptionBox" and req.option == "Cancel" then
-      return self.card_filter.cards
-    end
-    return {}
-  end,
   update_interaction = function(self, player, selected_cards, selected_targets, extra_data)
     if #self.all_choices == 1 and not self.namebox then return end
     local dat = self.interaction.data
     self.interaction.spec.UIrequest = table.simpleClone(dat)
     if dat.elemType == "OptionBox" then
       if dat.option == "Cancel" then
+        --FIXME(邪道实现): 直接修改req来取消self.pendings选牌
+        local handler = ClientInstance.current_request_handler
+        if handler then
+          handler.pendings = {}
+        end
         self.interaction.spec.result = nil
       else
         self.interaction.spec.result = { cards = table.simpleClone(selected_cards) }
@@ -127,7 +123,6 @@ virtual_viewas:addEffect("viewas", {
       end
     end
     self.interaction.spec.UIrequest = nil
-    --p(refresh_data)
     return refresh_data
   end,
   view_as = function(self, player, cards)

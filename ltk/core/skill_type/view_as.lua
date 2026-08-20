@@ -195,12 +195,12 @@ function ViewAsSkill:refresh_interaction(player, selected_cards, selected_target
       local subcards = VSPattern.subcards or spec.result.cards
       local ban_names = VSPattern.ban_names or {}
       for _, name in ipairs(VSPattern.names) do
-        local card = Fk:cloneCard(name, nil, nil, VSPattern.skillName, subcards)
+        local card = Fk:cloneCard(name, nil, nil, VSPattern.skill_name, subcards)
         table.insert(items, {
           prop = {
             type = "card",
             card = card,
-            additional_prop = { selectable = (not table.contains(ban_names, name) and player:canUseOrResponseInCurrent(card)) }
+            additional_prop = { selectable = (not table.contains(ban_names, card.trueName) and player:canUseOrResponseInCurrent(card)) }
           },
           name = name,
           cid = i,

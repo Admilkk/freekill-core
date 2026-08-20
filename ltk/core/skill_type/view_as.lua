@@ -225,17 +225,21 @@ function ViewAsSkill:refresh_interaction(player, selected_cards, selected_target
       end
       refresh_data.optionBox = UI.OptionBox(op_spec)
     else
-      local op_spec = {   ---@class OptionBoxParams
-        options = {},
-        all_options = { "OK" },
-        direct_send = true,
-        cancelable = true
-      }
-      local card = self:viewAs(player, selected_cards)
-      if card and card:getSkill(player):feasible(player, selected_targets, { }, card) then
-        op_spec.options = { "OK" }
+      local handler = ClientInstance.current_request_handler
+      if handler and handler.class.name == "ReqActiveSkill" then
+        --在读条中使用的情况直接使用自带的确定取消即可（因为可以反复操作）
+        local op_spec = {   ---@class OptionBoxParams
+          options = {},
+          all_options = { "OK" },
+          direct_send = true,
+          cancelable = true
+        }
+        local card = self:viewAs(player, selected_cards)
+        if card and card:getSkill(player):feasible(player, selected_targets, { }, card) then
+          op_spec.options = { "OK" }
+        end
+        refresh_data.optionBox = UI.OptionBox(op_spec)
       end
-      refresh_data.optionBox = UI.OptionBox(op_spec)
     end
   end
   spec.UIrequest = nil

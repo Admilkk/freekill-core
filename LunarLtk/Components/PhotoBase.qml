@@ -32,6 +32,7 @@ Game.BasicItem {
   property bool surrendered: false
 
   property alias photoMask: photoMask
+  property alias skinIcon: skinIcon
 
   state: "normal"
 
@@ -247,16 +248,16 @@ Game.BasicItem {
     }
   }
 
-  HoverHandler {
-    id: hover
-    onHoveredChanged: {
-      if (hovered && root.enableChangeSkin && (roomScene.dataModel?.dashboardId === root.playerid) && !Config.observing && !cooldownTimer.running && (Ltk.getSkinNamesByGeneral(root.general).length > 0 || Ltk.getSkinNamesByGeneral(root.deputyGeneral).length > 0)) {
-        skinIcon.visible = true;
-      } else {
-        skinIcon.visible = false;
-      }
-    }
-  }
+  // HoverHandler {
+  //   id: hover
+  //   onHoveredChanged: {
+  //     if (hovered && root.enableChangeSkin && (roomScene.dataModel?.dashboardId === root.playerid) && !Config.observing && !cooldownTimer.running && (Ltk.getSkinNamesByGeneral(root.general).length > 0 || Ltk.getSkinNamesByGeneral(root.deputyGeneral).length > 0) || Cpp.quickStartMode) {
+  //       skinIcon.visible = true;
+  //     } else {
+  //       skinIcon.visible = false;
+  //     }
+  //   }
+  // }
 
   function refreshSkins() {
     if (root.playerid === roomScene.dataModel?.dashboardId && !Config.observing) {

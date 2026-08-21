@@ -544,8 +544,8 @@ function ChangeShield:main()
 
   room.logic:trigger(fk.BeforeShieldChanged, data.who, data)
 
-  data.num = math.min(num, player:getMaxShield() - player.shield)
-  data.num = math.max(num, -player.shield)
+  data.num = math.min(data.num, data.who:getMaxShield() - data.who.shield)
+  data.num = math.max(data.num, -data.who.shield)
   if data.num == 0 then
     data.prevented = true
   end

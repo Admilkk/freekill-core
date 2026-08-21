@@ -337,7 +337,7 @@ function Room:clearHandMark(player, name)
 end
 
 --- 将一张卡牌的```mark```标记设置为```value```，并通知所有客户端更新。
---- 
+---
 --- 通用的mark名称及后缀参见```mark_enum.lua```。
 ---@param card Card @ 更新标记的牌
 ---@param mark string @ 标记的名称
@@ -1025,7 +1025,7 @@ end
 --- 询问玩家选择X张牌和Y名角色。
 ---
 --- 返回两个值，第一个是选择目标列表，第二个是选择的牌id列表，第三个是否按了确定
---- 
+---
 --- 默认可取消
 ---@param player ServerPlayer @ 要询问的玩家
 ---@param params AskToChooseCardsAndPlayersParams @ 各种变量
@@ -3224,7 +3224,7 @@ end
 --- 禁用player视角的AG（不可与之交互）。
 ---
 --- 若不传参（即player为nil），那么禁用所有玩家的AG。
---- 
+---
 --- 注意想要真正关掉AG的话应该调用closeAG。
 ---@see Room.closeAG
 ---@param player? ServerPlayer @ 要禁用AG的玩家
@@ -3491,29 +3491,6 @@ function Room:askToChooseToMoveCardInBoard(player, params)
       return self:canMoveCardInBoard(params.flag, nil, params.exclude_ids)
     end
   end
-end
-
---- 改变玩家的护甲数
----@param player ServerPlayer
----@param num integer @ 变化量
-function Room:changeShield(player, num)
-  num = math.min(num, player:getMaxShield() - player.shield)
-  num = math.max(num, -player.shield)
-  if num == 0 then return end
-  if num > 0 then
-    self:sendLog {
-      type = "#AddShield",
-      from = player.id,
-      arg = num,
-    }
-  else
-    self:sendLog {
-      type = "#LoseShield",
-      from = player.id,
-      arg = -num,
-    }
-  end
-  self:setPlayerProperty(player, "shield", player.shield + num)
 end
 
 -- 杂项函数
@@ -4472,7 +4449,7 @@ function Room:quickSetPlayerRole(roles)
       if v["role"] then
         local idx = self:getIndexFromHuman(tonumber(k))
         if idx == -1 then error("Index doesn't exist!") end
-        
+
         if table.contains(_roles, v["role"]) then
           arr[idx] = v["role"]
           table.removeOne(_roles, v["role"])

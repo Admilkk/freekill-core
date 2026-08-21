@@ -1246,7 +1246,7 @@ end
 
 ---@class AskToChooseIniticalGeneralParams
 ---@field targets ServerPlayer | ServerPlayer[]
----@field generals? string[] @ 提前传入可选的武将牌，该参数会覆盖isLord、num和lordNum，需自行returnToGeneralPile放回武将牌堆
+---@field generals? string[] @ 提前传入可选的武将牌，该参数会覆盖isLord、num和lordNum
 ---@field lordRole? string @ “主公”身份，默认为主公，明忠模式则为忠臣
 ---@field isLord? boolean @ 是否为“主公”，决定是否调用lordNum取武将牌
 ---@field lordGeneral? string @ 主公主将
@@ -1258,6 +1258,7 @@ end
 ---@field enabledKingdoms? string[] @ 允许使用的势力（国战专属参数）
 ---@field hideRole? boolean @ 是否隐藏身份显示
 ---@field skipSetup? boolean @ 跳过设置武将
+---@field returnPile? boolean @ 剩余的放回武将牌堆，默认为是
 
 ---初始选将
 ---@param player ServerPlayer @ 无用参数
@@ -1274,6 +1275,7 @@ function Room:askToChooseIniticalGeneral(player, params)
   params.isHeg = params.isHeg or false
   params.enabledKingdoms = params.enabledKingdoms or {}
   params.hideRole = params.hideRole or false
+  params.returnPile = params.returnPile == nil and true or params.returnPile
 
   if params.lordGeneral == "" and params.lordDeputy ~= "" then
     error("can't assign lordDeputy but left lordGeneral empty")
@@ -1395,12 +1397,22 @@ function Room:askToChooseIniticalGeneral(player, params)
 
     ans[pl] = g_data
     ans2[pl] = { [extra_data[1]] = extra_data[2] }
-    for _, g in ipairs(g_data) do
-      table.removeOne(_generals, g)
+    if params.returnPile then
+      for _, g in ipairs(g_data) do
+        if not table.removeOne(_generals, g) then
+          local trueName = Fk.generals[g].trueName -- 考虑truename
+          for i = #_generals, 1, -1 do
+            if Fk.generals[_generals[i]].trueName == trueName then
+              table.remove(_generals, i)
+              break
+            end
+          end
+        end
+      end
     end
   end
 
-  self:returnToGeneralPile(_generals, "random")
+  if params.returnPile then self:returnToGeneralPile(_generals, "random") end
 
   return ans, ans2, _generals
 end

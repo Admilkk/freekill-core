@@ -359,8 +359,12 @@ W.PageBase {
   }
 
   function doSuperLightBox(path, data) {
-    bigAnim.source = Cpp.path + "/" + path;
-    if (data) {
+    if (path) {
+      bigAnim.source = Cpp.path + "/" + path;
+    } else {
+      bigAnim.sourceComponent = Qt.createComponent("LunarLtk.Components", "SuperLightBox");
+    }
+    if (data && bigAnim.item && typeof bigAnim.item.loadData === "function") {
       bigAnim.item.loadData(data);
     }
   }

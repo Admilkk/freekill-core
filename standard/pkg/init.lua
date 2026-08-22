@@ -112,6 +112,7 @@ local role_getlogic = function()
           targets = lord,
           generals = generals,
           needDeputy = room:getSettings("enableDeputy"),
+          returnPile = true,
         })
       end
 
@@ -420,7 +421,7 @@ Fk:loadTranslationTable{
       "主公死亡时，若储君为忠臣，获得主公区域内至多两张牌，增加1点体力上限，回复1点体力，变为主公；" ..
       "忠臣储君死亡时，主公失去1点体力；储君杀死主公弃置所有牌。",
   ["RenegadeLoyalty"] = "内奸侍奉明主",
-  ["help: RenegadeLoyalty"] = "场上人数＞4且有主忠死亡时，内奸可以变为忠臣。",
+  ["help: RenegadeLoyalty"] = "场上人数＞4且有主忠死亡时，内奸可以变为忠臣（不暴露身份）。",
   ["RenegadeWild"] = "内奸自立",
   ["help: RenegadeWild"] = "内奸可以成为野心家：获得野心家标记（出牌阶段，弃置以摸两张牌或回复1点体力）" ..
       "和〖飞扬〗〖跋扈〗，杀死角色摸三张牌。",

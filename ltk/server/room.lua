@@ -540,14 +540,21 @@ function Room:setCardEmotion(cid, name)
 end
 
 --- 播放一个全屏大动画。可以自己指定qml文件路径和额外的信息。
----@param path string @ qml文件的路径，有默认值
----@param extra_data any @ 要传递的额外信息
-function Room:doSuperLightBox(path, extra_data)
-  path = path or "RoomElement/SuperLightBox.qml"
+---@param path string? @ qml文件的路径，有默认值
+---@param extra_data any @ 要传递的额外信息。默认可用键值表：text为文本，media为媒体，bgColor为背景颜色，contentAreaColor为中心区域颜色，contentAreaSize为中心区域占比
+---@param pause integer? @ 停顿时间，默认2000，不包括淡入淡出
+---@param fade integer? @ 淡入淡出时间，默认500
+function Room:doSuperLightBox(path, extra_data, pause, fade)
+  pause = pause or 2000
+  fade = fade or 500
+  extra_data = extra_data or {}
+  extra_data.pause = pause
+  extra_data.fade = fade
   self:doAnimate("SuperLightBox", {
     path = path,
     data = extra_data,
   })
+  self:delay(pause + fade * 2)
 end
 
 --- 基本上是个不常用函数就是了

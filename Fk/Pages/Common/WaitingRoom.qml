@@ -802,7 +802,7 @@ W.PageBase {
     }
     for (let i = 0; i < observerModel.count; i++) {
       if (observerModel.get(i).id === id) {
-        return observerListView.contentItem.children[i];
+        return observerListView.itemAtIndex(i);
       }
     }
     return undefined;

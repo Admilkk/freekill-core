@@ -540,7 +540,7 @@ W.PageBase {
         bg.radius: 10
         bg.color: '#8eb1ab'
         border.width: 0
-        visible: isOwner && isFull
+        visible: isOwner && isFull && !Config.observing        
         enabled: isAllReady
         onClicked: if (enabled) {
           Cpp.notifyServer("StartGame", "");

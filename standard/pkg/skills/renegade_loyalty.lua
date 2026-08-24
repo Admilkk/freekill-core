@@ -15,6 +15,7 @@ Fk:loadTranslationTable{
 
 ---@type TrigSkelSpec<TurnFunc|PhaseFunc>
 local spec = {
+  mute = true,
   can_trigger = function (self, event, target, player, data)
     if not player:hasSkill(loyalty.name) or player.role ~= "renegade" or not (event == fk.TurnEnd or player == target) then return end
     local room = player.room

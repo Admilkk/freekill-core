@@ -525,28 +525,32 @@ QtObject {
   function getSkeletonSkinData(general, name) {
     const skin = getSkinByName(general, name);
     if (!skin?.is_skel) return;
-    const path = Cpp.path + "/" + skin.path + (skin.path.endsWith("/") ? "" : "/");
+    const isRemoteFile = skin.path.startsWith("http://") || skin.path.startsWith("https://")
+    let path = (Cpp.path + "/" + skin.path + (skin.path.endsWith("/") ? "" : "/"));
     const atlasBgFile = skin.bg + ".atlas";
     const skelBgFile = skin.bg + (skin.files.includes(skin.bg + ".skel") ? ".skel" : ".json");
     const atlasBodyFile = skin.body + ".atlas";
     const skelBodyFile = skin.body + (skin.files.includes(skin.body + ".skel") ? ".skel" : ".json");
 
-    const hash = urlToBase62(skin.path);
     let suc = true;
-    for (const n of skin.files) {
-      if (!Fs.resolveFile(`${Cpp.path}/assets/lunarltk/skel/${hash}/${n}`)) {
-        suc = false;
-        Fs.downloadFileToAssets(
-        skin.path + n,
-        `lunarltk/skel/${hash}/${n}`
-        )
+    if (isRemoteFile) {
+      const hash = urlToBase62(skin.path);
+      path = `${Cpp.path}/assets/lunarltk/skel/${hash}/`;
+      for (const n of skin.files) {
+        if (!Fs.resolveFile(`${Cpp.path}/assets/lunarltk/skel/${hash}/${n}`)) {
+          suc = false;
+          Fs.downloadFileToAssets(
+          skin.path + n,
+          `lunarltk/skel/${hash}/${n}`
+          )
+        }
       }
     }
     
     if (suc) {
       const extraData = skin.extra_data;
       return {
-        path: `${Cpp.path}/assets/lunarltk/skel/${hash}/`,
+        path: path,
         atlasBgFile: atlasBgFile,
         skelBgFile: skelBgFile,
         atlasBodyFile: atlasBodyFile,

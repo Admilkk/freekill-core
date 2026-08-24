@@ -106,7 +106,7 @@ Item {
         id: bgLoader
         anchors.fill: parent
         sourceComponent: {
-          if (root.skelData.imgBgPath) {
+          if (root.skelData.staticBg) {
             return skelStaticBg
           } else if (root.skelData.atlasBgFile) {
             return skelBg

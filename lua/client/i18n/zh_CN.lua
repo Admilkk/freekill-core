@@ -464,6 +464,8 @@ FreeKill使用的是libgit2的C API，与此同时使用Git完成拓展包的下
   ["Are you sure to quit?"] = "是否确认退出对局？（若对局开始则将计入逃跑次数）",
 
   ["Trust"] = "托管",
+  ["Are you sure to trust?"] = "是否确认托管？",
+  ["help: Are you sure to trust?"] = "（长按可直接托管，取消托管不会询问）",
   ["Sort Cards"] = "牌序",
   ["Sort by Type"] = "按类型",
   ["Sort by Number"] = "按点数",

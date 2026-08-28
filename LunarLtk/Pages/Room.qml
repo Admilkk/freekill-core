@@ -5,6 +5,7 @@ import QtQuick.Controls
 import QtQuick.Layouts
 import QtMultimedia
 import Qt5Compat.GraphicalEffects
+import QtQuick.Dialogs
 
 import Fk
 import Fk.Components.Common
@@ -139,6 +140,33 @@ RoomBase {
         visible: !Config.observing && !Config.replaying
         textFont.pixelSize: 28
         onClicked: {
+          if (getPhoto(Cpp.self.id).dataModel.netstate == "trust") {
+            doTrust(); // 已托管点击直接取消托管
+          } else {
+            trustDialog.open(); // 托管询问
+          }
+        }
+        onRightClicked: doTrust(); // 长按直接托管
+
+        MessageDialog {
+          id: trustDialog
+          title: Lua.tr("Trust")
+          text: Lua.tr("Are you sure to trust?")
+          informativeText: Lua.tr("help: Are you sure to trust?")
+          buttons: MessageDialog.Ok | MessageDialog.Cancel
+          onButtonClicked: function (button) {
+            switch (button) {
+              case MessageDialog.Ok: {
+                trustBtn.doTrust();
+                break;
+              }
+              case MessageDialog.Cancel: {
+                trustDialog.close();
+              }
+            }
+          }
+        }
+        function doTrust() {
           Cpp.notifyServer("Trust", "");
           trustBtn.enabled = false;
           roomScene.dataModel.deActivate();

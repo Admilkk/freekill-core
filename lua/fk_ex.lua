@@ -405,11 +405,11 @@ end
 
 ---@class PoxiSpec
 ---@field name string
----@field card_filter fun(to_select: integer, selected: integer[], data: any, extra_data: any): any
----@field feasible fun(selected: integer[], data: any, extra_data: any): any
----@field post_select? fun(selected: integer[], data: any, extra_data: any): integer[]
----@field default_choice? fun(data: any, extra_data: any): integer[]
----@field prompt? string | fun(data: any, extra_data: any): string
+---@field card_filter fun(to_select: integer, selected: integer[], data: PoxiCardData[], extra_data: table|PoxiExtraData): any
+---@field feasible fun(selected: integer[], data: PoxiCardData[], extra_data: table|PoxiExtraData): any
+---@field post_select? fun(selected: integer[], data: PoxiCardData[], extra_data: table|PoxiExtraData): integer[]
+---@field default_choice? fun(data: PoxiCardData[], extra_data: table|PoxiExtraData): integer[]
+---@field prompt? string | fun(data: PoxiCardData[], extra_data: table|PoxiExtraData, selected: integer[]): string
 
 ---@class QmlMarkSpec
 ---@field name string

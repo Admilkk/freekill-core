@@ -216,8 +216,8 @@ QtObject {
     return _L.chooseGeneralFeasible(rule_name, selected, data, extra_data);
   }
 
-  function poxiPrompt(poxi_type, data, extra_data) {
-    return _L.poxiPrompt(poxi_type, data, extra_data);
+  function poxiPrompt(poxi_type, data, extra_data, selected) {
+    return _L.poxiPrompt(poxi_type, data, extra_data, selected);
   }
 
   function poxiFilter(poxi_type, to_select, selected, data, extra_data) {

@@ -1018,7 +1018,7 @@ function M:chooseGeneralFeasible(rule_name, selected, data, extra_data)
   return rule.feasible(selected, data, extra_data)
 end
 
-function M:poxiPrompt(poxi_type, data, extra_data)
+function M:poxiPrompt(poxi_type, data, extra_data, selected)
   local poxi = Fk.poxi_methods[poxi_type]
   if not poxi then return end
   local prompt = poxi.prompt
@@ -1026,7 +1026,7 @@ function M:poxiPrompt(poxi_type, data, extra_data)
   if type(prompt) == "string" then
     return prompt
   else
-    return prompt(data, extra_data)
+    return prompt(data, extra_data, selected)
   end
 end
 

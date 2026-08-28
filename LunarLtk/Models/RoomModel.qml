@@ -182,7 +182,7 @@ QtObject {
     const model = getPhoto(uid);
     // FIXME: skins这边写成这样不太好看
     if (model && property_name in model) {
-      model[property_name] = value;
+      if (value !== undefined) model[property_name] = value;
     }
   }
 

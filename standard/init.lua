@@ -42,6 +42,15 @@ extension.customPages = {
       uri = "LunarLtk.Pages",
       name = "GeneralPoolOverview",
     }
+  },
+  {
+    name = "Skin Settings",
+    iconUrl = "http://175.178.66.93/symbolic/mimetypes/x-office-document-symbolic.svg",
+    popup = true,
+    qml = {
+      uri = "LunarLtk.Pages",
+      name = "SkinSetting",
+    }
   }
 }
 

@@ -39,4 +39,9 @@ Popup {
     }
     onSourceComponentChanged: sourceChanged();
   }
+
+  onClosed: {
+    sourceComponent.destroy();
+    sourceComponent = null;
+  }
 }

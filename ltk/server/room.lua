@@ -799,7 +799,13 @@ function Room:askToDiscard(player, params)
     skillName = params.skill_name,
     pattern = params.pattern,
   }
-  local _, ret = self:askToUseActiveSkill(player, {skill_name = "discard_skill", prompt = params.prompt, cancelable = params.cancelable, extra_data = data, no_indicate = params.no_indicate})
+  local _, ret = self:askToUseActiveSkill(player, {
+    skill_name = "discard_skill",
+    prompt = params.prompt,
+    cancelable = params.cancelable,
+    extra_data = data,
+    no_indicate = params.no_indicate,
+  })
 
   if ret then
     toDiscard = ret.cards
@@ -4119,9 +4125,6 @@ function Room:actExtraTurn()
     data.who:gainAnExtraTurn(false, data.reason, data.phases, data.extra_data)
   end
 end
-
----@deprecated @ 用actExtraTurn代替
-Room.ActExtraTurn = Room.actExtraTurn
 
 --- 获得一名角色的客户端手牌顺序
 --- 本bug由玄蝶提供

@@ -104,7 +104,6 @@ end
 ---@field public max_round_use_time? integer|fun(self: SkillSkeleton, player: Player): integer? @ 该技能效果的最大使用次数——轮次
 ---@field public max_game_use_time? integer|fun(self: SkillSkeleton, player: Player): integer? @ 该技能效果的最大使用次数——本局游戏
 ---@field public history_branch? string|fun(self: UsableSkill, player: ServerPlayer, data: SkillUseData):string? @ 发动技能时增加添加对应某处分支的次数
----@field public derived_piles? string | string[] @ 与某效果联系起来的私人牌堆名，失去该效果时将之置入弃牌堆(@deprecated)
 ---@field public times? integer | fun(self: UsableSkill, player: Player): integer @ 显示在技能按钮上的发动次数数字，负数不显示
 
 ---@class ButtonSkillSpec: UsableSkillSpec
@@ -405,11 +404,11 @@ end
 
 ---@class PoxiSpec
 ---@field name string
----@field card_filter fun(to_select: integer, selected: integer[], data: PoxiCardData[], extra_data: table|PoxiExtraData): any
----@field feasible fun(selected: integer[], data: PoxiCardData[], extra_data: table|PoxiExtraData): any
----@field post_select? fun(selected: integer[], data: PoxiCardData[], extra_data: table|PoxiExtraData): integer[]
----@field default_choice? fun(data: PoxiCardData[], extra_data: table|PoxiExtraData): integer[]
----@field prompt? string | fun(data: PoxiCardData[], extra_data: table|PoxiExtraData, selected: integer[]): string
+---@field card_filter fun(to_select: integer, selected: integer[], data: any, extra_data: any): any
+---@field feasible fun(selected: integer[], data: any, extra_data: any): any
+---@field post_select? fun(selected: integer[], data: any, extra_data: any): integer[]
+---@field default_choice? fun(data: any, extra_data: any): integer[]
+---@field prompt? string | fun(data: any, extra_data: any): string
 
 ---@class QmlMarkSpec
 ---@field name string

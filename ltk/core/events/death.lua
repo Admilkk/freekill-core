@@ -18,9 +18,6 @@ local DyingEvent = TriggerEvent:subclass("DyingEvent")
 --- 进入濒死状态时
 ---@class fk.EnterDying: DyingEvent
 fk.EnterDying = DyingEvent:subclass("fk.EnterDying")
---- （已弃用）
----@class fk.Dying: DyingEvent
-fk.Dying = DyingEvent:subclass("fk.Dying")
 --- 濒死结算结束后
 ---@class fk.AfterDying: DyingEvent
 fk.AfterDying = DyingEvent:subclass("fk.AfterDying")

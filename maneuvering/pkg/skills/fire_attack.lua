@@ -83,8 +83,30 @@ skill:addAI(Fk.Ltk.AI.newCardSkillStrategy {
       card = effect.card,
       damage = 1,
       damageType = fk.FireDamage,
-      skillName = skill.name
+      skillName = skill.name,
     })
+  end,
+})
+
+skill:addAI(Fk.Ltk.AI.newDiscardStrategy {
+  choose_cards = function(self, ai)
+    local data = ai.data[4]
+    if data.skillName == skill.name then
+      local available_cards = ai:getEnabledCards()
+      ai:sortCards(available_cards, "keep_value")
+      local benefit = ai:getBenefitOfEvents(function(logic)
+        logic:moveCardTo(available_cards[1], Card.DiscardPile, nil, fk.ReasonDiscard, ai.data[1], nil, false, ai.player)
+        logic:damage({
+          from = ai.player,
+          to = ai.room:getPlayerById(tonumber(string.split(ai.data[2], ":")[2])),
+          damage = 1,
+          damageType = fk.FireDamage,
+          skillName = ai.data[1],
+          --card = nil,
+        })
+      end)
+      return { available_cards[1] }, benefit
+    end
   end,
 })
 

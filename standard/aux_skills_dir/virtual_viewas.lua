@@ -84,7 +84,7 @@ virtual_viewas:addEffect("viewas", {
             prop = {
               type = "card",
               card = card,
-              additional_prop = { selectable = (table.contains(self.choices, name) and player:canUseOrResponseInCurrent(card)) }
+              additional_prop = { selectable = (table.contains(self.choices, name) and player:canUseOrResponseInCurrent(card, extra_data)) }
             },
             name = name,
             cid = i,

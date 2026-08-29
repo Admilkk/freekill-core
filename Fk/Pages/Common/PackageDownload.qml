@@ -12,10 +12,18 @@ W.PageBase {
 
   function setPackages(summary) {
     const localSummary = JSON.parse(Pacman.getPackSummary());
+    const localList = JSON.parse(Pacman.listPackages());
     packageModel.clear();
     hasHandlerModel = [];
     for (let data of summary) {
-      data.oldHash = localSummary.find(d => d.name === data.name)?.hash ?? "(nil)";
+      const local = localSummary.find(d => d.name === data.name);
+      const localPkg = localList.find(d => d.name === data.name);
+      data.oldHash = local?.hash ?? "(nil)";
+      data.oldUrl = localPkg?.url ?? "";
+      // 源地址发生变化（如 gitee → cnb）时，先卸载旧源，让随后的 loadSummary 按新 url 重新克隆
+      if (data.url && data.oldUrl && data.oldUrl !== data.url) {
+        Pacman.removePack(data.name);
+      }
       packageModel.append(data);
     }
   }

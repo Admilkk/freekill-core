@@ -14,6 +14,7 @@
 ---@field public max_card_num integer
 ---@field public card_num integer
 ---@field public interaction any
+---@field public interaction_helper function
 ---@field public update_interaction function
 ---@field public refresh_interaction function
 ---@field public prompt string | function? @ 技能提示

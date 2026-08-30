@@ -172,7 +172,7 @@ function ViewAsSkill:refresh_interaction(player, selected_cards, selected_target
   if type(helper) == "function" then
     helper = helper(self, player, selected_cards, selected_targets)
   end
-  if helper == nil then return end
+  if helper == nil or helper.type ~= "cardname" then return end
 
   local refresh_data = {}
   local req = spec.UIrequest or {}
@@ -202,7 +202,7 @@ function ViewAsSkill:refresh_interaction(player, selected_cards, selected_target
           prop = {
             type = "card",
             card = card,
-            additional_prop = { selectable = table.contains(names, card.name) }
+            additional_prop = { selectable = table.contains(names, name) }
           },
           name = name,
           cid = i,
@@ -276,7 +276,7 @@ end
 ---@return Player[]? @ 返回固定目标角色列表。若此牌可以选择目标，返回空表
 function ViewAsSkill:fixTargets(player, selected_cards, c, extra_data)
   local card = self:viewAs(player, selected_cards)
-  if card == nil or card:getFixedTargets(player, extra_data) then
+  if card == nil or card:getFixedTargets(player, extra_data) or card.is_passive then
     return {}
   end
   return nil

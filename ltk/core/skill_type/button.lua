@@ -126,25 +126,9 @@ end
 ---@param selected_cards integer[] @ 已选牌
 ---@return boolean
 function ButtonSkill:feasible(player, selected, selected_cards)
+  if self.interaction_helper and self.interaction.data == nil then return false end
   return #selected >= self:getMinTargetNum(player) and #selected <= self:getMaxTargetNum(player)
     and #selected_cards >= self:getMinCardNum(player) and #selected_cards <= self:getMaxCardNum(player)
-end
-
--- 刷新技能的交互选项（如选项框、选项卡等），返回一个表，表中每个元素为一个选项
----@param player Player @ 使用者
----@param selected_targets Player[] @ 已选目标
----@param selected_cards integer[] @ 已选牌
----@return table?
-function ButtonSkill:refresh_interaction(player, selected_cards, selected_targets)
-  if self.interaction then
-    local spec = self.interaction.spec
-    if spec and spec.type == "optionbox" and spec.direct_send then
-      if self:feasible(player, selected_targets, selected_cards) then
-        return self.interaction.spec.options
-      end
-      return {}
-    end
-  end
 end
 
 -- 使用技能时默认的烧条提示（一般会在主动使用时出现）

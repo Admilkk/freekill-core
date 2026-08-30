@@ -140,6 +140,17 @@ W.PageBase {
     onTriggered: roomScene.handleRefreshData()
   }
 
+  Connections {
+    target: roomScene.progressAnim
+    function onFinished(){
+      if (dataModel.requestTotal < 6000) return;
+      dataModel.negativeTotal += dataModel.requestTotal;
+      if (dataModel.negativeTotal > 89900) {
+        Cpp.notifyServer("KickPlayer", dataModel.dashboardId)
+      }
+    }
+  }
+
   // ==== function 区 ====
 
   function initializeRoom() {

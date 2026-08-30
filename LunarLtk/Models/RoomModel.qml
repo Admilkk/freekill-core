@@ -56,6 +56,7 @@ QtObject {
   // 读条信息
   property real requestTotal // 总共的读条时长
   property real requestDuration // 剩余读条时长
+  property real negativeTotal // 烧断条总时长
 
   property string prompt
 

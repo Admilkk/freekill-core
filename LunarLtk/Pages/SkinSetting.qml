@@ -207,7 +207,7 @@ W.PageBase {
   function getUnsolvedSkins(_skins) {
     return root.skins.filter(s => {
       const hash = Ltk.urlToBase62(s.path)
-      if (!(s.path.startsWith("http://") || s.path.startsWith("https://"))) return true;
+      if (!s.path.startsWith("http://") && !s.path.startsWith("https://")) return false;
       if (s.is_skel) {
         for (const f of s.files) {
           if (!Fs.resolveFile(`${Cpp.path}/assets/lunarltk/skel/${hash}/${f}`)) return false;

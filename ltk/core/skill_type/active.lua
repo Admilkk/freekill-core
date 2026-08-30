@@ -85,10 +85,7 @@ function ActiveSkill:refresh_interaction(player, selected_cards, selected_target
 
   if spec.type ~= "ToBeDecided" then return end
 
-  local helper = self.interaction_helper
-  if type(helper) == "function" then
-    helper = helper(self, player, selected_cards, selected_targets)
-  end
+  local helper = self:interaction_helper(player, selected_cards, selected_targets)
   if helper == nil then return end
 
   local refresh_data = {}

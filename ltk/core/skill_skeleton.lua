@@ -562,6 +562,17 @@ function fk.readInteractionToSkill(skill, spec)
       end,
     })
   end
+  if spec.interaction_helper then
+    skill.interaction_helper = setmetatable({}, {
+      __call = function(_, ...)
+        if type(spec.interaction_helper) == "function" then
+          return spec.interaction_helper(...)
+        else
+          return spec.interaction_helper
+        end
+      end,
+    })
+  end
 end
 
 ---@param _skill SkillSkeleton
@@ -628,9 +639,6 @@ function SkillSkeleton:createActiveSkill(_skill, idx, key, attr, spec)
   end
 
   fk.readInteractionToSkill(skill, spec)
-  if spec.interaction_helper and type(spec.interaction_helper) == "function" then
-    skill.interaction_helper = spec.interaction_helper
-  end
   if spec.update_interaction and type(spec.update_interaction) == "function" then
     skill.update_interaction = spec.update_interaction
   end
@@ -771,10 +779,6 @@ function SkillSkeleton:createViewAsSkill(_skill, idx, key, attr, spec)
   if spec.prompt then skill.prompt = spec.prompt end
 
   fk.readInteractionToSkill(skill, spec)
-
-  if spec.interaction_helper and type(spec.interaction_helper) == "function" then
-    skill.interaction_helper = spec.interaction_helper
-  end
   if spec.update_interaction and type(spec.update_interaction) == "function" then
     skill.update_interaction = spec.update_interaction
   end

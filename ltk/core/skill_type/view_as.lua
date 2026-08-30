@@ -168,10 +168,7 @@ function ViewAsSkill:refresh_interaction(player, selected_cards, selected_target
   local VSPattern = self:filterPattern(player, nil, selected_cards)
   if VSPattern == nil then return end
 
-  local helper = self.interaction_helper
-  if type(helper) == "function" then
-    helper = helper(self, player, selected_cards, selected_targets)
-  end
+  local helper = self:interaction_helper(player, selected_cards, selected_targets)
   if helper == nil or helper.type ~= "cardname" then return end
 
   local refresh_data = {}

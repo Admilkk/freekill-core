@@ -49,7 +49,7 @@ function ActiveSkill:update_interaction(player, selected_cards, selected_targets
       end
       spec.result = nil
     else
-      spec.result = { cards = table.simpleClone(selected_cards) }
+      spec.result = { cards = table.simpleClone(selected_cards), tos = selected_targets }
       if dat.option ~= "OK" then
         spec.result.name = dat.option
       end
@@ -63,6 +63,7 @@ function ActiveSkill:update_interaction(player, selected_cards, selected_targets
       spec.result.name = dat.name
       spec.pendings = { dat.cid }
     end
+    spec.result.tos = selected_targets
   end
   self.interaction.data = (spec.result or {}).name
 end
@@ -85,11 +86,24 @@ function ActiveSkill:refresh_interaction(player, selected_cards, selected_target
 
   if spec.type ~= "ToBeDecided" then return end
 
-  local helper = self:interaction_helper(player, selected_cards, selected_targets)
-  if helper == nil then return end
-
   local refresh_data = {}
   local req = spec.UIrequest or {}
+  local tos = selected_targets
+
+  if spec.UIrequest and spec.result then
+    --interaction.data变化会掉目标，要在这里补上
+    --待定：有必要再判一圈合法性吗？
+    local handler = ClientInstance.current_request_handler
+    if handler then
+      tos = spec.result.tos
+      for _, to in ipairs(tos) do
+        handler:selectTarget(to.id, { selected = true })
+      end
+    end
+  end
+
+  local helper = self:interaction_helper(player, selected_cards, tos)
+  if helper == nil then return end
 
   if helper.type == "cardname" then
     local max_num, min_num = self:getMaxCardNum(player), self:getMinCardNum(player)
@@ -152,7 +166,7 @@ function ActiveSkill:refresh_interaction(player, selected_cards, selected_target
             direct_send = true,
             cancelable = true
           }
-          if self:feasible(player, selected_targets, selected_cards) then
+          if self:feasible(player, tos, selected_cards) then
             op_spec.options = { "OK" }
           end
           refresh_data.optionBox = UI.OptionBox(op_spec)
@@ -163,7 +177,8 @@ function ActiveSkill:refresh_interaction(player, selected_cards, selected_target
     if self.interaction.data == nil then
       refresh_data.optionBox = helper
     else
-      if req.elemType == "OptionBox" and self:feasible(player, selected_targets, selected_cards) then
+
+      if req.elemType == "OptionBox" and self:feasible(player, tos, selected_cards) then
         --按下选项后，若满足feasible，则自动确认！
         local h = ClientInstance.current_request_handler
         if h then
@@ -183,7 +198,7 @@ function ActiveSkill:refresh_interaction(player, selected_cards, selected_target
           direct_send = true,
           cancelable = true
         }
-        if self:feasible(player, selected_targets, selected_cards) then
+        if self:feasible(player, tos, selected_cards) then
           op_spec.options = { "OK" }
         end
         refresh_data.optionBox = UI.OptionBox(op_spec)

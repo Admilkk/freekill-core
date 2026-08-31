@@ -331,8 +331,9 @@ end
 
 ---@class GameModeSpec
 ---@field public name string @ 游戏模式名
----@field public minPlayer integer @ 最小玩家数
----@field public maxPlayer integer @ 最大玩家数
+---@field public minPlayer? integer @ 最小玩家数
+---@field public maxPlayer? integer @ 最大玩家数
+---@field public playerNums? integer[] @ 玩家数（直接定义）
 ---@field public minComp? integer @ 最小电脑数，负数为实际玩家数+此数。创建房间后自动添加，无视服务器设置
 ---@field public maxComp? integer @ 最大电脑数，负数为实际玩家数+此数
 ---@field public rule? string @ 规则（通过技能完成，通常用来为特定角色及特定时机提供触发事件）
@@ -344,7 +345,7 @@ end
 ---@field public winner_getter? fun(self: GameMode, victim: ServerPlayer): ServerPlayer | string @ 在死亡流程中用于判断是否结束游戏，并输出胜利者
 ---@field public surrender_func? fun(self: GameMode, playedTime: number, player: Player): table  @ 投降条件判断
 ---@field public is_counted? fun(self: GameMode, room: Room): boolean @ 是否计入胜率统计
----@field public feasible? fun(self: GameMode, settings: any): boolean @ 是否允许创房间
+---@field public feasible? fun(self: GameMode, settings: W.SettingsParam): boolean @ 是否允许创房间
 ---@field public get_adjusted? fun(self: GameMode, player: ServerPlayer): table @ 调整玩家初始属性
 ---@field public reward_punish? fun(self: GameMode, victim: ServerPlayer, killer?: ServerPlayer) @ 死亡奖惩
 ---@field public friend_enemy_judge? fun(self: GameMode, targetOne: ServerPlayer | Player, targetTwo: ServerPlayer | Player): boolean? @ 敌友判断
@@ -354,9 +355,13 @@ end
 ---@return GameMode
 function fk.CreateGameMode(spec)
   assert(type(spec.name) == "string")
-  assert(type(spec.minPlayer) == "number")
-  assert(type(spec.maxPlayer) == "number")
+  assert((type(spec.minPlayer) == "number" and type(spec.maxPlayer) == "number") or type(spec.playerNums) == "table")
+  if spec.playerNums then
+    spec.minPlayer = spec.playerNums[1]
+    spec.maxPlayer = spec.playerNums[#spec.playerNums]
+  end
   local ret = GameMode:new(spec.name, spec.minPlayer, spec.maxPlayer)
+  ret.playerNums = spec.playerNums
   ret.minComp = spec.minComp or 0
   ret.maxComp = spec.maxComp or -1
   ret.whitelist = spec.whitelist
@@ -407,11 +412,11 @@ end
 
 ---@class PoxiSpec
 ---@field name string
----@field card_filter fun(to_select: integer, selected: integer[], data: any, extra_data: any): any
----@field feasible fun(selected: integer[], data: any, extra_data: any): any
----@field post_select? fun(selected: integer[], data: any, extra_data: any): integer[]
----@field default_choice? fun(data: any, extra_data: any): integer[]
----@field prompt? string | fun(data: any, extra_data: any): string
+---@field card_filter fun(to_select: integer, selected: integer[], data: PoxiCardData[], extra_data: table|PoxiExtraData): any
+---@field feasible fun(selected: integer[], data: PoxiCardData[], extra_data: table|PoxiExtraData): any
+---@field post_select? fun(selected: integer[], data: PoxiCardData[], extra_data: table|PoxiExtraData): integer[]
+---@field default_choice? fun(data: PoxiCardData[], extra_data: table|PoxiExtraData): integer[]
+---@field prompt? string | fun(data: PoxiCardData[], extra_data: table|PoxiExtraData, selected: integer[]): string
 
 ---@class QmlMarkSpec
 ---@field name string

@@ -778,7 +778,8 @@ W.PageBase {
                     Lua.updateRequestUI("Interaction", "1", "update", {
                       elemType: "ExpandItem",
                       cid: spec.cid,
-                      name: spec.name
+                      name: spec.name,
+                      autoTarget: Config.autoTarget,
                     } );
                   }
                 });
@@ -794,6 +795,7 @@ W.PageBase {
                       elemType: "ExpandItem",
                       cid: spec.cid,
                       name: spec.name,
+                      autoTarget: Config.autoTarget,
                     } );
                   }
                 });
@@ -827,12 +829,14 @@ W.PageBase {
               if (direct) {
                 Lua.updateRequestUI("Interaction", "1", "finish", {
                   option: option_answer,
+                  autoTarget: Config.autoTarget,
                 });
                 Lua.updateRequestUI("Button", "OK");
               } else {
                 Lua.updateRequestUI("Interaction", "1", "update", {
                   elemType: "OptionBox",
                   option: option_answer,
+                  autoTarget: Config.autoTarget,
                 } );
               }
             });
@@ -840,7 +844,8 @@ W.PageBase {
               if (cancelable) {
                 Lua.updateRequestUI("Interaction", "1", "update", {
                   elemType: "OptionBox",
-                  option: "Cancel"
+                  option: "Cancel",
+                  autoTarget: Config.autoTarget,
                 } );
               } else {
                 Lua.updateRequestUI("Button", "Cancel")

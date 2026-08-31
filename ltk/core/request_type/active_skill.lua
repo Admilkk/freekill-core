@@ -607,7 +607,7 @@ function ReqActiveSkill:updateInteraction(data, ignoreSetup)
       )
     end
     if not ignoreSetup then
-      ReqActiveSkill.setup(self, true) -- interaction变动后需复原
+      ReqActiveSkill.setup(self, true, data) -- interaction变动后需复原
     end
   end
 end

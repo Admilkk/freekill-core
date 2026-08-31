@@ -19,6 +19,7 @@ QtObject {
   property var cardItem
 
   property string name: "slash" // 牌名
+  property string trueName: "slash"
   property string virtName: "" // 被〖武神〗之类技能强制转化，或被当作其他牌使用时，此牌的实际牌名
   property int number // 点数
   property string suit // 花色
@@ -59,6 +60,7 @@ QtObject {
       attackRange: data.attack_range ?? 0
     })
     known = Lua.selfPlayer.cardVisible(cardId);
+    trueName = name.split("__").pop();
   }
 }
 

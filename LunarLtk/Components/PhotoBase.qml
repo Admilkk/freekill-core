@@ -99,6 +99,7 @@ Game.BasicItem {
       height: parent.height
       hasDeputy: !!root.deputyGeneral
       enabledShown: true
+      visible: !Config.banChangeSkin
     }
 
     Image {
@@ -132,6 +133,7 @@ Game.BasicItem {
       height: parent.height
       hasDeputy: !!deputyGeneral
       enabledShown: true
+      visible: !Config.banChangeSkin
     }
   }
 

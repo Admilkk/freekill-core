@@ -29,7 +29,7 @@ Popup {
     height: parent.height / Config.winScale
     scale: Config.winScale
     clip: true
-    onSourceChanged: {
+    onLoaded: {
       if (item === null) {
         return;
       }
@@ -37,11 +37,13 @@ Popup {
         root.close();
       });
     }
-    onSourceComponentChanged: sourceChanged();
   }
 
   onClosed: {
-    sourceComponent.destroy();
-    sourceComponent = null;
+    if (loader.item === null) {
+      return;
+    }
+    loader.active = false;
+    loader.active = true;
   }
 }

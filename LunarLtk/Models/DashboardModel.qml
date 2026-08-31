@@ -216,7 +216,7 @@ QtObject {
     });
 
     for (const card of handcards) {
-      card.cardTip = Ltk.getCardTip(card.cardId);
+      card.updateCardTip();
       if (!card.selectable) {
         card.prohibitReason = Ltk.getCardProhibitReason(card.cardId);
       }

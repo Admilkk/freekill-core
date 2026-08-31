@@ -62,5 +62,15 @@ QtObject {
     known = Lua.selfPlayer.cardVisible(cardId);
     trueName = name.split("__").pop();
   }
+  
+  function updateCardTip() {
+    const dataList = Ltk.getCardTip(cardId);
+    // 翻译是个逻辑，这里要负责直接向ui呈送需要的文本
+    for (const data of dataList) {
+      data.content = Ltk.processPrompt(data.content);
+    }
+    cardTip = dataList;
+  }
+
 }
 

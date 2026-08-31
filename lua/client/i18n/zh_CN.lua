@@ -473,6 +473,7 @@ FreeKill使用的是libgit2的C API，与此同时使用Git完成拓展包的下
   ["playerstr_self"] = "(你)",
 
   ["Menu"] = "菜单",
+  ["Room Info"] = "房间信息",
   ["Surrender"] = "投降",
   ["Surrender is disabled in this mode"] = "投降在该模式不可用",
   ["Quit"] = "退出",

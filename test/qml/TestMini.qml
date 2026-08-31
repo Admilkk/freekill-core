@@ -31,7 +31,7 @@ ColumnLayout {
     text: "Reply"
     onClicked: {
       close();
-      roomScene.state = "notactive";
+      Ltk.roomModel.deActivate();
       ClientInstance.replyToServer("", "Hello");
     }
   }

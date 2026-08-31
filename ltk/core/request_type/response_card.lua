@@ -274,13 +274,7 @@ local function autoSelectOnlyFeasibleTarget(req, data)
       req.selected_targets = tars
       req.scene:update("Photo", tars[1], { selected = true })
       req:updateUnselectedTargets()
-      if req:feasible() then
-        req:updateButtons()
-      else
-        req.selected_targets = {}
-        req.scene:update("Photo", tars[1], { selected = false })
-        req:updateUnselectedTargets()
-      end
+      req:updateButtons()
     end
   end
 end

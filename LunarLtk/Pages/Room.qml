@@ -525,7 +525,7 @@ RoomBase {
     height: 65
     padding: 8
     z: 9
-    visible: getPhoto(Cpp.self.id).dataModel.netstate == "trust"
+    visible: getPhoto(Cpp.self.id).dataModel.netstate == "trust" && !Config.observing && !Config.replaying
     anchors.horizontalCenter: dashboard.horizontalCenter
     anchors.verticalCenter: dashboard.verticalCenter
     text: Lua.tr("Cancel Trust")

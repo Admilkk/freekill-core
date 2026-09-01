@@ -49,7 +49,7 @@ function ActiveSkill:update_interaction(player, selected_cards, selected_targets
       end
       spec.result = nil
     else
-      spec.result = { cards = table.simpleClone(selected_cards), tos = selected_targets }
+      spec.result = {}
       if dat.option ~= "OK" then
         spec.result.name = dat.option
       end
@@ -63,8 +63,26 @@ function ActiveSkill:update_interaction(player, selected_cards, selected_targets
       spec.result.name = dat.name
       spec.pendings = { dat.cid }
     end
-    spec.result.tos = selected_targets
   end
+
+  if spec.result and #selected_targets > 0 then
+    self.interaction.data = nil
+    --验证selected_targets的目标，如果能通过，则填充原目标
+    local targets_copy = {}
+    for _, p in ipairs(selected_targets) do
+      if self:targetFilter(player, p, targets_copy, selected_cards) then
+        table.insert(targets_copy, p)
+      else
+        break
+      end
+    end
+    if #targets_copy == #selected_targets then
+      spec.UIrequest.selected_targets = targets_copy
+      --取消掉setup自带的自动选目标！
+      dat.autoTarget = false
+    end
+  end
+
   self.interaction.data = (spec.result or {}).name
 end
 
@@ -90,12 +108,12 @@ function ActiveSkill:refresh_interaction(player, selected_cards, selected_target
   local req = spec.UIrequest or {}
   local tos = selected_targets
 
-  if spec.UIrequest and spec.result then
+  if #tos == 0 and req.selected_targets and #req.selected_targets > 0 then
     --interaction.data变化会掉目标，要在这里补上
-    --待定：有必要再判一圈合法性吗？
+    --待定：update_interaction已进行过预验证，这里还有必要再判一圈合法性吗？
     local handler = ClientInstance.current_request_handler
     if handler then
-      tos = spec.result.tos
+      tos = spec.UIrequest.selected_targets
       for _, to in ipairs(tos) do
         handler:selectTarget(to.id, { selected = true })
       end
@@ -110,7 +128,7 @@ function ActiveSkill:refresh_interaction(player, selected_cards, selected_target
 
     if spec.UIrequest == nil then
       if #selected_cards == max_num and spec.result == nil then
-        spec.result = { cards = table.simpleClone(selected_cards) }
+        spec.result = {}
         req = {
           elemType = "OptionBox",
           option = "OK"
@@ -148,14 +166,9 @@ function ActiveSkill:refresh_interaction(player, selected_cards, selected_target
     if max_num > 0 then
       --可选牌时，需要重设手牌区按钮
       if spec.result == nil then
-        local op_spec = {   ---@class OptionBoxParams
-          options = {},
-          all_options = { "OK" }
-        }
         if #selected_cards >= min_num then
-          op_spec.options = { "OK" }
+          refresh_data.optionBox = UI.OptionBox { options = { "OK" } }
         end
-        refresh_data.optionBox = UI.OptionBox(op_spec)
       else
         local handler = ClientInstance.current_request_handler
         if handler and handler.class.name == "ReqActiveSkill" then
@@ -177,7 +190,6 @@ function ActiveSkill:refresh_interaction(player, selected_cards, selected_target
     if self.interaction.data == nil then
       refresh_data.optionBox = helper
     else
-
       if req.elemType == "OptionBox" and self:feasible(player, tos, selected_cards) then
         --按下选项后，若满足feasible，则自动确认！
         local h = ClientInstance.current_request_handler

@@ -139,7 +139,7 @@ function ViewAsSkill:update_interaction(player, selected_cards, selected_targets
       end
       spec.result = nil
     else
-      spec.result = { cards = table.simpleClone(selected_cards) }
+      spec.result = {}
     end
   elseif dat.elemType == "ExpandItem" then
     spec.result = spec.result or {}
@@ -176,7 +176,7 @@ function ViewAsSkill:refresh_interaction(player, selected_cards, selected_target
 
   if spec.UIrequest == nil then
     if #selected_cards == VSPattern.max_num and spec.result == nil then
-      spec.result = { cards = table.simpleClone(selected_cards) }
+      spec.result = {}
       req = {
         elemType = "OptionBox",
         option = "OK"
@@ -191,7 +191,7 @@ function ViewAsSkill:refresh_interaction(player, selected_cards, selected_target
     else
       local items = {}
       local i = 1
-      local subcards = VSPattern.subcards or spec.result.cards
+      local subcards = VSPattern.subcards or selected_cards
       local names = helper.choices or {}
       for _, name in ipairs(helper.all_choices or names) do
         local card = Fk:cloneCard(name, nil, nil, self.name, subcards)
@@ -215,14 +215,9 @@ function ViewAsSkill:refresh_interaction(player, selected_cards, selected_target
   if VSPattern.max_num > 0 then
     --可选牌时，需要重设手牌区按钮
     if spec.result == nil then
-      local op_spec = {   ---@class OptionBoxParams
-        options = {},
-        all_options = { "OK" }
-      }
       if #selected_cards >= VSPattern.min_num then
-        op_spec.options = { "OK" }
+        refresh_data.optionBox = UI.OptionBox { options = { "OK" } }
       end
-      refresh_data.optionBox = UI.OptionBox(op_spec)
     else
       local handler = ClientInstance.current_request_handler
       if handler and handler.class.name == "ReqActiveSkill" then
@@ -234,7 +229,7 @@ function ViewAsSkill:refresh_interaction(player, selected_cards, selected_target
           cancelable = true
         }
         local card = self:viewAs(player, selected_cards)
-        if card and card:getSkill(player):feasible(player, selected_targets, { }, card) then
+        if card and card:getSkill(player):feasible(player, selected_targets, {}, card) then
           op_spec.options = { "OK" }
         end
         refresh_data.optionBox = UI.OptionBox(op_spec)

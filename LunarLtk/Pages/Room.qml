@@ -141,12 +141,12 @@ RoomBase {
         textFont.pixelSize: 28
         onClicked: {
           if (getPhoto(Cpp.self.id).dataModel.netstate == "trust") {
-            doTrust(); // 已托管点击直接取消托管
+            dataModel.trust(); // 已托管点击直接取消托管
           } else {
             trustDialog.open(); // 托管询问
           }
         }
-        onRightClicked: doTrust(); // 长按直接托管
+        onRightClicked: dataModel.trust(); // 长按直接托管
 
         MessageDialog {
           id: trustDialog
@@ -157,7 +157,7 @@ RoomBase {
           onButtonClicked: function (button) {
             switch (button) {
               case MessageDialog.Ok: {
-                trustBtn.doTrust();
+                dataModel.trust();
                 break;
               }
               case MessageDialog.Cancel: {
@@ -165,11 +165,6 @@ RoomBase {
               }
             }
           }
-        }
-        function doTrust() {
-          Cpp.notifyServer("Trust", "");
-          trustBtn.enabled = false;
-          roomScene.dataModel.deActivate();
         }
       }
       MetroButton {
@@ -516,6 +511,29 @@ RoomBase {
       font.family: Config.li2Name
       font.pixelSize: 48
     }
+  }
+
+  Rectangle { // 托管变灰
+    anchors.fill: dashboard
+    visible: getPhoto(Cpp.self.id).dataModel.netstate == "trust"
+    color: "gray"
+    opacity: 0.35
+    z: 9
+  }
+  MetroButton {
+    width: 150
+    height: 65
+    padding: 8
+    z: 9
+    visible: getPhoto(Cpp.self.id).dataModel.netstate == "trust"
+    anchors.horizontalCenter: dashboard.horizontalCenter
+    anchors.verticalCenter: dashboard.verticalCenter
+    text: Lua.tr("Cancel Trust")
+    textFont.bold: true
+    textFont.family: Config.libianName
+    textFont.pixelSize: 30
+    title.style: Text.Outline
+    onClicked: dataModel.trust();
   }
 
   MiscStatus {

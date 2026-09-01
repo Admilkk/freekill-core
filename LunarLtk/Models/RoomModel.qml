@@ -659,6 +659,12 @@ QtObject {
     Lua.updateRequestUI("Button", "Cancel");
   }
 
+  function trust() {
+    Cpp.notifyServer("Trust", "");
+    trustBtn.enabled = false;
+    deActivate();
+  }
+
   // 确定只会修改model属性的逻辑都搬家到这里
   function setupCallbacks() {
     roomPage.addCallback(Command.NetStateChanged, netStateChanged);

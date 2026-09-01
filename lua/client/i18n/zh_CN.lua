@@ -481,7 +481,8 @@ FreeKill使用的是libgit2的C API，与此同时使用Git完成拓展包的下
 
   ["Trust"] = "托管",
   ["Are you sure to trust?"] = "是否确认托管？",
-  ["help: Are you sure to trust?"] = "（长按可直接托管，取消托管不会询问）",
+  ["help: Are you sure to trust?"] = "（长按可直接托管）",
+  ["Cancel Trust"] = "取消托管",
   ["Sort Cards"] = "牌序",
   ["Sort by Type"] = "按类型",
   ["Sort by Number"] = "按点数",

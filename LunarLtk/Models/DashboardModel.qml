@@ -200,6 +200,7 @@ QtObject {
       }
       card.footnote = Lua.tr(dat.ui_data.footnote);
       card.footnoteVisible = true;
+      card.updateCardTip();
       const vcard = Ltk.getVirtualEquipData(0, dat.data.id);
       if (vcard) card.virtName = vcard.name;
       expandedCards.push(card);

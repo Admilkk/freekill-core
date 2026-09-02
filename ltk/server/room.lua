@@ -881,6 +881,7 @@ end
 ---@field pattern? string @ 选牌规则
 ---@field expand_pile? string|integer[] @ 可选私人牌堆名称，或额外可选牌
 ---@field visible_pile? string|integer[] @ 可见的牌
+---@field card_tip_name? string @ 引用的选择卡牌提示的函数名
 
 --- 询问一名玩家选择自己的几张牌。
 ---
@@ -924,6 +925,7 @@ function Room:askToCards(player, params)
     pattern = params.pattern,
     expand_pile = params.expand_pile,
     visible_pile = params.visible_pile,
+    cardTipName = params.card_tip_name,
   }
   local activeParams = { ---@type AskToUseActiveSkillParams
     skill_name = "choose_cards_skill",

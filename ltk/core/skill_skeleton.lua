@@ -544,6 +544,7 @@ function SkillSkeleton:createVisibilitySkill(_skill, idx, key, attr, spec)
 end
 
 -- 将技能的选项框设置元表，仅用于主动技、视为技
+---@param spec ButtonSkillSpec
 function fk.readInteractionToSkill(skill, spec)
   if spec.interaction then
     skill.interaction = setmetatable({}, {
@@ -625,7 +626,6 @@ function SkillSkeleton:createActiveSkill(_skill, idx, key, attr, spec)
   if spec.feasible then skill.feasible = spec.feasible end
   if spec.on_use then skill.onUse = spec.on_use end
   if spec.prompt then skill.prompt = spec.prompt end
-  if spec.card_tip then skill.cardTip = spec.card_tip end
   if spec.target_tip then skill.targetTip = spec.target_tip end
   if spec.handly_pile then skill.handly_pile = spec.handly_pile end
   if spec.click_count then skill.click_count = spec.click_count end
@@ -667,7 +667,6 @@ function SkillSkeleton:createCardSkill(_skill, idx, key, attr, spec)
   if spec.on_effect then skill.onEffect = spec.on_effect end
   if spec.on_nullified then skill.onNullified = spec.on_nullified end
   if spec.prompt then skill.prompt = spec.prompt end
-  if spec.card_tip then skill.cardTip = spec.card_tip end
   if spec.target_tip then skill.targetTip = spec.target_tip end
   if spec.fix_targets then skill.fixTargets = spec.fix_targets end
   if spec.offset_func then skill.preEffect = spec.offset_func end

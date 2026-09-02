@@ -84,9 +84,9 @@ function fk.readButtonSpecToSkill(skill, spec)
   skill.visible_pile = spec.visible_pile
   skill.click_count = not not spec.click_count
   skill.include_equip = spec.include_equip
+  skill.cardTip = spec.card_tip
 
   if spec.target_filter then skill.targetFilter = spec.target_filter end
-  if spec.on_cost then skill.onCost = spec.on_cost end
   if spec.on_cost then skill.onCost = spec.on_cost end
 end
 
@@ -117,7 +117,7 @@ end
 ---@field public handly_pile? boolean @ 是否能够选择“如手牌使用或打出”的牌
 ---@field public click_count? boolean @ 是否在点击按钮瞬间就计数并播放特效和语音
 ---@field public include_equip? boolean @ 选牌时是否展开装备区
----@field public visible_pile? integer[] | string | fun(self: ActiveSkill, player: Player): integer[] | string @ 可见的手牌id，同时筛选手牌和expand_pile。如果返回值为字符串，当返回"_expand_pile"时会转为expand_pile，为其他字符串时则转为对应name的私人牌堆。注意：这是纯ui方案，不要用这种方式来做合法牌的筛选
+---@field public visible_pile? integer[] | string | fun(self: ButtonSkill, player: Player): integer[] | string @ 可见的手牌id，同时筛选手牌和expand_pile。如果返回值为字符串，当返回"_expand_pile"时会转为expand_pile，为其他字符串时则转为对应name的私人牌堆。注意：这是纯ui方案，不要用这种方式来做合法牌的筛选
 ---@field public interaction? fun(self: ButtonSkill, player: Player): table? @ 选项框
 ---@field public interaction_helper? fun(self: ButtonSkill, player: Player, selected_cards: integer[], selected_targets: Player[], extra_data: any): table? @ 预制interaction
 ---@field public update_interaction? fun(self: ButtonSkill, player: Player, selected_cards: integer[], selected_targets: Player[], extra_data: any): any @ interaction更新时立刻预设信息（在选牌及目标刷新之前）
@@ -128,19 +128,19 @@ end
 ---@field public on_cost? fun(self: ButtonSkill, player: ServerPlayer, data: SkillUseData, extra_data?: UseExtraData|table):CostData|table? @ 自定义技能的消耗信息
 ---@field public on_use? fun(self: ButtonSkill, room: Room, skillUseEvent: SkillUseData): any @ 实际使用的函数
 ---@field public prompt? string|fun(self: ButtonSkill, player: Player, selected_cards: integer[], selected_targets: Player[]): string @ 思考时的提示信息
+---@field public card_tip? fun(self: ButtonSkill, player: Player, to_select: integer, selected: integer[], selected_targets: Player[], card?: Card, selectable: boolean, extra_data: any): string|CardTipDataSpec? @ 显示在牌上的提示
 
 ---@class StatusSkillSpec: SkillSpec
 
 ---@class ActiveSkillSpec: ButtonSkillSpec
 ---@field public can_use? fun(self: ActiveSkill, player: Player): any @ 判断主动技能否发动
 ---@field public history_branch? string|fun(self: ActiveSkill, player: ServerPlayer, data: SkillUseData):string? @ 发动技能时增加添加对应某处分支的次数
----@field public card_tip? fun(self: ActiveSkill, player: Player, to_select: integer, selected: integer[], selected_targets: Player[], card?: Card, selectable: boolean, extra_data: any): string|CardTipDataSpec? @ 显示在牌上的提示
 ---@field public target_tip? fun(self: ActiveSkill, player: Player, to_select: Player, selected: Player[], selected_cards: integer[], card?: Card, selectable: boolean, extra_data: any): string|TargetTipDataSpec? @ 显示在目标武将牌脸上的提示
 ---@field public fix_targets? fun(self: ActiveSkill, player: Player, selected_cards: integer[], card: Card, extra_data: any): Player[]? @ 设置固定目标
 
 ---@class CardSkillSpec: ActiveSkillSpec
 ---@field public distance_limit? integer @ 目标距离限制，与目标距离小于等于此值方可使用
----@field public mod_target_filter? fun(self: ActiveSkill, player: Player, to_select: Player, selected: Player[], card: Card, extra_data: any): any @ 更宽松地判定目标是否合法（例如不能杀自己，火攻无手牌目标），常用于额外目标判断
+---@field public mod_target_filter? fun(self: CardSkill, player: Player, to_select: Player, selected: Player[], card: Card, extra_data: any): any @ 更宽松地判定目标是否合法（例如不能杀自己，火攻无手牌目标），常用于额外目标判断
 ---@field public target_filter? fun(self: CardSkill, player: Player?, to_select: Player, selected: Player[], selected_cards: integer[], card?: Card, extra_data: any): any @ 判定目标能否选择
 ---@field public feasible? fun(self: CardSkill, player: Player, selected: Player[], selected_cards: integer[]): any @ 判断卡牌和目标是否符合技能限制
 ---@field public can_use? fun(self: CardSkill, player: Player, card: Card, extra_data: any): any @ 判断卡牌技能否发动
@@ -157,7 +157,6 @@ end
 ---@field public interaction_helper? fun(self: CardSkill, player: Player, selected_cards: integer[], selected_targets: Player[], card: Card, extra_data: any): table? @ 预制interaction
 ---@field public update_interaction? fun(self: CardSkill, player: Player, selected_cards: integer[], selected_targets: Player[], card: Card, extra_data: any): any @ interaction更新时立刻预设信息（在选牌及目标刷新之前）
 ---@field public refresh_interaction? fun(self: CardSkill, player: Player, selected_cards: integer[], selected_targets: Player[], card: Card, extra_data: any): table? @ （暂时没用）用于给interaction传递额外信息，例如按钮亮暗
----@field public card_tip? fun(self: ActiveSkill, player: Player, to_select: integer, selected: integer[], selected_targets: Player[], card?: Card, selectable: boolean, extra_data: any): string|CardTipDataSpec? @ 显示在牌上的提示
 ---@field public target_tip? fun(self: CardSkill, player: Player, to_select: Player, selected: Player[], selected_cards: integer[], card?: Card, selectable: boolean, extra_data: any): string|TargetTipDataSpec? @ 显示在目标武将牌脸上的提示
 
 ---@class ViewAsSkillSpec: ButtonSkillSpec
@@ -189,7 +188,6 @@ end
 ---@field public enabled_at_nullification? fun(self: ViewAsSkill, player: Player, data: CardEffectData): boolean? @ 判断一张牌是否能被此技能转化无懈来响应
 ---@field public include_equip? boolean @ 选牌时是否展开装备区
 ---@field public fix_targets? fun(self: ViewAsSkill, player: Player, selected_cards: integer[], card: Card, extra_data: any): Player[]? @ 设置固定目标
----@field public visible_pile? integer[] | string | fun(self: ActiveSkill, player: Player): integer[] | string @ 可见的手牌id，同时筛选手牌和expand_pile。如果返回值为字符串，当返回"_expand_pile"时会转为expand_pile，为其他字符串时则转为对应name的私人牌堆。注意：这是纯ui方案，不要用这种方式来做合法牌的筛选
 
 ---@class DistanceSpec: StatusSkillSpec
 ---@field public correct_func? fun(self: DistanceSkill, from: Player, to: Player, card?: Card): integer?
@@ -223,7 +221,7 @@ end
 ---@field public bypass_distances? fun(self: TargetModSkill, player: Player, skill: ActiveSkill, card?: Card, to?: Player): any @ 是否无距离限制
 ---@field public distance_limit_func? fun(self: TargetModSkill, player: Player, skill: ActiveSkill, card?: Card, to?: Player): number?
 ---@field public extra_target_func? fun(self: TargetModSkill, player: Player, skill: ActiveSkill, card?: Card): number?
----@field public card_tip_func? fun(self: ActiveSkill, player: Player, to_select: integer, selected: integer[], selected_targets: Player[], card?: Card, selectable: boolean, extra_data: any): string|CardTipDataSpec? @ 显示在牌上的提示
+---@field public card_tip_func? fun(self: TargetModSkill, player: Player, to_select: integer, selected: integer[], selected_targets: Player[], card?: Card, selectable: boolean, extra_data: any): string|CardTipDataSpec? @ 显示在牌上的提示
 ---@field public target_tip_func? fun(self: TargetModSkill, player: Player, to_select: Player, selected: Player[], selected_cards: integer[], card?: Card, selectable: boolean, extra_data: any): string|TargetTipDataSpec?
 ---@field public remove_func? fun(self: TargetModSkill, player: Player): boolean? @ 判断是否被移除
 

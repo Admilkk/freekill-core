@@ -895,6 +895,12 @@ function M:getCardTip(cid)
       end
     elseif skill:isInstanceOf(ViewAsSkill) then
       ---@cast skill ViewAsSkill
+      local tip = skill:cardTip(Self, to_select, selected, table.map(selected_targets, Util.Id2PlayerMapper), nil, extra_data)
+      if type(tip) == "string" then
+        table.insert(ret, { content = tip, type = "normal" })
+      elseif type(tip) == "table" then
+        table.insertTable(ret, tip)
+      end
       card = skill:viewAs(Self, selected)
     end
   end

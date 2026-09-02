@@ -741,6 +741,7 @@ end
 ---@field include_equip? boolean @ 能不能弃装备区？
 ---@field pattern? string @ 弃牌需要符合的规则
 ---@field skip? boolean @ 是否跳过弃牌（即只询问选择可以弃置的牌）
+---@field card_tip_name? string @ 引用的选择卡牌提示的函数名
 
 --- 询问一名角色弃牌。
 ---
@@ -797,6 +798,7 @@ function Room:askToDiscard(player, params)
     min_num = params.min_num,
     include_equip = params.include_equip,
     skillName = params.skill_name,
+    cardTipName = params.card_tip_name,
     pattern = params.pattern,
   }
   local _, ret = self:askToUseActiveSkill(player, {

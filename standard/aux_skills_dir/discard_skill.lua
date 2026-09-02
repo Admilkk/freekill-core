@@ -51,6 +51,13 @@ _skill:addEffect('active', {
   end,
   min_card_num = function(self, player) return self.min_num end,
   max_card_num = function(self, player) return self.num end,
+  card_tip = function (self, player, to_select, selected, selected_targets, card, selectable, extra_data)
+    if self.cardTipName then
+      local cardTip = Fk.card_tips[self.cardTipName]
+      assert(cardTip)
+      return cardTip.card_tip(self, player, to_select, selected, selected_targets, card, selectable, extra_data)
+    end
+  end,
 })
 
 _skill:addAI(Fk.Ltk.AI.newActiveStrategy {

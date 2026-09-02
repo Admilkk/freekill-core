@@ -4486,7 +4486,7 @@ function Room:quickSetPlayerRole(roles)
 
     for i = 1, #roles do
       if not arr[i] and #_roles > 0 then
-        arr[i] = self:tableRandomPick(_roles)
+        arr[i] = table.remove(_roles, self:random(1, #_roles))
       end
       roles[i] = arr[i]
     end

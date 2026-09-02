@@ -3,6 +3,7 @@
 ---@field public clientplayer_klass any
 ---@field public observing boolean 客户端是否在旁观
 ---@field public observer_setup_data any 我这个旁观者本人的实际setup信息
+---@field public observer_player any 旁观者本人的独立身份（Lua Player，本人 id 常驻 cpp map；仅对局旁观时建立）
 ---@field public replaying boolean 客户端是否在重放
 ---@field public replaying_show boolean 重放时是否要看到全部牌
 ---@field public record any
@@ -604,6 +605,14 @@ function ClientBase:loadRoomSummary(data)
 end
 
 function ClientBase:reconnect(data)
+  -- 旁观者自己不在房间玩家列表，断线重连走 observe 流程，不会收到自己的 Reconnect。
+  -- 若正处于旁观却收到 Reconnect，那必然是被旁观者(observee)重连后转发的整房摘要：
+  -- 不应把自己当成重连者整包重建，否则 room 被刷新、观察视角/切视角功能被打断。
+  -- （回放录像 replaying 仍需要执行 Reconnect 片段来同步画面，故放行）
+  if self.observing and not self.replaying then
+    return
+  end
+
   local players = data.players
 
   self:stopRecording("")
@@ -645,13 +654,54 @@ function ClientBase:observe(data)
 
   if not self.observer_setup_data then
     self.observer_setup_data = {
-      Self.id, Self.player:getScreenName(), Self.player:getAvatar() }
+      Self.id, Self.player:getScreenName(), Self.player:getAvatar(),
+      Self.player:getTotalGameTime() }
   end
 
   local setup_data = players[data.you].setup_data
   self:setup(setup_data)
 
   self:loadRoomSummary(data)
+
+  -- loadRoomSummary 内部重建了 client（Self 此时为被旁观者）。
+  -- 纠正被旁观者(observee)的总时长基线：
+  -- setup 顶替只改了 cpp self 的 id/name/avatar，totalGameTime 仍是旁观者本人的；
+  -- enterRoom 的 FIXME 段又会把这个(本人的)时长复制给 observee 的 cpp player，
+  -- 而 observee 的真实总时长在 setup_data[5]（服务器 serialize 下发）。
+  -- 这里用差值把 observee 的时长纠正为真实值（对照 reconnect 里的 addTotalGameTime）。
+  self = ClientInstance
+  local you = self:getPlayerById(data.you)
+  local real_time = setup_data and setup_data[5]
+  if you and real_time then
+    you.player:addTotalGameTime(real_time - you.player:getTotalGameTime())
+  end
+
+  -- 在新实例上把旁观者本人注册为独立身份（observer_player：cpp player + Lua Player），
+  -- 并加入旁观者列表。从此本人以独立身份常驻 cpp map，Self 仍指向被旁观者用于渲染视角；
+  -- 返回房间 / 等待界面时直接 changeSelf 切回本人即可，无需再 addPlayer 覆盖顶回。
+  self:ensureObserverIdentity()
+end
+
+-- 将旁观者本人注册为独立身份（cpp player + Lua Player + 旁观者列表条目）。
+-- 本人 player 以本人 id 常驻 cpp players map，不再被覆盖或泄漏。
+-- @return ClientPlayer? 本人对应的 Lua Player；非旁观状态时返回 nil
+function ClientBase:ensureObserverIdentity()
+  if self.observer_player then
+    return self.observer_player
+  end
+  local t = self.observer_setup_data
+  if not t then
+    return nil
+  end
+  local cp = self.client:addPlayer(t[1], t[2], t[3])
+  if t[4] then
+    cp:addTotalGameTime(t[4])
+  end
+  local lp = self:createPlayer(cp)
+  self.observer_player = lp
+  self.observers = self.observers or {}
+  table.insertIfNeed(self.observers, { 0, cp, t[1] })
+  return lp
 end
 
 function ClientBase:setPlayerProperty(player, property, value)

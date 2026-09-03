@@ -1578,6 +1578,9 @@ end
 --- 是否为通牌队友
 ---@param other Player|integer
 function Player:isBuddy(other)
+  -- other 为 nil 表示该玩家已不在房间（如被旁观者已退房、刷新链路过其残留引用），
+  -- 直接视为非队友，避免对 nil 索引崩溃
+  if other == nil then return false end
   local room = Fk:currentRoom()
   if room.observing and not room.replaying and not room:getSettings("enableObserverViewCard") then return false end
   local id = type(other) == "number" and other or other.id

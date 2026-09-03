@@ -167,7 +167,14 @@ function ClientBase:enterRoom(_data)
   -- FIXME: 这几句是不是有内存泄漏啊
   local sp = Self.player
   local new_sp = self.client:addPlayer(sp:getId(), sp:getScreenName(), sp:getAvatar())
-  new_sp:addTotalGameTime(sp:getTotalGameTime())
+
+  -- 别把旁观的总时长加到玩家上了
+  if self.observer_setup_data and self.observer_setup_data[5] then
+    new_sp:addTotalGameTime(self.observer_setup_data[5])
+  else
+    new_sp:addTotalGameTime(sp:getTotalGameTime())
+  end
+
   local gameData = sp:getGameData()
   new_sp:setGameData(gameData:at(0), gameData:at(1), gameData:at(2))
   Self.player = new_sp
@@ -657,8 +664,11 @@ function ClientBase:observe(data)
       Self.id, Self.player:getScreenName(), Self.player:getAvatar(),
       Self.player:getTotalGameTime() }
   end
-
+  -- 记录本次 observee 的真实总时长：enterRoom 用它给 map[observee] 设置正确基线，
+  -- 避免 UI 首次取值（EnterRoom 通知同步触发渲染）时仍拿到被污染的旁观者时长。
   local setup_data = players[data.you].setup_data
+  self.observer_setup_data[5] = setup_data and setup_data[5]
+
   self:setup(setup_data)
 
   self:loadRoomSummary(data)

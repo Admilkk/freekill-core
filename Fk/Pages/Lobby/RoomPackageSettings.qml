@@ -72,6 +72,7 @@ Flickable {
           checked: pkg_enabled
 
           onCheckedChanged: {
+            if (loading) return;
             const packs = Config.curScheme.banCardPkg;
             if (checked) {
               const idx = packs.indexOf(orig_name);
@@ -87,9 +88,6 @@ Flickable {
     }
   }
 
-  function checkPackage(orig_name, checked) {
-    return;
-  }
 
   Component.onCompleted: {
     loading = true;

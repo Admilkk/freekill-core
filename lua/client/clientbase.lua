@@ -145,7 +145,7 @@ function ClientBase:updateDisabled(data)
   table.insertTableIfNeed(
     disabled_packs,
     Fk.game_mode_disabled[data.gameMode] or Util.DummyTable
-  ) -- TODO: 客户端除了第一局（？），不读Fk.game_mode_disabled
+  )
   data.disabledPack = disabled_packs
 
   self.disabled_packs = disabled_packs

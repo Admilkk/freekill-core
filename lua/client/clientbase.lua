@@ -167,14 +167,14 @@ function ClientBase:enterRoom(_data)
   -- FIXME: 这几句是不是有内存泄漏啊
   local sp = Self.player
   local new_sp = self.client:addPlayer(sp:getId(), sp:getScreenName(), sp:getAvatar())
-
-  -- 别把旁观的总时长加到玩家上了
+  -- 旁观别把旁观的总时长加到玩家上了p self 顶替成 observee，但其 totalGameTime 仍是旁观者本人的；
+  -- 这里不能复制它，否则 observee 的时长会被污染成旁观者时长（UI 等级框显示错）。
+  -- observe() 会把 observee 的真实总时长放进 observer_setup_data[5]，创建即用正确基线。
   if self.observer_setup_data and self.observer_setup_data[5] then
     new_sp:addTotalGameTime(self.observer_setup_data[5])
   else
     new_sp:addTotalGameTime(sp:getTotalGameTime())
   end
-
   local gameData = sp:getGameData()
   new_sp:setGameData(gameData:at(0), gameData:at(1), gameData:at(2))
   Self.player = new_sp
@@ -421,6 +421,12 @@ end
 
 function ClientBase:addObserver(data)
   local id, name, avatar, gameTime = data[1], data[2], data[3], data[5]
+  -- 防重：同一旁观者只保留一条。服务器广播/摘要可能与本地的 ensureObserverIdentity 重复下发本人
+  for _, o in ipairs(self.observers or {}) do
+    if o[3] == id then
+      return
+    end
+  end
   local player = {
     getId = function() return id end,
     getScreenName = function() return name end,
@@ -710,7 +716,23 @@ function ClientBase:ensureObserverIdentity()
   local lp = self:createPlayer(cp)
   self.observer_player = lp
   self.observers = self.observers or {}
-  table.insertIfNeed(self.observers, { 0, cp, t[1] })
+  -- 防重：开战前旁观时 EnterRoom 的 _observers 已含本人，进入对局后再调用本函数
+  -- 不能重复插入本人。同一 id 只保留一条并升级为真实 cp（供 ResetClientLua 切回本人）。
+  local inserted = false
+  for i = #self.observers, 1, -1 do
+    local o = self.observers[i]
+    if o[3] == t[1] then
+      if inserted then
+        table.remove(self.observers, i)
+      else
+        self.observers[i] = { 0, cp, t[1] }
+        inserted = true
+      end
+    end
+  end
+  if not inserted then
+    table.insert(self.observers, { 0, cp, t[1] })
+  end
   return lp
 end
 

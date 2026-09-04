@@ -581,13 +581,20 @@ end
 ---
 --- 与此同时，在战报里面发一条“xxx发动了xxx”
 ---@param player ServerPlayer @ 发动技能的那个玩家
----@param skill_name string @ 技能名
+---@param skill_name string @ 技能名（或其他字符串），若有动态技能名则使用动态技能名
 ---@param skill_type? string | AnimationType @ 技能的动画效果，默认是那个技能的anim_type
 ---@param tos? integer[] | ServerPlayer[] @ 技能目标，填空则不声明
 function Room:notifySkillInvoked(player, skill_name, skill_type, tos)
   local bigAnim = false
   local skill = Fk.skills[skill_name]
-  if not skill then skill_type = "" else
+  local old_skill_name = skill_name
+  if skill then
+    local skel = skill:getSkeleton()
+    if skel then
+      skill_name = skel:getDynamicName(player) or skill_name
+    end
+  end
+  if skill then
     if not (skill.mute or skill.is_delay_effect) and skill:hasTag(Skill.Limited) then
       bigAnim = true -- 优先大招特效
     end
@@ -599,13 +606,9 @@ function Room:notifySkillInvoked(player, skill_name, skill_type, tos)
   if skill_type == "big" then bigAnim = true end
 
   if tos and #tos > 0 then
-    tos = table.map(tos, function (to)
-      if type(to) == "table" then
-        return to.id
-      else
-        return to
-      end
-    end)
+    if type(tos[1]) == "table" then
+      tos = table.map(tos, Util.IdMapper)
+    end
     self:sendLog{
       type = "#InvokeSkillTo",
       from = player.id,
@@ -627,7 +630,9 @@ function Room:notifySkillInvoked(player, skill_name, skill_type, tos)
       skill_type = skill_type,
     })
   else
-    skill_name = skill:getSkeleton().name
+    if skill_name == old_skill_name then
+      skill_name = (skill:getSkeleton() or {}).name or skill_name
+    end
     self:doAnimate("InvokeUltSkill", {
       name = skill_name,
       player = player.id,

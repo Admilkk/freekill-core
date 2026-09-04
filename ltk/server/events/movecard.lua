@@ -549,7 +549,7 @@ function MoveEventWrappers:throwCard(card_ids, skillName, who, thrower)
 end
 
 --- 重铸一名角色的牌。
----@param card_ids integer[] @ 被重铸的牌
+---@param card_ids integer|integer[] @ 被重铸的牌
 ---@param who ServerPlayer @ 重铸的角色
 ---@param skillName? string @ 技能名，默认为“重铸”
 ---@param moveMark? table|string @ 移动后自动赋予标记，格式：{标记名(支持-inarea后缀，移出值代表区域后清除), 值}
@@ -557,7 +557,7 @@ end
 function MoveEventWrappers:recastCard(card_ids, who, skillName, moveMark)
   ---@cast self Room
   if type(card_ids) == "number" then
-    card_ids = {card_ids}
+    card_ids = {card_ids} ---@cast card_ids integer[]
   end
   skillName = skillName or "recast"
   self:moveCards({

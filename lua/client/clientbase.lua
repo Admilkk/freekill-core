@@ -9,6 +9,7 @@
 ---@field public record any
 ---@field public callbacks { [string|integer]: fun(self, data) }
 ---@field public disabled_packs string[] FIXME:拓展包设置依赖这玩意，看看能不能把他赶出通用Mixin
+---@field public disabled_generals string[]
 local ClientBase = {}
 
 function ClientBase:initialize(_client)
@@ -16,6 +17,7 @@ function ClientBase:initialize(_client)
   self.recording = false
   self.callbacks = {}
   self.disabled_packs = {}
+  self.disabled_generals = {}
   ------------------------
   self:addCallback("NetworkDelayTest", self.sendSetupPacket)
   self:addCallback("Setup", self.setup)
@@ -137,6 +139,19 @@ function ClientBase:heartbeat()
   self.client:notifyServer("Heartbeat", "")
 end
 
+function ClientBase:updateDisabled(data)
+  local disabled_packs = data.disabledPack or {}
+
+  table.insertTableIfNeed(
+    disabled_packs,
+    Fk.game_mode_disabled[data.gameMode] or Util.DummyTable
+  ) -- TODO: 客户端除了第一局（？），不读Fk.game_mode_disabled
+  data.disabledPack = disabled_packs
+
+  self.disabled_packs = disabled_packs
+  self.disabled_generals = data.disabledGenerals or {}
+end
+
 function ClientBase:enterRoom(_data)
   local data = _data[3]
 
@@ -195,6 +210,8 @@ function ClientBase:enterRoom(_data)
     self.players = {Self}
     self.alive_players = {Self}
   end
+
+  self:updateDisabled(data)
 
   self.enter_room_data = cbor.encode(_data);
   -- 补一个，防止爆炸
@@ -285,6 +302,8 @@ function ClientBase:changeRoom(_data)
     local p = t[2]
     return { t[3], p:getScreenName(), p:getAvatar(), false, p:getTotalGameTime() }
   end)
+
+  self:updateDisabled(data)
 
   self.enter_room_data = cbor.encode(_data);
 

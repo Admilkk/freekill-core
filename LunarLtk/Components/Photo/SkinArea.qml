@@ -102,46 +102,43 @@ Item {
     Item {
       anchors.fill: parent
 
-      Loader {
-        id: bgLoader
+      // QSGRenderNode 直接内联绘制时父级 clip / OpacityMask 对它不生效，
+      // 需用 layer 离屏成纹理。但 layer 默认按“逻辑尺寸”采样（不乘 DPR、
+      // 也不超采样），在高分屏/放大显示时骨骼会糊；因此手动把 textureSize
+      // 设为逻辑尺寸的 2 倍做超采样，显示时缩小回逻辑尺寸，画面锐利。
+      layer.enabled: true
+      layer.smooth: true
+      layer.textureSize: Qt.size(
+        Math.max(1, Math.round(width * 2)),
+        Math.max(1, Math.round(height * 2)))
+
+      // 背景静态图（可选）
+      Image {
+        visible: !!root.skelData.staticBg
         anchors.fill: parent
-        sourceComponent: {
-          if (root.skelData.staticBg) {
-            return skelStaticBg
-          } else if (root.skelData.atlasBgFile) {
-            return skelBg
-          }
-        }
+        fillMode: Image.PreserveAspectCrop
+        source: root.skelData.staticBg ? (root.skelData.path + root.skelData.staticBg) : ""
       }
 
-      Component{
-        id: skelStaticBg
-        Image {
-          anchors.fill: parent
-          fillMode: Image.PreserveAspectCrop
-          source: root.skelData.path + root.skelData.staticBg
-        }
-      }
+      // 背景骨骼 —— 与人物骨骼放在同一父层级（去掉原 Loader 包装，
+      // 否则两者父变换链不同会导致同 offset 下锚点错位）
+      SkeletonAnimation {
+        visible: !root.skelData.staticBg
+        atlasFile: root.skelData.path + root.skelData.atlasBgFile
+        skeletonDataFile: root.skelData.path + root.skelData.skelBgFile
+        skeletonScale: root.skelData.renderScale
+        spineVersion: SpineVersion.Auto
+        premultipliedAlapha: false
+        x: root.width * root.skelData.bgXOffset
+        y: root.height * root.skelData.bgYOffset
+        scale: root.skelData.bgScale * root.height / root.skelData.renderScale / 175
 
-      Component {
-        id: skelBg
-        SkeletonAnimation {
-          atlasFile: root.skelData.path + root.skelData.atlasBgFile
-          skeletonDataFile: root.skelData.path + root.skelData.skelBgFile
-          skeletonScale: root.skelData.renderScale
-          spineVersion: SpineVersion.Auto
-          premultipliedAlapha: false
-          x: root.width * root.skelData.bgXOffset
-          y: root.height * root.skelData.bgYOffset
-          scale: root.skelData.bodyScale * root.height / root.skelData.renderScale / 175
-
-          Component.onCompleted: {
-            if (root.skelData.bgShownAnim && root.enabledShown) {
-              setAnimation(0, root.skelData.bgShownAnim, false);
-              addAnimation(0, root.skelData.bgNormalAnim, true);
-            } else {
-              setAnimation(0, root.skelData.bgNormalAnim, true)
-            }
+        Component.onCompleted: {
+          if (root.skelData.bgShownAnim && root.enabledShown) {
+            setAnimation(0, root.skelData.bgShownAnim, false);
+            addAnimation(0, root.skelData.bgNormalAnim, true);
+          } else {
+            setAnimation(0, root.skelData.bgNormalAnim, true)
           }
         }
       }

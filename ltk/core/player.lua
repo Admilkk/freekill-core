@@ -758,7 +758,7 @@ end
 
 --- 增加玩家使用特定技能分支的历史次数。
 ---@param skill_name string @ 技能名
----@param branch string @ 技能分支名，不写则默认改变某技能**所有分支**的历史次数
+---@param branch string @ 技能分支名
 ---@param num? integer @ 次数 默认1
 function Player:addSkillBranchUseHistory(skill_name, branch, num)
   num = num or 1

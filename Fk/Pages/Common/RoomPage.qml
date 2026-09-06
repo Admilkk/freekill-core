@@ -65,7 +65,7 @@ Item {
 
     Text {
       anchors.centerIn: parent
-      text: Config.headerName !== "" ? Config.headerName : Lua.tr("Click The Game Scene to back")
+      text: Config.headerName !== "" ? Lua.tr("Current room: %1").arg(Config.headerName) : Lua.tr("Click The Game Scene to back")
       font.pixelSize: 16
     }
   }

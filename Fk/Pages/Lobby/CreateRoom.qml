@@ -42,6 +42,7 @@ Item {
     RoomGeneralSettings {
       id: roomGeneralSettings
       config: root.config
+      isChangeRoom: root.isChangeRoom
       onSettingsUpdated: {
         boardgameSettings.updateSettingsUI();
         gameModeSettings.updateSettingsUI();

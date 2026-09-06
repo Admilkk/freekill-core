@@ -919,7 +919,7 @@ W.PageBase {
     if (roomSettings.roomId !== undefined) {
       displayName += "[{id}]".replace("{id}", roomSettings.roomId);
     }
-    Config.headerName = Lua.tr("Current room: %1").arg(displayName);
+    Config.headerName = displayName;
 
     playerNum = Config.roomCapacity;
     for (let i = 0; i < 10; i++) {

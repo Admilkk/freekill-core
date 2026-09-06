@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 import QtQuick
-import QtQuick.Layouts
 
 import Fk
 import Fk.Widgets as W
@@ -15,6 +14,7 @@ Item {
   height: 800
 
   required property var config
+  property bool isChangeRoom: false
 
   readonly property alias roomName: roomName.text
   readonly property alias playerNum: playerNum.value
@@ -31,7 +31,7 @@ Item {
       W.EntryRow {
         id: roomName
         title: Lua.tr("Room Name")
-        text: Lua.tr("$RoomName").arg(Config.hideScreenName ? Lua.tr("Player") : Self.screenName)
+        text: root.isChangeRoom ? Config.headerName : Lua.tr("$RoomName").arg(Config.hideScreenName ? Lua.tr("Player") : Self.screenName)
       }
     }
 

@@ -77,7 +77,8 @@ Item {
       playerNum.value = Config.preferedPlayerNum;
 
       for (let k in Config.curScheme.banPkg) {
-        Ltk.updatePackageEnable(k, false);
+        if (Config.curScheme.banPkg[k].length === 0)
+          Ltk.updatePackageEnable(k, false);
       }
       Config.curScheme.banCardPkg.forEach(p => Ltk.updatePackageEnable(p, false));
       Config.curSchemeChanged();

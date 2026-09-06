@@ -68,7 +68,7 @@ function Room:initialize(_room)
     self.settings.gameMode = "aaa_role_mode"
   end
 
-  table.insertTable(self.disabled_packs, Fk.game_mode_disabled[self:getSettings('gameMode')])
+  table.insertTableIfNeed(self.disabled_packs, Fk.game_mode_disabled[self:getSettings('gameMode')])
   self.disabled_generals = self:getSettings('disabledGenerals')
 
   self:addCallback("prelight", self.handlePrelight)

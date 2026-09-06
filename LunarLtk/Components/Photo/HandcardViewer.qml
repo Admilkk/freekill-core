@@ -39,44 +39,44 @@ Rectangle {
         if (!Lua.selfPlayer.cardVisible(cid)) continue;
         const data = Ltk.getCardData(cid, true);
         let a = Lua.tr(data.name);
-         if (a.length >= 2) {
-           a = a.slice(0, 2);
-         }
-         txt.push(a);
-       }
+        if (a.length >= 2) {
+          a = a.slice(0, 2);
+        }
+        txt.push(a);
+      }
 
-       if (txt.length < 5) {
-         const unknownCards = ids.length - txt.length;
-         for (let i = 0; i < unknownCards; i++) {
-           if (txt.length >= 4) {
-             txt.push("...");
-             break;
-           } else {
-             txt.push("?");
-           }
-         }
-       }
+      if (txt.length < 5) {
+        const unknownCards = ids.length - txt.length;
+        for (let i = 0; i < unknownCards; i++) {
+          if (txt.length >= 4) {
+            txt.push("...");
+            break;
+          } else {
+            txt.push("?");
+          }
+        }
+      }
 
-       return txt.join("<br>");
-     }
-     color: "#E4D5A0"
-     font.family: Config.libianName
-     font.pixelSize: 18
-     textFormat: Text.RichText
-     horizontalAlignment: Text.AlignHCenter
-   }
+      return txt.join("<br>");
+    }
+    color: "#E4D5A0"
+    font.family: Config.libianName
+    font.pixelSize: 18
+    textFormat: Text.RichText
+    horizontalAlignment: Text.AlignHCenter
+  }
 
-   W.TapHandler {
-     onTapped: {
-       const params = { name: "hand_card" };
-       let data = root.dataModel.handcards;
-       data = data.filter((e) => Lua.selfPlayer.cardVisible(e));
+  W.TapHandler {
+    onTapped: {
+      const params = { name: "hand_card" };
+      let data = root.dataModel.handcards;
+      data = data.filter((e) => Lua.selfPlayer.cardVisible(e));
 
-       params.ids = data;
-       params.additional_prop = { selectable: true, markVisible: true };
+      params.ids = data;
+      params.additional_prop = { selectable: true, markVisible: true };
 
-       // Just for using room's right drawer
-       roomScene.showInfoPopup(Qt.createComponent("LunarLtk.Pages.InfoPopups", "ViewPile"), params);
-     }
-   }
- }
+      // Just for using room's right drawer
+      roomScene.showInfoPopup(Qt.createComponent("LunarLtk.Pages.InfoPopups", "ViewPile"), params);
+    }
+  }
+}

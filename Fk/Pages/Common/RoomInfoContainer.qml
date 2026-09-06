@@ -28,9 +28,9 @@ Item {
     const key = prop.title;
     if (typeof value === "boolean") {
       const tr = Lua.hasTranslate("#" + key);
-      const trNega = Lua.hasTranslate("#!" + key);
+      const trNeg = Lua.hasTranslate("#!" + key);
       if (tr) {
-        return value ? [tr]: (trNega ? [trNega] : [Lua.tr(prop.title), Lua.tr(value)]);
+        return value ? [tr]: (trNeg ? [trNeg] : [Lua.tr(prop.title), Lua.tr(value)]);
       }
     }
 
@@ -47,7 +47,7 @@ Item {
     const gameSettingsData = Lua.getUIDataOfSettings(gameMode, data, false);
 
     _settings.push([Lua.tr("GameMode"), Lua.tr(gameMode)]);
-    _settings.push([Lua.tr("ResponseTime"), Config.roomTimeout]);
+    _settings.push([Lua.tr("ResponseTime"), (Config.roomTimeout + 1).toString()]); // 幽默假装
     for (const group of boardgameSettingsData) {
       for (const prop of group['_children']) {
         _settings.push(getSettingKey(prop, "_game"));
@@ -174,7 +174,7 @@ Item {
     anchors.left: parent.left
     anchors.right: parent.right
     anchors.bottom: parent.bottom
-    rowHeight: root.footerHeight
+    implicitHeight: root.footerHeight
     backgroundColor: root.switchBackgroundColor
     borderColor: root.switchBorderColor
     title: Lua.tr("View False Settings")

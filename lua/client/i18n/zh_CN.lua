@@ -107,6 +107,7 @@ Fk:loadTranslationTable {
   ["help: Operation timeout"] = "一次操作的最大思考时长。",
   ["Choose General timeout"] = "选将时长(秒)",
   ["help: Choose General timeout"] = "选将的最大思考时长。",
+  ["Timeout as general timeout"] = "选将时长与操作时长相同",
   ["Luck Card Times"] = "手气卡次数",
   ["help: Luck Card Times"] = "可以更换初始手牌的最多次数。",
   ["Has Password"] = "有密码",

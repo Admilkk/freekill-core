@@ -140,8 +140,11 @@ W.ComboRow = function(spec)
 end
 
 ---@class W.SpinRowSpec : W.CommonValueSpec
----@field from integer|fun(settings: W.SettingsParam): integer
----@field to integer|fun(settings: W.SettingsParam): integer
+---@field from? integer|fun(settings: W.SettingsParam): integer @ 和items互斥，指定最小值
+---@field to? integer|fun(settings: W.SettingsParam): integer @ 和items互斥，指定最大值
+---@field items? table|fun(settings: W.SettingsParam): table @ 所有可选择的值，和from、to互斥，至少要用一组定义
+---@field stepSize? integer|fun(settings: W.SettingsParam): integer @ 步长，默认1
+---@field editable? boolean|fun(settings: W.SettingsParam): boolean
 
 ---@param spec W.SpinRowSpec
 W.SpinRow = function(spec)

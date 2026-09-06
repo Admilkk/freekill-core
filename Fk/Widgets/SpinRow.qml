@@ -9,6 +9,7 @@ ActionRow {
   property bool editable: false
   property int from
   property int to
+  property int stepSize: 1
   property int value
   property list<var> items: []
 
@@ -17,10 +18,40 @@ ActionRow {
     editable: root.editable
     from: root.items.length > 0 ? 0 : root.from
     to: root.items.length > 0 ? root.items.length - 1 : root.to
+    stepSize: root.stepSize
     value: root.value
 
     property bool _syncing: false
     property bool _syncScheduled: false
+
+    validator: root.items.length > 0 ? itemValidator : rangeValidator
+
+    IntValidator {
+      id: rangeValidator
+      bottom: Math.min(root.from, root.to)
+      top: Math.max(root.from, root.to)
+    }
+
+    RegularExpressionValidator {
+      id: itemValidator
+      regularExpression: spinBox.itemRegularExpression()
+    }
+
+    function escapeRegularExpression(text) {
+      return String(text).replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    }
+
+    function itemRegularExpression() {
+      if (root.items.length === 0) return /^.*$/;
+
+      const values = [];
+      for (let i = 0; i < root.items.length; ++i) {
+        const value = String(root.items[i]);
+        if (!values.includes(value)) values.push(value);
+      }
+
+      return new RegExp("^(" + values.map(escapeRegularExpression).join("|") + ")$");
+    }
 
     function itemIndexFromValue(value) {
       if (root.items.length === 0) return Number(value) || 0;
@@ -149,8 +180,12 @@ ActionRow {
             return i;
           }
         }
+        return Math.min(Math.max(spinBox.value, 0), root.items.length - 1);
       }
-      return Math.min(Math.max(spinBox.value, 0), root.items.length > 0 ? root.items.length - 1 : spinBox.value);
+
+      const parsed = Number(text);
+      if (isNaN(parsed)) return spinBox.value;
+      return Math.min(Math.max(parsed, Math.min(root.from, root.to)), Math.max(root.from, root.to));
     }
 
     background: Rectangle {

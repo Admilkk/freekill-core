@@ -9,6 +9,7 @@ local settings = {
       title = "Select generals num",
       from = 3,
       to = 18,
+      editable = true,
     },
 
     W.SpinRow {
@@ -16,6 +17,22 @@ local settings = {
       title = "Choose General timeout",
       from = 10,
       to = 60,
+      editable = true,
+      enabled = function (settings)
+        return not settings._game["timeoutAsGeneralTimeout"]
+      end,
+      value = function (settings)
+        if settings._game["timeoutAsGeneralTimeout"] then
+          return settings.timeout
+        else
+          return settings._game["generalTimeout"]
+        end
+      end,
+    },
+
+    W.SwitchRow {
+      _settingsKey = "timeoutAsGeneralTimeout",
+      title = "Timeout as general timeout",
     },
 
     W.SpinRow {
@@ -23,6 +40,7 @@ local settings = {
       title = "Luck Card Times",
       from = 0,
       to = 8,
+      editable = true,
     },
   },
 

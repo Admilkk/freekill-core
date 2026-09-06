@@ -49,6 +49,7 @@ Item {
         title: Lua.tr("Player num")
         from: 1
         to: 10
+        editable: true
         value: Config.preferedPlayerNum
 
         onValueChanged: {

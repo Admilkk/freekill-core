@@ -410,8 +410,8 @@ end
 
 ---@class PoxiSpec
 ---@field name string
----@field card_filter fun(to_select: integer, selected: integer[], data: PoxiCardData[], extra_data: table|PoxiExtraData): any
----@field feasible fun(selected: integer[], data: PoxiCardData[], extra_data: table|PoxiExtraData): any
+---@field card_filter fun(to_select: integer, selected: integer[], data: PoxiCardData[], extra_data: table|PoxiExtraData): any @ askToArrangeCards调用的PoxiMethod的```data```为integer[][]，```extra_data```为integer[][]，请手动cast
+---@field feasible fun(selected: integer[], data: PoxiCardData[], extra_data: table|PoxiExtraData): any @ askToArrangeCards调用的PoxiMethod的```data```为integer[][]，```extra_data```为integer[][]，请手动cast
 ---@field post_select? fun(selected: integer[], data: PoxiCardData[], extra_data: table|PoxiExtraData): integer[]
 ---@field default_choice? fun(data: PoxiCardData[], extra_data: table|PoxiExtraData): integer[]
 ---@field prompt? string | fun(data: PoxiCardData[], extra_data: table|PoxiExtraData, selected: integer[]): string

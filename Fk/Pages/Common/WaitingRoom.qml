@@ -1,15 +1,12 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 import QtQuick
-import QtQuick.Controls
 import QtQuick.Layouts
 
 import Fk
 import Fk.Components.Common
 import Fk.Components.WaitingRoom
 import Fk.Widgets as W
-
-import LunarLtk
 
 W.PageBase {
   id: roomScene

@@ -131,6 +131,15 @@ ColumnLayout {
     }
 
     MetroButton {
+      text: Lua.tr("Observe")
+      visible: Config.observing
+      onClicked: {
+        Lua.client.changeSelf(root.dataModel.playerid);
+        root.finish();
+      }
+    }
+
+    MetroButton {
       text: {
         const name = dataModel.screenName;
         const blocked = !Config.blockedUsers.includes(name);

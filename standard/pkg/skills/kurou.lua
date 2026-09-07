@@ -17,11 +17,9 @@ kurou:addEffect("active", {
 
 kurou:addAI(Fk.Ltk.AI.newActiveStrategy {
   think = function(self, ai)
-    local player = ai.player
-
     return { }, ai:getBenefitOfEvents(function(logic)
-      logic:loseHp(player, 1, kurou.name)
-      logic:drawCards(player, 2, kurou.name)
+      logic:loseHp(ai.player, 1, kurou.name)
+      logic:drawCards(ai.player, 2, kurou.name)
     end)
   end,
 })

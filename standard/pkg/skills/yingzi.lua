@@ -10,7 +10,7 @@ yingzi:addEffect(fk.DrawNCards, {
 })
 
 yingzi:addAI(Fk.Ltk.AI.newInvokeStrategy{
-  think = Util.TrueFunc
+  think = Util.TrueFunc,
 })
 
 return yingzi

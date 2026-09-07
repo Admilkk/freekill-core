@@ -662,28 +662,28 @@ end
 ---@param key string?
 ---@return number
 function SmartAI:needHelp(target, key)
-  if self.player:isFriend(target) then
-    local keys = { "hp", "h", "e" }
-    if key then
-      keys = string.split(key, "|")
-    end
-    local n = 0
-    if table.contains(keys, "hp") then
-      n = n + 200 * (target.maxHp - target.hp - target.shield)
-    end
-    if table.contains(keys, "h") then
-      for _, id in ipairs(target:getCardIds("h")) do
-        n = n + target.ai:getCardValue(id)
-      end
-    end
-    if table.contains(keys, "e") then
-      for _, id in ipairs(target:getCardIds("e")) do
-        n = n + target.ai:getCardValue(id)
-      end
-    end
-    return n
+  local keys = { "hp", "h", "e" }
+  if key then
+    keys = string.split(key, "|")
   end
-  return -1
+  local n = 0
+  if table.contains(keys, "hp") then
+    n = n + 200 * (target.maxHp - target.hp - target.shield)
+  end
+  if table.contains(keys, "h") then
+    for _, id in ipairs(target:getCardIds("h")) do
+      n = n + target.ai:getCardValue(id)
+    end
+  end
+  if table.contains(keys, "e") then
+    for _, id in ipairs(target:getCardIds("e")) do
+      n = n + target.ai:getCardValue(id)
+    end
+  end
+  if self.player:isEnemy(target) then
+    n = -n
+  end
+  return n
 end
 
 return SmartAI

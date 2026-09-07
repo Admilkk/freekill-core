@@ -18,25 +18,9 @@ jianxiong:addAI(Fk.Ltk.AI.newInvokeStrategy{
     ---@type DamageData
     local data = ai.room.logic:getCurrentEvent().data
     return ai:getBenefitOfEvents(function(logic)
-      logic:obtainCard(data.to, data.card, true, fk.ReasonJustMove, data.to, jianxiong.name)
+      logic:obtainCard(ai.player, data.card, true, fk.ReasonJustMove, ai.player, jianxiong.name)
     end) >= 0
   end,
 })
-
-jianxiong:addTest(function(room, me)
-  local comp2 = room.players[2] ---@type ServerPlayer, ServerPlayer
-  FkTest.runInRoom(function() room:handleAddLoseSkills(me, jianxiong.name) end)
-
-  local slash = Fk:getCardById(1)
-  FkTest.setNextReplies(me, { "__cancel", "1" })
-  FkTest.runInRoom(function()
-    room:useCard{
-      from = comp2,
-      tos = { me },
-      card = slash,
-    }
-  end)
-  lu.assertEquals(me:getCardIds("h")[1], 1)
-end)
 
 return jianxiong

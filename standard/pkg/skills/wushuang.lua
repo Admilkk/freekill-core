@@ -4,7 +4,7 @@ local wushuang = fk.CreateSkill {
 }
 
 ---@type TrigSkelSpec<AimFunc>
-local wushuang_spec = {
+local spec = {
   on_use = function(self, event, target, player, data)
     local to = (event == fk.TargetConfirmed and data.card.trueName == "duel") and data.from or data.to
     data:setResponseTimes(2, to)
@@ -17,7 +17,7 @@ wushuang:addEffect(fk.TargetSpecified, {
     return target == player and player:hasSkill(wushuang.name) and
       table.contains({ "slash", "duel" }, data.card.trueName)
   end,
-  on_use = wushuang_spec.on_use
+  on_use = spec.on_use
 })
 
 wushuang:addEffect(fk.TargetConfirmed, {
@@ -25,7 +25,7 @@ wushuang:addEffect(fk.TargetConfirmed, {
   can_trigger = function(self, event, target, player, data)
     return target == player and player:hasSkill(wushuang.name) and data.card.trueName == "duel"
   end,
-  on_use = wushuang_spec.on_use
+  on_use = spec.on_use
 })
 
 return wushuang

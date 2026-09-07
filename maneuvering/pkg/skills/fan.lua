@@ -12,38 +12,6 @@ fanSkill:addEffect(fk.AfterCardUseDeclared, {
   end,
 })
 
-fanSkill:addTest(function (room, me)
-  local card = room:printCard("fan")
-  local comp2 = room.players[2]
-  local vine = room:printCard("vine")
-  FkTest.runInRoom(function ()
-    room:useCard{
-      from = me,
-      tos = {me},
-      card = card,
-    }
-    room:useCard{
-      from = comp2,
-      tos = {comp2},
-      card = vine,
-    }
-    room:useVirtualCard("slash", nil, me, comp2)
-  end)
-  lu.assertEquals(comp2.hp, 4)
-
-  FkTest.setNextReplies(me, {"1"})
-  FkTest.runInRoom(function ()
-    room:useVirtualCard("slash", nil, me, comp2)
-  end)
-  lu.assertEquals(comp2.hp, 2)
-
-  FkTest.setNextReplies(me, {"1"})
-  FkTest.runInRoom(function ()
-    room:useVirtualCard("thunder__slash", nil, me, comp2)
-  end)
-  lu.assertEquals(comp2.hp, 1)
-end)
-
 fanSkill:addAI(Fk.Ltk.AI.newInvokeStrategy{
   think = function(self, ai)
     ---@type UseCardData

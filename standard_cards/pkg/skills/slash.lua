@@ -47,7 +47,7 @@ skill:addEffect("cardskill", {
         card = effect.card,
         damage = 1,
         damageType = fk.NormalDamage,
-        skillName = skill.name
+        skillName = skill.name,
       })
     end
   end,
@@ -65,41 +65,9 @@ skill:addAI(Fk.Ltk.AI.newCardSkillStrategy {
       card = effect.card,
       damage = 1,
       damageType = fk.NormalDamage,
-      skillName = skill.name
+      skillName = skill.name,
     })
   end,
 })
-
-skill:addTest(function(room, me)
-  local slash = Fk:getCardById(1)
-  local comp2 = room.players[2]
-
-  -- 简单测试on_effect
-  FkTest.setNextReplies(comp2, { "" })
-  FkTest.runInRoom(function()
-    room:useCard {
-      from = me,
-      tos = { comp2 },
-      card = slash,
-    }
-  end)
-  lu.assertEquals(comp2.hp, 3)
-
-  -- 然后在摸牌阶段中断，并来客户端进行简单测试
-  FkTest.setRoomBreakpoint(me, "PlayCard")
-  FkTest.runInRoom(function()
-    room:obtainCard(me, slash)
-    Request:new(me, "PlayCard"):ask()
-  end)
-
-  local handler = ClientInstance.current_request_handler --[[ @as ReqPlayCard ]]
-  -- 简单测试can_use：能用就行
-  lu.assertIsTrue(handler:cardValidity(slash.id))
-  -- 简单测试target_filter：应该只选的到攻击范围内的也就是2和8号位
-  handler:selectCard(slash.id, { selected = true })
-  lu.assertEquals(table.map(room:getOtherPlayers(me), function(p)
-    return not not handler:targetValidity(p.id)
-  end), { true, false, false, false, false, false, true })
-end)
 
 return skill

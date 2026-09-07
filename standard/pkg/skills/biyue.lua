@@ -15,7 +15,7 @@ biyue:addEffect(fk.EventPhaseStart, {
 biyue:addAI(Fk.Ltk.AI.newInvokeStrategy{
   think = function(self, ai)
     return ai:getBenefitOfEvents(function(logic)
-      logic:drawCards(ai.player, 1, self.skill_name)
+      logic:drawCards(ai.player, 1)
     end) >= 0
   end,
 })

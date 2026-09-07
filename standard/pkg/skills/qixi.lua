@@ -30,9 +30,7 @@ qixi:addAI(Fk.Ltk.AI.newActiveStrategy {
     local ret, benefit = nil, -100000
     for _, id in ipairs(ai:getEnabledCards()) do
       local card = Fk.skills[self.skill_name]:viewAs(ai.player, { id })
-      --if ai:getCardValue(id) < ai:getCardValue(card) then
-      --end
-      if card then
+      if card and ai:getCardValue(id) <= ai:getCardValue(card) then
         ai:selectSkill(self.skill_name, true)
         ai:selectCard(id, true)
         for targets in self:searchTargetSelections(ai) do

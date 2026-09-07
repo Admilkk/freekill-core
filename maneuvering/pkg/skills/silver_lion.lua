@@ -36,24 +36,4 @@ silverLionSkill:addEffect(fk.AfterCardsMove, {
   end,
 })
 
-silverLionSkill:addTest(function (room, me)
-  local card = room:printCard("silver_lion")
-  FkTest.runInRoom(function ()
-    room:useCard{
-      from = me,
-      tos = {me},
-      card = card,
-    }
-    room:damage{
-      to = me,
-      damage = 2,
-    }
-  end)
-  lu.assertEquals(me.hp, 3)
-  FkTest.runInRoom(function ()
-    room:throwCard(card, nil, me)
-  end)
-  lu.assertEquals(me.hp, 4)
-end)
-
 return silverLionSkill

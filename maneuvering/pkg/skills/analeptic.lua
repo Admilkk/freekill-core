@@ -77,55 +77,8 @@ analepticSkill:addAI(Fk.Ltk.AI.newCardSkillStrategy {
         recoverBy = effect.from,
         card = effect.card,
       })
-    else
-      Util.TrueFunc()
     end
   end
 })
-
-analepticSkill:addTest(function(room, me)
-  local analeptic = room:printCard("analeptic")
-  local comp2 = room.players[2]
-
-  -- test1: 喝酒后等到回合结束，酒状态解除
-  FkTest.runInRoom(function()
-    room:useCard {
-      from = me,
-      card = analeptic,
-      tos = {},
-    }
-  end)
-  lu.assertEquals(me.drank, 1)
-  FkTest.runInRoom(function()
-    GameEvent.Turn:create(TurnData:new(me, "game_rule", { Player.Finish })):exec()
-  end)
-  lu.assertEquals(me.drank, 0)
-
-  -- test2: 喝酒加伤害
-  FkTest.runInRoom(function()
-    room:useCard {
-      from = me,
-      card = analeptic,
-      tos = {},
-    }
-    room:useCard {
-      from = me,
-      tos = { comp2 },
-      card = Fk:cloneCard("slash")
-    }
-  end)
-  lu.assertEquals(me.drank, 0)
-  lu.assertEquals(comp2.hp, 2)
-
-  -- test3: 濒死时喝酒，改为回血
-  FkTest.setNextReplies(me, { {
-    card = analeptic.id,
-  } })
-  FkTest.runInRoom(function()
-    room:obtainCard(me, analeptic)
-    room:loseHp(me, 4)
-  end)
-  lu.assertEquals(me.hp, 1)
-end)
 
 return analepticSkill

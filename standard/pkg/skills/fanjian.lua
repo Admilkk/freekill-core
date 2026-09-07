@@ -42,7 +42,7 @@ fanjian:addAI(Fk.Ltk.AI.newActiveStrategy {
     if #cards == 0 or #players == 0 then return {}, -1000 end
 
     local good_cards = table.filter(cards, function(id)
-      return ai:getCardValue(id, "use_value") >= 45 or ai:getCardValue(id, "keep_value") >= 45
+      return ai:getCardValue(id) >= 45
     end)
     if (#good_cards / #cards) >= 0.8 then return {}, -1000 end
 

@@ -14,12 +14,4 @@ skill:addEffect(fk.DamageCaused, {
   end,
 })
 
-skill:addAI({
-  correct_func = function(self, logic, event, target, player, data)
-    if self.skill:triggerable(event, target, player, data) then
-      data.damage = data.damage + 1
-    end
-  end,
-}, nil, nil, true)
-
 return skill

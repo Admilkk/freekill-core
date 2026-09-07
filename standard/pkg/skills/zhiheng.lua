@@ -26,7 +26,7 @@ zhiheng:addAI(Fk.Ltk.AI.newActiveStrategy {
     local cards = ai:getEnabledCards()
 
     cards = table.filter(cards, function(id)
-      return ai:getCardValue(id, "use_value") < 45 and ai:getCardValue(id, "keep_value") < 45
+      return ai:getCardValue(id) <= 45
     end)
 
     if #cards > 0 then

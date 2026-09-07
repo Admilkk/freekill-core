@@ -3,7 +3,7 @@ local hujia = fk.CreateSkill {
   tags = { Skill.Lord },
 }
 
-local hujia_spec = {
+local spec = {
   anim_type = "defensive",
   can_trigger = function(self, event, target, player, data)
     return target == player and player:hasSkill(hujia.name) and
@@ -47,16 +47,17 @@ local hujia_spec = {
   end,
 }
 
-hujia:addEffect(fk.AskForCardUse, hujia_spec)
-hujia:addEffect(fk.AskForCardResponse, hujia_spec)
+hujia:addEffect(fk.AskForCardUse, spec)
+hujia:addEffect(fk.AskForCardResponse, spec)
 
 hujia:addAI(Fk.Ltk.AI.newInvokeStrategy {
   think = function(self, ai)
     for _, p in ipairs(ai.player.room.alive_players) do
       if ai:isFriend(p) and p.kingdom == "wei" and
-          (p:hasSkill("#eight_diagram_skill") or #table.filter(ai.player:getHandlyIds(), function(cid)
-            return Fk:getCardById(cid).trueName == "jink"
-          end) <= 1) then
+        (p:hasSkill("#eight_diagram_skill") or
+        #table.filter(ai.player:getHandlyIds(), function(cid)
+          return Fk:getCardById(cid).trueName == "jink"
+        end) <= 1) then
         return true
       end
     end

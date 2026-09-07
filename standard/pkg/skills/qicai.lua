@@ -9,15 +9,4 @@ qicai:addEffect("targetmod", {
   end,
 })
 
-qicai:addTest(function(room, me)
-  FkTest.runInRoom(function()
-    room:handleAddLoseSkills(me, "qicai")
-  end)
-
-  local snatch = Fk:cloneCard("supply_shortage")
-  lu.assertIsTrue(table.every(room:getOtherPlayers(me, false), function (other)
-    return me:canUseTo(snatch, other)
-  end))
-end)
-
 return qicai

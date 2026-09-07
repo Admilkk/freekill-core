@@ -32,7 +32,7 @@ fankui:addAI(Fk.Ltk.AI.newInvokeStrategy{
     local player = ai.player
     local ret, benefit = player.ai:askToChooseCards({
       cards = data.from:getCardIds("he"),
-      skill_name = fankui.name,
+      skill_name = self.skill_name,
       data = {
         toArea = Card.PlayerHand,
         target = player,
@@ -41,7 +41,7 @@ fankui:addAI(Fk.Ltk.AI.newInvokeStrategy{
       },
     })
     return ai:getBenefitOfEvents(function(logic)
-      logic:obtainCard(player, ret, false, fk.ReasonPrey, player, fankui.name)
+      logic:obtainCard(player, ret, false, fk.ReasonPrey, player, self.skill_name)
     end) > 0
   end,
 })

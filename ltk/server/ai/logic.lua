@@ -75,7 +75,7 @@ function AIGameLogic:setPlayerProperty(player, key, value)
   if key == "hp" then
     benefit = (value - orig) * 200
   elseif key == "shield" then
-    benefit = (value - orig) * 150
+    benefit = (value - orig) * 180
   elseif key == "chained" then
     benefit = value and -80 or 80
   elseif key == "faceup" then
@@ -272,6 +272,23 @@ function AIGameLogic:damage(damageData)
   return not Damage:new(self, data):getBenefit()
 end
 
+---@param damageData DamageDataSpec
+---@param num integer 伤害值改变量
+function AIGameLogic:changeDamage(damageData, num)
+  if damageData.damage < 1 or damageData.prevented then
+    return 0
+  end
+  self:setPlayerProperty(damageData.to, "hp", damageData.to.hp - num)
+end
+
+---@param damageData DamageDataSpec
+function AIGameLogic:preventDamage(damageData)
+  if damageData.damage < 1 or damageData.prevented then
+    return 0
+  end
+  self:setPlayerProperty(damageData.to, "hp", damageData.to.hp + damageData.damage)
+end
+
 local LoseHp = AIGameEvent:subclass("AIGameEvent.LoseHp")
 function LoseHp:exec()
   local data = self.data
@@ -348,6 +365,23 @@ end
 function AIGameLogic:recover(recoverDataSpec)
   local recoverData = RecoverData:new(recoverDataSpec)
   return not Recover:new(self, recoverData):getBenefit()
+end
+
+---@param recoverData RecoverDataSpec
+---@param num integer 回复值改变量
+function AIGameLogic:changeRecover(recoverData, num)
+  if recoverData.num < 1 or recoverData.prevented then
+    return 0
+  end
+  self:setPlayerProperty(recoverData.who, "hp", math.min(recoverData.who.maxHp, recoverData.who.hp + recoverData.num + num))
+end
+
+---@param recoverData RecoverDataSpec
+function AIGameLogic:preventRecover(recoverData)
+  if recoverData.num < 1 or recoverData.prevented then
+    return 0
+  end
+  self:setPlayerProperty(recoverData.who, "hp", recoverData.who.hp - recoverData.num)
 end
 
 -- skill.lua
@@ -646,8 +680,6 @@ end
 function AIGameLogic:judge(data)
   return Judge:new(self, JudgeData:new(data)):getBenefit()
 end
-
--- 暂时不模拟改判。
 
 -- pindian.lua
 local Pindian = AIGameEvent:subclass("AIGameEvent.Pindian")

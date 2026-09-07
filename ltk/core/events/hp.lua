@@ -88,6 +88,7 @@ fk.IceDamage = 4
 ---@field public dealtRecorderId integer? @ “实际造成的伤害”中对应的事件ID
 ---@field public prevented boolean? @ 伤害是否被防止
 ---@field public parent DamageData? @ 传导的来源伤害数据
+---@field public last_damage integer? @ 记录伤害事件的最后一次伤害值
 
 --- 描述和伤害事件有关的数据
 ---@class DamageData: DamageDataSpec, TriggerData

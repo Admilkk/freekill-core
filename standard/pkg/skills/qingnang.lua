@@ -37,7 +37,7 @@ qingnang:addAI(Fk.Ltk.AI.newActiveStrategy {
     if #cards < 1 or #targets == 0 then return {}, -1000 end
 
     cards = table.filter(cards, function(id)
-      return ai:getCardValue(id, "use_value") < 45 and ai:getCardValue(id, "keep_value") < 45
+      return ai:getCardValue(id) <= 45
     end)
     local throw_cards = { cards[1] }
 

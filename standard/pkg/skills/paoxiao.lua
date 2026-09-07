@@ -19,11 +19,7 @@ paoxiao:addEffect(fk.CardUsing, {
   end,
   on_refresh = function(self, event, target, player, data)
     player:broadcastSkillInvoke("paoxiao")
-    player.room:doAnimate("InvokeSkill", {
-      name = "paoxiao",
-      player = player.id,
-      skill_type = paoxiao.name,
-    })
+    player.room:notifySkillInvoked(player, paoxiao.name, "offensive")
   end,
 })
 

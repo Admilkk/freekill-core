@@ -15,8 +15,8 @@ jijiang:addEffect("viewas", {
   end,
   before_use = function(self, player, use)
     local room = player.room
-    if use.tos then
-      room:doIndicate(player.id, table.map(use.tos, Util.IdMapper))
+    if use.tos and not use.noIndicate then
+      room:doIndicate(player, use.tos)
     end
 
     for _, p in ipairs(room:getOtherPlayers(player)) do

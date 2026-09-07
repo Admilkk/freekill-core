@@ -28,11 +28,6 @@ xiaoji:addEffect(fk.AfterCardsMove, {
     end
     return i
   end,
-  on_cost = function(self, event, target, player, data)
-    if player.room:askToSkillInvoke(player, { skill_name = xiaoji.name }) then
-      return true
-    end
-  end,
   on_use = function(self, event, target, player, data)
     player:drawCards(2, xiaoji.name)
   end,
@@ -41,7 +36,7 @@ xiaoji:addEffect(fk.AfterCardsMove, {
 xiaoji:addAI(Fk.Ltk.AI.newInvokeStrategy{
   think = function(self, ai)
     return ai:getBenefitOfEvents(function(logic)
-      logic:drawCards(ai.player, 2, self.skill_name)
+      logic:drawCards(ai.player, 2)
     end) > 0
   end,
 })

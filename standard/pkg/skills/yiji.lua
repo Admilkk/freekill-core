@@ -6,11 +6,6 @@ yiji:addEffect(fk.Damaged, {
   trigger_times = function(self, event, target, player, data)
     return data.damage
   end,
-  on_cost = function(self, event, target, player, data)
-    if player.room:askToSkillInvoke(player, { skill_name = yiji.name }) then
-      return true
-    end
-  end,
   on_use = function(self, event, target, player, data)
     local room = player.room
     local ids = room:getNCards(2)

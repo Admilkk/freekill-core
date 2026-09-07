@@ -2,7 +2,7 @@ local skill = fk.CreateSkill {
   name = "thunder__slash_skill",
 }
 
-local slash_skill = Fk.skills["slash_skill"] --[[ @as ActiveSkill ]]
+local slash_skill = Fk.skills["slash_skill"] ---@cast slash_skill CardSkill
 
 skill:addEffect("cardskill", {
   prompt = function(self, player, selected_cards)

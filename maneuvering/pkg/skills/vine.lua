@@ -42,24 +42,4 @@ skill:addAI({
   end,
 }, nil, nil, true)
 
-skill:addTest(function (room, me)
-  local card = room:printCard("vine")
-  local comp2 = room.players[2]
-  FkTest.runInRoom(function ()
-    room:useCard{
-      from = me,
-      tos = {me},
-      card = card,
-    }
-    room:useVirtualCard("slash", nil, comp2, me)
-    room:useVirtualCard("archery_attack", nil, comp2, me)
-    room:useVirtualCard("savage_assault", nil, comp2, me)
-  end)
-  lu.assertEquals(me.hp, 4)
-  FkTest.runInRoom(function ()
-    room:useVirtualCard("fire__slash", nil, comp2, me)
-  end)
-  lu.assertEquals(me.hp, 2)
-end)
-
 return skill

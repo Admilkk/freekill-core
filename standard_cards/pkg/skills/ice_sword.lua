@@ -12,9 +12,13 @@ skill:addEffect(fk.DetermineDamageCaused, {
     local room = player.room
     data:preventDamage()
     local to = data.to
-    for i = 1, 2 do
+    for _ = 1, 2 do
       if player.dead or to.dead or to:isNude() then break end
-      local card = room:askToChooseCard(player, { target = to, flag = "he", skill_name = skill.name })
+      local card = room:askToChooseCard(player, {
+        target = to,
+        flag = "he",
+        skill_name = skill.name,
+      })
       room:throwCard(card, skill.name, to, player)
     end
   end,

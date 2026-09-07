@@ -37,11 +37,15 @@ luoshen:addEffect(fk.FinishJudge, {
 luoshen:addAI(Fk.Ltk.AI.newInvokeStrategy{
   think = function(self, ai)
     return ai:getBenefitOfEvents(function(logic)
+      local card = Fk:getCardById(Fk:currentRoom().draw_pile[1] or 1)
       logic:judge({
         who = ai.player,
         reason = luoshen.name,
         pattern = ".|.|black",
       })
+      if card and card:matchPattern(".|.|black") then
+        logic:moveCardTo(card, Card.PlayerHand, ai.player, fk.ReasonJustMove, self.skill_name, nil, true, ai.player)
+      end
     end) >= -100
   end,
 })

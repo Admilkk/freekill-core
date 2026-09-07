@@ -29,10 +29,12 @@ zhiheng:addAI(Fk.Ltk.AI.newActiveStrategy {
       return ai:getCardValue(id, "use_value") < 45 and ai:getCardValue(id, "keep_value") < 45
     end)
 
-    return { cards }, ai:getBenefitOfEvents(function(logic)
-      logic:throwCard(cards, self.skill_name, player, player)
-      logic:drawCards(player, #cards, self.skill_name)
-    end)
+    if #cards > 0 then
+      return { cards }, ai:getBenefitOfEvents(function(logic)
+        logic:throwCard(cards, self.skill_name, player, player)
+        logic:drawCards(player, #cards, self.skill_name)
+      end)
+    end
   end,
 })
 

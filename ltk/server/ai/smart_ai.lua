@@ -274,10 +274,15 @@ end
 function SmartAI:handlePlayCard()
   local active_strategy_list = {} ---@type AI.ActiveStrategy[]
   do
-    local skills = self:getEnabledSkills()
-    local card_ids = self:getEnabledCards()
+    for _, sname in ipairs(self:getEnabledSkills()) do
+      local ai = self:findStrategyOfSkill(AI.ActiveStrategy, sname)
+      if ai then
+        table.insert(active_strategy_list, ai)
+      end
+    end
+
     local tmp = {}
-    for _, id in ipairs(card_ids) do
+    for _, id in ipairs(self:getEnabledCards()) do
       local cd = Fk:getCardById(id)
       tmp[cd.skill.name] = true
     end
@@ -289,14 +294,7 @@ function SmartAI:handlePlayCard()
       end
     end
 
-    for _, sname in ipairs(skills) do
-      local ai = self:findStrategyOfSkill(AI.ActiveStrategy, sname)
-      if ai then
-        table.insert(active_strategy_list, ai)
-      end
-    end
   end
-
   if self._debug then
     verbose(1, "======== %s: 开始计算出牌阶段 ========", tostring(self))
   end
@@ -310,13 +308,12 @@ function SmartAI:handlePlayCard()
 
     -- 干脆直接走handleActive的流程
 
-    local ret, real_val = ai:makeReply(self) -- "", -10000 -- ai:think(self)
+    local ret, real_val = ai:makeReply(self)
     if self._debug then
       verbose(1, "%s: 思考结果是%s, 收益是%s", ai.skill_name, json.encode(ret), json.encode(real_val))
     end
     real_val = real_val or -100000
 
-    -- if ret and ret ~= "" then return ret end
     if best_val < real_val then
       if self._debug then
         verbose(1, "将决策%s换成更好的%s (收益%g => %g)", json.encode(best_ret), json.encode(ret), best_val, real_val)
@@ -324,15 +321,15 @@ function SmartAI:handlePlayCard()
       best_ret, best_val = ret, real_val
     end
     self:unSelectAll()
-
-    -- FIXME: 为了实现按优先级出牌，干脆只要收益为正就出
-    if best_val >= 0 then
-      if self._debug then
-        verbose(1, "懒得推测了，得出决策%s", json.encode(best_ret))
-      end
-      return best_ret
-    end
   end
+
+  if best_val >= 0 then
+    if self._debug then
+      verbose(1, "懒得推测了，得出决策%s", json.encode(best_ret))
+    end
+    return best_ret
+  end
+
   if self._debug then
     verbose(1, "推测出最佳决策是%s", json.encode(best_ret))
   end

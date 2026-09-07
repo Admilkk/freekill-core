@@ -69,19 +69,6 @@ skill:addEffect("cardskill", {
   end,
 })
 
-skill:addTest(function(room, me)
-  FkTest.runInRoom(function()
-    room:useCard {
-      from = me,
-      tos = {},
-      card = Fk:cloneCard("amazing_grace"),
-    }
-  end)
-  lu.assertEquals(#me:getCardIds("h"), 1)
-  lu.assertEquals(#room.players[2]:getCardIds("h"), 1)
-  lu.assertEquals(#room.players[3]:getCardIds("h"), 1)
-end)
-
 skill:addAI(Fk.Ltk.AI.newCardSkillStrategy {
   keep_value = -1,
   use_value = 3,

@@ -46,7 +46,7 @@ function AI:getEnabledCards(pattern)
   return ret
 end
 
---- 返回当前所有可选并且还未选中的角色，包括自己
+--- 返回当前所有可选并且还未选中的角色
 ---@return ServerPlayer[]
 function AI:getEnabledTargets()
   if not self:isInDashboard() then return Util.DummyTable end

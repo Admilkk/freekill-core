@@ -52,11 +52,11 @@ tuxi:addAI(Fk.Ltk.AI.newChoosePlayersStrategy{
       targets = ai:getEnabledTargets(),
       min_num = 0,
       max_num = 2,
-      skill_name = tuxi.name,
+      skill_name = self.skill_name,
       benefit_func = function (logic, p)
         local ret, _ = ai:askToChooseCards({
           cards = p:getCardIds("h"),
-          skill_name = tuxi.name,
+          skill_name = self.skill_name,
           data = {
             toArea = Card.PlayerHand,
             target = ai.player,
@@ -64,7 +64,7 @@ tuxi:addAI(Fk.Ltk.AI.newChoosePlayersStrategy{
             proposer = ai.player,
           }
         })
-        logic:obtainCard(ai.player, ret, false, fk.ReasonPrey, ai.player, tuxi.name)
+        logic:obtainCard(ai.player, ret, false, fk.ReasonPrey, ai.player, self.skill_name)
       end,
       basic_benefit = -ai:getBenefitOfEvents(function(logic)
         logic:drawCards(ai.player, 2, "phase_draw")

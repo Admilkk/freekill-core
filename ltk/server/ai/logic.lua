@@ -626,7 +626,7 @@ function Judge:exec()
   local logic = self.logic
   local who = data.who
 
-  -- data.isJudgeEvent = true
+  data.isJudgeEvent = true
   logic:trigger(fk.StartJudge, who, data)
   data.card = data.card or Fk:getCardById(self.ai.room.draw_pile[1] or 1)
 
@@ -648,5 +648,125 @@ function AIGameLogic:judge(data)
 end
 
 -- 暂时不模拟改判。
+
+-- pindian.lua
+local Pindian = AIGameEvent:subclass("AIGameEvent.Pindian")
+function Pindian:exec()
+  local data = self.data
+  local room = self.room
+  local logic = self.logic
+  local from = data.from
+  local results = data.results
+  for _, to in pairs(data.tos) do
+    results[to] = results[to] or {}
+  end
+
+  logic:trigger(fk.StartPindian, from, data)
+
+
+  ---@type ServerPlayer[]
+  local targets = {}
+  local moveInfos = {} ---@type MoveInfo[]
+  if data.fromCard then
+    local cid = data.fromCard:getEffectiveId()
+    if cid and Fk:currentRoom():getCardArea(cid) ~= Card.Processing and
+      not table.find(moveInfos, function (info)
+        return table.contains(info.ids, cid)
+      end) then
+      table.insert(moveInfos, {
+        ids = { cid },
+        from = room:getCardOwner(cid),
+        toArea = Card.Processing,
+        moveReason = fk.ReasonPindian,
+        skillName = data.reason,
+        moveVisible = true,
+      })
+    end
+  elseif not from:isKongcheng() then
+    table.insert(targets, from)
+  end
+  for _, to in ipairs(data.tos) do
+    if results[to] and results[to].toCard then
+      local cid = results[to].toCard:getEffectiveId()
+      if cid and Fk:currentRoom():getCardArea(cid) ~= Card.Processing and
+        not table.find(moveInfos, function (info)
+          return table.contains(info.ids, cid)
+        end) then
+        table.insert(moveInfos, {
+          ids = { cid },
+          from = room:getCardOwner(cid),
+          toArea = Card.Processing,
+          moveReason = fk.ReasonPindian,
+          skillName = data.reason,
+          moveVisible = true,
+        })
+      end
+    elseif not to:isKongcheng() then
+      table.insert(targets, to)
+    end
+  end
+
+  if #targets ~= 0 then
+    for _, to in ipairs(targets) do
+      local card = Fk:getCardById(table.random(to:getCardIds("h")))
+
+      if to == from then
+        data.fromCard = card
+      else
+        data.results[to].toCard = card
+      end
+
+      if not table.find(moveInfos, function (info)
+        return table.contains(info.ids, card:getEffectiveId())
+      end) then
+        table.insert(moveInfos, {
+          ids = { card:getEffectiveId() },
+          from = to,
+          toArea = Card.Processing,
+          moveReason = fk.ReasonPindian,
+          skillName = data.reason,
+          moveVisible = true,
+        })
+      end
+    end
+  end
+
+  logic:trigger(fk.PindianCardsDisplaying, nil, data)
+
+  if #moveInfos > 0 then
+    room:moveCards(table.unpack(moveInfos))
+  end
+
+  logic:trigger(fk.PindianCardsDisplayed, nil, data)
+
+  for _, to in ipairs(data.tos) do
+    local result = data.results[to]
+    local fromCard, toCard = data.fromCard, result.toCard
+    if fromCard and toCard then
+      if fromCard.number > toCard.number then
+        result.winner = from
+      elseif fromCard.number < toCard.number then
+        result.winner = to
+      end
+
+      local singlePindianData = {
+        from = from,
+        to = to,
+        fromCard = data.fromCard,
+        toCard = result.toCard,
+        winner = result.winner,
+        reason = data.reason,
+      }
+      logic:trigger(fk.PindianResultConfirmed, nil, singlePindianData)
+    end
+  end
+
+  logic:trigger(fk.PindianFinished, from, data)
+end
+
+---@param data PindianDataSpec
+function AIGameLogic:pindian(data)
+  return Pindian:new(self, PindianData:new(data)):getBenefit()
+end
 
 return AIGameLogic, AIGameEvent

@@ -170,7 +170,6 @@ SmartAI:setSkillAI("__card_skill", {
   choose_targets = function(self, ai)
     -- local targets = ai:getEnabledTargets()
     local logic = AIGameLogic:new(ai)
-    local estimate_val = self:getEstimatedBenefit(ai)
     local val_func = function(targets)
       logic.benefit = 0
       logic:useCard({
@@ -189,7 +188,6 @@ SmartAI:setSkillAI("__card_skill", {
       if (not best_targets) or (best_val < val) then
         best_targets, best_val = targets, val
       end
-      -- if best_val > estimate_val then break end
     end
     return best_targets or {}, best_val
   end,
@@ -241,8 +239,7 @@ function SmartAI:handleAskForUseActiveSkill()
 end
 
 -- 出牌阶段AI的步骤是：
--- 1. 分析手中的手牌、技能按钮以及局势，判断出本次行动意向，目前设计的意向有：
---    进攻、防御、控制
+-- 1. 分析手中的手牌、技能按钮以及局势，判断出本次行动意向，目前设计的意向有：进攻、防御、控制
 -- 2. (TODO) 为可以点击的卡牌转化技确定要转化的牌名 然后将该单一牌名纳入下一步那种牌名的考虑内
 -- 3. 将可用卡牌和技能按优先级排序，根据之前推测出的趋向，某些卡牌/技能的优先级会被修正
 -- 4. 计算优先级最高的3个卡牌/技能的方案及其收益
@@ -293,20 +290,18 @@ function SmartAI:handlePlayCard()
         table.insert(active_strategy_list, ai)
       end
     end
-
   end
+
   if self._debug then
     verbose(1, "======== %s: 开始计算出牌阶段 ========", tostring(self))
   end
 
-  local best_ret, best_val = "", -1
+  local best_ret, best_val, count = "", -1, 0
   if self._debug then
     verbose(1, "目前的决策：直接取消(收益%g)", best_val)
   end
   for _, ai in fk.sorted_pairs(active_strategy_list, function(a) return a.use_priority end) do
     self:selectSkill(ai.skill_name, true)
-
-    -- 干脆直接走handleActive的流程
 
     local ret, real_val = ai:makeReply(self)
     if self._debug then
@@ -319,21 +314,23 @@ function SmartAI:handlePlayCard()
         verbose(1, "将决策%s换成更好的%s (收益%g => %g)", json.encode(best_ret), json.encode(ret), best_val, real_val)
       end
       best_ret, best_val = ret, real_val
+
+      --只想20种比较好的决策
+      count = count + 1
+      if count > 20 then
+        break
+      end
     end
     self:unSelectAll()
   end
 
-  if best_val >= 0 then
+  if best_val >= 0 and best_ret ~= "" then
     if self._debug then
-      verbose(1, "懒得推测了，得出决策%s", json.encode(best_ret))
+      verbose(1, "推测出最佳决策是%s", json.encode(best_ret))
     end
     return best_ret
   end
 
-  if self._debug then
-    verbose(1, "推测出最佳决策是%s", json.encode(best_ret))
-  end
-  if best_ret and best_ret ~= "" then return best_ret end
   return ""
 end
 
@@ -553,21 +550,19 @@ function SmartAI:getCardValue(card, key)
   return ret
 end
 
--- 将卡牌id数组按照某种估值方针从小到大原地排序
----@param tab integer[]
+-- 将卡牌id数组按照某种估值从小到大原地排序
+---@param ids integer[]
 ---@param key "keep_value"|"use_value"|"use_priority"
----@param reverse boolean? 是否反过来排序（从大到小）
-function SmartAI:sortCards(tab, key, reverse)
+---@param reverse boolean? 是否反过来（从大到小）排序
+function SmartAI:sortCards(ids, key, reverse)
   -- value_tab是必须的，因为table.sort每轮比较时都会调用一次fun(a,b)
   -- 太阳神卡慢的点之一就是没有提前计算出结果
   local value_tab = {}
-  for _, id in ipairs(tab) do
-    if key == "keep_value" then
-      value_tab[id] = self:getCardValue(id)
-    end
+  for _, id in ipairs(ids) do
+    value_tab[id] = self:getCardValue(id)
   end
 
-  table.sort(tab, function(a, b)
+  table.sort(ids, function(a, b)
     local va, vb = value_tab[a], value_tab[b]
     if reverse then
       return va > vb
@@ -657,6 +652,38 @@ function SmartAI:askToChoosePlayers(params)
   end
   if #targets == 0 then return {}, 0 end
   return targets, total_benefit
+end
+
+-- 局势分析
+--========================================
+
+-- AI需要“帮助”某玩家的程度
+---@param target ServerPlayer
+---@param key string?
+---@return number
+function SmartAI:needHelp(target, key)
+  if self.player:isFriend(target) then
+    local keys = { "hp", "h", "e" }
+    if key then
+      keys = string.split(key, "|")
+    end
+    local n = 0
+    if table.contains(keys, "hp") then
+      n = n + 200 * (target.maxHp - target.hp - target.shield)
+    end
+    if table.contains(keys, "h") then
+      for _, id in ipairs(target:getCardIds("h")) do
+        n = n + target.ai:getCardValue(id)
+      end
+    end
+    if table.contains(keys, "e") then
+      for _, id in ipairs(target:getCardIds("e")) do
+        n = n + target.ai:getCardValue(id)
+      end
+    end
+    return n
+  end
+  return -1
 end
 
 return SmartAI

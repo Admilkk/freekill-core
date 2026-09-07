@@ -25,6 +25,35 @@ qixi:addEffect("viewas", {
   end
 })
 
-qixi:addAI(nil, "vs_skill")
+qixi:addAI(Fk.Ltk.AI.newActiveStrategy {
+  think = function(self, ai)
+    local ret, benefit = nil, -100000
+    for _, id in ipairs(ai:getEnabledCards()) do
+      local card = Fk.skills[self.skill_name]:viewAs(ai.player, { id })
+      --if ai:getCardValue(id) < ai:getCardValue(card) then
+      --end
+      if card then
+        ai:selectSkill(self.skill_name, true)
+        ai:selectCard(id, true)
+        for targets in self:searchTargetSelections(ai) do
+          local tmp = ai:getBenefitOfEvents(function (logic)
+            logic:useCard{
+              from = ai.player,
+              tos = targets or card:getDefaultTarget(ai.player),
+              card = card,
+            }
+          end)
+          if tmp > benefit then
+            ret, benefit = { { id }, targets or {} }, tmp
+          end
+        end
+        ai:unSelectAll()
+      end
+    end
+    if ret then
+      return ret, benefit
+    end
+  end,
+})
 
 return qixi

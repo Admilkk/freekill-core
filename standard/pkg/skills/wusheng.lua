@@ -22,6 +22,4 @@ wusheng:addEffect("viewas", {
   end,
 })
 
-wusheng:addAI(nil, "vs_skill")
-
 return wusheng

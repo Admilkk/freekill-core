@@ -100,17 +100,122 @@ Item {
   Component {
     id: skeletonAnim
     Item {
+      id: skelHost
       anchors.fill: parent
+
+      // —— 骨骼同步播放协调（等待真正加载完成 / 失败即跳过） ——
+      // 先统计本皮肤应有的骨架层数量（bg / extraBg / body / front / extraFront；
+      // bg、front 可能不存在，extra 数量可变），与下方实际创建逻辑保持一致。
+      // 每层骨架在 Component.onCompleted 时注册到队列；但 QML 的 onCompleted 只
+      // 代表组件树创建完成，骨架数据（PNG/JSON）是 C++ 异步加载的，二者并不同步。
+      // 因此监听每层的 skeletonLoadFinished：只有“所有层都已给出加载结论（成功
+      // loaded，或失败）”就统一播放——成功的层一起 setAnimation 起播，失败的层
+      // 直接跳过。这样既保证各层真正同一时刻起播，又不会因个别坏层（文件缺失/
+      // 版本不支持）而卡住整个皮肤等待。
+      property var _skeletonQueue: []     // 元素：{ comp, shown, normal, done, ok }
+      property bool _skeletonsStarted: false
+      property int _expectedCount: (function() {
+        let n = 0
+        if (!root.skelData.staticBg) ++n                                // 背景骨骼
+        n += (root.skelData.extraBg ? root.skelData.extraBg.length : 0) // 额外背景
+        ++n                                                             // 身体
+        if (!root.skelData.atlasFrontFile.startsWith("undefined")) ++n  // 前景
+        n += (root.skelData.extraFront ? root.skelData.extraFront.length : 0) // 额外前景
+        return n
+      })()
+
+      function _registerSkeleton(comp, shown, normal) {
+        if (skelHost._skeletonsStarted) {
+          // 统一播放后才完成注册（如模型动态增删）的层：立即单独起播
+          skelHost._playOne(comp, shown, normal)
+          return
+        }
+        const entry = { comp, shown, normal, done: comp.loadConcluded, ok: comp.loadOk }
+        skelHost._skeletonQueue.push(entry)
+        // 有新骨架注册 → 重置收集窗口（容纳 Loader/Repeater 内容稍晚注册）
+        skeletonCollectTimer.restart()
+        if (entry.done) {
+          // 注册前已给出加载结论（极快完成或已失败）
+          skelHost._maybeStartSkeletons()
+          return
+        }
+        // 等待该层给出加载结论：成功(ok=true) 或失败(ok=false) 都算“结束”。
+        // wrapper 缓存 loadConcluded/loadOk，这里用信号推进协调器。
+        comp.skeletonLoadFinished.connect(function(ok) {
+          entry.done = true
+          entry.ok = !!ok
+          skelHost._maybeStartSkeletons()
+        })
+      }
+
+      // 收集窗口：任何骨架注册都会重启它，根 Item onCompleted 也会启动一次；
+      // 窗口静默（没有新的层再加入）后判定收集完成——Loader 内容（front 等）
+      // 即使比其它层晚一拍注册，也会在窗口内被纳入。
+      Timer {
+        id: skeletonCollectTimer
+        interval: 32
+        repeat: false
+        onTriggered: skelHost._closeSkeletonCollection()
+      }
+
+      // 收集窗口关闭后调用：
+      // 若统计数大于实际注册数（个别层因数据缺失/条件不满足未被创建），
+      // 把期望修正为实际注册数，避免永远等一个不存在的层。
+      function _closeSkeletonCollection() {
+        if (skelHost._skeletonQueue.length < skelHost._expectedCount)
+          skelHost._expectedCount = skelHost._skeletonQueue.length
+        skelHost._maybeStartSkeletons()
+      }
+
+      // 所有层都已注册且全部给出结论（成功或失败）→ 统一播放成功层。
+      // 关键：绝不“到点抢跑”——每个已注册层最终都会发加载结论（C++ 成功/失败
+      // 都保证发出），等待不会卡死；抢跑会让先完成的层先播、后完成的层晚播，
+      // 正是同一皮肤内各层不同步的根源。
+      function _maybeStartSkeletons() {
+        if (skelHost._skeletonsStarted)
+          return
+        if (skelHost._skeletonQueue.length < skelHost._expectedCount)
+          return // 收集尚未完成
+        for (const s of skelHost._skeletonQueue) {
+          if (!s.done)
+            return // 仍有层未给出加载结论：继续等待，不抢跑
+        }
+        skelHost._startSkeletons()
+      }
+
+      function _startSkeletons() {
+        if (skelHost._skeletonsStarted)
+          return
+        // 仅当确有成功加载的层才锁定并统一播放；若全部失败（如远程文件暂不可用）
+        // 保持未锁定，等待后续层重试成功后再次驱动播放。
+        let anyOk = false
+        for (const s of skelHost._skeletonQueue) {
+          if (s.ok) { anyOk = true; break }
+        }
+        if (!anyOk)
+          return
+        skelHost._skeletonsStarted = true
+        const queue = skelHost._skeletonQueue
+        skelHost._skeletonQueue = []
+        for (const s of queue) {
+          if (s.ok)
+            skelHost._playOne(s.comp, s.shown, s.normal)
+        }
+      }
+
+      function _playOne(comp, shown, normal) {
+        if (shown && root.enabledShown) {
+          comp.setAnimation(0, shown, false)
+          comp.addAnimation(0, normal, true)
+        } else {
+          comp.setAnimation(0, normal, true)
+        }
+      }
 
       // QSGRenderNode 直接内联绘制时父级 clip / OpacityMask 对它不生效，
       // 需用 layer 离屏成纹理。但 layer 默认按“逻辑尺寸”采样（不乘 DPR、
       // 也不超采样），在高分屏/放大显示时骨骼会糊；因此手动把 textureSize
       // 设为逻辑尺寸的 2 倍做超采样，显示时缩小回逻辑尺寸，画面锐利。
-      layer.enabled: true
-      layer.smooth: true
-      layer.textureSize: Qt.size(
-        Math.max(1, Math.round(width * 2)),
-        Math.max(1, Math.round(height * 2)))
 
       // 背景静态图（可选）
       Image {
@@ -120,26 +225,46 @@ Item {
         source: root.skelData.staticBg ? (root.skelData.path + root.skelData.staticBg) : ""
       }
 
-      // 背景骨骼 —— 与人物骨骼放在同一父层级（去掉原 Loader 包装，
-      // 否则两者父变换链不同会导致同 offset 下锚点错位）
-      SkeletonAnimation {
-        visible: !root.skelData.staticBg
-        atlasFile: root.skelData.path + root.skelData.atlasBgFile
-        skeletonDataFile: root.skelData.path + root.skelData.skelBgFile
-        skeletonScale: root.skelData.renderScale
-        spineVersion: SpineVersion.Auto
-        premultipliedAlapha: false
-        x: root.width * root.skelData.bgXOffset
-        y: root.height * root.skelData.bgYOffset
-        scale: root.skelData.bgScale * root.height / root.skelData.renderScale / 175
+      // 背景骨骼 —— 与人物骨骼放在同一父层级（用 Loader 条件创建：
+      // 有 staticBg 时用静态图代替，不创建背景骨架，让计数与实际创建一致）。
+      Loader {
+        sourceComponent: !root.skelData.staticBg ? bgSkelCom : null
+      }
 
-        Component.onCompleted: {
-          if (root.skelData.bgShownAnim && root.enabledShown) {
-            setAnimation(0, root.skelData.bgShownAnim, false);
-            addAnimation(0, root.skelData.bgNormalAnim, true);
-          } else {
-            setAnimation(0, root.skelData.bgNormalAnim, true)
-          }
+      Component {
+        id: bgSkelCom
+        SkeletonAnimation {
+          atlasFile: root.skelData.path + root.skelData.atlasBgFile
+          skeletonDataFile: root.skelData.path + root.skelData.skelBgFile
+          skeletonScale: root.skelData.renderScale
+          spineVersion: SpineVersion.Auto
+          premultipliedAlapha: false
+          x: root.width * root.skelData.bgXOffset
+          y: root.height * root.skelData.bgYOffset
+          scale: root.skelData.bgScale * root.height / root.skelData.renderScale / 175
+
+          // 只注册不播放：等所有骨架层 onCompleted 后统一起播
+          Component.onCompleted: skelHost._registerSkeleton(this,
+            root.skelData.bgShownAnim, root.skelData.bgNormalAnim)
+        }
+      }
+
+      Repeater {
+        model: root.skelData.extraBg
+        SkeletonAnimation {
+          required property var modelData
+          atlasFile: root.skelData.path + modelData + ".atlas"
+          skeletonDataFile: root.skelData.path + modelData + root.skelData.skelType
+          skeletonScale: root.skelData.renderScale
+          spineVersion: SpineVersion.Auto
+          premultipliedAlapha: false
+          x: root.width * root.skelData.bgXOffset
+          y: root.height * root.skelData.bgYOffset
+          scale: root.skelData.bgScale * root.height / root.skelData.renderScale / 175
+
+          // 只注册不播放：等所有骨架层 onCompleted 后统一起播
+          Component.onCompleted: skelHost._registerSkeleton(this,
+            root.skelData.bgShownAnim, root.skelData.bgNormalAnim)
         }
       }
 
@@ -154,15 +279,61 @@ Item {
         y: root.height * root.skelData.bodyYOffset
         scale: root.skelData.bodyScale * root.height / root.skelData.renderScale / 175
 
-        Component.onCompleted: {
-          if (root.skelData.bodyShownAnim && root.enabledShown) {
-            setAnimation(0, root.skelData.bodyShownAnim, false);
-            addAnimation(0, root.skelData.bodyNormalAnim, true);
-          } else {
-            setAnimation(0, root.skelData.bodyNormalAnim, true)
+        // 只注册不播放：等所有骨架层 onCompleted 后统一起播
+        Component.onCompleted: skelHost._registerSkeleton(this,
+          root.skelData.bodyShownAnim, root.skelData.bodyNormalAnim)
+      }
+
+      Loader {
+        sourceComponent: {
+          if (!root.skelData.atlasFrontFile.startsWith("undefined")) {
+            return frontSkelCom
           }
         }
       }
+
+      Component {
+        id: frontSkelCom
+        SkeletonAnimation {
+          id: skelFront
+          atlasFile: root.skelData.path + root.skelData.atlasFrontFile
+          skeletonDataFile: root.skelData.path + root.skelData.skelFrontFile
+          skeletonScale: root.skelData.renderScale
+          spineVersion: SpineVersion.Auto
+          premultipliedAlapha: false
+          x: root.width * root.skelData.frontXOffset
+          y: root.height * root.skelData.frontYOffset
+          scale: root.skelData.frontScale * root.height / root.skelData.renderScale / 175
+
+          // 只注册不播放：等所有骨架层 onCompleted 后统一起播
+          Component.onCompleted: skelHost._registerSkeleton(this,
+            root.skelData.frontShownAnim, root.skelData.frontNormalAnim)
+        }
+      }
+
+      Repeater {
+        model: root.skelData.extraFront
+        SkeletonAnimation {
+          required property var modelData
+          atlasFile: root.skelData.path + modelData + ".atlas"
+          skeletonDataFile: root.skelData.path + modelData + root.skelData.skelType
+          skeletonScale: root.skelData.renderScale
+          spineVersion: SpineVersion.Auto
+          premultipliedAlapha: false
+          x: root.width * root.skelData.frontXOffset
+          y: root.height * root.skelData.frontYOffset
+          scale: root.skelData.frontScale * root.height / root.skelData.renderScale / 175
+
+          // 只注册不播放：等所有骨架层 onCompleted 后统一起播
+          Component.onCompleted: skelHost._registerSkeleton(this,
+            root.skelData.frontShownAnim, root.skelData.frontNormalAnim)
+        }
+      }
+
+      // 根 Item 的 onCompleted 在所有同步子骨架之后触发（QML 子先父后），
+      // 此时大部分骨架已完成注册；启动收集窗口 Timer 收尾，给 Loader 内容
+      // （front 等）最后一拍注册机会。之后窗口关闭 → 收窄期望 → 尝试统一播放。
+      Component.onCompleted: skeletonCollectTimer.start()
     }
   }
 }

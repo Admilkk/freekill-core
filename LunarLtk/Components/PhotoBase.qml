@@ -90,7 +90,7 @@ Game.BasicItem {
       }
     }
 
-    SkinArea {
+    SkinMedia {
       id: skin
       general: root.general
       skinName: root.skinSource.name
@@ -124,7 +124,7 @@ Game.BasicItem {
       }
     }
 
-    SkinArea {
+    SkinMedia {
       id: deputySkin
       general: root.deputyGeneral
       skinName: root.deputySkinSource.name

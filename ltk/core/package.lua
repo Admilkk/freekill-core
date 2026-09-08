@@ -208,6 +208,7 @@ function Package:addSkinPackage(skinPak)
             files = arr.files,
             bg = arr.bg,
             body = arr.body,
+            front = arr.front,
             extra_data = arr.extra_data,
           }
         else

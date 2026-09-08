@@ -8,10 +8,13 @@
 ---@field special_anim? string @ 特殊动画（未适配）
 ---@field bg_scale? number
 ---@field body_scale? number
+---@field front_scale? number
 ---@field bg_x_offset? number
 ---@field bg_y_offset? number
 ---@field body_x_offset? number
 ---@field body_y_offset? number
+---@field front_x_offset? number
+---@field front_y_offset? number
 ---@field bg_shown_anim? string
 ---@field bg_normal_anim? string
 ---@field bg_attack_anim? string
@@ -20,6 +23,12 @@
 ---@field body_normal_anim? string
 ---@field body_attack_anim? string
 ---@field body_special_anim? string
+---@field front_shown_anim? string
+---@field front_normal_anim? string
+---@field front_attack_anim? string
+---@field front_special_anim? string
+---@field extra_bg? string[]
+---@field extra_front? string[]
 ---@field render_scale? number @ 渲染比例，比较大的或组件很多的骨骼适当调低一点这个
 ---@field static_bg? string @ 如果使用静态图片作为背景，则在这里输入静态图片名（带后缀），注意：files里也得有这个文件
 
@@ -35,6 +44,7 @@
 ---@field path string
 ---@field files string[]
 ---@field bg? string
+---@field front? string
 ---@field body string
 ---@field extra_data? SkeletonExtraDataSpec
 
@@ -47,6 +57,7 @@
 ---@field skin_name string
 ---@field files string[]
 ---@field bg? string
+---@field front? string
 ---@field body string
 ---@field extra_data? SkeletonExtraDataSpec
 

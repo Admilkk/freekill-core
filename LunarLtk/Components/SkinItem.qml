@@ -13,7 +13,7 @@ BasicItem {
   property string skinName: ""
   property alias text: skinName.text
 
-  SkinArea {
+  SkinMedia {
     id: skinImg
     general: root.general
     skinName: root.skinName

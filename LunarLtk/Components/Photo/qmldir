@@ -13,5 +13,6 @@ RoleComboBox 1.0 RoleComboBox.qml
 Shield 1.0 Shield.qml
 HandcardViewer 1.0 HandcardViewer.qml
 SkinArea 1.0 SkinArea.qml
+SkinMedia 1.0 SkinMedia.qml
 RestIndicator 1.0 RestIndicator.qml
 TargetTip 1.0 TargetTip.qml

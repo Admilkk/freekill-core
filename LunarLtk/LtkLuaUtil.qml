@@ -531,6 +531,8 @@ QtObject {
     const skelBgFile = skin.bg + (skin.files.includes(skin.bg + ".skel") ? ".skel" : ".json");
     const atlasBodyFile = skin.body + ".atlas";
     const skelBodyFile = skin.body + (skin.files.includes(skin.body + ".skel") ? ".skel" : ".json");
+    const atlasFrontFile = skin.front + ".atlas";
+    const skelFrontFile = skin.front + (skin.files.includes(skin.front + ".skel") ? ".skel" : ".json");
 
     let suc = true;
     if (isRemoteFile) {
@@ -555,12 +557,18 @@ QtObject {
         skelBgFile: skelBgFile,
         atlasBodyFile: atlasBodyFile,
         skelBodyFile: skelBodyFile,
+        atlasFrontFile: atlasFrontFile,
+        skelFrontFile: skelFrontFile,
+        skelType: skin.files.includes(skin.body + ".skel") ? ".skel" : ".json",
         bgScale: extraData.bg_scale ?? (extraData.scale ?? 1),
         bodyScale: extraData.body_scale ?? (extraData.scale ?? 1),
+        frontScale: extraData.front_scale ?? (extraData.scale ?? 1),
         bgXOffset: extraData.bg_x_offset ?? (extraData.x_offset ?? 0.5),
         bgYOffset: extraData.bg_y_offset ?? (extraData.y_offset ?? 0.5),
         bodyXOffset: extraData.body_x_offset ?? (extraData.x_offset ?? 0.5),
         bodyYOffset: extraData.body_y_offset ?? (extraData.y_offset ?? 0.5),
+        frontXOffset: extraData.front_x_offset ?? (extraData.x_offset ?? 0.5),
+        frontYOffset: extraData.front_y_offset ?? (extraData.y_offset ?? 0.5),
         bgShownAnim: extraData.bg_shown_anim ?? (extraData.shown_anim ?? ""),
         bgNormalAnim: extraData.bg_normal_anim ?? (extraData.normal_anim ?? "DaiJi"),
         bgAttackAnim: extraData.bg_attack_anim ?? (extraData.attack_anim ?? ""),
@@ -569,8 +577,14 @@ QtObject {
         bodyNormalAnim: extraData.body_normal_anim ?? (extraData.normal_anim ?? "DaiJi"),
         bodyAttackAnim: extraData.body_attack_anim ?? (extraData.special_anim ?? ""),
         bodySpecialAnim: extraData.body_special_anim ?? (extraData.shown_anim ?? ""),
+        frontNormalAnim: extraData.front_normal_anim ?? (extraData.normal_anim ?? "DaiJi"),
+        frontAttackAnim: extraData.front_attack_anim ?? (extraData.attack_anim ?? ""),
+        frontSpecialAnim: extraData.front_special_anim ?? (extraData.special_anim ?? ""),
+        frontShownAnim: extraData.front_shown_anim ?? (extraData.shown_anim ?? ""),
         renderScale: extraData.render_scale ?? 1,
-        staticBg: extraData.static_bg ?? ""
+        staticBg: extraData.static_bg ?? "",
+        extraBg: extraData.extra_bg ?? [],
+        extraFront: extraData.extra_front ?? [],
       }
     }
     return

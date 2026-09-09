@@ -1,15 +1,11 @@
 import QtQuick
-import QtQuick.Controls
-import QtQuick.Layouts
 import QtMultimedia
 
 import Fk
-import Fk.Components.Common
 import Fk.Widgets as W
 
 import LunarLtk
 import LunarLtk.Components
-import LunarLtk.Components.Photo as PhotoElement
 
 // Room系页面的公共代码（大概）
 // 反正放不可见元素就好了
@@ -37,6 +33,8 @@ W.PageBase {
 
   required property Item drawPile
   required property Item tablePile
+
+  property bool gameOver: false
 
   ListModel {
     id: photoModel
@@ -215,14 +213,16 @@ W.PageBase {
   }
 
   function handleRefreshData() {
-    //ai说游戏结束别刷了
-    if (!Lua.client.gameStarted) {
+    if (!gameOver) {
+      dataModel.refreshData();
+      Ltk.refreshStatusSkills();
+      // 刷托管按钮
+      trustBtn.enabled = true;
+    }
+    if (!Lua.client.gameStarted) { // 游戏结束仅刷一次
+      gameOver = true;
       return;
     }
-    dataModel.refreshData();
-    Ltk.refreshStatusSkills();
-    // 刷托管按钮
-    trustBtn.enabled = true;
   }
 
   function handleOnPopupReady(command, data, model) {

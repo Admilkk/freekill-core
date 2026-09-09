@@ -310,18 +310,26 @@ local function filterGeneral(general, filter)
     (voiceActor ~= "" and not find_with_escape(translateInfo("cv:" .. general.name), voiceActor)) or
     (illustrator ~= "" and not find_with_escape(translateInfo("illustrator:" .. general.name), illustrator)) or
     (audioText ~= "" and not findAudioText(general, audioText)) or
-    (#enabledStates > 0 and not table.contains(enabledStates, Fk:canUseGeneral(general.name) and Fk:translate("Enable") or Fk:translate("Disabled"))) or
-    (#skinStates > 0 and not table.contains(skinStates, #Fk:getSkinNamesByGeneral(general.name) > 0 and Fk:translate("Available") or Fk:translate("Unavailable")))
+    (#skinStates == 1 and not table.contains(skinStates, #Fk:getSkinNamesByGeneral(general.name) > 0 and Fk:translate("Available") or Fk:translate("Unavailable")))
   )
 end
 
-function M:filterAllGenerals(filter)
+function M:filterAllGenerals(filter, generals)
   local ret = {}
-  for _, name in ipairs(Fk.package_names) do
-    if Fk.packages[name].type == Package.GeneralPack then
-      for _, g in ipairs(Fk.packages[name].generals) do
-        if not g.total_hidden and filterGeneral(g, filter) then
-          table.insert(ret, g.name)
+  local doFilter = function (g)
+    if not g.total_hidden and filterGeneral(g, filter) then
+      table.insert(ret, g.name)
+    end
+  end
+  if generals then
+    for _, g_name in ipairs(generals) do
+      doFilter(Fk.generals[g_name])
+    end
+  else
+    for _, name in ipairs(Fk.package_names) do
+      if Fk.packages[name].type == Package.GeneralPack then
+        for _, g in ipairs(Fk.packages[name].generals) do
+          doFilter(g)
         end
       end
     end

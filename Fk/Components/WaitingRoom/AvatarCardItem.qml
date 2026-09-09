@@ -125,7 +125,7 @@ BasicItem {
       border.color: '#c2a216'
       visible: Self?.id === root.playerid
       Text {
-        text: "自己"
+        text: Lua.tr("Self")
         color: '#fffadf'
         font.bold: true
         font.pixelSize: 11
@@ -145,7 +145,7 @@ BasicItem {
       color: '#922b2b'
       clip: true
       Text {
-        text: "已屏蔽"
+        text:  Lua.tr("Blocked")
         font.bold: true
         font.pixelSize: 11
         font.letterSpacing: 3
@@ -196,7 +196,7 @@ BasicItem {
       color: root.ready ? '#81aa65' : '#555555'
       visible: root.hasPlayer && !root.isOwner
       Text {
-        text: root.ready ? "准备" : "未准备"
+        text: root.ready ? Lua.tr("Ready") : Lua.tr("Unready")
         font.bold: true
         anchors.fill: parent
         color: "white"
@@ -217,7 +217,7 @@ BasicItem {
       color: '#920707'
       visible: root.isOwner
       Text {
-        text: "房主"
+        text: Lua.tr("Room Owner")
         font.bold: true
         anchors.fill: parent
         color: "white"

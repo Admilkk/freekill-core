@@ -117,7 +117,52 @@ QtObject {
   }
 
   function filterAllGenerals(filter) {
-    return _L.filterAllGenerals(filter);
+    const enabledStates = filter.enabledStates
+    let generals
+    if (enabledStates.length === 1) {
+      const generalPacks = Lua.evaluate(`table.filter(Fk.package_names, function(name) return Fk.packages[name].type == Package.GeneralPack end)`);
+
+      const findEnable = enabledStates[0] === Lua.tr("Enable");
+      const curScheme = Config.curScheme;
+      let disabledGenerals = [];
+      let enabledGenerals = [];
+      for (const pack of generalPacks) {
+        const generals = Ltk.getGenerals(pack);
+        if (Object.prototype.hasOwnProperty.call(Config.curScheme.banPkg, pack)) {
+          const arr = Config.curScheme.banPkg[pack];
+          if (findEnable) {
+            enabledGenerals.push(...arr.filter(g =>
+              !Lua.ev(`Fk.generals['${g}'].hidden`)));
+          } else if (arr.length === 0) {
+            disabledGenerals.push(...generals);
+          } else {
+            disabledGenerals.push(...generals.filter(g =>
+              !arr.includes(g) || Lua.ev(`Fk.generals['${g}'].hidden`)));
+          }
+        } else if (Object.prototype.hasOwnProperty.call(Config.curScheme.normalPkg, pack)) {
+          const arr = Config.curScheme.normalPkg[pack] ?? [];
+          if (findEnable) {
+            enabledGenerals.push(...generals.filter(g =>
+              !arr.includes(g) && !Lua.ev(`Fk.generals['${g}'].hidden`)));
+          } else {
+            disabledGenerals.push(...generals.filter(g =>
+              arr.includes(g) || Lua.ev(`Fk.generals['${g}'].hidden`)));
+          }
+        } else if (findEnable) {
+          enabledGenerals.push(...generals.filter(g =>
+            !Lua.ev(`Fk.generals['${g}'].hidden`)));
+        } else {
+          disabledGenerals.push(...generals.filter(g =>
+            Lua.ev(`Fk.generals['${g}'].hidden`)));
+        }
+      }
+      if (findEnable) {
+        generals = enabledGenerals;
+      } else {
+        generals = disabledGenerals;
+      }
+    }
+    return _L.filterAllGenerals(filter, generals);
   }
 
   function updatePackageEnable(pkg, enabled) {

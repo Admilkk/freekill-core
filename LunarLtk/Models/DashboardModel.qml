@@ -163,6 +163,11 @@ QtObject {
         addSkill(s.name);
       }
     }
+    for (const s of self._fake_skills) {
+      if (s.visible) {
+        addSkill(s.name, true);
+      }
+    }
 
     selfChanged();
   }

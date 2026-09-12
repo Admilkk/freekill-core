@@ -6,22 +6,16 @@ choosePlayersToMoveCardInBoardSkill:addEffect("active", {
   target_num = 2,
   card_filter = Util.FalseFunc,
   target_filter = function(self, player, to_select, selected, cards)
-    if #selected > 0 then
-      return selected[1]:canMoveCardsInBoardTo(to_select, self.flag, self.excludeIds) and
-        table.contains(self.tos, to_select)
+    if #selected < 2 then
+      if #selected == 1 then
+        return selected[1]:canMoveCardsInBoardTo(to_select, self.flag, self.excludeIds) and table.contains(self.tos, to_select)
+      else
+        return table.contains(self.froms, to_select) and
+          table.find(to_select:getCardIds(self.flag or "ej"), function(id)
+            return not table.contains(self.excludeIds or {}, id)
+          end)
+      end
     end
-    if not table.contains(self.froms, to_select) then return false end
-
-    local fromAreas = { Player.Equip, Player.Judge }
-    if self.flag == "e" then
-      fromAreas = { Player.Equip }
-    elseif self.flag == "j" then
-      fromAreas = { Player.Judge }
-    end
-
-    return #table.filter(to_select:getCardIds(fromAreas), function(id)
-      return not table.contains((type(self.excludeIds) == "table" and self.excludeIds or {}), id)
-    end) > 0
   end,
 })
 

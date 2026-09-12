@@ -230,15 +230,10 @@ function SkillEventWrappers:handleAddLoseSkills(player, skill_names, source_skil
             self:sendLog{
               type = "#LoseSkill",
               from = player.id,
-              arg = s.name
+              arg = s.name,
+              toast = self:getBanner("RoundCount") ~= nil,
             }
           end
-
-          -- if s.derived_piles then
-          --   for _, pile_name in ipairs(s.derived_piles) do
-          --     table.insertTableIfNeed(lost_piles, player:getPile(pile_name))
-          --   end
-          -- end
         end
 
         table.insert(losts, true)
@@ -265,7 +260,8 @@ function SkillEventWrappers:handleAddLoseSkills(player, skill_names, source_skil
             self:sendLog{
               type = "#AcquireSkill",
               from = player.id,
-              arg = s.name
+              arg = s.name,
+              toast = self:getBanner("RoundCount") ~= nil,
             }
           end
         end
@@ -286,17 +282,20 @@ function SkillEventWrappers:handleAddLoseSkills(player, skill_names, source_skil
       if losts[i] then
         local skill = triggers[i]
         if not no_trigger then
-          self.logic:trigger(fk.EventLoseSkill, player, {skill = skill, who = player})
+          self.logic:trigger(fk.EventLoseSkill, player, { skill = skill, who = player })
         end
         skill:getSkeleton():onLose(player, false)
       else
         local skill = triggers[i]
         if no_trigger then
-          skill:getSkeleton():onAcquire(player, player.room:getBanner("RoundCount") == nil)
+          skill:getSkeleton():onAcquire(player, self:getBanner("RoundCount") == nil)
         else
-          self.logic:trigger(fk.EventAcquireSkill, player, {skill = skill, who = player})
+          self.logic:trigger(fk.EventAcquireSkill, player, { skill = skill, who = player })
           skill:getSkeleton():onAcquire(player, false)
         end
+      end
+      for _, p in ipairs(self.alive_players) do
+        p:filterHandcards()
       end
     end
   end

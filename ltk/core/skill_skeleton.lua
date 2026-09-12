@@ -43,8 +43,8 @@
 ---@field public max_use_time table<integer, integer|fun(self: SkillSkeleton, player: Player): integer?> @ 该技能在各时机内最大的使用次数，可能是函数或整数，若为nil则表示不限制
 ---@field public max_branches_use_time? table<string, table<integer, integer?>?> | fun(self: SkillSkeleton, player: Player): table<string, table<integer, integer?>?>? @ 该技能的最大使用次数——任意标签（内部有独立的时段细分）
 ---@field public addTest fun(self: SkillSkeleton, fn: fun(room: Room, me: ServerPlayer)) @ 测试函数
----@field public onAcquire fun(self: SkillSkeleton, player: ServerPlayer, is_start: boolean, src: ServerPlayer) @ 获得技能时执行的函数
----@field public onLose fun(self: SkillSkeleton, player: ServerPlayer, is_death: boolean) @ 失去技能时执行的函数
+---@field public onAcquire fun(self: SkillSkeleton, player: ServerPlayer, is_start?: boolean, src?: ServerPlayer) @ 获得技能时执行的函数
+---@field public onLose fun(self: SkillSkeleton, player: ServerPlayer, is_death?: boolean) @ 失去技能时执行的函数
 ---@field public addEffect fun(self: SkillSkeleton, key: "distance", data: DistanceSpec, attribute: nil): SkillSkeleton
 ---@field public addEffect fun(self: SkillSkeleton, key: "prohibit", data: ProhibitSpec, attribute: nil): SkillSkeleton
 ---@field public addEffect fun(self: SkillSkeleton, key: "atkrange", data: AttackRangeSpec, attribute: nil): SkillSkeleton

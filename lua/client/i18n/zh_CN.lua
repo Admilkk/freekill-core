@@ -562,8 +562,8 @@ FreeKill使用的是libgit2的C API，与此同时使用Git完成拓展包的下
   ["Back To Lobby"] = "返回大厅",
   ["Save Replay"] = "保存录像",
 
-  ["$AddObserver"] = '玩家 <b>%s</b> 开始旁观',
-  ["$RemoveObserver"] = '旁观者 <b>%s</b> 离开了房间',
+  ["$AddObserver"] = "玩家 <b>%s</b> 开始旁观",
+  ["$RemoveObserver"] = "旁观者 <b>%s</b> 离开了房间",
 
   ["Show All Cards"] = "显示未知信息",
   ["Speed Resume"] = "匀速",
@@ -714,6 +714,10 @@ Fk:loadTranslationTable {
   ["heal_hp"] = "回复体力",
   ["damaged"] = "受到伤害",
   ["view"] = "观看",
+  ["use_from"] = "使用者",
+  ["use_to"] = "目标",
+  ["damage_from"] = "伤害来源",
+  ["damage_to"] = "受伤角色",
 }
 
 -- related to sendLog

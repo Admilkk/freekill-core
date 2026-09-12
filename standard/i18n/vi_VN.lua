@@ -444,8 +444,6 @@ Fk:loadTranslationTable({
   ["lijian"] = "Ly Gián",
   [":lijian"] = "Một lần trong giai đoạn ra bài, bạn có thể bỏ 1 lá và chọn 2 người nam khác, người được chọn sau xem như sử dụng 1 lá 【Vô Giải Khả Kích】2 lên người được chọn trước mà không thể bị 【Quyết Đấu】.",
   ["#lijian-active"] = "Phát động Ly Gián, bỏ 1 lá trên tay và chọn 2 người nam khác, người được chọn sau xem như sử dụng 1 lá 【Quyết Đấu】 2 lên người được chọn trước mà không thể bị 【Vô Giải Khả Kích】",
-  ["lijian_tip_1"] = "Sát trước",
-  ["lijian_tip_2"] = "Sát sau",
   ["$biyue1"] = "Thất lễ rồi ～",
   ["$biyue2"] = "Ghen tị chưa ～",
   ["biyue"] = "Bế Nguyệt",

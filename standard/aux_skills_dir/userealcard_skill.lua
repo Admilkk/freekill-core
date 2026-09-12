@@ -14,6 +14,33 @@ useRealCardSkill:addEffect("viewas", {
   end,
 })
 
-useRealCardSkill:addAI(nil, "vs_skill")
+useRealCardSkill:addAI(Fk.Ltk.AI.newActiveStrategy {
+  think = function(self, ai)
+    local ret, benefit = nil, 0
+    for _, id in ipairs(ai:getEnabledCards()) do
+      local card = Fk:getCardById(id)
+      if card then
+        ai:selectSkill(self.skill_name, true)
+        ai:selectCard(id, true)
+        for targets in self:searchTargetSelections(ai) do
+          local tmp = ai:getBenefitOfEvents(function (logic)
+            logic:useCard{
+              from = ai.player,
+              tos = targets or card:getDefaultTarget(ai.player),
+              card = card,
+            }
+          end)
+          if tmp > benefit then
+            ret, benefit = { { id }, targets or {} }, tmp
+          end
+        end
+        ai:unSelectAll()
+      end
+    end
+    if ret then
+      return ret, benefit
+    end
+  end,
+})
 
 return useRealCardSkill

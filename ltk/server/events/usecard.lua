@@ -222,7 +222,7 @@ function UseCard:main()
     end
   end
 
-  if logic:trigger(fk.PreCardUse, useCardData.from, useCardData) then
+  if logic:trigger(fk.PreCardUse, useCardData.from, useCardData) or useCardData.nullified then
     logic:breakEvent()
   end
 
@@ -273,6 +273,11 @@ function UseCard:main()
     end
 
     logic:trigger(event, useCardData.from, useCardData)
+
+    if useCardData.nullified then
+      logic:breakEvent()
+    end
+
     if event == fk.CardUsing then
       if not useCardData.toCard and #useCardData.tos == 0 then
         break
@@ -564,6 +569,10 @@ local onAim = function(room, useCardData, aimEventCollaborators)
       useCardData.card = aimStruct.card
       useCardData.extra_data = aimStruct.extra_data
 
+      if useCardData.nullified then
+        room.logic:breakEvent()
+      end
+
       if #aimStruct:getAllTargets() == 0 then
         return false
       end
@@ -614,6 +623,10 @@ function UseCardEventWrappers:doCardUseEffect(useCardData)
   local realCardIds = self:getSubcardsByRule(useCardData.card, { Card.Processing })
 
   self.logic:trigger(fk.BeforeCardUseEffect, useCardData.from, useCardData)
+
+  if useCardData.nullified then
+    self.logic:breakEvent()
+  end
 
   -- 若为使用装备或延时锦囊牌，则直接置入对应区域，不进行生效结算了
   if useCardData.card.type == Card.TypeEquip then

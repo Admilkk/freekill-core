@@ -48,6 +48,7 @@ fk.CardRespondFinished = RespondCardEvent:subclass("fk.CardRespondFinished")
 ---@field public additionalEffectToPlayer? table<ServerPlayer, integer> @ 对某人的额外生效次数
 ---@field public noIndicate? boolean @ 隐藏指示线
 ---@field public attachedSkillAndUser? { user: integer, skillName: string, muteCard: boolean } @ 附加技能、使用者与卡牌静音，用于转化技
+---@field public nullified? boolean @ 使用无效
 
 --- 使用牌的数据
 ---@class UseCardData: UseCardDataSpec, TriggerData
@@ -83,6 +84,16 @@ end
 function UseCardData:removeAllTargets()
   self.tos = {} ---@type ServerPlayer[] @ 目标列表
   self.subTos = {}
+end
+
+--- 无效！（当前时机处理完毕后，终止使用事件）
+function UseCardData:setNullified()
+  self.nullified = true
+  RoomInstance:sendLog{
+    type = "#UseCardNullified",
+    from = self.from.id,
+    arg = self.card,
+  }
 end
 
 ---@return ServerPlayer[]

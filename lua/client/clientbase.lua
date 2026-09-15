@@ -472,7 +472,7 @@ function ClientBase:switchToObserver(data)
   -- 将玩家和旁观数据也修改一下再给qml
   local id = data[1]
   local lp = self:getPlayerById(id)
-  local cp = lp.player
+  local cp = lp.player --[[@as fk.Player]]
   local _id, _name, _avatar, _gameTime = cp:getId(), cp:getScreenName(), cp:getAvatar(), cp:getTotalGameTime()
   local player = {
     getId = function() return _id end,

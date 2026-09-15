@@ -73,19 +73,25 @@ function ClientPlayer:sendDataToUI()
     end
   end
 
+  local skills = {}
   for _, skill in ipairs(self.player_skills) do
     if skill.visible then
+      table.insert(skills, skill.name)
       c:notifyUI("AddSkill", { id, skill.name })
     end
   end
 
   for k, v in pairs(self.skillUsedHistory) do
     if v[4] > 0 then
+      table.removeOne(skills, k)
       c:setSkillUseHistory({ id, k, v[1], 1 })
       c:setSkillUseHistory({ id, k, v[2], 2 })
       c:setSkillUseHistory({ id, k, v[3], 3 })
       c:setSkillUseHistory({ id, k, v[4], 4 })
     end
+  end
+  for _, skill_name in ipairs(skills) do
+    c:updateLimitSkill(id, Fk.skills[skill_name])
   end
 end
 

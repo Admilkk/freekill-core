@@ -649,7 +649,7 @@ end
 -- 更新限定技，觉醒技、转换技、使命技在武将牌旁边的技能UI
 ---@param pid integer @ 技能拥有角色id
 ---@param skill Skill @ 要更新的技能
-local function updateLimitSkill(pid, skill)
+function Client:updateLimitSkill(pid, skill)
   if not skill.visible then return end
   local player = ClientInstance:getPlayerById(pid)
   local times = -2
@@ -719,7 +719,7 @@ function Client:loseSkill(data)
     end
   end
 
-  updateLimitSkill(id, skill)
+  self:updateLimitSkill(id, skill)
 end
 
 function Client:addSkill(data)
@@ -773,7 +773,7 @@ function Client:addSkill(data)
   end
 
 
-  updateLimitSkill(id, skill)
+  self:updateLimitSkill(id, skill)
 end
 
 function Client:addStatusSkill(data)
@@ -862,7 +862,7 @@ function Client:addSkillUseHistory(data)
 
   local skill = Fk.skills[skill_name]
   if not skill then return end
-  updateLimitSkill(playerid, Fk.skills[skill_name])
+  self:updateLimitSkill(playerid, Fk.skills[skill_name])
 end
 
 function Client:addSkillBranchUseHistory(data)
@@ -873,7 +873,7 @@ function Client:addSkillBranchUseHistory(data)
   -- 真的有分支会改变状态吗……？
   -- local skill = Fk.skills[skill_name]
   -- if not skill then return end
-  -- updateLimitSkill(playerid, Fk.skills[skill_name])
+  -- self:updateLimitSkill(playerid, Fk.skills[skill_name])
 end
 
 function Client:setSkillUseHistory(data)
@@ -883,7 +883,7 @@ function Client:setSkillUseHistory(data)
 
   local skill = Fk.skills[skill_name]
   if not skill then return end
-  updateLimitSkill(id, Fk.skills[skill_name])
+  self:updateLimitSkill(id, Fk.skills[skill_name])
 end
 
 function Client:setSkillBranchUseHistory(data)
@@ -896,7 +896,7 @@ function Client:setSkillBranchUseHistory(data)
   -- 真的有分支会改变状态吗……？
   -- local skill = Fk.skills[skill_name]
   -- if not skill then return end
-  -- updateLimitSkill(id, Fk.skills[skill_name])
+  -- self:updateLimitSkill(id, Fk.skills[skill_name])
 end
 
 function Client:addVirtualEquip(data)
@@ -922,7 +922,7 @@ end
 
 function Client:updateQuestSkillUI(data)
   local playerId, skillName = data[1], data[2]
-  updateLimitSkill(playerId, Fk.skills[skillName])
+  self:updateLimitSkill(playerId, Fk.skills[skillName])
 end
 
 function Client:handlePrintCard(data)

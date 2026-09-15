@@ -17,7 +17,7 @@ change_hero:addEffect("active", {
   end,
   target_num = 1,
   interaction = UI.OptionBox {
-    options = { "mainGeneral",  "deputyGeneral", "removeDeputyGeneral", "Gender", "Kingdom" },
+    options = { "mainGeneral", "deputyGeneral", "removeDeputyGeneral", "Gender", "Kingdom" },
     direct_send = true
   },
   refresh_interaction = function(self, player, selected_cards, selected_targets)
@@ -36,7 +36,7 @@ change_hero:addEffect("active", {
       room:removeDeputy(target, {})
     elseif choice:endsWith("General") then
       local generals = room:getNGenerals(8)
-      local general = room:askToChooseGeneral(from, {generals = generals, n = 1})
+      local general = room:askToChooseGeneral(from, {generals = generals, n = 1}) ---@cast general string
       local origin = choice == "deputyGeneral" and target.deputyGeneral or target.general
       if origin ~= "" then
         table.insertIfNeed(generals, origin)

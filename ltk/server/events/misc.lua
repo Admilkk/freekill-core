@@ -269,7 +269,6 @@ end
 ---@param params RemoveDeputyParams
 function MiscEventWrappers:removeDeputy(player, params)
   if player.deputyGeneral == "" then return end
-  ---@cast self Room
   params.send_log = params.send_log or true
 
   ChangeProperty:create(PropertyChangeData:new{

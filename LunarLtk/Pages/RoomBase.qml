@@ -213,12 +213,11 @@ W.PageBase {
   }
 
   function handleRefreshData() {
-    if (!gameOver) {
-      dataModel.refreshData();
-      Ltk.refreshStatusSkills();
-      // 刷托管按钮
-      trustBtn.enabled = true;
-    }
+    if (gameOver) return;
+    dataModel.refreshData();
+    Ltk.refreshStatusSkills();
+    // 刷托管按钮
+    trustBtn.enabled = true;
     if (!Lua.client.gameStarted) { // 游戏结束仅刷一次
       gameOver = true;
       return;

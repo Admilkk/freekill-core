@@ -15,6 +15,7 @@ W.PageBase {
   id: root
   objectName: "GeneralPoolOverview"
   property int generalCount: 0
+  property int sameConvertedGeneralCount: 0
   property var allGenerals: []
 
   component AvatarCard: CompactGeneralCardItem {
@@ -75,7 +76,13 @@ W.PageBase {
       Layout.alignment: Qt.AlignHCenter
       font.pixelSize: 18
       horizontalAlignment: Text.AlignHCenter
-      text: Lua.tr("%1 generals are enabled in this room").arg(root.generalCount);
+      text: {
+        let ret = Lua.tr("%1 generals are enabled in this room").arg(root.generalCount);
+        if (root.sameConvertedGeneralCount > 0) {
+          ret += Lua.tr("(%1 generals excepted same name)").arg(root.sameConvertedGeneralCount);
+        }
+        return ret;
+      }
     }
 
     Switch {
@@ -230,6 +237,24 @@ W.PageBase {
       allGenerals.push(...generals);
     }
     root.generalCount = allGenerals.length;
+    if (!Lua.client.getSettings("disableSameConvert")) {
+      const luaAllGenerals = allGenerals.map((name) => JSON.stringify(name)).join(", ");
+      root.sameConvertedGeneralCount = Lua.evaluate(`(function()
+        local trueNames = {}
+        local ret = {}
+        local names = { ${luaAllGenerals} }
+        for _, name in ipairs(names) do
+          local trueName = Fk.generals[name].trueName
+          if not trueNames[trueName] then
+            table.insert(ret, name)
+            trueNames[trueName] = true
+          end
+        end
+        return #ret
+      end)()`)
+    } else { // FIXME: 修改配置不改变
+      root.sameConvertedGeneralCount = 0;
+    }
     root.allGenerals = allGenerals;
   }
 }

@@ -194,6 +194,7 @@ Fk:loadTranslationTable {
   ["Import Success"] = "从剪贴板导入禁将方案成功。",
   ["Rename"] = "重命名",
   ["%1 generals are enabled in this room"] = "本房间一共启用了 %1 名武将",
+  ["(%1 generals excepted same name)"] = "（排除同名后为 %1 名）",
   ["Show general pool by packages"] = "按包显示将池",
   ["Copy as ban scheme"] = "复制禁将方案",
 

@@ -94,6 +94,10 @@ QtObject {
     }
   }
 
+  onHpChanged: {
+    maxCard = luaPlayer.getMaxCards();
+  }
+
   function updateHandcards() {
     handcards = luaPlayer.getCardIds("h");
   }

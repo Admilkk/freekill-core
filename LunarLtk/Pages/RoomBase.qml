@@ -34,8 +34,6 @@ W.PageBase {
   required property Item drawPile
   required property Item tablePile
 
-  property bool gameOver: false
-
   ListModel {
     id: photoModel
 
@@ -135,7 +133,12 @@ W.PageBase {
     interval: 200
     running: true
     repeat: true
-    onTriggered: roomScene.handleRefreshData()
+    onTriggered: {
+      if (!Lua.client.gameStarted) { // 游戏结束仅刷一次
+        stop();
+      }
+      roomScene.handleRefreshData();
+    }
   }
 
   // ==== function 区 ====
@@ -213,15 +216,10 @@ W.PageBase {
   }
 
   function handleRefreshData() {
-    if (gameOver) return;
     dataModel.refreshData();
     Ltk.refreshStatusSkills();
     // 刷托管按钮
     trustBtn.enabled = true;
-    if (!Lua.client.gameStarted) { // 游戏结束仅刷一次
-      gameOver = true;
-      return;
-    }
   }
 
   function handleOnPopupReady(command, data, model) {
@@ -439,6 +437,12 @@ W.PageBase {
     setEmotion(playerId, "damage");
     photo.tremble();
     Backend.playSound("./audio/system/" + damageType + (damageNum > 1 ? "2" : ""));
+
+    if (damageNum < 2) return; // 大于等于2播放数字动画
+    const damageAnimCom = Qt.createComponent("LunarLtk.Components.Photo", "DamageNumberAnimation");
+    if (damageAnimCom.status !== Component.Ready) return;
+    const damageAnim = damageAnimCom.createObject(photo, { num: damageNum })
+    damageAnim.anim.start()
   }
 
   function playLoseHpEffect() {

@@ -1,5 +1,6 @@
 module LunarLtk.Components.Photo
 
+DamageNumberAnimation 1.0 DamageNumberAnimation.qml
 DelayedTrickArea 1.0 DelayedTrickArea.qml
 EquipArea 1.0 EquipArea.qml
 EquipItem 1.0 EquipItem.qml

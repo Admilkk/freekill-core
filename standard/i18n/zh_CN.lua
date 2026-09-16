@@ -559,4 +559,7 @@ Fk:loadTranslationTable{
   ["gamerule_aborted"] = "废除",
   ["#EquipmentChoice"] = "%arg",
   ["#GameRuleReplaceEquipment"] = "请选择要置入的区域",
+
+  ["A Player is Starting a Surrender Negotiation"] = "一名玩家发起协商投降",
+  ["A Player Rejects Surrender Negotiation"] = "一名玩家拒绝投降",
 }

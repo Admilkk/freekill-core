@@ -49,6 +49,8 @@ function ServerRoomBase:initialize(_room)
   self:addCallback("observe", self.addObserver)
   self:addCallback("leave", self.removeObserver)
   self:addCallback("surrender", self.handleSurrender)
+  self:addCallback("surrender_negotiation", self.handleSurrenderNegotiation)
+  self:addCallback("reply_surrender_negotiation", self.handleSurrenderNegotiationReply)
 end
 
 ---@param check_fn? fun(reason: string): boolean?
@@ -480,6 +482,129 @@ function ServerRoomBase:handleSurrender(id, data)
   self.hasSurrendered = true
   self:doBroadcastNotify("CancelRequest", "")
   ResumeRoom(self.id)
+end
+
+function ServerRoomBase:clearSurrenderNegotiation()
+  local negotiation = self:getTag("surrenderNegotiationing")
+  if negotiation then
+    for _, p in ipairs(negotiation.voters) do
+      p:doNotify("CloseSurrenderNegotiation", { negotiation.id })
+    end
+  end
+  self:removeTag("surrenderNegotiationing")
+end
+
+function ServerRoomBase:finishSurrenderNegotiation(negotiation)
+  local mode = Fk.game_modes[self:getSettings('gameMode')]
+  local surrendered = table.simpleClone(negotiation.surrendered)
+  for _, p in ipairs(surrendered) do
+    p.surrendered = true
+    self:broadcastProperty(p, "surrendered")
+  end
+
+  local winner = Pcall(mode.getWinner, mode, negotiation.initiator) --[[@as string]]
+  if winner ~= "" then
+    self:removeTag("surrenderNegotiationing")
+    self:doBroadcastNotify("CancelRequest", "")
+    if self.current_request then
+      self.hasSurrendered = true
+      ResumeRoom(self.id)
+    else
+      self:gameOver(winner)
+    end
+  else
+    for _, p in ipairs(surrendered) do
+      p.surrendered = false
+      self:broadcastProperty(p, "surrendered")
+    end
+    self:clearSurrenderNegotiation()
+  end
+end
+
+local function updateSurrenderNegotiationAutoAgreed(negotiation)
+  for _, p in ipairs(negotiation.surrendered) do
+    local state = p.serverplayer:getState()
+    if state == fk.Player_Run or state == fk.Player_Robot then
+      negotiation.agreed[p.id] = true
+    end
+  end
+end
+
+function ServerRoomBase:handleSurrenderNegotiation(id, data) -- FIXME: 非ltk怎么办
+  local player = self:getPlayerById(id)
+  if not player or (player.dead and player.rest <= 0) then return end
+  if self:getTag("surrenderNegotiationing") then return end
+
+  local mode = Fk.game_modes[self:getSettings('gameMode')]
+  local checks = mode:surrenderNegotiationFunc(os.time() - self.start_time, player)
+  if #checks == 0 or table.find(checks, function(check) return not check.passed end) then
+    return
+  end
+  self:setPlayerMark(player, "_surrender_negotiation_count",
+    (player:getMark("_surrender_negotiation_count") or 0) + 1)
+  self:doBroadcastNotify("ShowToast", Fk:translate("A Player is Starting a Surrender Negotiation"))
+
+  local surrendered = table.connect({ player }, player:getFriends(false, false))
+  surrendered = table.filter(surrendered, function(p)
+    return not (p.dead and p.rest <= 0)
+  end)
+  local agreed = { [player.id] = true }
+  local voters = {}
+  for _, p in ipairs(surrendered) do
+    local state = p.serverplayer:getState()
+    if p ~= player then
+      if state == fk.Player_Run or state == fk.Player_Robot then
+        agreed[p.id] = true
+      else
+        table.insert(voters, p)
+      end
+    end
+  end
+
+  local negotiation = {
+    id = tostring(os.getms()) .. ":" .. tostring(player.id),
+    initiator = player,
+    surrendered = surrendered,
+    voters = voters,
+    agreed = agreed,
+  }
+  updateSurrenderNegotiationAutoAgreed(negotiation)
+  if table.every(negotiation.surrendered, function(p) return negotiation.agreed[p.id] end) then
+    self:finishSurrenderNegotiation(negotiation)
+    return
+  end
+
+  self:setTag("surrenderNegotiationing", negotiation)
+
+  for _, p in ipairs(voters) do
+    p:doNotify("AskForSurrenderNegotiation", {
+      negotiation.id,
+      player.id,
+      player._splayer:getScreenName(),
+    })
+  end
+end
+
+function ServerRoomBase:handleSurrenderNegotiationReply(id, data)
+  local player = self:getPlayerById(id)
+  local negotiation = self:getTag("surrenderNegotiationing")
+  if not player or not negotiation then return end
+
+  local negotiationId = data[3]
+  local accepted = data[4] == "true"
+  if negotiationId ~= negotiation.id or not table.contains(negotiation.voters, player) then return end
+
+  if not accepted then
+    self:doBroadcastNotify("ShowToast", Fk:translate("A Player Rejects Surrender Negotiation"))
+    self:clearSurrenderNegotiation()
+    return
+  end
+
+  negotiation.agreed[player.id] = true
+  updateSurrenderNegotiationAutoAgreed(negotiation)
+  if table.every(negotiation.surrendered, function(p) return negotiation.agreed[p.id] end) then
+    self:finishSurrenderNegotiation(negotiation)
+  end
 end
 
 --- 将房间中某个tag设为特定值。

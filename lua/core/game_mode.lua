@@ -45,9 +45,9 @@ function GameMode:getWinner(victim)
     local alive = table.filter(room.players, function(p) ---@type Player[]
       return not p.surrendered and not (p.dead and p.rest == 0)
     end)
-    local winner = alive[1].role
+    local winner = alive[1]
     for _, p in ipairs(alive) do
-      if p.role ~= winner then
+      if not p:isFriend(winner) then
         return ""
       end
     end
@@ -60,6 +60,43 @@ end
 ---@return table
 function GameMode:surrenderFunc(playedTime, player)
   return {}
+end
+
+-- 判断什么时候可以协商投降的函数
+-- _surrender_negotiation_count mark保存发起次数
+---@param playedTime number @ 游戏时长（单位：秒）
+---@param player Base.Player @ 发起投降的玩家
+---@return table
+function GameMode:surrenderNegotiationFunc(playedTime, player)
+  local alive_players = table.filter(Fk:currentRoom().players, function(p)
+    return not p.dead or p.rest > 0
+  end)
+  local sideText = "Only two side"
+  local sideCheck = true
+  if #alive_players > 2 then
+    local other = nil ---@type Base.Player
+    for _, t in ipairs(alive_players) do
+      if not player:isFriend(t) then
+        if other == nil then
+          other = t
+        elseif not other:isFriend(t) then
+          sideCheck = false
+          break
+        end
+      end
+    end
+  else
+    sideCheck = false
+    sideText = "Please use surrender instead"
+  end
+  return {
+    {
+      text = Fk:translate("surrender negotiation limitation: %1 times"):gsub("%%1", 2),
+      passed = player:getMark("_surrender_negotiation_count") < 2,
+    },
+    { text = "time limitation: 30 sec", passed = playedTime >= 30 },
+    { text = sideText, passed = sideCheck },
+  }
 end
 
 -- 判断是否计入场次的函数
@@ -128,8 +165,8 @@ function GameMode:deathRewardAndPunish (victim, killer)
 end
 
 -- 敌友身份判断
----@param targetOne ServerPlayer | Player @ 待判断角色1
----@param targetTwo ServerPlayer | Player @ 待判断角色2
+---@param targetOne Base.Player @ 待判断角色1
+---@param targetTwo Base.Player @ 待判断角色2
 function GameMode:friendEnemyJudge (targetOne, targetTwo)
   if targetOne == targetTwo then return true end
   if targetOne.role == "civilian" or targetTwo.role == "civilian" then return true end

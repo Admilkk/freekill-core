@@ -21,6 +21,7 @@ Item {
   property real replayerSpeed
   property int replayerElapsed
   property int replayerDuration
+  property string surrenderNegotiationId: ""
 
   Image {
     id: bg
@@ -232,6 +233,34 @@ Item {
       }
     }
 
+    W.ButtonContent {
+      id: surrenderNegotiationButton
+      plainButton: false
+      enabled: !Config.observing && !Config.replaying
+      text: Lua.tr("Surrender Negotiation")
+      icon.source: Cpp.path + "/image/misc/surrender"
+      font.bold: true
+      Layout.fillWidth: true
+      onClicked: {
+        if (!Lua.client.gameStarted) {
+          return;
+        }
+        const self = Lua.selfPlayer;
+        if (self.dead && self.rest <= 0) {
+          return;
+        }
+        const surrenderCheck = Lua.checkSurrenderNegotiationAvailable();
+        if (!surrenderCheck.length) {
+          surrenderNegotiationDialog.informativeText =
+          Lua.tr('Surrender Negotiation is disabled in this mode');
+        } else {
+          surrenderNegotiationDialog.informativeText = surrenderCheck
+          .map(str => `${Lua.tr(str.text)}（${str.passed ? '✓' : '✗'}）`)
+          .join('<br>');
+        }
+        surrenderNegotiationDialog.open();
+      }
+    }
 
     W.ButtonContent {
       id: generalButton
@@ -335,6 +364,51 @@ Item {
           surrenderDialog.close();
         }
       }
+    }
+  }
+
+  MessageDialog {
+    id: surrenderNegotiationDialog
+    title: Lua.tr("Surrender Negotiation")
+    informativeText: ''
+    buttons: MessageDialog.Ok | MessageDialog.Cancel
+    onButtonClicked: function (button, role) {
+      switch (button) {
+        case MessageDialog.Ok: {
+          const surrenderCheck = Lua.checkSurrenderNegotiationAvailable();
+          if (surrenderCheck.length &&
+          !surrenderCheck.find(check => !check.passed)) {
+
+            Cpp.notifyServer("PushRequest", [
+              "surrender_negotiation", true
+            ].join(","));
+          }
+          surrenderNegotiationDialog.close();
+          break;
+        }
+        case MessageDialog.Cancel: {
+          surrenderNegotiationDialog.close();
+        }
+      }
+    }
+  }
+
+  MessageDialog {
+    id: surrenderNegotiationRequestDialog
+    title: Lua.tr("Surrender Negotiation")
+    informativeText: ""
+    buttons: MessageDialog.Ok | MessageDialog.Cancel
+    onButtonClicked: function (button, role) {
+      const accepted = button === MessageDialog.Ok;
+      if (root.surrenderNegotiationId !== "") {
+        Cpp.notifyServer("PushRequest", [
+          "reply_surrender_negotiation",
+          root.surrenderNegotiationId,
+          accepted
+        ].join(","));
+      }
+      root.surrenderNegotiationId = "";
+      surrenderNegotiationRequestDialog.close();
     }
   }
 
@@ -868,6 +942,26 @@ Item {
     roomDrawer.open();
   }
 
+  function askForSurrenderNegotiation(sender, data) {
+    root.surrenderNegotiationId = data[0];
+    let name = data[2];
+    const room = gameLoader.item;
+    const photo = typeof room.getPhoto === 'function' ? room.getPhoto(data[1]) : null;
+    const roleShown = photo?.dataModel?.role_shown ?? photo?.role_shown ?? false;
+    if (!roleShown) // 需要配置role_shown且为真才能看到发起人的名字
+      name = Lua.tr("A friend");
+    surrenderNegotiationRequestDialog.informativeText =
+      Lua.tr("%1 wants to surrender. Agree?").arg(name);
+    surrenderNegotiationRequestDialog.open();
+  }
+
+  function closeSurrenderNegotiation(sender, data) {
+    if (root.surrenderNegotiationId === data[0]) {
+      root.surrenderNegotiationId = "";
+      surrenderNegotiationRequestDialog.close();
+    }
+  }
+
   Component.onCompleted: {
     overlay.addCallback(Command.EnterLobby, enterLobby);
     overlay.addCallback(Command.GameLog, addToLog);
@@ -880,6 +974,8 @@ Item {
     overlay.addCallback(Command.IWantToSaveRecord, trySaveRecord);
     overlay.addCallback(Command.IWantToBookmarkRecord, trySaveRecord);
     overlay.addCallback(Command.IWantToChat, openChat);
+    overlay.addCallback("AskForSurrenderNegotiation", askForSurrenderNegotiation);
+    overlay.addCallback("CloseSurrenderNegotiation", closeSurrenderNegotiation);
 
     overlay.addCallback(Command.ReplayerDurationSet, (_, j) => {
       root.replayerDuration = parseInt(j);

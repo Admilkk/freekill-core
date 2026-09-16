@@ -341,7 +341,8 @@ end
 ---@field public ui_settings? any @ ui规则
 ---@field public main_mode? string @ 主模式名（用于判断此模式是否为某模式的衍生）
 ---@field public winner_getter? fun(self: GameMode, victim: ServerPlayer): ServerPlayer | string @ 在死亡流程中用于判断是否结束游戏，并输出胜利者
----@field public surrender_func? fun(self: GameMode, playedTime: number, player: Player): table  @ 投降条件判断
+---@field public surrender_func? fun(self: GameMode, playedTime: number, player: Player): table @ 投降条件判断
+---@field public surrender_negotiation_func? fun(self: GameMode, playedTime: number, player: Player): table @ 协商投降条件判断
 ---@field public is_counted? fun(self: GameMode, room: Room): boolean @ 是否计入胜率统计
 ---@field public feasible? fun(self: GameMode, settings: W.SettingsParam): boolean @ 是否允许创房间
 ---@field public get_adjusted? fun(self: GameMode, player: ServerPlayer): table @ 调整玩家初始属性
@@ -378,6 +379,10 @@ function fk.CreateGameMode(spec)
   if spec.surrender_func then
     assert(type(spec.surrender_func) == "function")
     ret.surrenderFunc = spec.surrender_func
+  end
+  if spec.surrender_negotiation_func then
+    assert(type(spec.surrender_negotiation_func) == "function")
+    ret.surrenderNegotiationFunc = spec.surrender_negotiation_func
   end
   if spec.is_counted then
     assert(type(spec.is_counted) == "function")

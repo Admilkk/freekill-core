@@ -214,6 +214,10 @@ QtObject {
     return call("CheckSurrenderAvailable");
   }
 
+  function checkSurrenderNegotiationAvailable() {
+    return call("CheckSurrenderNegotiationAvailable");
+  }
+
   function saveRecord() {
     return call("SaveRecord");
   }

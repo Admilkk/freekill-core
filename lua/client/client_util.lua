@@ -168,6 +168,14 @@ function CheckSurrenderAvailable()
   return mode:surrenderFunc(playedTime, Self:getMark("@ControledBy") ~= 0 and Self:getMark("@ControledBy") or Self)
 end
 
+function CheckSurrenderNegotiationAvailable()
+  local curMode = ClientInstance:getSettings('gameMode')
+  local mode = Fk.game_modes[curMode] or Fk.game_modes["aaa_role_mode"]
+  local playedTime = os.time() - ClientInstance.gameStartTime
+  local player = Self:getMark("@ControledBy") ~= 0 and Self:getMark("@ControledBy") or Self
+  return mode:surrenderNegotiationFunc(playedTime, player)
+end
+
 function SaveRecord()
   local c = ClientInstance
   c.client:saveRecord(cbor.encode(c.record), c.record[2])

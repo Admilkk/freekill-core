@@ -109,6 +109,20 @@ function Player:hasMark(mark, suffixes)
   return nil
 end
 
+--- 是否为友方
+---@param to Base.Player @ 待判断的角色
+---@return boolean
+function Player:isFriend(to)
+  return Fk.game_modes[Fk:currentRoom():getSettings('gameMode')]:friendEnemyJudge(self, to)
+end
+
+--- 是否为敌方
+---@param to Base.Player @ 待判断的角色
+---@return boolean
+function Player:isEnemy(to)
+  return not Fk.game_modes[Fk:currentRoom():getSettings('gameMode')]:friendEnemyJudge(self, to)
+end
+
 -- 底层逻辑之序列化
 
 function Player:serialize()

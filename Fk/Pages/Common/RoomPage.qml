@@ -318,6 +318,7 @@ Item {
       font.bold: true
       Layout.fillWidth: true
       onClicked: {
+        roomDrawer.loglessMode = false;
         roomDrawer.open();
       }
     }
@@ -564,6 +565,8 @@ Item {
     y: Config.winHeight * 0.025
 
     property int rememberedIdx: 0
+    property int loglessRememberedIdx: 0
+    property bool loglessMode: false
 
     background: Rectangle {
       radius: 12 * Config.winScale
@@ -581,7 +584,10 @@ Item {
       W.ViewSwitcher {
         id: drawerBar
         Layout.alignment: Qt.AlignHCenter
-        model: [
+        model: roomDrawer.loglessMode ? [
+          Lua.tr("Chat"),
+          Lua.tr("PlayerList"),
+        ] : [
           Lua.tr("Log"),
           Lua.tr("Chat"),
           Lua.tr("PlayerList"),
@@ -592,11 +598,11 @@ Item {
         Layout.fillWidth: true
         Layout.fillHeight: true
         interactive: false
-        currentIndex: drawerBar.currentIndex
+        currentIndex: roomDrawer.loglessMode ? drawerBar.currentIndex + 1 : drawerBar.currentIndex
         clip: true
 
         Item {
-          LogEdit {
+          RoomGameLogEdit {
             id: log
             anchors.fill: parent
           }
@@ -691,12 +697,16 @@ Item {
     onAboutToHide: {
       // 安卓下在聊天时关掉Popup会在下一次点开时完全卡死
       // 可能是Qt的bug 总之为了伺候安卓需要把聊天框赶走
-      rememberedIdx = drawerBar.currentIndex;
+      if (loglessMode) {
+        loglessRememberedIdx = drawerBar.currentIndex;
+      } else {
+        rememberedIdx = drawerBar.currentIndex;
+      }
       drawerBar.currentIndex = 0;
     }
 
     onAboutToShow: {
-      drawerBar.currentIndex = rememberedIdx;
+      drawerBar.currentIndex = loglessMode ? loglessRememberedIdx : rememberedIdx;
       playerListModel.clear();
       const ps = Lua.getPlayersAndObservers();
       ps.forEach(p => {
@@ -722,6 +732,7 @@ Item {
   Shortcut {
     sequence: "T"
     onActivated: {
+      roomDrawer.loglessMode = false;
       roomDrawer.open();
     }
   }
@@ -939,6 +950,7 @@ Item {
   }
 
   function openChat() {
+    roomDrawer.loglessMode = gameContent?.objectName === "WaitingRoom";
     roomDrawer.open();
   }
 

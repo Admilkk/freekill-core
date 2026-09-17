@@ -10,6 +10,7 @@ import Fk.Widgets as W
 
 W.PageBase {
   id: roomScene
+  objectName: "WaitingRoom"
 
   property int playerNum: 0
 

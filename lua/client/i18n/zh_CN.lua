@@ -811,6 +811,7 @@ Fk:loadTranslationTable {
   ["#TargetAdded"] = "%from 使用的 %arg 增加了目标 %to",
   ["#TargetCancelled"] = "%from 使用的 %arg 取消了目标 %to",
   ["#UseCardNullified"] = "%from 使用的 %arg 无效",
+  ["#RespondCardNullified"] = "%from 打出的 %arg 无效",
   ["#TargetNullified"] = "%from 使用的 %arg 对 %to 无效",
 
   -- skill

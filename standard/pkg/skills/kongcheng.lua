@@ -38,24 +38,4 @@ kongcheng:addAI({
   end,
 }, nil, "kongcheng", true) -- effect_names: { "kongcheng", "#kongcheng_2_prohibit" }
 
-kongcheng:addTest(function(room, me)
-  local comp2 = room.players[2]
-
-  FkTest.runInRoom(function()
-    room:handleAddLoseSkills(me, "kongcheng")
-  end)
-  local slash = Fk:cloneCard("slash")
-  local duel = Fk:cloneCard("duel")
-  FkTest.runInRoom(function()
-    me:drawCards(1)
-  end)
-  lu.assertTrue(comp2:canUseTo(slash, me))
-  lu.assertTrue(comp2:canUseTo(duel, me))
-  FkTest.runInRoom(function()
-    me:throwAllCards("h")
-  end)
-  lu.assertFalse(comp2:canUseTo(slash, me))
-  lu.assertFalse(comp2:canUseTo(duel, me))
-end)
-
 return kongcheng

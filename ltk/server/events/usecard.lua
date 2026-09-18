@@ -330,7 +330,7 @@ function RespondCard:main()
     -- respondCardData.attachedSkillAndUser = nil
   end
 
-  if logic:trigger(fk.PreCardRespond, respondCardData.from, respondCardData) then
+  if logic:trigger(fk.PreCardRespond, respondCardData.from, respondCardData) or respondCardData.nullified then
     logic:breakEvent()
   end
 

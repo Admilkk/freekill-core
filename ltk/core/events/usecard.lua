@@ -8,6 +8,7 @@
 ---@field public skipDrop? boolean @ 是否不进入弃牌堆
 ---@field public customFrom? ServerPlayer @ 新响应者
 ---@field public attachedSkillAndUser? { user: integer, skillName: string, muteCard: boolean } @ 附加技能、使用者与卡牌静音，用于转化技
+---@field public nullified? boolean @ 打出无效
 
 --- 打出牌的数据
 ---@class RespondCardData: RespondCardDataSpec, TriggerData
@@ -91,6 +92,16 @@ function UseCardData:setNullified()
   self.nullified = true
   RoomInstance:sendLog{
     type = "#UseCardNullified",
+    from = self.from.id,
+    arg = self.card,
+  }
+end
+
+--- 无效！（当前时机处理完毕后，终止使用事件）
+function RespondCardData:setNullified()
+  self.nullified = true
+  RoomInstance:sendLog{
+    type = "#RespondCardNullified",
     from = self.from.id,
     arg = self.card,
   }

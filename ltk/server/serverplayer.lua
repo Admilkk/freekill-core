@@ -389,11 +389,16 @@ end
 ---@return boolean @ 是否成功横置或重置
 function ServerPlayer:setChainState(chained, data)
   local room = self.room
+
   if data == nil then
     data = {
       who = self,
       reason = self.room.logic:getCurrentSkillName() or "game_rule",
     }
+  end
+
+  if (data.who.chained and chained) or (not data.who.chained and not chained) then
+    return false
   end
 
   room.logic:trigger(fk.BeforeChainStateChange, self, data)

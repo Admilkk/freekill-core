@@ -30,9 +30,16 @@ jijiang:addEffect("viewas", {
         if respond then
           respond.skipDrop = true
           room:responseCard(respond)
-
-          use.card = respond.card
-          return
+          if not respond.nullified then
+            use.card = respond.card
+            return
+          else
+            room:moveCards({
+              ids = room:getSubcardsByRule(respond.card, { Card.Processing }),
+              toArea = Card.DiscardPile,
+              moveReason = fk.ReasonResponse,
+            })
+          end
         end
       end
     end

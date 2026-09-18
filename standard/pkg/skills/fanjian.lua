@@ -23,8 +23,9 @@ fanjian:addEffect("active", {
       flag = "h",
       skill_name = fanjian.name,
     })
+    local yes = Fk:getCardById(card):getSuitString(true) ~= choice
     room:obtainCard(target, card, true, fk.ReasonPrey, target, fanjian.name)
-    if Fk:getCardById(card):getSuitString(true) ~= choice and target:isAlive() then
+    if yes and not target.dead then
       room:damage {
         from = player,
         to = target,
@@ -37,40 +38,30 @@ fanjian:addEffect("active", {
 
 fanjian:addAI(Fk.Ltk.AI.newActiveStrategy {
   think = function(self, ai)
-    local cards = ai.player:getCardIds("h")
-    local players = ai:getEnabledTargets()
-    if #cards == 0 or #players == 0 then return {}, -1000 end
+    local player = ai.player
+    if ai.player:isKongcheng() or #ai:getEnabledTargets() == 0 then return {}, 0 end
 
-    local good_cards = table.filter(cards, function(id)
-      return ai:getCardValue(id) >= 45
-    end)
-    if (#good_cards / #cards) >= 0.8 then return {}, -1000 end
-
-    local benefits = {}
-    for _, target in ipairs(players) do
-      local card_benefit, all_benefits = -1, 0
-      local benefits_all = table.map(cards, function(cid)
-        local card_benefit_local = ai:getBenefitOfEvents(function(logic)
-          logic:obtainCard(target, cid, true, fk.ReasonGive)
+    local ret, benefit = nil, 0
+    for _, p in ipairs(ai:getEnabledTargets()) do
+      local tmp = 0
+      for _, id in ipairs(ai.player:getCardIds("h")) do
+        tmp = tmp + ai:getBenefitOfEvents(function(logic)
+          logic:moveCardTo(id, Card.PlayerHand, p, fk.ReasonGive)
+          logic:damage {
+            from = ai.player,
+            to = p,
+            damage = 1,
+          }
         end)
-        all_benefits = all_benefits + card_benefit_local
-        return card_benefit_local
-      end)
-      card_benefit = all_benefits / #benefits_all
-      local damage_benefit = ai:getBenefitOfEvents(function(logic)
-        logic:damage {
-          from = ai.player,
-          to = target,
-          damage = 1,
-          skillName = fanjian.name,
-        }
-      end)
-      benefits[#benefits + 1] = { target, card_benefit + damage_benefit }
+      end
+      tmp = tmp / player:getHandcardNum()
+      if tmp > benefit then
+        ret, benefit = p, tmp
+      end
     end
-    table.sort(benefits, function(a, b) return a[2] > b[2] end)
-    if #benefits == 0 then return {}, -1000 end
-
-    return { { }, { benefits[1][1] } }, benefits[1][2]
+    if ret then
+      return { {}, { ret } }, benefit
+    end
   end,
 })
 

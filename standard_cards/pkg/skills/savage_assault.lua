@@ -24,7 +24,8 @@ skill:addEffect("cardskill", {
       respond = room:askToResponse(effect.to, params)
       if respond then
         room:responseCard(respond)
-      else
+      end
+      if not (respond and not respond.nullified) then
         room:damage({
           from = effect.from,
           to = effect.to,

@@ -33,12 +33,13 @@ skill:addEffect("cardskill", {
         respond = room:askToResponse(currentResponser, params)
         if respond then
           room:responseCard(respond)
-        else
+        end
+        if not (respond and not respond.nullified) then
           break
         end
       end
 
-      if not respond then
+      if not (respond and not respond.nullified) then
         break
       end
 
@@ -65,13 +66,18 @@ skill:addAI(Fk.Ltk.AI.newCardSkillStrategy {
   use_priority = 2.9,
 
   on_effect = function(self, logic, effect)
+    local nums = table.map({ effect.from, effect.to }, function (p)
+      return #table.filter(p:getHandlyIds(), function (id)
+        return Fk:getCardById(id).trueName == "slash" and not p:prohibitResponse(Fk:getCardById(id))
+      end)
+    end)
     logic:damage({
-      from = effect.from,
-      to = effect.to,
+      from = nums[1] >= nums[2] and effect.from or effect.to,
+      to = nums[1] >= nums[2] and effect.to or effect.from,
       card = effect.card,
       damage = 1,
       damageType = fk.NormalDamage,
-      skillName = skill.name
+      skillName = skill.name,
     })
   end,
 })

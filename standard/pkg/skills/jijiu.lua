@@ -19,7 +19,7 @@ jijiu:addEffect("viewas", {
   end,
   enabled_at_play = Util.FalseFunc,
   enabled_at_response = function(self, player, response)
-    return not response and Fk:currentRoom().current ~= player
+    return not response and Fk:currentRoom():getCurrent() ~= player
   end,
 })
 

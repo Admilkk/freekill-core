@@ -801,4 +801,65 @@ function AIGameLogic:pindian(data)
   return Pindian:new(self, PindianData:new(data)):getBenefit()
 end
 
+
+-- misc
+
+---@class AIGameEvent.TurnOver : AIGameEvent
+---@field public data table
+local TurnOver = AIGameEvent:subclass("AIGameEvent.SimpleChangeEvent")
+
+--- 翻面
+---@param player ServerPlayer 被翻面的玩家
+---@param data? table
+function AIGameLogic:turnOver(player, data)
+  local logic = self.logic
+  if data == nil then
+    data = {
+      who = player,
+      reason = "game_rule",
+    }
+  end
+  logic:trigger(fk.BeforeTurnOver, player, data)
+  if data.prevented then return end
+  logic:setPlayerProperty(player, "faceup", not player.faceup)
+  logic:trigger(fk.TurnedOver, player, data)
+  return true
+end
+
+---@class AIGameEvent.Chain : AIGameEvent
+---@field public data table
+local Chain = AIGameEvent:subclass("AIGameEvent.SimpleChangeEvent")
+
+--- 设置连环状态
+---@param player ServerPlayer 被改变状态的玩家
+---@param chained boolean @ true为横置，false为重置
+---@param data any? @ 额外数据
+function AIGameLogic:setChainState(player, chained, data)
+  local logic = self.logic
+  if (player.chained and chained) or (not player.chained and not chained) then return end
+  if data == nil then
+    data = {
+      who = player,
+      reason = "game_rule",
+    }
+  end
+  logic:trigger(fk.BeforeChainStateChange, player, data)
+  if data.prevented then return end
+  logic:setPlayerProperty(player, "chained", chained)
+  logic:trigger(fk.ChainStateChanged, player, data)
+end
+
+--- 复原武将牌（翻至正面、解除连环状态）
+---@param player ServerPlayer 被改变状态的玩家
+function AIGameLogic:reset(player)
+  if player.faceup and not player.chained then return end
+  local logic = self.logic
+  if player.chained then
+    logic:setPlayerProperty(player, "chained", false)
+  end
+  if not player.faceup then
+    logic:setPlayerProperty(player, "faceup", true)
+  end
+end
+
 return AIGameLogic, AIGameEvent

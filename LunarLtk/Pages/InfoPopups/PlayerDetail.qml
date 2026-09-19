@@ -135,6 +135,9 @@ ColumnLayout {
       visible: Config.observing
       onClicked: {
         Lua.client.changeSelf(root.dataModel.playerid);
+        ClientInstance.notifyServer("PushRequest", [
+          "observe_player", root.dataModel.playerid
+        ].join(","));
         root.finish();
       }
     }

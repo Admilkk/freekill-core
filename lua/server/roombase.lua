@@ -47,6 +47,7 @@ function ServerRoomBase:initialize(_room)
   ------------------------
   self:addCallback("reconnect", self.playerReconnect)
   self:addCallback("observe", self.addObserver)
+  self:addCallback("observe_player", self.handleObservePlayer)
   self:addCallback("leave", self.removeObserver)
   self:addCallback("surrender", self.handleSurrender)
   self:addCallback("surrender_negotiation", self.handleSurrenderNegotiation)
@@ -481,6 +482,26 @@ function ServerRoomBase:addObserver(id)
       })
       break
     end
+  end
+end
+
+function ServerRoomBase:handleObservePlayer(id, data)
+  local target_id = tonumber(data[3])
+  local target = self:getPlayerById(target_id)
+  if not target then return end
+
+  local observer
+  for _, t in ipairs(self.observers) do
+    if t[3] == id then
+      t[1] = target.id
+      observer = t[2]
+      break
+    end
+  end
+  if not observer or observer:getState() == fk.Player_Robot then return end
+
+  if self:getSettings("enableObserverViewFakeSkills") and target.syncFakeSkillsTo then
+    target:syncFakeSkillsTo(observer)
   end
 end
 

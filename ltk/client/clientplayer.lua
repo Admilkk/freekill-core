@@ -80,9 +80,7 @@ function ClientPlayer:sendDataToUI()
       c:notifyUI("AddSkill", { id, skill.name })
     end
   end
-  local show_fake_skills = not (
-    id ~= Self.id and c.observing and not c.replaying and not c:getSettings("enableObserverViewFakeSkills")
-  )
+  local show_fake_skills = not c.observing or c.replaying or c:getSettings("enableObserverViewFakeSkills")
   if show_fake_skills then
     for _, skill in ipairs(rawget(self, "_manually_fake_skills") or self._fake_skills or Util.DummyTable) do
       if skill.visible then

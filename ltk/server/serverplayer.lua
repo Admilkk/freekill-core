@@ -57,6 +57,15 @@ function ServerPlayer:syncFakeSkills()
   end
 end
 
+function ServerPlayer:syncFakeSkillsTo(observer)
+  for _, s in ipairs(self._manually_fake_skills) do
+    observer:doNotify("AddSkill", cbor.encode { self.id, s.name, true })
+    if table.contains(self.prelighted_skills, s) then
+      observer:doNotify("PrelightSkill", cbor.encode { s.name, true })
+    end
+  end
+end
+
 --- 翻面
 ---@param data any? 额外数据
 ---@return boolean @ 是否成功翻面

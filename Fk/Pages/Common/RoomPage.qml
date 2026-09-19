@@ -661,6 +661,9 @@ Item {
               height: parent.height - 6
               onClicked: {
                 Lua.client.changeSelf(pid);
+                ClientInstance.notifyServer("PushRequest", [
+                  "observe_player", pid
+                ].join(","));
               }
             }
             W.ButtonContent {

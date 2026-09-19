@@ -674,9 +674,9 @@ function Client:updateLimitSkill(pid, skill)
   end
 end
 
-function Client:canViewFakeSkillFor(pid)
-  if pid == Self.id then return true end
-  return not (self.observing and not self.replaying and not self:getSettings("enableObserverViewFakeSkills"))
+function Client:canViewFakeSkill()
+  if not self.observing or self.replaying then return true end
+  return self:getSettings("enableObserverViewFakeSkills")
 end
 
 function Client:loseSkill(data)
@@ -692,7 +692,7 @@ function Client:loseSkill(data)
     target:loseSkill(skill)
   end
 
-  if fake and not self:canViewFakeSkillFor(id) then
+  if fake and not self:canViewFakeSkill() then
     self:updateLimitSkill(id, skill)
     return
   end
@@ -748,7 +748,7 @@ function Client:addSkill(data)
     target:addSkill(skill)
   end
 
-  if fake and not self:canViewFakeSkillFor(id) then
+  if fake and not self:canViewFakeSkill() then
     self:updateLimitSkill(id, skill)
     return
   end
@@ -796,7 +796,7 @@ function Client:addSkill(data)
 end
 
 function Client:prelightSkill(data)
-  if not self:canViewFakeSkillFor(Self.id) then return end
+  if not self:canViewFakeSkill() then return end
 
   local skill_name, isPrelight = data[1], data[2]
   local skill = Fk.skills[skill_name]

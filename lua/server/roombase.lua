@@ -51,6 +51,29 @@ function ServerRoomBase:initialize(_room)
   self:addCallback("surrender", self.handleSurrender)
   self:addCallback("surrender_negotiation", self.handleSurrenderNegotiation)
   self:addCallback("reply_surrender_negotiation", self.handleSurrenderNegotiationReply)
+  self:addCallback("Chat", self.handleChat)
+end
+
+function ServerRoomBase:handleChat(id, reqlist)
+  local p = self:getPlayerById(id)
+  if not p then return end
+  local msg = reqlist[3]
+  if type(msg) ~= "string" then
+    local ok, decoded = pcall(cbor.decode, msg)
+    if ok and type(decoded) == "table" then
+      msg = decoded.msg
+    end
+  end
+  if type(msg) ~= "string" or msg == "" then return end
+  local filterFn = Fk.filterChatMessage or (ServerPlayerBase and ServerPlayerBase.filterChatMessage)
+  if not filterFn then return end
+  local filtered = filterFn(msg)
+  if not filtered then return end
+  self:doBroadcastNotify("Chat", {
+    type = 2,
+    sender = id,
+    msg = filtered,
+  })
 end
 
 ---@param check_fn? fun(reason: string): boolean?
@@ -132,7 +155,6 @@ function ServerRoomBase:checkNoHuman(chkOnly)
   return true
 end
 
-
 --- 正式在这个房间中开始游戏。
 ---
 --- 当这个函数返回之后，整个Room线程也宣告结束。
@@ -183,12 +205,19 @@ function ServerRoomBase:arrangeSeats(players)
   self:doBroadcastNotify("ArrangeSeats", player_circle)
 end
 
-
 --- 向多名玩家广播一条消息。
 ---@param command string @ 发出这条消息的消息类型
 ---@param jsonData any @ 消息的数据，一般是JSON字符串，也可以是普通字符串，取决于client怎么处理了
 ---@param players? ServerPlayerBase[] @ 要告知的玩家列表，默认为所有人
 function ServerRoomBase:doBroadcastNotify(command, jsonData, players)
+  if command == "Chat" and type(jsonData) == "table" and jsonData.msg then
+    local filterFn = Fk.filterChatMessage or (ServerPlayerBase and ServerPlayerBase.filterChatMessage)
+    if filterFn then
+      local filtered = filterFn(jsonData.msg)
+      if not filtered then return end
+      jsonData.msg = filtered
+    end
+  end
   players = players or self.players
   for _, p in ipairs(players) do
     p:doNotify(command, jsonData)
@@ -232,7 +261,7 @@ end
 ---@param timeout integer? @ focus的烧条时长
 function ServerRoomBase:notifyMoveFocus(players, command, timeout)
   if (players.class) then
-    players = {players}
+    players = { players }
   end
 
   local ids = {}
@@ -246,7 +275,6 @@ function ServerRoomBase:notifyMoveFocus(players, command, timeout)
     timeout
   })
 end
-
 
 --- 向战报中发送一条log。
 ---@param log LogMessage @ Log的实际内容
@@ -320,7 +348,7 @@ end
 ---@param skill string
 function ServerRoomBase:addFakeSkill(player, skill)
   player:addFakeSkill(skill)
-  local toget = {table.unpack(Fk.skill_skels[skill].effects)}
+  local toget = { table.unpack(Fk.skill_skels[skill].effects) }
   for _, s in ipairs(toget) do
     if s:isInstanceOf(TriggerSkill) then
       ---@cast s TriggerSkill
@@ -370,9 +398,9 @@ function ServerRoomBase:gameOver(winners)
 
   local winPlayers = table.map(winners:split("+"), function(id) return self:getPlayerById(tonumber(id)) end)
   if table.contains(
-    { "running", "normal" },
-    coroutine.status(self.main_co)
-  ) then
+        { "running", "normal" },
+        coroutine.status(self.main_co)
+      ) then
     self.logic:trigger(fk.GameFinished, nil, { players = winPlayers })
   end
 
@@ -399,15 +427,15 @@ function ServerRoomBase:gameOver(winners)
   end
   self:doBroadcastNotify("GameOver", winners)
   fk.qInfo(string.format("[GameOver] %d, %s, %s, in %ds", self.id, self:getSettings('gameMode'),
-  table.concat(winRoles, "+"),
-  os.time() - self.start_time))
+    table.concat(winRoles, "+"),
+    os.time() - self.start_time))
 
   self.room:gameOver()
 
   if table.contains(
-    { "running", "normal" },
-    coroutine.status(self.main_co)
-  ) then
+        { "running", "normal" },
+        coroutine.status(self.main_co)
+      ) then
     coroutine.yield("__handleRequest", "over")
   else
     coroutine.close(self.main_co)
@@ -435,7 +463,7 @@ function ServerRoomBase:tellRoomToObserver(player)
   fk.qInfo(string.format("[Observe] %d, %s, in %.3fms",
     self.id, player:getScreenName(), (os.getms() - start_time) / 1000))
 
-  table.insert(self.observers, {observee.id, player, player:getId()})
+  table.insert(self.observers, { observee.id, player, player:getId() })
 end
 
 function ServerRoomBase:addObserver(id)
@@ -469,7 +497,7 @@ function ServerRoomBase:removeObserver(id)
 end
 
 function ServerRoomBase:handleSurrender(id, data)
--- request_handlers["surrender"] = function(room, id, reqlist)
+  -- request_handlers["surrender"] = function(room, id, reqlist)
   local player = self:getPlayerById(id)
   if not player then return end
 
@@ -608,9 +636,9 @@ function ServerRoomBase:handleSurrenderNegotiationReply(id, data)
 end
 
 --- 将房间中某个tag设为特定值。
---- 
+---
 --- 注意：客户端无法获取room tag，请改用```setBanner```
---- 
+---
 --- 当想在服务端搞点全局变量时，不要自己设置全局变量或者上值，而应该使用room的tag。
 ---@param tag_name string @ tag名字
 ---@param value any @ 值
@@ -631,11 +659,11 @@ function ServerRoomBase:removeTag(tag_name)
 end
 
 --- 将一名玩家的某种标记设置为某值，并通知所有客户端更新。
---- 
+---
 --- 值可以是数字、字符串、表、键值表等。注意键值表做值时键值表的键不能是数字。
---- 
+---
 --- 通用的mark名称及后缀参见`mark_enum.lua`。
---- 
+---
 -- mark name and UI:
 --
 -- ```xxx```: invisible mark
@@ -662,7 +690,7 @@ function ServerRoomBase:setPlayerMark(player, mark, value)
 end
 
 --- 将一名玩家的```mark```标记增加```count```个，并通知所有客户端更新。
---- 
+---
 --- tableMark有封装方法```addTableMark```和```addTableMarkIfNeed```
 ---@param player Base.Player @ 加标记的玩家
 ---@param mark string @ 标记名称
@@ -675,7 +703,7 @@ function ServerRoomBase:addPlayerMark(player, mark, count)
 end
 
 --- 将一名玩家的```mark```标记减少```count```个，并通知所有客户端更新。
---- 
+---
 --- tableMark有封装方法```removeTableMark```
 ---@param player Base.Player @ 减标记的玩家
 ---@param mark string @ 标记名称
@@ -688,7 +716,7 @@ function ServerRoomBase:removePlayerMark(player, mark, count)
 end
 
 --- 设置房间banner，显示于左上角，用于模式介绍、仁区等
---- 
+---
 --- 房间版mark
 ---@param name string @ banner的名称
 ---@param value any
@@ -740,7 +768,7 @@ function ServerRoomBase:tableRandomPick(t, n)
   local n0 = n
   n = n or 1
   if #t == 0 then return n0 ~= nil and {} or nil end
-  local tmp = {table.unpack(t)}
+  local tmp = { table.unpack(t) }
   local ret = {}
   while n > 0 and #tmp > 0 do
     local i = self:random(1, #tmp)
@@ -828,7 +856,8 @@ end
 function ServerRoomBase:saveGlobalState(key, data)
   if not self.room then return nil end
   if type(self.room.saveGlobalState) ~= "function" then
-    fk.qWarning("self._splayer.saveGlobalState doesn't exist, Please ensure that the server version is freekill-asio 0.0.6+")
+    fk.qWarning(
+    "self._splayer.saveGlobalState doesn't exist, Please ensure that the server version is freekill-asio 0.0.6+")
     return nil
   end
   local ok, jsonData = pcall(json.encode, data)
@@ -848,7 +877,8 @@ end
 function ServerRoomBase:getGlobalSaveState(key)
   if not self.room then return {} end
   if type(self.room.getGlobalSaveState) ~= "function" then
-    fk.qWarning("self._splayer.getGlobalSaveState doesn't exist, Please ensure that the server version is freekill-asio 0.0.6+")
+    fk.qWarning(
+    "self._splayer.getGlobalSaveState doesn't exist, Please ensure that the server version is freekill-asio 0.0.6+")
     return {}
   end
   local data = self.room:getGlobalSaveState(key)
@@ -866,6 +896,5 @@ function ServerRoomBase:getGlobalSaveState(key)
     return {}
   end
 end
-
 
 return ServerRoomBase

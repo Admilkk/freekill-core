@@ -76,7 +76,7 @@ function ClientBase:startRecording()
     os.date("%Y%m%d%H%M%S"),
     self.enter_room_data,
     cbor.encode { Self.id, Self.player:getScreenName(), Self.player:getAvatar() },
-    "", -- 由于C++写翻车，此条空出来
+    "",       -- 由于C++写翻车，此条空出来
     "normal", -- 表示本录像是正常全流程，还是重连，还是旁观
     -- RESERVED
     "",
@@ -207,8 +207,8 @@ function ClientBase:enterRoom(_data)
     self.players = players
     self.alive_players = table.simpleClone(players)
   else
-    self.players = {Self}
-    self.alive_players = {Self}
+    self.players = { Self }
+    self.alive_players = { Self }
   end
 
   self:updateDisabled(data)
@@ -233,7 +233,7 @@ function ClientBase:enterRoom(_data)
         getState = function() return fk.Player_Online end,
         getTotalGameTime = function() return gameTime end,
       }
-      return {0, player, id}
+      return { 0, player, id }
     end
     for _, o in ipairs(data._observers or {}) do
       table.insert(self.observers, fakeObs(o[1], o[2], o[3], o[5]))
@@ -453,7 +453,7 @@ function ClientBase:addObserver(data)
     getState = function() return fk.Player_Online end,
     getTotalGameTime = function() return gameTime end,
   }
-  table.insert(self.observers, {0, player, id})
+  table.insert(self.observers, { 0, player, id })
   -- self:notifyUI("ServerMessage", string.format(Fk:translate("$AddObserver"), name))
 end
 
@@ -486,7 +486,7 @@ function ClientBase:switchToObserver(data)
   if id ~= Self.id then
     self.client:removePlayer(id)
   end
-  table.insert(self.observers, {0, player, id})
+  table.insert(self.observers, { 0, player, id })
 end
 
 function ClientBase:switchToPlayer(data)
@@ -514,13 +514,50 @@ function ClientBase:switchToPlayer(data)
   table.insert(self.players, lp)
 end
 
+function ClientBase.filterChatMessage(msg)
+  if type(msg) ~= "string" or msg == "" then return nil end
+
+  if msg:find("<[%a/!][^>]*>") then
+    return nil
+  end
+
+  local banwords = (ServerConfig and ServerConfig.banwords)
+      or (Fk and Fk.currentClientConfig and Fk.currentClientConfig.banwords)
+      or {}
+  for _, word in ipairs(banwords) do
+    if type(word) == "string" and word ~= "" then
+      local plain_word = word:gsub("[%(%)%.%%%+%-%*%?%[%^%$]", "%%%1")
+      msg = msg:gsub(plain_word, function()
+        local mask = ""
+        for _ in utf8.codes(word) do
+          mask = mask .. "*"
+        end
+        return mask
+      end)
+    end
+  end
+
+  return msg
+end
+
 function ClientBase:chat(data)
   -- jsonData: { int type, int sender, string msg }
   if data.type == 1 then
+    if data.msg then
+      local filtered = ClientBase.filterChatMessage(data.msg)
+      if not filtered then return end
+      data.msg = filtered
+    end
     data.general = ""
     data.time = os.date("%H:%M:%S")
     self:notifyUI("Chat", data)
     return
+  end
+
+  if data.msg then
+    local filtered = ClientBase.filterChatMessage(data.msg)
+    if not filtered then return end
+    data.msg = filtered
   end
 
   local p = self:getPlayerById(data.sender)
@@ -653,7 +690,7 @@ function ClientBase:reconnect(data)
   if not self.replaying then
     self:startRecording()
     self.record[6] = "reconnect"
-    table.insert(self.record, {math.floor(os.getms() / 1000), false, "Reconnect", cbor.encode(data)})
+    table.insert(self.record, { math.floor(os.getms() / 1000), false, "Reconnect", cbor.encode(data) })
   end
 
   local setup_data = players[data.you].setup_data
@@ -670,18 +707,18 @@ function ClientBase:observe(data)
   self:stopRecording("")
   -- 若我此时处于房间中则发送一下进大厅刷页面
   if table.find(self.observers, function(t)
-    -- 在开战前的房间，observers里面有Self.id
-    return t[3] == Self.id or
-    -- 在开战后的房间，Self.id换个法子寻找
-      t[3] == (self.observer_setup_data or {})[1]
-  end) then
+        -- 在开战前的房间，observers里面有Self.id
+        return t[3] == Self.id or
+            -- 在开战后的房间，Self.id换个法子寻找
+            t[3] == (self.observer_setup_data or {})[1]
+      end) then
     self:notifyUI("EnterLobby", "")
   end
 
   if not self.replaying then
     self:startRecording()
     self.record[6] = "reconnect"
-    table.insert(self.record, {math.floor(os.getms() / 1000), false, "Observe", cbor.encode(data)})
+    table.insert(self.record, { math.floor(os.getms() / 1000), false, "Observe", cbor.encode(data) })
   end
 
   if not self.observer_setup_data then

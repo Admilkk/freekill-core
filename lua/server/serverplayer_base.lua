@@ -16,9 +16,41 @@ function ServerPlayerBase:initialize(_self)
   self._timewaste_count = 0
 end
 
+function ServerPlayerBase.filterChatMessage(msg)
+  if type(msg) ~= "string" or msg == "" then return nil end
+
+  if msg:find("<[%a/!][^>]*>") then
+    return nil
+  end
+
+  local banwords = ServerConfig and ServerConfig.banwords or {}
+  for _, word in ipairs(banwords) do
+    if type(word) == "string" and word ~= "" then
+      local plain_word = word:gsub("[%(%)%.%%%+%-%*%?%[%^%$]", "%%%1")
+      msg = msg:gsub(plain_word, function()
+        local mask = ""
+        for _ in utf8.codes(word) do
+          mask = mask .. "*"
+        end
+        return mask
+      end)
+    end
+  end
+
+  return msg
+end
+
+Fk.filterChatMessage = ServerPlayerBase.filterChatMessage
+
 ---@param command string
 ---@param data any
 function ServerPlayerBase:doNotify(command, data)
+  if command == "Chat" and type(data) == "table" and data.msg then
+    local filtered = ServerPlayerBase.filterChatMessage(data.msg)
+    if not filtered then return end
+    data.msg = filtered
+  end
+
   local cbordata = cbor.encode(data)
 
   local room = self.room
@@ -46,34 +78,10 @@ function ServerPlayerBase:doNotify(command, data)
   end
 end
 
-local function filterChatMessage(msg)
-  if type(msg) ~= "string" or msg == "" then return nil end
-
-  if msg:find("<[%a/!][^>]*>") then
-    return nil
-  end
-
-  local banwords = ServerConfig and ServerConfig.banwords or {}
-  for _, word in ipairs(banwords) do
-    if type(word) == "string" and word ~= "" then
-      local plain_word = word:gsub("[%(%)%.%%%+%-%*%?%[%^%$]", "%%%1")
-      msg = msg:gsub(plain_word, function()
-        local mask = ""
-        for _ in utf8.codes(word) do
-          mask = mask .. "*"
-        end
-        return mask
-      end)
-    end
-  end
-
-  return msg
-end
-
 --- 发送一句聊天
 ---@param msg string
 function ServerPlayerBase:chat(msg)
-  local filtered = filterChatMessage(msg)
+  local filtered = ServerPlayerBase.filterChatMessage(msg)
   if not filtered then return end
   self.room:doBroadcastNotify("Chat", {
     type = 2,
@@ -153,7 +161,7 @@ function ServerPlayerBase:getSaveState()
   if not self._splayer then return {} end
   if type(self._splayer.getSaveState) ~= "function" then
     fk.qWarning(
-    "self._splayer.getSaveState doesn't exist, Please ensure that the server version is freekill-asio 0.0.5+")
+      "self._splayer.getSaveState doesn't exist, Please ensure that the server version is freekill-asio 0.0.5+")
     return {}
   end
   local data = self._splayer:getSaveState()
@@ -179,7 +187,7 @@ function ServerPlayerBase:saveGlobalState(key, data)
   if not self._splayer then return nil end
   if type(self._splayer.saveGlobalState) ~= "function" then
     fk.qWarning(
-    "self._splayer.saveGlobalState doesn't exist, Please ensure that the server version is freekill-asio 0.0.6+")
+      "self._splayer.saveGlobalState doesn't exist, Please ensure that the server version is freekill-asio 0.0.6+")
     return nil
   end
   local ok, jsonData = pcall(json.encode, data)
@@ -200,7 +208,7 @@ function ServerPlayerBase:getGlobalSaveState(key)
   if not self._splayer then return {} end
   if type(self._splayer.getGlobalSaveState) ~= "function" then
     fk.qWarning(
-    "self._splayer.getGlobalSaveState doesn't exist, Please ensure that the server version is freekill-asio 0.0.6+")
+      "self._splayer.getGlobalSaveState doesn't exist, Please ensure that the server version is freekill-asio 0.0.6+")
     return {}
   end
   local data = self._splayer:getGlobalSaveState(key)

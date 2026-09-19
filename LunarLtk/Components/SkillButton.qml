@@ -32,7 +32,7 @@ Item {
       } else if (root.dataModel.isPrelight) {
         let ret = Cpp.path + "/image/button/skill/prelight/";
         const enabled = root.dataModel.enabled;
-        let suffix = enabled ? (root.dataModel.selected ? "pressed" : "normal") : "disabled";
+        let suffix = enabled ? ((root.dataModel.selected || root.dataModel.prelighted) ? "pressed" : "normal") : "disabled";
         return ret + suffix;
       }
       return "";

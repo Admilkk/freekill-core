@@ -1803,6 +1803,8 @@ function Player:serialize()
   o.card_history = self.cardUsedHistory
   o.skill_history = self.skillUsedHistory
   o.skills = table.map(self.player_skills, Util.NameMapper)
+  o.fake_skills = table.map(rawget(self, "_manually_fake_skills") or self._fake_skills, Util.NameMapper)
+  o.prelighted_skills = table.map(rawget(self, "prelighted_skills") or {}, Util.NameMapper)
   o.player_cards = self.player_cards
   o.special_cards = self.special_cards
   o.buddy_list = self.buddy_list
@@ -1817,6 +1819,17 @@ function Player:deserialize(o)
   self.cardUsedHistory = o.card_history
   self.skillUsedHistory = o.skill_history
   for _, sname in ipairs(o.skills) do self:addSkill(sname) end
+  self._manually_fake_skills = {}
+  for _, sname in ipairs(o.fake_skills or {}) do self:addFakeSkill(sname) end
+  for _, sname in ipairs(o.fake_skills or {}) do
+    local skill = Fk.skills[sname]
+    if skill then table.insertIfNeed(self._manually_fake_skills, skill) end
+  end
+  self.prelighted_skills = {}
+  for _, sname in ipairs(o.prelighted_skills or {}) do
+    local skill = Fk.skills[sname]
+    if skill then table.insertIfNeed(self.prelighted_skills, skill) end
+  end
   self.player_cards = o.player_cards
   self.special_cards = o.special_cards
   self.buddy_list = o.buddy_list

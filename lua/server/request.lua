@@ -104,6 +104,9 @@ function Request:_sendPacket(player)
       table.removeOne(from._observers, controller)
       table.insert(player._observers, controller)
       controller:doNotify("ChangeSelf", cbor.encode(player.id))
+      if player.syncFakeSkills then
+        player:syncFakeSkills()
+      end
     end
   end
 

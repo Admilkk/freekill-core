@@ -39,17 +39,20 @@ end
 function ServerPlayer:reconnect()
   ServerPlayerBase.reconnect(self)
 
-  -- send fake skills
-  for _, s in ipairs(self._manually_fake_skills) do
-    self:doNotify("AddSkill", { self.id, s.name, true })
-    if table.contains(self.prelighted_skills, s) then
-      self:doNotify("PrelightSkill", { s.name, true })
-    end
-  end
+  self:syncFakeSkills()
 
   for _, skills in ipairs(self.room.status_skills) do
     for _, skill in ipairs(skills) do
       self:doNotify("AddStatusSkill", { skill.name })
+    end
+  end
+end
+
+function ServerPlayer:syncFakeSkills()
+  for _, s in ipairs(self._manually_fake_skills) do
+    self:doNotify("AddSkill", { self.id, s.name, true })
+    if table.contains(self.prelighted_skills, s) then
+      self:doNotify("PrelightSkill", { s.name, true })
     end
   end
 end

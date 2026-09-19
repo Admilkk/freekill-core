@@ -102,19 +102,25 @@ QtObject {
     handcardsSorted();
   }
 
-  function addSkill(skill_name, prelight) {
+  function addSkill(skill_name, prelight, prelighted) {
     const model = Ltk.createSkillModel(skill_name);
     const arr = prelight ? fakeSkills : skills;
     if (prelight) {
       model.isPrelight = true;
+      model.prelighted = !!prelighted;
       model.enabled = true;
     }
 
-    if (!arr.find(e => e.origName === skill_name)) {
+    const oldModel = arr.find(e => e.origName === skill_name);
+    if (!oldModel) {
       arr.push(model);
       if (prelight) {
         model.selectedChanged.connect(() => {
           if (!model.selected) return;
+          if (Config.observing) {
+            model.selected = false;
+            return;
+          }
           model.enabled = false;
           ClientInstance.notifyServer("PushRequest", [
             "prelight", model.origName, (!model.prelighted).toString()
@@ -125,6 +131,8 @@ QtObject {
           if (model.enabled) roomScene.activateSkill(model.origName, model.selected, "click");
         });
       }
+    } else if (prelight && prelighted !== undefined) {
+      oldModel.prelighted = !!prelighted;
     }
     return;
   }
@@ -163,9 +171,15 @@ QtObject {
         addSkill(s.name);
       }
     }
+    const isPrelighted = skillName => {
+      for (const s of self.prelighted_skills ?? []) {
+        if (s.name === skillName) return true;
+      }
+      return false;
+    };
     for (const s of self._fake_skills) {
       if (s.visible) {
-        addSkill(s.name, true);
+        addSkill(s.name, true, isPrelighted(s.name));
       }
     }
 

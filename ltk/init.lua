@@ -69,7 +69,12 @@ local settings = {
     W.SwitchRow {
       _settingsKey = "enableObserverViewCard",
       title = "Observer can view card",
-    }
+    },
+
+    W.SwitchRow {
+      _settingsKey = "enableObserverViewFakeSkills",
+      title = "Observer can view fake skills",
+    },
   }
 }
 

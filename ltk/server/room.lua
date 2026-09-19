@@ -77,7 +77,12 @@ function Room:initialize(_room)
 end
 
 function Room:handlePrelight(id, data)
-  local p = self:getPlayerById(id)
+  local controller = self:getPlayerById(id)
+  if not controller then return end
+
+  local p = table.find(self.players, function(player)
+    return table.contains(player._observers, controller._splayer)
+  end)
   if p then
     p:prelightSkill(data[3], data[4] == "true")
   end

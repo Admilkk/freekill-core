@@ -33,6 +33,7 @@ function Client:initialize(_client)
   self:addCallback("ShowCard", self.showCard)
   self:addCallback("LoseSkill", self.loseSkill)
   self:addCallback("AddSkill", self.addSkill)
+  self:addCallback("PrelightSkill", self.prelightSkill)
   self:addCallback("AddStatusSkill", self.addStatusSkill)
   self:addCallback("AskForSkillInvoke", self.askForSkillInvoke)
   self:addCallback("AskForUseActiveSkill", self.askForUseActiveSkill)
@@ -673,6 +674,11 @@ function Client:updateLimitSkill(pid, skill)
   end
 end
 
+function Client:canViewFakeSkillFor(pid)
+  if pid == Self.id then return true end
+  return not (self.observing and not self.replaying and not self:getSettings("enableObserverViewFakeSkills"))
+end
+
 function Client:loseSkill(data)
   -- jsonData: [ int player_id, string skill_name ]
   local id, skill_name, fake = data[1], data[2], data[3]
@@ -681,8 +687,14 @@ function Client:loseSkill(data)
 
   if fake then
     target:loseFakeSkill(skill)
+    table.removeOne(target._manually_fake_skills or {}, skill)
   else
     target:loseSkill(skill)
+  end
+
+  if fake and not self:canViewFakeSkillFor(id) then
+    self:updateLimitSkill(id, skill)
+    return
   end
 
   if not fake then
@@ -730,8 +742,15 @@ function Client:addSkill(data)
 
   if fake then
     target:addFakeSkill(skill)
+    target._manually_fake_skills = target._manually_fake_skills or {}
+    table.insertIfNeed(target._manually_fake_skills, skill)
   else
     target:addSkill(skill)
+  end
+
+  if fake and not self:canViewFakeSkillFor(id) then
+    self:updateLimitSkill(id, skill)
+    return
   end
 
   if not fake then
@@ -774,6 +793,28 @@ function Client:addSkill(data)
 
 
   self:updateLimitSkill(id, skill)
+end
+
+function Client:prelightSkill(data)
+  if not self:canViewFakeSkillFor(Self.id) then return end
+
+  local skill_name, isPrelight = data[1], data[2]
+  local skill = Fk.skills[skill_name]
+  if skill then
+    Self.prelighted_skills = Self.prelighted_skills or {}
+    if isPrelight then
+      table.insertIfNeed(Self.prelighted_skills, skill)
+      for _, s in ipairs(skill.related_skills) do
+        table.insertIfNeed(Self.prelighted_skills, s)
+      end
+    else
+      table.removeOne(Self.prelighted_skills, skill)
+      for _, s in ipairs(skill.related_skills) do
+        table.removeOne(Self.prelighted_skills, s)
+      end
+    end
+  end
+  self:notifyUI("PrelightSkill", data)
 end
 
 function Client:addStatusSkill(data)

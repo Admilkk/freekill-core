@@ -8,8 +8,8 @@
 local ServerPlayerBase = {}
 
 function ServerPlayerBase:initialize(_self)
-  self.serverplayer = _self -- 控制者
-  self._splayer = _self -- 真正在玩的玩家
+  self.serverplayer = _self   -- 控制者
+  self._splayer = _self       -- 真正在玩的玩家
   self._observers = { _self } -- "旁观"中的玩家，然而不包括真正的旁观者
   self.id = _self:getId()
 
@@ -35,24 +35,50 @@ function ServerPlayerBase:doNotify(command, data)
     -- 绑定它的旁观者若收到会把自己当重连者重建一遍（room 被刷新、观察视角被打断）。
     -- 被旁观者回来后，旁观者靠 broadcastProperty(state) 等增量消息同步即可。
     if id == self.id and command ~= "Reconnect" and room.room:hasObserver(p)
-      and p:getState() ~= fk.Player_Robot then
+        and p:getState() ~= fk.Player_Robot then
       p:doNotify(command, cbordata)
     end
   end
 
   if room.notify_count >= room.notify_max and
-    coroutine.status(room.main_co) == "normal" then
+      coroutine.status(room.main_co) == "normal" then
     room:delay(100)
   end
+end
+
+local function filterChatMessage(msg)
+  if type(msg) ~= "string" or msg == "" then return nil end
+
+  if msg:find("<[%a/!][^>]*>") then
+    return nil
+  end
+
+  local banwords = ServerConfig and ServerConfig.banwords or {}
+  for _, word in ipairs(banwords) do
+    if type(word) == "string" and word ~= "" then
+      local plain_word = word:gsub("[%(%)%.%%%+%-%*%?%[%^%$]", "%%%1")
+      msg = msg:gsub(plain_word, function()
+        local mask = ""
+        for _ in utf8.codes(word) do
+          mask = mask .. "*"
+        end
+        return mask
+      end)
+    end
+  end
+
+  return msg
 end
 
 --- 发送一句聊天
 ---@param msg string
 function ServerPlayerBase:chat(msg)
+  local filtered = filterChatMessage(msg)
+  if not filtered then return end
   self.room:doBroadcastNotify("Chat", {
     type = 2,
     sender = self.id,
-    msg = msg,
+    msg = filtered,
   })
 end
 
@@ -82,8 +108,7 @@ function ServerPlayerBase:reconnect()
   -- 所以如果有这种情况的话，再发送一次给重连的玩家
   local req = room.current_request
   if req and table.contains(req.players, thinker) and
-    sp:thinking() and not req.result[thinker.id] then
-
+      sp:thinking() and not req.result[thinker.id] then
     sp:setThinking(false)
     req:_sendPacket(thinker)
   end
@@ -127,7 +152,8 @@ end
 function ServerPlayerBase:getSaveState()
   if not self._splayer then return {} end
   if type(self._splayer.getSaveState) ~= "function" then
-    fk.qWarning("self._splayer.getSaveState doesn't exist, Please ensure that the server version is freekill-asio 0.0.5+")
+    fk.qWarning(
+    "self._splayer.getSaveState doesn't exist, Please ensure that the server version is freekill-asio 0.0.5+")
     return {}
   end
   local data = self._splayer:getSaveState()
@@ -152,7 +178,8 @@ end
 function ServerPlayerBase:saveGlobalState(key, data)
   if not self._splayer then return nil end
   if type(self._splayer.saveGlobalState) ~= "function" then
-    fk.qWarning("self._splayer.saveGlobalState doesn't exist, Please ensure that the server version is freekill-asio 0.0.6+")
+    fk.qWarning(
+    "self._splayer.saveGlobalState doesn't exist, Please ensure that the server version is freekill-asio 0.0.6+")
     return nil
   end
   local ok, jsonData = pcall(json.encode, data)
@@ -172,7 +199,8 @@ end
 function ServerPlayerBase:getGlobalSaveState(key)
   if not self._splayer then return {} end
   if type(self._splayer.getGlobalSaveState) ~= "function" then
-    fk.qWarning("self._splayer.getGlobalSaveState doesn't exist, Please ensure that the server version is freekill-asio 0.0.6+")
+    fk.qWarning(
+    "self._splayer.getGlobalSaveState doesn't exist, Please ensure that the server version is freekill-asio 0.0.6+")
     return {}
   end
   local data = self._splayer:getGlobalSaveState(key)

@@ -61,6 +61,26 @@ local function loadConf()
 end
 Config = loadConf()
 
+local function loadServerConf()
+  local new_core = FileIO.pwd():endsWith("packages/freekill-core")
+
+  local cfg = io.open((new_core and "../../" or "") .. "freekill.server.config.json")
+  local ret
+  if cfg == nil then
+    ret = {
+      banwords = {},
+      tempBanTime = 20,
+    }
+  else
+    ret = json.decode(cfg:read("a"))
+    cfg:close()
+  end
+  if type(ret.banwords) ~= "table" then ret.banwords = {} end
+  if type(ret.tempBanTime) ~= "number" then ret.tempBanTime = 20 end
+  return ret
+end
+ServerConfig = loadServerConf()
+
 -- 禁用各种危险的函数，尽可能让Lua执行安全的代码。
 os = {
   time = os.time,

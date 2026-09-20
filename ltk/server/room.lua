@@ -2712,13 +2712,14 @@ function Room:askToUseVirtualCard(player, params)
 
   if extra_data.bypass_times == nil then extra_data.bypass_times = true end
   if extra_data.extraUse == nil then extra_data.extraUse = true end
+  local user = extra_data.fix_user and self:getPlayerById(extra_data.fix_user) or player
   local all_names, subcards, skillName, prompt, cancelable, skipUse = params.name, params.subcards, params.skill_name, params.prompt, params.cancelable, params.skip
   extra_data.skillName = skillName
   local names = table.filter(all_names, function (name)
     local card = Fk:cloneCard(name)
     card:addSubcards(subcards)
     card.skillName = skillName
-    return #card:getAvailableTargets(player, extra_data) > 0
+    return #card:getAvailableTargets(user, extra_data) > 0
   end)
   if #names == 0 then return end
   if not cancelable then
@@ -2742,7 +2743,7 @@ function Room:askToUseVirtualCard(player, params)
         end
       end
       card.skillName = skillName
-      if #card:getDefaultTarget(player, extra_data) > 0 then
+      if #card:getDefaultTarget(user, extra_data) > 0 then
         break
       end
       if n == names[#names] then
@@ -2774,7 +2775,7 @@ function Room:askToUseVirtualCard(player, params)
       end
     end
     card.skillName = skillName
-    tos = #dat.targets > 0 and dat.targets or card:getDefaultTarget(player, extra_data)
+    tos = #dat.targets > 0 and dat.targets or card:getDefaultTarget(user, extra_data)
   else
     if cancelable then return end
     for _, n in ipairs(names) do
@@ -2796,12 +2797,12 @@ function Room:askToUseVirtualCard(player, params)
         end
       end
       card.skillName = skillName
-      tos = card:getDefaultTarget(player, extra_data)
+      tos = card:getDefaultTarget(user, extra_data)
     end
   end
   if not tos or #tos == 0 then return end
   local use = {
-    from = player,
+    from = user,
     tos = tos,
     card = card,
     extraUse = extra_data.extraUse,

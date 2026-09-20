@@ -429,7 +429,8 @@ function ReqActiveSkill:feasible()
     ---@cast skill ViewAsSkill
     card = self:getUsingCard()
     if card then
-      ret = card:getSkill(player):feasible(player, targets, { card.id }, card)
+      local user = self.extra_data.fix_user and Fk:currentRoom():getPlayerById(self.extra_data.fix_user) or player
+      ret = card:getSkill(user):feasible(user, targets, { card.id }, card)
     elseif not self.sub_selection_flag then -- 如果是二级选择的场合就全权交给viewAs处理了
       ret = self.sub_cards and skill:feasible(player, targets, self.pendings) -- 因为生成函数，sub_cards可能为空，但若为数组则一定有元素
     end
@@ -473,11 +474,15 @@ function ReqActiveSkill:targetValidity(pid)
   local skill = Fk.skills[self.skill_name] --[[@as ButtonSkill]]
   if not skill then return false end
   local card -- 因为有多种情况，所以需要缓存
+  local user = self.player
   if skill:isInstanceOf(ViewAsSkill) then
     ---@cast skill ViewAsSkill
     card = self:getUsingCard()
     if card then
       skill = card:getSkill(self.player)
+      if self.extra_data and self.extra_data.fix_user then
+        user = Fk:currentRoom():getPlayerById(self.extra_data.fix_user)
+      end
     else
       local sub_data = type(skill.sub_data) == "function" and skill:sub_data(self.player, self.pendings) or skill.sub_data
       if sub_data then
@@ -488,7 +493,7 @@ function ReqActiveSkill:targetValidity(pid)
   local room = Fk:currentRoom()
   local p = room:getPlayerById(pid)
   local selected = table.map(self.selected_targets, Util.Id2PlayerMapper)
-  return not not skill:targetFilter(self.player, p, selected, self.pendings, card, self.extra_data)
+  return not not skill:targetFilter(user, p, selected, self.pendings, card, self.extra_data)
 end
 
 -- 获得二级选择的卡牌

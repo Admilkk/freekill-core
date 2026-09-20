@@ -78,13 +78,14 @@ virtual_viewas:addEffect("viewas", {
         if #subcards == 0 then
           subcards = cardFilter.fake_subcards and {} or self.interaction.spec.result.cards
         end
+        local user = self.fix_user and Fk:currentRoom():getPlayerById(self.fix_user) or player
         for _, name in ipairs(self.all_choices) do
           local card = Fk:cloneCard(name, nil, nil, self.skillName, subcards)
           table.insert(items, {
             prop = {
               type = "card",
               card = card,
-              additional_prop = { selectable = (table.contains(self.choices, name) and player:canUseOrResponseInCurrent(card, extra_data)) }
+              additional_prop = { selectable = (table.contains(self.choices, name) and user:canUseOrResponseInCurrent(card, extra_data)) }
             },
             name = name,
             cid = i,
@@ -115,8 +116,9 @@ virtual_viewas:addEffect("viewas", {
           direct_send = true,
           cancelable = true
         }
+        local user = self.fix_user and Fk:currentRoom():getPlayerById(self.fix_user) or player
         local card = self:viewAs(player, selected_cards)
-        if card and card:getSkill(player):feasible(player, selected_targets, { }, card) then
+        if card and card:getSkill(user):feasible(user, selected_targets, {}, card) then
           spec.options = { "OK" }
         end
         refresh_data.optionBox = UI.OptionBox(spec)

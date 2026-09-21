@@ -1,10 +1,9 @@
-
 local designating = fk.CreateSkill {
   name = "lord_designating_heir&",
   mode_skill = true,
 }
 
-Fk:loadTranslationTable{
+Fk:loadTranslationTable {
   ["lord_designating_heir&"] = "立储",
   [":lord_designating_heir&"] = "第一轮限一次，你可以将一名其他角色立为储君：" ..
       "主公死亡时，若储君为忠臣，获得主公区域内至多两张牌，加1点体力上限，回复1点体力，变为主公；" ..
@@ -20,11 +19,11 @@ Fk:loadTranslationTable{
 
 ---@type TrigSkelSpec<TurnFunc|PhaseFunc>
 local spec = {
-  can_trigger = function (self, event, target, player, data)
+  can_trigger = function(self, event, target, player, data)
     return player:hasSkill(designating.name) and player.role == "lord" and
         player.room:getBanner("RoundCount") == 1 and not player.room:getBanner("heir_designated")
   end,
-  on_cost = function (self, event, target, player, data)
+  on_cost = function(self, event, target, player, data)
     local room = player.room
     local tos = room:askToChoosePlayers(player, {
       targets = room:getOtherPlayers(player, false),
@@ -39,7 +38,7 @@ local spec = {
       return true
     end
   end,
-  on_use = function (self, event, target, player, data)
+  on_use = function(self, event, target, player, data)
     local room = player.room
     room:setBanner("heir_designated", true)
     local to = event:getCostData(self).tos[1]
@@ -53,10 +52,10 @@ designating:addEffect(fk.EventPhaseEnd, spec)
 designating:addEffect(fk.BeforePlayCard, spec)
 
 designating:addEffect(fk.RoundStart, {
-  can_refresh = function (self, event, target, player, data)
+  can_refresh = function(self, event, target, player, data)
     return player.room:getBanner("RoundCount") > 1
   end,
-  on_refresh = function (self, event, target, player, data)
+  on_refresh = function(self, event, target, player, data)
     player:loseFakeSkill(designating.name)
   end,
 })
@@ -67,12 +66,12 @@ designating:addEffect(fk.BeforeGameOverJudge, {
   anim_type = "support",
   can_trigger = function(self, event, target, player, data)
     return target.role == "lord" and player:getMark("@@heir_of_throne-noclear") == target
-      and player.role == "loyalist" and player:isAlive()
+        and player.role == "loyalist" and player:isAlive() and player.rest == 0
   end,
   on_cost = Util.TrueFunc,
-  on_use = function (self, event, target, player, data)
+  on_use = function(self, event, target, player, data)
     local room = player.room
-    local bigSkilAnimate = function (name)
+    local bigSkilAnimate = function(name)
       room:doAnimate("InvokeUltSkill", {
         name = name,
         player = player.id,
@@ -100,7 +99,7 @@ designating:addEffect(fk.BeforeGameOverJudge, {
     if player.dead then return end
     room:changeMaxHp(player, 1)
     if player.dead then return end
-    room:recover{ who = player, num = 1, skillName = designating.name }
+    room:recover { who = player, num = 1, skillName = designating.name }
     if player.dead then return end
     room:setPlayerProperty(player, "role", "lord")
     room:setPlayerProperty(player, "role_shown", true)
@@ -110,20 +109,20 @@ designating:addEffect(fk.BeforeGameOverJudge, {
 designating:addEffect(fk.Deathed, {
   priority = 0,
   anim_type = "negative",
-  can_trigger = function (self, event, target, player, data)
-    return target:getMark("@@heir_of_throne-noclear") == player and target.role == "loyalist"
+  can_trigger = function(self, event, target, player, data)
+    return target:getMark("@@heir_of_throne-noclear") == player and target.role == "loyalist" 
   end,
   on_cost = Util.TrueFunc,
-  on_use = function (self, event, target, player, data)
+  on_use = function(self, event, target, player, data)
     player.room:loseHp(player, 1, designating.name)
   end
 })
 
 designating:addEffect(fk.AfterPropertyChange, {
-  can_refresh = function (self, event, target, player, data)
+  can_refresh = function(self, event, target, player, data)
     return target == player and table.contains(data.results.roleChange or {}, "lord")
   end,
-  on_refresh = function (self, event, target, player, data)
+  on_refresh = function(self, event, target, player, data)
     if player.role == "lord" then
       player:addFakeSkill(designating.name)
     else

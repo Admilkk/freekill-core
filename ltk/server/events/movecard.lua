@@ -64,6 +64,10 @@ function MoveCards:main()
             if card:getMark(MarkEnum.DestructIntoDiscard) ~= 0 and data.toArea == Card.DiscardPile then
               will_destruct = true
             end
+            if card:getMark(MarkEnum.DestructOutMyArea) ~= 0 and data.to ~= data.from and
+              (info.fromArea == Card.PlayerHand or info.fromArea == Card.PlayerEquip) then
+              will_destruct = data.moveReason ~= fk.ReasonUse
+            end
             if card:getMark(MarkEnum.DestructOutMyEquip) ~= 0 and info.fromArea == Card.PlayerEquip then
               will_destruct = info.fromArea == Card.PlayerEquip
             end
@@ -74,6 +78,7 @@ function MoveCards:main()
             end
             if will_destruct then
               room:setCardMark(card, MarkEnum.DestructIntoDiscard, 0)
+              room:setCardMark(card, MarkEnum.DestructOutMyArea, 0)
               room:setCardMark(card, MarkEnum.DestructOutMyEquip, 0)
               room:setCardMark(card, MarkEnum.DestructOutEquip, 0)
               table.insert(destruct_ids, info.cardId)

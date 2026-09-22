@@ -79,6 +79,9 @@ MarkEnum.DestructIntoDiscard = "__destr_discard"
 -- 离开自己的装备区销毁 例新服刘晔
 MarkEnum.DestructOutMyEquip = "__destr_my_equip"
 
+-- 离开自己的手牌或装备区销毁
+MarkEnum.DestructOutMyArea = "__destr_my_area"
+
 -- 进入非装备区销毁(可在装备区/处理区移动) 例OL冯方女
 MarkEnum.DestructOutEquip = "__destr_equip"
 

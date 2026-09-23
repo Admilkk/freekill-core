@@ -83,6 +83,12 @@ function ActiveSkill:update_interaction(player, selected_cards, selected_targets
     end
   end
 
+  --这里需要记录下空置目标，防止autoTarget增加目标后满足feasible自动点确定逻辑误判
+  --FIXME: 有没有更好的办法？
+  if dat.autoTarget and #selected_targets == 0 then
+    spec.UIrequest.selected_targets = {}
+  end
+
   self.interaction.data = (spec.result or {}).name
 end
 
@@ -190,15 +196,19 @@ function ActiveSkill:refresh_interaction(player, selected_cards, selected_target
     if self.interaction.data == nil then
       refresh_data.optionBox = helper
     else
+      --按下选项后，若满足feasible，则自动确认！
       if req.elemType == "OptionBox" and self:feasible(player, tos, selected_cards) then
-        --按下选项后，若满足feasible，则自动确认！
-        local h = ClientInstance.current_request_handler
-        if h then
-          h:update("Button", "OK", "")
-          h:_finish()
+        --这里需要考虑autoTarget增加目标后满足feasible自动点确定逻辑误判的问题
+        --FIXME: 有没有更好的办法？
+        if not (#tos > 0 and req.selected_targets and #req.selected_targets == 0) then
+          local h = ClientInstance.current_request_handler
+          if h then
+            h:update("Button", "OK", "")
+            h:_finish()
+          end
+          spec.UIrequest = nil
+          return
         end
-        spec.UIrequest = nil
-        return
       end
 
       local handler = ClientInstance.current_request_handler

@@ -16,7 +16,7 @@ Item {
   property bool mergeRole: false
 
   function query() {
-    const addr = ClientInstance.peerAddress();
+    const addr = ClientInstance.peerAddress().replace(/'/g, "''");
     let query = `SELECT general, mode, role,
     COUNT(CASE result WHEN 1 THEN 1 END) AS win,
     COUNT(CASE result WHEN 2 THEN 1 END) AS lose,
@@ -27,7 +27,7 @@ Item {
 
     if (generalFilter.length !== 0) {
       query += ' AND (';
-      query += generalFilter.map(e => `general = '${e}'`).join(" OR ");
+      query += generalFilter.map(e => `general = '${e.replace(/'/g, "''")}'`).join(" OR ");
       query += ')';
     }
 
@@ -243,7 +243,7 @@ Item {
   }
 
   Component.onCompleted: {
-    const addr = ClientInstance.peerAddress();
+    const addr = ClientInstance.peerAddress().replace(/'/g, "''");
     Cpp.sqlquery(`SELECT general FROM myGameData WHERE pid = ${Self.id} AND
       server_addr = '${addr}' GROUP BY general ORDER BY id;`)
     .forEach(e => generals.append({ general: e.general }));

@@ -639,13 +639,14 @@ Item {
         otherText.append(`<font color="lightslategrey">技能描述全字符数：</font><b>${descLen} ~ ${descLenComment}</b><br>`);
 
         // 写sql是吧，我觉得这样不太好
-        const addr = ClientInstance.peerAddress();
+        const addr = ClientInstance.peerAddress().replace(/'/g, "''");
+        const safeGeneral = general.replace(/'/g, "''");
         let query = `SELECT general, mode, role,
         COUNT(CASE result WHEN 1 THEN 1 END) AS win,
         COUNT(CASE result WHEN 2 THEN 1 END) AS lose,
         COUNT(CASE result WHEN 3 THEN 1 END) AS draw,
         COUNT() AS total
-        FROM myGameData WHERE pid = ${Self.id} AND server_addr = '${addr}' AND general = '${general}'
+        FROM myGameData WHERE pid = ${Self.id} AND server_addr = '${addr}' AND general = '${safeGeneral}'
         GROUP BY mode;`
         const result = Cpp.sqlquery(query);
 

@@ -9,6 +9,22 @@ QtObject {
     return !exp.test(sv);
   }
 
+  // 过滤房间名，移除SQL注入危险字符并限制长度
+  function sanitizeRoomName(name) {
+    if (!name) return "";
+    let sanitized = String(name);
+    // 移除SQL注入相关的危险字符
+    sanitized = sanitized.replace(/['";#*\\?<>|]/g, "");
+    sanitized = sanitized.replace(/--/g, "");
+    sanitized = sanitized.replace(/\/\*/g, "");
+    sanitized = sanitized.replace(/\*\//g, "");
+    // 限制长度
+    if (sanitized.length > 50) {
+      sanitized = sanitized.substring(0, 50);
+    }
+    return sanitized.trim();
+  }
+
   // function stringToHex(str) {
   //   return encodeURIComponent(str)
   //     .replace(/%([0-9A-Fa-f]{2})/g, (_, hex) => hex)

@@ -132,11 +132,13 @@ Item {
             if (!ClientInstance.checkSqlString(text)) return;
             const mdata = model.get(list.currentIndex);
             if (!mdata) return;
+            const safeFileName = mdata.fileName.replace(/'/g, "''");
+            const safeComment = text.replace(/'/g, "''");
             Cpp.sqlquery(`REPLACE INTO starredRecording (id, replay_name, my_comment)
-            VALUES (${mdata.query?.id ?? 'NULL'}, '${mdata.fileName}', '${text}');`);
+            VALUES (${mdata.query?.id ?? 'NULL'}, '${safeFileName}', '${safeComment}');`);
 
             mdata.query = Cpp.sqlquery(
-              `SELECT * FROM starredRecording WHERE replay_name = '${mdata.fileName}';`)[0];
+              `SELECT * FROM starredRecording WHERE replay_name = '${safeFileName}';`)[0];
           }
         }
 
@@ -163,8 +165,9 @@ Item {
             onClicked: {
               const mdata = model.get(list.currentIndex);
               if (!mdata) return;
+              const safeFileName = mdata.fileName.replace(/'/g, "''");
               const sql = (`DELETE FROM starredRecording WHERE
-              replay_name = '${mdata.fileName}';`);
+              replay_name = '${safeFileName}';`);
               Backend.removeRecord(mdata.fileName);
               model.remove(list.currentIndex);
               Cpp.sqlquery(sql);
@@ -203,7 +206,8 @@ Item {
       if (d.length !== 8) return;
       // s: <time>.<screenName>.<mode>.<general>.<role>.<winner>.fk.rep
       const [t, name, mode, general, role, winner] = d;
-      const query = Cpp.sqlquery(`SELECT * FROM starredRecording WHERE replay_name = '${s}';`)[0] ?? {};
+      const safeFileName = s.replace(/'/g, "''");
+      const query = Cpp.sqlquery(`SELECT * FROM starredRecording WHERE replay_name = '${safeFileName}';`)[0] ?? {};
       if (query.id === "#null") {
         query.id = null;
       } else {

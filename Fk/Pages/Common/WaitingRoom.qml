@@ -900,8 +900,14 @@ W.PageBase {
     let data ;
     const boardgame = Lua.evaluate(`Fk:getBoardGame(ClientInstance.settings.gameMode).name`);
     const ui_config = Config.enabledUIPackages[boardgame];
-    if (ui_config !== undefined && ui_config !== "default" && Lua.evaluate(`not not Fk:getUIPackage("${ui_config}")`)) {
-      data = Lua.evaluate(`Fk.ui_packages["${ui_config}"].page`)
+    const hasUIPackage = Lua.fn(`function(name)
+      return Fk:getUIPackage(name) ~= nil
+    end`);
+    const getUIPackagePage = Lua.fn(`function(name)
+      return Fk.ui_packages[name].page
+    end`);
+    if (ui_config !== undefined && ui_config !== "default" && hasUIPackage(ui_config)) {
+      data = getUIPackagePage(ui_config);
     } else {
       data = Lua.evaluate(`Fk:getBoardGame(ClientInstance.settings.gameMode).page`)
     }

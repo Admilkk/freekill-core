@@ -182,8 +182,9 @@ Item {
             Layout.fillWidth: true
             onClicked: {
               const fileName = Backend.saveBlobRecordToFile(id);
+              const safeFileName = (fileName + '.fk.rep').replace(/'/g, "''");
               Cpp.sqlquery(`REPLACE INTO starredRecording (id, replay_name, my_comment)
-              VALUES (${id}, '${fileName + '.fk.rep'}', '⭐');`);
+              VALUES (${id}, '${safeFileName}', '⭐');`);
               list.currentIndexChanged();
             }
           }

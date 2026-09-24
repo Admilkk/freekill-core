@@ -59,7 +59,13 @@ Item {
       }
     }
     // TODO：往下一堆实质都是ltk特化，其他桌游要定制呢？
-    if (Lua.ev(`Fk:getBoardGame('${gameMode}').name == 'lunarltk'`)) {
+    // gameMode 来自房主创建房间时的设置（经服务端转发），不可信，
+    // 必须用 Lua.fn 传参，不能拼接到 Lua 代码字符串中，否则可被注入任意 Lua 代码
+    const isLtkBoardgame = Lua.fn(`function(mode)
+      local bg = Fk:getBoardGame(mode)
+      return bg ~= nil and bg.name == "lunarltk"
+    end`)(gameMode);
+    if (isLtkBoardgame) {
       _settings.push([Lua.tr("General Pool"), "1"]);
       _settings.push([Lua.tr('CardPackages'), cardpack.map(e => {
         let ret = Lua.tr(e);

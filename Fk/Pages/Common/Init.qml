@@ -248,7 +248,10 @@ W.PageBase {
 
       App.setBusy(true);
       Config.quickStartMode = gameMode;
-      const boardgameName = Lua.evaluate(`Fk:getBoardGame('${gameMode}').name`);
+      const boardgameName = Lua.fn(`function(modeName)
+        local bg = Fk:getBoardGame(modeName)
+        return bg and bg.name or "lunarltk"
+      end`)(gameMode);
       const boardgameConf = Db.getModeSettings(boardgameName);
       const gameModeConf = Db.getModeSettings(boardgameName + ':' + gameMode);
       let k, arr;

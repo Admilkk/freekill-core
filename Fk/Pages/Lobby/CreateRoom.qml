@@ -54,7 +54,10 @@ Item {
       onGameModeChanged: {
         roomGeneralSettings.refreshGameMode(gameMode);
         const getUIData = Lua.fn("GetUIDataOfSettings");
-        const boardgameName = Lua.evaluate(`Fk:getBoardGame('${gameMode}').name`);
+        const boardgameName = Lua.fn(`function(modeName)
+          local bg = Fk:getBoardGame(modeName)
+          return bg and bg.name or "lunarltk"
+        end`)(gameMode);
 
         const boardgameConf = Db.getModeSettings(boardgameName);
         const gameModeConf = Db.getModeSettings(boardgameName + ':' + gameMode);
@@ -170,15 +173,31 @@ Item {
           });
 
           const gameMode = Config.preferedMode;
-          const boardgameName = Lua.evaluate(`Fk:getBoardGame('${gameMode}').name`);
+          // 验证游戏模式是否存在，防止创建不存在的游戏模式
+          const isValidMode = Lua.fn(`function(modeName)
+            return Fk.game_modes[modeName] ~= nil
+          end`)(gameMode);
+          if (!isValidMode) {
+            App.setBusy(false);
+            App.showToast(Lua.tr("Invalid game mode"));
+            return;
+          }
+
+          const boardgameName = Lua.fn(`function(modeName)
+            local bg = Fk:getBoardGame(modeName)
+            return bg and bg.name or "lunarltk"
+          end`)(gameMode);
           const boardgameConf = Db.getModeSettings(boardgameName);
           const gameModeConf = Db.getModeSettings(boardgameName + ":" + gameMode);
 
+          // 过滤房间名，防止SQL注入
+          const filteredRoomName = Db.sanitizeRoomName(roomGeneralSettings.roomName);
+
           ClientInstance.notifyServer(root.isChangeRoom ? "ChangeRoom" : "CreateRoom", [
-            roomGeneralSettings.roomName, roomGeneralSettings.playerNum,
+            filteredRoomName, roomGeneralSettings.playerNum,
             Config.preferredTimeout, {
               gameMode,
-              roomName: roomGeneralSettings.roomName,
+              roomName: filteredRoomName,
               password: roomGeneralSettings.roomPassword,
               _game: boardgameConf,
               _mode: gameModeConf,

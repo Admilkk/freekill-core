@@ -27,7 +27,11 @@ end
 ---@return number? @ 最大使用次数，nil就是无限
 function UsableSkill:getMaxUseTime(player, scope, card, to)
   scope = scope or Player.HistoryTurn
-  local ret = self.max_use_time[scope]
+  local time = self.max_use_time[scope]
+  local ret = time
+  if type(time) == "function" then
+    ret = time(self, player)
+  end
   if not ret then return nil end
   if card then
     local status_skills = Fk:currentRoom().status_skills[TargetModSkill] or Util.DummyTable

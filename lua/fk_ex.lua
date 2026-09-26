@@ -108,12 +108,12 @@ end
 
 ---@class ButtonSkillSpec: UsableSkillSpec
 ---@field public expand_pile? string | integer[] | fun(self: ButtonSkill, player: ServerPlayer): integer[]|string? @ 额外牌堆，牌堆名称或卡牌id表
----@field public min_target_num? integer @ 最小目标数
----@field public max_target_num? integer @ 最大目标数
----@field public target_num? integer @ 额定目标数
----@field public min_card_num? integer @ 最小卡牌数
----@field public max_card_num? integer @ 最大卡牌数
----@field public card_num? integer @ 额定卡牌数
+---@field public min_target_num? integer|fun(self: ButtonSkill, player: Player): integer? @ 最小目标数
+---@field public max_target_num? integer|fun(self: ButtonSkill, player: Player): integer? @ 最大目标数
+---@field public target_num? integer|fun(self: ButtonSkill, player: Player): integer? @ 额定目标数
+---@field public min_card_num? integer|fun(self: ButtonSkill, player: Player): integer? @ 最小卡牌数
+---@field public max_card_num? integer|fun(self: ButtonSkill, player: Player): integer? @ 最大卡牌数
+---@field public card_num? integer|fun(self: ButtonSkill, player: Player): integer? @ 额定卡牌数
 ---@field public handly_pile? boolean @ 是否能够选择“如手牌使用或打出”的牌
 ---@field public click_count? boolean @ 是否在点击按钮瞬间就计数并播放特效和语音
 ---@field public include_equip? boolean @ 选牌时是否展开装备区

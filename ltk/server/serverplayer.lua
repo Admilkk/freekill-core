@@ -41,7 +41,7 @@ function ServerPlayer:reconnect()
 
   self:syncFakeSkills()
 
-  for _, skills in ipairs(self.room.status_skills) do
+  for _, skills in pairs(self.room.status_skills) do
     for _, skill in ipairs(skills) do
       self:doNotify("AddStatusSkill", { skill.name })
     end

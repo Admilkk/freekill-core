@@ -1650,7 +1650,7 @@ function Room:askToChooseCards(player, params)
     if string.find(flag, "h") and #handcards > 0 then
       table.insert(cards_data, {"$Hand", handcards})
       for _, id in ipairs(handcards) do
-        if not player:cardVisible(id) then
+        if not player:cardVisible(id, nil, true) then
           visible_data[tostring(id)] = false
         end
       end

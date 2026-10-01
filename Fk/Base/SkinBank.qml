@@ -226,7 +226,7 @@ QtObject {
   }
 
   function removeMp3Suffix(path) {
-    return path.replace(/(1)?\.mp3$/i, "");
+    return path.replace(/\.mp3$/i, "");
   }
 
   // 武将技能语音

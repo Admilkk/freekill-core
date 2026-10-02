@@ -191,7 +191,8 @@ ActionRow {
     background: Rectangle {
       color: "transparent"
       implicitHeight: root.height - 16
-      implicitWidth: 120
+      // 固定宽度需大于最大内容宽度，保证各行数值居中位置一致
+      implicitWidth: 150
     }
   }
 

@@ -12,6 +12,8 @@ Item {
 
   signal shown() // 对话框刚刚展示时触发的信号
 
+  property bool movable: true
+
   Rectangle {
     id: background
     anchors.fill: parent
@@ -33,7 +35,7 @@ Item {
   }
 
   DragHandler {
-    enabled: background.visible
+    enabled: background.visible && root.movable
     grabPermissions: PointHandler.TakeOverForbidden
     xAxis.enabled: true
     yAxis.enabled: true

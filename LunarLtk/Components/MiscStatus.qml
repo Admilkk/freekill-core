@@ -30,16 +30,6 @@ Item {
     text: root.dataModel.getTimeString(root.dataModel.playedTime);
   }
 
-  // FIXME: 杀了这个timer 在刷状态技那里改Model的数据才对
-  Timer {
-    interval: 1000
-    running: true
-    repeat: true
-    onTriggered: {
-      root.dataModel.playedTime++;
-    }
-  }
-
   Image {
     id: deckImg
     anchors.top: timeTxt.bottom

@@ -320,7 +320,8 @@ function ClientBase:quitRoom()
   self:stopRecording("")
 end
 
-function ClientBase:startGame(data)
+---@param played_time? integer @ 对局已进行时长（秒）
+function ClientBase:startGame(data, played_time)
   if self.gameStarted then return end
   if not self.replaying then
     self:startRecording()
@@ -335,7 +336,7 @@ function ClientBase:startGame(data)
   end
 
   self.gameStarted = true
-  self.gameStartTime = os.time()
+  self.gameStartTime = os.time() - math.max(0, played_time or 0)
 
   local players = {}
 
@@ -661,7 +662,7 @@ function ClientBase:loadRoomSummary(data)
     self:addObserver(t)
   end
 
-  self:startGame()
+  self:startGame(nil, data.played_time)
 
   self:arrangeSeats(data.circle)
 

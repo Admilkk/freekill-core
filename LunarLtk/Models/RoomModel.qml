@@ -27,6 +27,7 @@ QtObject {
   property int drawPileNum      // 牌堆剩余数
   property int roundCount       // 轮数
   property int playedTime       // 对局已经过的时长
+  property real gameStartTime   // 开局时间戳（秒）
 
   property list<PhotoModel> players: [] // 所有玩家的photo所需数据（包括自己的）
 
@@ -136,8 +137,13 @@ QtObject {
     deActivated();
   }
 
+  function refreshPlayedTime() {
+    playedTime = Math.max(0, Math.floor(Date.now() / 1000) - gameStartTime);
+  }
+
   // 一秒5刷智慧
   function refreshData() {
+    refreshPlayedTime();
     drawPileNum = Lua.ev("#ClientInstance.draw_pile");
     roundCount = Lua.client.getBanner("RoundCount") || 0;
     for (const model of players) {
@@ -754,6 +760,9 @@ QtObject {
   }
 
   function initialize() {
+    // 开局时间在对局内不变
+    gameStartTime = Lua.client.gameStartTime;
+    refreshPlayedTime();
     dashboardId = Cpp.self.id;
     const luaPlayers = Lua.client.players;
     playerNum = luaPlayers.length;

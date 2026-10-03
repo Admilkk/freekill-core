@@ -802,6 +802,8 @@ end
 function ServerRoomBase:serialize(player)
   local klass = self.class.super --[[@as Base.RoomBase]]
   local o = klass.serialize(self)
+  -- 同步对局时长，避免双端时钟差异
+  o.played_time = self.start_time and math.max(0, os.time() - self.start_time) or 0
   if player then
     o.you = player.id
   end

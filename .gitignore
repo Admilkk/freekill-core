@@ -1,0 +1,2 @@
+# Local skin debugger regression checks are not distributed.
+/test/skin_debugger/
